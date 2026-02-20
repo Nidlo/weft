@@ -1,0 +1,28 @@
+{
+  "name": "StitchHub - Custom Fashion, Connected",
+  "short_name": "StitchHub",
+  "description": "Connect with talented seamstresses, tailors, and fashion designers for custom-made clothing.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf9f6",
+  "theme_color": "#6b21a8",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "shopping", "business"],
+  "lang": "en",
+  "dir": "ltr"
+}
