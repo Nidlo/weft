@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
+import { HomeDiscovery } from "@/components/shared/home-discovery";
 
 export default function Home() {
   return (
     <AppShell>
-      <div className="flex min-h-[70dvh] flex-col items-center justify-center text-center">
+      {/* Hero */}
+      <div className="flex flex-col items-center py-12 text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
           Custom Fashion,{" "}
           <span className="text-primary">Connected</span>
@@ -22,6 +24,11 @@ export default function Home() {
             <Link href="/search">Browse Designers</Link>
           </Button>
         </div>
+      </div>
+
+      {/* Discovery Sections */}
+      <div className="pb-12">
+        <HomeDiscovery />
       </div>
     </AppShell>
   );

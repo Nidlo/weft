@@ -1,14 +1,32 @@
-import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client/core";
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloLink,
+} from "@apollo/client/core";
 import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { ErrorLink } from "@apollo/client/link/error";
+import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 import { useAuthStore } from "@/lib/stores/auth";
 
-const httpLink = new HttpLink({
+const uploadLink = new UploadHttpLink({
   uri: process.env.NEXT_PUBLIC_API_URL,
   credentials: "include",
   headers: {
     Accept: "application/json",
   },
+});
+
+const authLink = new ApolloLink((operation, forward) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    operation.setContext(({ headers = {} }) => ({
+      headers: {
+        ...headers,
+        Authorization: `Bearer ${token}`,
+      },
+    }));
+  }
+  return forward(operation);
 });
 
 const errorLink = new ErrorLink(({ error, operation }) => {
@@ -34,15 +52,21 @@ const errorLink = new ErrorLink(({ error, operation }) => {
 });
 
 export const apolloClient = new ApolloClient({
-  link: errorLink.concat(httpLink),
+  link: ApolloLink.from([errorLink, authLink, uploadLink]),
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
         fields: {
-          searchDesigners: {
+          designers: {
             keyArgs: ["input"],
-            merge(_existing: unknown, incoming: unknown) {
-              return incoming;
+            merge(existing: Record<string, unknown> | undefined, incoming: Record<string, unknown>) {
+              if (!existing) return incoming;
+              const existingData = (existing.data ?? []) as unknown[];
+              const incomingData = (incoming.data ?? []) as unknown[];
+              return {
+                ...incoming,
+                data: [...existingData, ...incomingData],
+              };
             },
           },
         },

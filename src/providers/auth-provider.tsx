@@ -1,21 +1,23 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useAuthStore } from "@/lib/stores/auth";
+import { useAuthStore, useHasHydrated } from "@/lib/stores/auth";
 import { apolloClient } from "@/lib/graphql/client";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import type { MeData } from "@/types/graphql";
-import type { UserRole } from "@/lib/stores/auth";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user, setUser, setLoading, logout } = useAuthStore();
+  const { user, token, setUser, setLoading, logout } = useAuthStore();
+  const hasHydrated = useHasHydrated();
   const didValidate = useRef(false);
 
   useEffect(() => {
+    // Wait for Zustand to rehydrate from localStorage before making decisions
+    if (!hasHydrated) return;
     if (didValidate.current) return;
     didValidate.current = true;
 
-    if (!user) {
+    if (!user || !token) {
       setLoading(false);
       return;
     }
@@ -26,16 +28,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then(({ data }) => {
         if (data?.me) {
           const me = data.me;
-          const role = me.role?.toLowerCase() as UserRole | undefined;
           setUser({
             id: me.id,
-            name: me.name || "",
+            firstName: me.firstName,
+            lastName: me.lastName,
+            fullName: me.fullName,
             phone: me.phone || "",
             email: me.email,
-            role: role ?? null,
             avatarUrl: me.avatarUrl,
             city: me.city,
-            isOnboarded: !!me.role,
+            isDesigner: me.isDesigner,
+            isOnboarded: me.isOnboarded,
           });
         } else {
           logout();
@@ -45,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Session invalid — clear local state
         logout();
       });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hasHydrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <>{children}</>;
 }

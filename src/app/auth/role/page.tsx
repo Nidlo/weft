@@ -1,11 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
-import { SELECT_ROLE } from "@/lib/graphql/mutations/auth";
-import type { SelectRoleData } from "@/types/graphql";
+import { BECOME_DESIGNER, COMPLETE_ONBOARDING } from "@/lib/graphql/mutations/auth";
+import type { BecomeDesignerData, CompleteOnboardingData } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
-import type { UserRole } from "@/lib/stores/auth";
 import {
   Card,
   CardContent,
@@ -14,11 +14,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface RoleOption {
-  role: string;
+  key: string;
   title: string;
   description: string;
   icon: string;
@@ -27,55 +28,98 @@ interface RoleOption {
 
 const roles: RoleOption[] = [
   {
-    role: "CLIENT",
+    key: "CLIENT",
     title: "I want clothes made",
     description: "Find designers, place orders, and track your garments",
-    icon: "👗",
+    icon: "\uD83D\uDC57",
   },
   {
-    role: "DESIGNER",
+    key: "DESIGNER",
     title: "I'm a designer",
     description:
       "Get clients, manage orders, and grow your fashion business",
-    icon: "✂️",
+    icon: "\u2702\uFE0F",
   },
   {
-    role: "ORGANIZATION",
+    key: "ORGANIZATION",
     title: "I run a workshop",
     description: "Manage a team of designers and handle bulk orders",
-    icon: "🏢",
+    icon: "\uD83C\uDFE2",
     disabled: true,
   },
 ];
 
 export default function RoleSelectionPage() {
   const router = useRouter();
-  const { user, setUser } = useAuthStore();
-  const [selectRole, { loading }] = useMutation(SELECT_ROLE);
+  const { user, setUser, isAuthenticated, isLoading } = useAuthStore();
+  const [becomeDesigner, { loading: designerLoading }] = useMutation(BECOME_DESIGNER);
+  const [completeOnboarding, { loading: onboardingLoading }] = useMutation(COMPLETE_ONBOARDING);
 
-  const handleSelect = async (role: string) => {
-    if (role === "ORGANIZATION") {
+  const loading = designerLoading || onboardingLoading;
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!isAuthenticated) {
+      router.replace("/auth/phone");
+      return;
+    }
+    if (user?.isOnboarded) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, user, router]);
+
+  if (isLoading || !isAuthenticated || user?.isOnboarded) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="mt-2 h-4 w-64" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-lg" />
+          ))}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const handleSelect = async (key: string) => {
+    if (key === "ORGANIZATION") {
       toast.info("Organization accounts are coming soon! Join the waitlist.");
       return;
     }
 
     try {
-      const { data } = await selectRole({ variables: { role } });
-      const result = data as SelectRoleData | undefined;
+      if (key === "DESIGNER") {
+        const { data } = await becomeDesigner();
+        const result = data as BecomeDesignerData | undefined;
 
-      if (result?.selectRole) {
-        const selectedRole = result.selectRole.role?.toLowerCase() as UserRole | undefined;
-        setUser({
-          ...user!,
-          role: selectedRole ?? null,
-          isOnboarded: true,
-        });
-        toast.success("Welcome to StitchHub!");
-        router.push("/dashboard");
+        if (result?.becomeDesigner) {
+          setUser({
+            ...user!,
+            isDesigner: true,
+          });
+          toast.success("Welcome to StitchHub!");
+          router.push("/onboarding");
+        }
+      } else {
+        // Client — just complete onboarding
+        const { data } = await completeOnboarding();
+        const result = data as CompleteOnboardingData | undefined;
+
+        if (result?.completeOnboarding) {
+          setUser({
+            ...user!,
+            isOnboarded: true,
+          });
+          toast.success("Welcome to StitchHub!");
+          router.push("/dashboard");
+        }
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to set role";
+        error instanceof Error ? error.message : "Something went wrong";
       toast.error(message);
     }
   };
@@ -91,8 +135,8 @@ export default function RoleSelectionPage() {
       <CardContent className="space-y-3">
         {roles.map((option) => (
           <button
-            key={option.role}
-            onClick={() => handleSelect(option.role)}
+            key={option.key}
+            onClick={() => handleSelect(option.key)}
             disabled={loading || option.disabled}
             className={cn(
               "flex w-full items-start gap-4 rounded-lg border border-border p-4 text-left transition-colors hover:border-primary hover:bg-accent/50",

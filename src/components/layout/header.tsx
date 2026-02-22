@@ -30,16 +30,16 @@ export function Header() {
               </Link>
             </Button>
             <Button variant="ghost" size="sm" className="hidden md:flex" asChild>
-              <Link href="/profile">{user?.name || "Profile"}</Link>
+              <Link href="/profile">{user?.firstName || "Profile"}</Link>
             </Button>
           </div>
         ) : (
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Log in</Link>
+              <Link href="/auth/phone">Log in</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/register">Sign up</Link>
+              <Link href="/auth/phone">Sign up</Link>
             </Button>
           </div>
         )}

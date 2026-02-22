@@ -16,13 +16,16 @@ export const VERIFY_OTP = gql`
       isNew
       user {
         id
-        name
+        firstName
+        lastName
+        fullName
         phone
         email
-        role
         avatarUrl
         city
         isVerified
+        isDesigner
+        isOnboarded
       }
     }
   }
@@ -35,27 +38,39 @@ export const SOCIAL_LOGIN = gql`
       isNew
       user {
         id
-        name
+        firstName
+        lastName
+        fullName
         phone
         email
-        role
         avatarUrl
         city
         isVerified
+        isDesigner
+        isOnboarded
       }
     }
   }
 `;
 
-export const SELECT_ROLE = gql`
-  mutation SelectRole($role: UserRole!) {
-    selectRole(role: $role) {
+export const BECOME_DESIGNER = gql`
+  mutation BecomeDesigner {
+    becomeDesigner {
       id
-      name
-      role
-      profile {
+      isDesigner
+      designerProfile {
         id
       }
+    }
+  }
+`;
+
+export const COMPLETE_ONBOARDING = gql`
+  mutation CompleteOnboarding {
+    completeOnboarding {
+      id
+      isOnboarded
+      onboardedAt
     }
   }
 `;

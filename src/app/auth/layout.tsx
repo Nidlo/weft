@@ -16,9 +16,24 @@ export default function AuthLayout({
   useEffect(() => {
     if (isLoading) return;
 
-    // Authenticated + onboarded users don't need auth pages
-    if (isAuthenticated && user?.isOnboarded && pathname !== "/auth/role") {
-      router.replace("/dashboard");
+    if (isAuthenticated) {
+      // Authenticated users should NOT be on /auth/phone or /auth/verify
+      if (pathname === "/auth/phone" || pathname === "/auth/verify") {
+        router.replace(user?.isOnboarded ? "/dashboard" : "/auth/role");
+        return;
+      }
+
+      // Authenticated users on /auth/role who are already onboarded → dashboard
+      if (pathname === "/auth/role" && user?.isOnboarded) {
+        router.replace("/dashboard");
+        return;
+      }
+    } else {
+      // Unauthenticated users should NOT be on /auth/role (need to log in first)
+      if (pathname === "/auth/role") {
+        router.replace("/auth/phone");
+        return;
+      }
     }
   }, [isAuthenticated, isLoading, user, pathname, router]);
 

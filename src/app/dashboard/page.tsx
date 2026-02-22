@@ -26,10 +26,10 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">
-            Welcome{user.name ? `, ${user.name}` : ""}!
+            Welcome{user.firstName ? `, ${user.firstName}` : ""}!
           </h1>
           <p className="text-muted-foreground">
-            Your {user.role === "designer" ? "designer" : "client"} dashboard
+            Your {user.isDesigner ? "designer" : "client"} dashboard
           </p>
         </div>
         <div className="rounded-lg border border-border bg-card p-6">

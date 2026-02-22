@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { apolloClient } from "@/lib/graphql/client";
 import { AuthProvider } from "@/providers/auth-provider";
+import { GoogleAuthProvider } from "@/providers/google-oauth-provider";
 import { useState } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -31,10 +32,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            {children}
-            <Toaster richColors position="top-right" />
-          </AuthProvider>
+          <GoogleAuthProvider>
+            <AuthProvider>
+              {children}
+              <Toaster richColors position="top-right" />
+            </AuthProvider>
+          </GoogleAuthProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </ApolloProvider>

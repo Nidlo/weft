@@ -5,6 +5,7 @@ describe("useAuthStore", () => {
   beforeEach(() => {
     useAuthStore.setState({
       user: null,
+      token: null,
       isAuthenticated: false,
       isLoading: true,
     });
@@ -36,7 +37,12 @@ describe("useAuthStore", () => {
     expect(state.isLoading).toBe(false);
   });
 
-  it("should clear user on logout", () => {
+  it("should store token", () => {
+    useAuthStore.getState().setToken("test-token-123");
+    expect(useAuthStore.getState().token).toBe("test-token-123");
+  });
+
+  it("should clear user and token on logout", () => {
     useAuthStore.getState().setUser({
       id: "1",
       name: "Test",
@@ -47,11 +53,13 @@ describe("useAuthStore", () => {
       city: null,
       isOnboarded: false,
     });
+    useAuthStore.getState().setToken("some-token");
 
     useAuthStore.getState().logout();
 
     const state = useAuthStore.getState();
     expect(state.user).toBeNull();
+    expect(state.token).toBeNull();
     expect(state.isAuthenticated).toBe(false);
     expect(state.isLoading).toBe(false);
   });

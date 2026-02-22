@@ -9,7 +9,7 @@ import type {
   RequestOtpData,
 } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
-import type { UserRole } from "@/lib/stores/auth";
+import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -51,10 +51,12 @@ export default function VerifyOtpPage() {
 }
 
 function VerifyOtpContent() {
+  const { isGuest, isLoading: guestLoading } = useGuestGuard();
   const router = useRouter();
   const searchParams = useSearchParams();
   const phone = searchParams.get("phone") || "";
   const setUser = useAuthStore((s) => s.setUser);
+  const setToken = useAuthStore((s) => s.setToken);
 
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
@@ -84,22 +86,24 @@ function VerifyOtpContent() {
         const result = data as VerifyOtpData | undefined;
 
         if (result?.verifyOtp) {
-          const { user, isNew } = result.verifyOtp;
-          const role = user.role?.toLowerCase() as UserRole | undefined;
+          const { token, user, isNew } = result.verifyOtp;
+          setToken(token);
           setUser({
             id: user.id,
-            name: user.name || "",
+            firstName: user.firstName,
+            lastName: user.lastName,
+            fullName: user.fullName,
             phone: user.phone || "",
             email: user.email,
-            role: role ?? null,
             avatarUrl: user.avatarUrl,
             city: user.city,
-            isOnboarded: !!user.role,
+            isDesigner: user.isDesigner,
+            isOnboarded: user.isOnboarded,
           });
 
           toast.success("Phone verified!");
 
-          if (isNew || !user.role) {
+          if (isNew || !user.isOnboarded) {
             router.push("/auth/role");
           } else {
             router.push("/dashboard");
@@ -113,7 +117,7 @@ function VerifyOtpContent() {
         inputRefs.current[0]?.focus();
       }
     },
-    [phone, verifyOtp, setUser, router]
+    [phone, verifyOtp, setUser, setToken, router]
   );
 
   const handleChange = (index: number, value: string) => {
@@ -180,6 +184,26 @@ function VerifyOtpContent() {
   const maskedPhone = phone
     ? phone.replace(/(\d{3})\d{4}(\d{3})/, "$1****$2")
     : "";
+
+  if (guestLoading || !isGuest) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="mt-2 h-4 w-60" />
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center gap-2">
+            {Array(OTP_LENGTH)
+              .fill(0)
+              .map((_, i) => (
+                <Skeleton key={i} className="h-14 w-12" />
+              ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

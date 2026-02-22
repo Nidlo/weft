@@ -4,13 +4,17 @@ export const ME_QUERY = gql`
   query Me {
     me {
       id
-      name
+      firstName
+      lastName
+      otherNames
+      fullName
       phone
       email
-      role
       avatarUrl
       city
       isVerified
+      isDesigner
+      isOnboarded
     }
   }
 `;

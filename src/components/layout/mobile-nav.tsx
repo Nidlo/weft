@@ -26,7 +26,7 @@ export function MobileNav() {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
 
-  const navItems = user?.role === "designer" ? designerNavItems : clientNavItems;
+  const navItems = user?.isDesigner ? designerNavItems : clientNavItems;
 
   return (
     <nav className="bg-background/95 fixed inset-x-0 bottom-0 z-50 border-t backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
