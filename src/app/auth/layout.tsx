@@ -11,10 +11,10 @@ export default function AuthLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading, _hasHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (!_hasHydrated || isLoading) return;
 
     if (isAuthenticated) {
       // Authenticated users should NOT be on /auth/phone or /auth/verify

@@ -1,36 +1,84 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, MessageSquare } from "lucide-react";
+import { Bell, MessageSquare, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@apollo/client/react";
+import { LOGOUT } from "@/lib/graphql/mutations/auth";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/stores/auth";
+import { toast } from "sonner";
 
 export function Header() {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, _hasHydrated, logout: clearAuth } =
+    useAuthStore();
+  const router = useRouter();
+  const [logoutMutation] = useMutation(LOGOUT);
+
+  const handleLogout = async () => {
+    try {
+      await logoutMutation();
+    } catch {
+      // Even if the backend call fails, clear local state
+    }
+    clearAuth();
+    toast.success("Logged out");
+    router.push("/");
+  };
 
   return (
     <header className="bg-background/95 sticky top-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link
+          href={isAuthenticated ? "/dashboard" : "/"}
+          className="flex items-center gap-2"
+        >
           <span className="text-xl font-bold tracking-tight text-primary">
             StitchHub
           </span>
         </Link>
 
-        {isAuthenticated ? (
+        {!_hasHydrated ? (
+          /* Still hydrating — show nothing to avoid flash of login buttons */
+          <div className="w-24" />
+        ) : isAuthenticated ? (
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="hidden md:flex" asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden md:flex"
+              asChild
+            >
               <Link href="/messages">
                 <MessageSquare className="h-5 w-5" />
               </Link>
             </Button>
-            <Button variant="ghost" size="icon" className="hidden md:flex" asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden md:flex"
+              asChild
+            >
               <Link href="/notifications">
                 <Bell className="h-5 w-5" />
               </Link>
             </Button>
-            <Button variant="ghost" size="sm" className="hidden md:flex" asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hidden md:flex"
+              asChild
+            >
               <Link href="/profile">{user?.firstName || "Profile"}</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden md:flex"
+              onClick={handleLogout}
+              title="Log out"
+            >
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         ) : (

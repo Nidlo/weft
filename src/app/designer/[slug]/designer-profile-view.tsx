@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,7 @@ function parseSpecs(raw: unknown): string[] {
 }
 
 export function DesignerProfileView({ designer }: Props) {
+  const router = useRouter();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const profile = designer.designerProfile;
   const images = parseImages(profile?.portfolioImages);
@@ -108,7 +110,13 @@ export function DesignerProfileView({ designer }: Props) {
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          <Button className="flex-1" disabled={!profile?.isAcceptingOrders}>
+          <Button
+            className="flex-1"
+            disabled={!profile?.isAcceptingOrders}
+            onClick={() =>
+              router.push(`/blueprint?designer=${profile?.slug ?? ""}`)
+            }
+          >
             {profile?.isAcceptingOrders
               ? "Request Quote"
               : "Not Accepting Orders"}

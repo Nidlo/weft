@@ -1,9 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { HomeDiscovery } from "@/components/shared/home-discovery";
+import { useAuthStore } from "@/lib/stores/auth";
 
 export default function Home() {
+  const { isAuthenticated, user, _hasHydrated } = useAuthStore();
+  const showAuthHero = _hasHydrated && isAuthenticated && user;
+
   return (
     <AppShell>
       {/* Hero */}
@@ -17,12 +23,25 @@ export default function Home() {
           Specify your garment, track production, and pay securely.
         </p>
         <div className="mt-8 flex gap-4">
-          <Button size="lg" asChild>
-            <Link href="/auth/phone">Get Started</Link>
-          </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/search">Browse Designers</Link>
-          </Button>
+          {showAuthHero ? (
+            <>
+              <Button size="lg" asChild>
+                <Link href="/search">Browse Designers</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/dashboard">My Dashboard</Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button size="lg" asChild>
+                <Link href="/auth/phone">Get Started</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/search">Browse Designers</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

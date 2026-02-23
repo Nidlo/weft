@@ -12,10 +12,11 @@ interface UseAuthGuardOptions {
 export function useAuthGuard(options: UseAuthGuardOptions = {}) {
   const { redirectTo = "/auth/phone", requireOnboarded = false } = options;
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading, _hasHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (isLoading) return;
+    // Wait for both hydration AND auth validation before redirecting
+    if (!_hasHydrated || isLoading) return;
 
     if (!isAuthenticated) {
       router.replace(redirectTo);
@@ -25,12 +26,12 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
     if (requireOnboarded && user && !user.isOnboarded) {
       router.replace("/auth/role");
     }
-  }, [isAuthenticated, isLoading, user, requireOnboarded, redirectTo, router]);
+  }, [_hasHydrated, isAuthenticated, isLoading, user, requireOnboarded, redirectTo, router]);
 
   return {
     user,
     isAuthenticated,
-    isLoading,
-    isReady: !isLoading && isAuthenticated,
+    isLoading: !_hasHydrated || isLoading,
+    isReady: _hasHydrated && !isLoading && isAuthenticated,
   };
 }

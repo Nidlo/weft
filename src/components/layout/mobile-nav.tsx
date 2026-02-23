@@ -2,21 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, MessageSquare, Bell, User } from "lucide-react";
+import {
+  Home,
+  Search,
+  MessageSquare,
+  Bell,
+  User,
+  ClipboardList,
+  Ruler,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/stores/auth";
 
 const clientNavItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/search", label: "Search", icon: Search },
-  { href: "/messages", label: "Messages", icon: MessageSquare },
-  { href: "/notifications", label: "Alerts", icon: Bell },
+  { href: "/orders", label: "Orders", icon: ClipboardList },
+  { href: "/measurements", label: "Body Vault", icon: Ruler },
   { href: "/profile", label: "Profile", icon: User },
 ];
 
 const designerNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
-  { href: "/orders", label: "Orders", icon: Search },
+  { href: "/orders", label: "Orders", icon: ClipboardList },
   { href: "/messages", label: "Messages", icon: MessageSquare },
   { href: "/notifications", label: "Alerts", icon: Bell },
   { href: "/profile", label: "Profile", icon: User },

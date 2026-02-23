@@ -219,3 +219,133 @@ export interface CreateSpecializationData {
 export interface CreateCityData {
   createCity: City;
 }
+
+// --- Sprint 3: Blueprint & Measurement ---
+
+export interface BlueprintOption {
+  value: string;
+  label: string;
+}
+
+export interface BlueprintOptions {
+  garmentTypes: BlueprintOption[];
+  occasions: BlueprintOption[];
+  designFields: Record<string, BlueprintOption[]>;
+  garmentFields: Record<string, string[]>;
+  fabricTypes: BlueprintOption[];
+  measurementFields: Record<string, string[]>;
+}
+
+export interface BlueprintOptionsData {
+  blueprintOptions: BlueprintOptions;
+}
+
+export interface MeasurementData {
+  upper_body?: Record<string, number | null>;
+  lower_body?: Record<string, number | null>;
+  vertical?: Record<string, number | null>;
+}
+
+export interface GqlMeasurement {
+  id: string;
+  label: string;
+  unit: string;
+  data: MeasurementData;
+  source: string;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MyMeasurementsData {
+  myMeasurements: GqlMeasurement[];
+}
+
+export interface CreateMeasurementData {
+  createMeasurement: GqlMeasurement;
+}
+
+export interface UpdateMeasurementData {
+  updateMeasurement: GqlMeasurement;
+}
+
+export interface DeleteMeasurementData {
+  deleteMeasurement: boolean;
+}
+
+export interface SetDefaultMeasurementData {
+  setDefaultMeasurement: GqlMeasurement;
+}
+
+export interface ExtractAiMeasurementsData {
+  extractAiMeasurements: MeasurementData;
+}
+
+export interface CreateMeasurementInput {
+  label: string;
+  unit?: string;
+  data: MeasurementData;
+  source?: string;
+}
+
+export interface UpdateMeasurementInput {
+  label?: string;
+  unit?: string;
+  data?: MeasurementData;
+}
+
+export interface BlueprintData {
+  garment_type: string;
+  garment_type_other?: string;
+  occasion: string;
+  design_details?: Record<string, string | string[]>;
+  additional_details?: string[];
+  free_text?: string;
+  reference_images?: string[];
+  fabric_type: string;
+  fabric_type_other?: string;
+  fabric_colour?: string;
+  fabric_colour_hex?: string;
+  client_providing_fabric?: boolean;
+  fabric_notes?: string;
+}
+
+export interface GqlOrder {
+  id: string;
+  clientId: string;
+  designerId: string;
+  measurementId: string | null;
+  blueprint: BlueprintData;
+  status: string;
+  budgetMin: number;
+  budgetMax: number;
+  deadline: string;
+  isRush: boolean;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface CreateOrderInput {
+  designerId: string;
+  measurementId?: string;
+  blueprint: BlueprintData;
+  budgetMin: number;
+  budgetMax: number;
+  deadline: string;
+  notes?: string;
+}
+
+export interface CreateOrderData {
+  createOrder: GqlOrder;
+}
+
+export interface UploadReferenceImageData {
+  uploadReferenceImage: {
+    url: string;
+    thumbnailUrl: string;
+  };
+}
+
+export interface CreateBlueprintOptionData {
+  createBlueprintOption: BlueprintOption;
+}

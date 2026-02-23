@@ -20,12 +20,14 @@ describe("useAuthStore", () => {
   it("should set user and mark as authenticated", () => {
     const mockUser = {
       id: "1",
-      name: "Kwame Mensah",
+      firstName: "Kwame",
+      lastName: "Mensah",
+      fullName: "Kwame Mensah",
       phone: "+233201234567",
       email: null,
-      role: "client" as const,
       avatarUrl: null,
       city: "Accra",
+      isDesigner: false,
       isOnboarded: true,
     };
 
@@ -45,12 +47,14 @@ describe("useAuthStore", () => {
   it("should clear user and token on logout", () => {
     useAuthStore.getState().setUser({
       id: "1",
-      name: "Test",
+      firstName: "Test",
+      lastName: "Designer",
+      fullName: "Test Designer",
       phone: "+233201234567",
       email: null,
-      role: "designer",
       avatarUrl: null,
       city: null,
+      isDesigner: true,
       isOnboarded: false,
     });
     useAuthStore.getState().setToken("some-token");

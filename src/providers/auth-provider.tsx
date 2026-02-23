@@ -44,9 +44,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           logout();
         }
       })
-      .catch(() => {
-        // Session invalid — clear local state
-        logout();
+      .catch((err: unknown) => {
+        // Only logout on explicit auth errors (token revoked/expired).
+        // Network errors or backend-down should NOT log the user out —
+        // keep them authenticated optimistically with cached profile data.
+        const graphQLErrors =
+          err instanceof Object &&
+          "graphQLErrors" in err &&
+          Array.isArray((err as Record<string, unknown>).graphQLErrors)
+            ? (
+                err as {
+                  graphQLErrors: Array<{
+                    message: string;
+                    extensions?: { category?: string };
+                  }>;
+                }
+              ).graphQLErrors
+            : [];
+
+        const isAuthError = graphQLErrors.some(
+          (e) =>
+            e.message === "Unauthenticated." ||
+            e.extensions?.category === "authentication"
+        );
+
+        if (isAuthError) {
+          logout();
+        } else {
+          // Network error — keep user logged in with cached data
+          setLoading(false);
+        }
       });
   }, [hasHydrated]); // eslint-disable-line react-hooks/exhaustive-deps
 

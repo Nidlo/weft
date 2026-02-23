@@ -12,10 +12,10 @@ import { useAuthStore } from "@/lib/stores/auth";
  */
 export function useGuestGuard() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading, _hasHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (!_hasHydrated || isLoading) return;
     if (!isAuthenticated) return;
 
     if (!user?.isOnboarded) {
@@ -23,10 +23,12 @@ export function useGuestGuard() {
     } else {
       router.replace("/dashboard");
     }
-  }, [isAuthenticated, isLoading, user, router]);
+  }, [_hasHydrated, isAuthenticated, isLoading, user, router]);
+
+  const resolving = !_hasHydrated || isLoading;
 
   return {
-    isGuest: !isLoading && !isAuthenticated,
-    isLoading,
+    isGuest: !resolving && !isAuthenticated,
+    isLoading: resolving,
   };
 }
