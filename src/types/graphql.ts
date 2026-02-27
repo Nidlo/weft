@@ -312,17 +312,75 @@ export interface BlueprintData {
 
 export interface GqlOrder {
   id: string;
-  clientId: string;
+  clientId: string | null;
   designerId: string;
   measurementId: string | null;
   blueprint: BlueprintData;
   status: string;
   budgetMin: number;
   budgetMax: number;
+  counterPrice: number | null;
+  counterMessage: string | null;
+  declineReason: string | null;
+  confirmedPrice: number | null;
   deadline: string;
+  deadlineStart: string | null;
   isRush: boolean;
+  isInternal: boolean;
   notes: string | null;
+  clientPhone: string | null;
+  clientName: string | null;
+  clientDisplayName: string | null;
+  hasLinkedClient: boolean;
+  deliveredAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
   createdAt: string;
+}
+
+export interface GqlOrderDetail extends GqlOrder {
+  client: GqlUser | null;
+  designer: GqlUser;
+  measurement: GqlMeasurement | null;
+  updates: GqlOrderUpdate[];
+  materials: GqlOrderMaterial[];
+  conversation: { id: string } | null;
+}
+
+export interface GqlOrderUpdate {
+  id: string;
+  orderId: string;
+  fromStatus: string;
+  toStatus: string;
+  notes: string | null;
+  photos: string[] | null;
+  updatedBy: GqlUser;
+  createdAt: string;
+}
+
+export interface GqlOrderMaterial {
+  id: string;
+  orderId: string;
+  name: string;
+  unitCost: number;
+  quantity: number;
+  totalCost: number;
+  isPurchased: boolean;
+  createdAt: string;
+}
+
+export interface GqlProfitSummary {
+  totalMaterialCost: number;
+  confirmedPrice: number;
+  profit: number;
+  marginPercent: number;
+  materialCount: number;
+  purchasedCount: number;
+}
+
+export interface OrderConnection {
+  data: GqlOrder[];
+  paginatorInfo: PaginatorInfo;
 }
 
 export interface CreateOrderInput {
@@ -348,4 +406,216 @@ export interface UploadReferenceImageData {
 
 export interface CreateBlueprintOptionData {
   createBlueprintOption: BlueprintOption;
+}
+
+// --- Sprint 4: Orders & Booking ---
+
+export interface MyOrdersData {
+  myOrders: OrderConnection;
+}
+
+export interface OrderDetailData {
+  order: GqlOrderDetail;
+}
+
+export interface OrderTimelineData {
+  orderTimeline: GqlOrderUpdate[];
+}
+
+export interface OrderProfitSummaryData {
+  orderProfitSummary: GqlProfitSummary;
+}
+
+export interface RespondToOrderInput {
+  orderId: string;
+  action: "accept" | "counter" | "decline";
+  counterPrice?: number;
+  counterMessage?: string;
+  declineReason?: string;
+}
+
+export interface UpdateOrderStatusInput {
+  orderId: string;
+  status: string;
+  notes?: string;
+}
+
+export interface AddMaterialInput {
+  orderId: string;
+  name: string;
+  unitCost: number;
+  quantity?: number;
+}
+
+export interface RespondToOrderData {
+  respondToOrder: GqlOrder;
+}
+
+export interface ConfirmOrderData {
+  confirmOrder: GqlOrder;
+}
+
+export interface UpdateOrderStatusData {
+  updateOrderStatus: GqlOrder;
+}
+
+export interface CancelOrderData {
+  cancelOrder: GqlOrder;
+}
+
+export interface ConfirmDeliveryData {
+  confirmDelivery: GqlOrder;
+}
+
+export interface AddMaterialData {
+  addMaterial: GqlOrderMaterial;
+}
+
+export interface TogglePurchasedData {
+  togglePurchased: GqlOrderMaterial;
+}
+
+export interface RemoveMaterialData {
+  removeMaterial: boolean;
+}
+
+// --- Client Search ---
+
+export interface ClientSearchResult {
+  id: string;
+  fullName: string | null;
+  phone: string | null;
+  avatarUrl: string | null;
+  city: string | null;
+}
+
+export interface SearchClientsData {
+  searchClients: ClientSearchResult[];
+}
+
+// --- Sprint 4B: Internal Orders ---
+
+export interface CreateInternalOrderInput {
+  garmentType: string;
+  clientId?: string;
+  clientPhone?: string;
+  clientName?: string;
+  budgetMin: number;
+  budgetMax: number;
+  deadline: string;
+  deadlineStart?: string;
+  notes?: string;
+  fabricTypes?: string[];
+  additionalDetails?: string[];
+  description?: string;
+  referenceImages?: string[];
+  measurementId?: string;
+  blueprint?: Partial<BlueprintData>;
+}
+
+export interface CreateInternalOrderData {
+  createInternalOrder: GqlOrder;
+}
+
+export interface UpdateOrderInput {
+  orderId: string;
+  garmentType?: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  confirmedPrice?: number;
+  deadline?: string;
+  deadlineStart?: string;
+  notes?: string;
+  description?: string;
+  referenceImages?: string[];
+  fabricTypes?: string[];
+  additionalDetails?: string[];
+  measurementId?: string;
+  clientId?: string;
+  clientName?: string;
+  clientPhone?: string;
+}
+
+export interface UpdateOrderData {
+  updateOrder: GqlOrder;
+}
+
+export interface ClientMeasurementsData {
+  clientMeasurements: GqlMeasurement[];
+}
+
+// --- Sprint 5: Messaging ---
+
+export interface GqlConversationParticipant {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  fullName: string | null;
+  avatarUrl: string | null;
+}
+
+export interface GqlConversation {
+  id: string;
+  orderId: string;
+  designerId: string;
+  clientId: string;
+  lastMessageAt: string | null;
+  order: {
+    id: string;
+    blueprint: { garment_type?: string } | null;
+    status: string;
+  };
+  designer: GqlConversationParticipant;
+  client: GqlConversationParticipant;
+  latestMessage: GqlMessage | null;
+  unreadCount: number;
+}
+
+export interface GqlMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  body: string | null;
+  mediaUrl: string | null;
+  mediaType: string | null;
+  readAt: string | null;
+  createdAt: string;
+  sender: GqlConversationParticipant;
+}
+
+export interface GqlMessagePage {
+  data: GqlMessage[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}
+
+export interface SendMessageInput {
+  conversationId?: string;
+  orderId?: string;
+  body?: string;
+  mediaUrl?: string;
+}
+
+export interface MyConversationsData {
+  myConversations: GqlConversation[];
+}
+
+export interface ConversationMessagesData {
+  conversationMessages: GqlMessagePage;
+}
+
+export interface SendMessageData {
+  sendMessage: GqlMessage;
+}
+
+export interface MarkMessagesReadData {
+  markMessagesRead: boolean;
+}
+
+export interface UnreadMessagesCountData {
+  unreadMessagesCount: number;
+}
+
+export interface StartConversationData {
+  startConversation: { id: string };
 }

@@ -7,6 +7,7 @@ import { useMutation } from "@apollo/client/react";
 import { LOGOUT } from "@/lib/graphql/mutations/auth";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/stores/auth";
+import { useMessagesStore } from "@/lib/stores/messages";
 import { toast } from "sonner";
 
 export function Header() {
@@ -14,6 +15,7 @@ export function Header() {
     useAuthStore();
   const router = useRouter();
   const [logoutMutation] = useMutation(LOGOUT);
+  const unreadCount = useMessagesStore((s) => s.unreadCount);
 
   const handleLogout = async () => {
     try {
@@ -46,11 +48,16 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="hidden md:flex"
+              className="relative hidden md:flex"
               asChild
             >
               <Link href="/messages">
                 <MessageSquare className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </Link>
             </Button>
             <Button

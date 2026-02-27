@@ -1,21 +1,41 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
+import { useConversations } from "@/lib/hooks/use-messages";
+import { useRealtime } from "@/providers/realtime-provider";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { ConversationListItem } from "@/components/messages/conversation-list-item";
 import { MessageSquare } from "lucide-react";
 
 export default function MessagesPage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
+  const { conversations, loading, refetch } = useConversations();
+  const { echo } = useRealtime();
+
+  // Refetch conversations list when a new message arrives on user channel
+  useEffect(() => {
+    if (!echo || !user?.id) return;
+
+    const channel = echo.private(`user.${user.id}`);
+    channel.listen(".message.sent", () => {
+      refetch();
+    });
+
+    return () => {
+      channel.stopListening(".message.sent");
+    };
+  }, [echo, user?.id, refetch]);
 
   if (!isReady || !user) {
     return (
       <AppShell>
         <div className="space-y-4">
           <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
         </div>
       </AppShell>
     );
@@ -23,30 +43,43 @@ export default function MessagesPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div>
           <h1 className="text-2xl font-bold">Messages</h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Chat with {user.isDesigner ? "your clients" : "your designers"}
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MessageSquare className="h-5 w-5" />
-              Conversations
-              <Badge variant="secondary">Coming in Sprint 5</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Real-time messaging with text, photos, and read receipts will be
-              available here. You&apos;ll be able to discuss order details, share
-              progress photos, and coordinate directly.
+        {loading && conversations.length === 0 ? (
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-3">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : conversations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground/50" />
+            <h3 className="text-lg font-medium">No conversations yet</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {user.isDesigner
+                ? "Conversations will appear here when clients message you about orders."
+                : "Start a conversation by messaging a designer from your order page."}
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        ) : (
+          <div className="divide-y rounded-lg border">
+            {conversations.map((conv) => (
+              <ConversationListItem key={conv.id} conversation={conv} />
+            ))}
+          </div>
+        )}
       </div>
     </AppShell>
   );

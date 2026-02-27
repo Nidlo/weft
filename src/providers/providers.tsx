@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { apolloClient } from "@/lib/graphql/client";
 import { AuthProvider } from "@/providers/auth-provider";
 import { GoogleAuthProvider } from "@/providers/google-oauth-provider";
+import { RealtimeProvider } from "@/providers/realtime-provider";
 import { useState } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -34,7 +35,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         >
           <GoogleAuthProvider>
             <AuthProvider>
-              {children}
+              <RealtimeProvider>
+                {children}
+              </RealtimeProvider>
               <Toaster richColors position="top-right" />
             </AuthProvider>
           </GoogleAuthProvider>

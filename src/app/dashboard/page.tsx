@@ -17,7 +17,11 @@ import {
   Star,
   TrendingUp,
   ArrowRight,
+  Plus,
 } from "lucide-react";
+import { useOrders } from "@/lib/hooks/use-orders";
+import { OrderCard } from "@/components/order/order-card";
+import { ACTIVE_STATUSES } from "@/lib/utils/order";
 
 function ClientDashboard({ firstName }: { firstName: string | null }) {
   return (
@@ -145,6 +149,10 @@ function ClientDashboard({ firstName }: { firstName: string | null }) {
 }
 
 function DesignerDashboard({ firstName }: { firstName: string | null }) {
+  const { orders } = useOrders(undefined, 5);
+  const activeOrders = orders.filter((o) => ACTIVE_STATUSES.includes(o.status));
+  const pendingOrders = orders.filter((o) => o.status === "pending");
+
   return (
     <div className="space-y-6">
       {/* Welcome */}
@@ -165,10 +173,12 @@ function DesignerDashboard({ firstName }: { firstName: string | null }) {
                 Active Orders
               </span>
             </div>
-            <p className="mt-2 text-2xl font-bold">0</p>
-            <Badge variant="secondary" className="mt-1 text-xs">
-              Order tracking in Sprint 4
-            </Badge>
+            <p className="mt-2 text-2xl font-bold">{activeOrders.length}</p>
+            {pendingOrders.length > 0 && (
+              <Badge variant="default" className="mt-1 text-xs">
+                {pendingOrders.length} pending
+              </Badge>
+            )}
           </CardContent>
         </Card>
 
@@ -221,8 +231,46 @@ function DesignerDashboard({ firstName }: { firstName: string | null }) {
         </CardContent>
       </Card>
 
+      {/* Recent orders */}
+      {orders.length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Recent Orders</CardTitle>
+            <Button variant="link" size="sm" asChild>
+              <Link href="/orders">View All</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {orders.slice(0, 3).map((order) => (
+              <OrderCard
+                key={order.id}
+                order={order as Parameters<typeof OrderCard>[0]["order"]}
+                viewAs="designer"
+              />
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Quick actions */}
       <div className="grid gap-4 sm:grid-cols-2">
+        <Link href="/orders/new" className="group">
+          <Card className="h-full transition-colors group-hover:border-primary">
+            <CardContent className="flex items-start gap-4 pt-6">
+              <div className="rounded-lg bg-primary/10 p-3">
+                <Plus className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold">Create Order</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Add an order for a walk-in client
+                </p>
+              </div>
+              <ArrowRight className="mt-1 h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+            </CardContent>
+          </Card>
+        </Link>
+
         <Link href="/orders" className="group">
           <Card className="h-full transition-colors group-hover:border-primary">
             <CardContent className="flex items-start gap-4 pt-6">
