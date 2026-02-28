@@ -336,6 +336,7 @@ export interface GqlOrder {
   cancelledAt: string | null;
   cancelReason: string | null;
   createdAt: string;
+  paymentSummary?: GqlPaymentSummary | null;
 }
 
 export interface GqlOrderDetail extends GqlOrder {
@@ -344,6 +345,8 @@ export interface GqlOrderDetail extends GqlOrder {
   measurement: GqlMeasurement | null;
   updates: GqlOrderUpdate[];
   materials: GqlOrderMaterial[];
+  payments: GqlPayment[];
+  paymentSummary: GqlPaymentSummary | null;
   conversation: { id: string } | null;
 }
 
@@ -618,4 +621,65 @@ export interface UnreadMessagesCountData {
 
 export interface StartConversationData {
   startConversation: { id: string };
+}
+
+// --- Sprint 6: Payments ---
+
+export type PaymentTypeValue = "deposit" | "balance" | "refund";
+export type PaymentMethodValue = "card" | "momo_mtn" | "momo_vodafone" | "momo_airteltigo";
+export type PaymentStatusValue = "pending" | "success" | "failed" | "refunded";
+export type PaymentProviderValue = "moolre" | "paystack";
+
+export interface GqlPayment {
+  id: string;
+  orderId: string;
+  payerId: string;
+  amount: number;
+  currency: string;
+  type: PaymentTypeValue;
+  method: PaymentMethodValue;
+  status: PaymentStatusValue;
+  reference: string;
+  provider: PaymentProviderValue;
+  providerReference: string | null;
+  providerStatus: string | null;
+  paidAt: string | null;
+  createdAt: string;
+}
+
+export interface GqlPaymentInitiation {
+  payment: GqlPayment;
+  authorizationUrl: string | null;
+  isMomo: boolean;
+  requiresOtp: boolean;
+  sessionId: string | null;
+}
+
+export interface GqlPaymentSummary {
+  depositStatus: PaymentStatusValue | null;
+  balanceStatus: PaymentStatusValue | null;
+  depositAmount: number | null;
+  balanceAmount: number | null;
+}
+
+export interface InitiatePaymentInput {
+  orderId: string;
+  type: "deposit" | "balance";
+  method: PaymentMethodValue;
+  callbackUrl: string;
+  phone?: string;
+  otp?: string;
+  sessionId?: string;
+}
+
+export interface InitiatePaymentData {
+  initiatePayment: GqlPaymentInitiation;
+}
+
+export interface PaymentStatusData {
+  paymentStatus: GqlPayment | null;
+}
+
+export interface OrderPaymentsData {
+  orderPayments: GqlPayment[];
 }

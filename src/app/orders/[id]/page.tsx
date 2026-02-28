@@ -26,6 +26,7 @@ import { OrderTimeline } from "@/components/order/order-timeline";
 import { DesignerResponseSheet } from "@/components/order/designer-response-sheet";
 import { CostBookPanel } from "@/components/order/cost-book-panel";
 import { OrderEditSheet } from "@/components/orders/order-edit-sheet";
+import { PaymentSection } from "@/components/payment/payment-section";
 import {
   getStatusConfig,
   formatPesewas,
@@ -372,6 +373,18 @@ export default function OrderDetailPage({
               </>
             )}
           </div>
+        )}
+
+        {/* Payment section — clients see pay buttons, both sides see history */}
+        {order.confirmedPrice && (
+          <PaymentSection
+            orderId={order.id}
+            confirmedPrice={order.confirmedPrice}
+            payments={order.payments ?? []}
+            summary={order.paymentSummary ?? null}
+            isClient={isClient}
+            orderStatus={order.status}
+          />
         )}
 
         <Separator />

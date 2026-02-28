@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock } from "lucide-react";
 import type { GqlOrder, GqlUser } from "@/types/graphql";
+import { PaymentStatusBadge } from "@/components/payment/payment-status-badge";
 import {
   getStatusConfig,
   formatPesewas,
@@ -57,6 +58,7 @@ export function OrderCard({ order, viewAs }: OrderCardProps) {
                   Internal
                 </Badge>
               )}
+              <PaymentStatusBadge summary={order.paymentSummary ?? null} />
             </div>
 
             <p className="mt-0.5 truncate text-xs text-muted-foreground">

@@ -36,6 +36,12 @@ export const MY_ORDERS = gql`
           fullName
           avatarUrl
         }
+        paymentSummary {
+          depositStatus
+          balanceStatus
+          depositAmount
+          balanceAmount
+        }
       }
       paginatorInfo {
         count
@@ -119,6 +125,25 @@ export const GET_ORDER = gql`
         totalCost
         isPurchased
         createdAt
+      }
+      payments {
+        id
+        orderId
+        payerId
+        amount
+        currency
+        type
+        method
+        status
+        reference
+        paidAt
+        createdAt
+      }
+      paymentSummary {
+        depositStatus
+        balanceStatus
+        depositAmount
+        balanceAmount
       }
       conversation {
         id
