@@ -20,6 +20,7 @@ import {
   Ruler,
   Scissors,
   ChevronRight,
+  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -156,6 +157,19 @@ export default function ProfilePage() {
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </Link>
+
+            {user.isDesigner && (
+              <Link
+                href="/wallet"
+                className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-accent"
+              >
+                <div className="flex items-center gap-3">
+                  <Wallet className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">Wallet & Payouts</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            )}
           </CardContent>
         </Card>
 

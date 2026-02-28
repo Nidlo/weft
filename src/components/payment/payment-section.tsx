@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CreditCard } from "lucide-react";
+import { CreditCard, CheckCircle2 } from "lucide-react";
 import type { GqlPayment, GqlPaymentSummary, PaymentStatusValue } from "@/types/graphql";
 import { formatPesewas } from "@/lib/utils/order";
 import { getPaymentStatusConfig, getPaymentMethodConfig, formatPaymentType } from "@/lib/utils/payment";
@@ -58,12 +58,15 @@ export function PaymentSection({
   const balanceAmount = summary?.balanceAmount ?? confirmedPrice - depositAmount;
   const depositStatus = summary?.depositStatus as PaymentStatusValue | null;
   const balanceStatus = summary?.balanceStatus as PaymentStatusValue | null;
+  const depositOwed = summary?.depositOwed ?? depositAmount;
+  const balanceOwed = summary?.balanceOwed ?? balanceAmount;
+  const isFullyPaid = summary?.isFullyPaid ?? false;
 
-  const canPayDeposit = isClient && depositStatus !== "success" && depositStatus !== "pending";
+  const canPayDeposit = isClient && depositOwed > 0 && depositStatus !== "pending";
   const canPayBalance =
     isClient &&
-    depositStatus === "success" &&
-    balanceStatus !== "success" &&
+    depositOwed === 0 &&
+    balanceOwed > 0 &&
     balanceStatus !== "pending";
 
   // Don't show payment section for cancelled/declined orders or orders without confirmed price
@@ -76,6 +79,12 @@ export function PaymentSection({
         <CardTitle className="flex items-center gap-2 text-base">
           <CreditCard className="h-4 w-4" />
           Payments
+          {isFullyPaid && (
+            <Badge variant="secondary" className="ml-auto bg-green-100 text-green-700 border-0">
+              <CheckCircle2 className="mr-1 h-3 w-3" />
+              Fully Paid
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -84,6 +93,11 @@ export function PaymentSection({
           <div>
             <p className="text-xs text-muted-foreground">Deposit (50%)</p>
             <p className="text-sm font-semibold">{formatPesewas(depositAmount)}</p>
+            {depositOwed > 0 && depositOwed < depositAmount && (
+              <p className="text-xs text-orange-600">
+                Remaining: {formatPesewas(depositOwed)}
+              </p>
+            )}
             {depositStatus && (
               <Badge
                 variant="secondary"
@@ -96,6 +110,11 @@ export function PaymentSection({
           <div>
             <p className="text-xs text-muted-foreground">Balance (50%)</p>
             <p className="text-sm font-semibold">{formatPesewas(balanceAmount)}</p>
+            {balanceOwed > 0 && balanceOwed < balanceAmount && (
+              <p className="text-xs text-orange-600">
+                Remaining: {formatPesewas(balanceOwed)}
+              </p>
+            )}
             {balanceStatus && (
               <Badge
                 variant="secondary"
@@ -106,6 +125,34 @@ export function PaymentSection({
             )}
           </div>
         </div>
+
+        {/* Accounting summary */}
+        {summary && summary.totalPaid > 0 && (
+          <div className="space-y-1 border-t pt-3 text-sm">
+            {summary.totalPaidGateway > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Paid via app</span>
+                <span className="font-medium">{formatPesewas(summary.totalPaidGateway)}</span>
+              </div>
+            )}
+            {summary.totalPaidExternal > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Paid offline (confirmed)</span>
+                <span className="font-medium">{formatPesewas(summary.totalPaidExternal)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-semibold">
+              <span>Total Paid</span>
+              <span>{formatPesewas(summary.totalPaid)}</span>
+            </div>
+            {summary.amountRemaining > 0 && (
+              <div className="flex justify-between text-orange-600">
+                <span>Amount Remaining</span>
+                <span className="font-semibold">{formatPesewas(summary.amountRemaining)}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Payment history */}
         {payments.length > 0 && (
@@ -125,14 +172,14 @@ export function PaymentSection({
             {canPayDeposit && (
               <Button asChild className="flex-1">
                 <Link href={`/orders/${orderId}/pay?type=deposit`}>
-                  Pay Deposit ({formatPesewas(depositAmount)})
+                  Pay Deposit ({formatPesewas(depositOwed)})
                 </Link>
               </Button>
             )}
             {canPayBalance && (
               <Button asChild className="flex-1">
                 <Link href={`/orders/${orderId}/pay?type=balance`}>
-                  Pay Balance ({formatPesewas(balanceAmount)})
+                  Pay Balance ({formatPesewas(balanceOwed)})
                 </Link>
               </Button>
             )}

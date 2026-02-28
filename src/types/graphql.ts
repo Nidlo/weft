@@ -11,6 +11,7 @@ export interface GqlUser {
   isVerified: boolean;
   isDesigner: boolean;
   isOnboarded: boolean;
+  hasVerifiedWalletAccount: boolean;
 }
 
 export interface RequestOtpData {
@@ -346,8 +347,11 @@ export interface GqlOrderDetail extends GqlOrder {
   updates: GqlOrderUpdate[];
   materials: GqlOrderMaterial[];
   payments: GqlPayment[];
+  payouts: GqlPayout[];
+  externalPayments: GqlExternalPayment[];
   paymentSummary: GqlPaymentSummary | null;
   conversation: { id: string } | null;
+  review: GqlReview | null;
 }
 
 export interface GqlOrderUpdate {
@@ -660,6 +664,13 @@ export interface GqlPaymentSummary {
   balanceStatus: PaymentStatusValue | null;
   depositAmount: number | null;
   balanceAmount: number | null;
+  totalPaidGateway: number;
+  totalPaidExternal: number;
+  totalPaid: number;
+  amountRemaining: number;
+  depositOwed: number;
+  balanceOwed: number;
+  isFullyPaid: boolean;
 }
 
 export interface InitiatePaymentInput {
@@ -682,4 +693,215 @@ export interface PaymentStatusData {
 
 export interface OrderPaymentsData {
   orderPayments: GqlPayment[];
+}
+
+// --- Sprint 6b: Payouts ---
+
+export type PayoutStatusValue =
+  | "pending"
+  | "processing"
+  | "success"
+  | "failed"
+  | "wallet_pending";
+
+export interface GqlPayout {
+  id: string;
+  paymentId: string;
+  designerId: string;
+  orderId: string;
+  grossAmount: number;
+  platformFee: number;
+  feeRate: number;
+  netAmount: number;
+  provider: PaymentProviderValue | null;
+  status: PayoutStatusValue;
+  reference: string;
+  providerReference: string | null;
+  recipientPhone: string | null;
+  recipientNetwork: string | null;
+  recipientName: string | null;
+  transferredAt: string | null;
+  createdAt: string;
+}
+
+export interface RequestPayoutData {
+  requestPayout: GqlPayout;
+}
+
+export interface OrderPayoutsData {
+  orderPayouts: GqlPayout[];
+}
+
+// --- Sprint 7: Reviews & Ratings ---
+
+export interface GqlReviewPhoto {
+  url: string;
+  thumbnail_url: string;
+  public_id: string;
+}
+
+export interface GqlReview {
+  id: string;
+  orderId: string;
+  reviewerId: string;
+  designerId: string;
+  rating: number;
+  comment: string | null;
+  photos: GqlReviewPhoto[] | null;
+  designerResponse: string | null;
+  designerRespondedAt: string | null;
+  createdAt: string;
+  reviewer: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    fullName: string | null;
+    avatarUrl: string | null;
+  };
+}
+
+export interface GqlRatingBreakdown {
+  five: number;
+  four: number;
+  three: number;
+  two: number;
+  one: number;
+}
+
+export interface ReviewConnection {
+  data: GqlReview[];
+  paginatorInfo: PaginatorInfo;
+}
+
+export interface SubmitReviewInput {
+  orderId: string;
+  rating: number;
+  comment?: string;
+  photos?: File[];
+}
+
+export interface SubmitReviewData {
+  submitReview: GqlReview;
+}
+
+export interface RespondToReviewData {
+  respondToReview: {
+    id: string;
+    designerResponse: string;
+    designerRespondedAt: string;
+  };
+}
+
+export interface DesignerReviewsData {
+  designerReviews: ReviewConnection;
+}
+
+export interface RatingBreakdownData {
+  ratingBreakdown: GqlRatingBreakdown;
+}
+
+// --- Sprint 8: Wallets & External Payments ---
+
+export type MomoNetworkValue = "mtn" | "telecel" | "at";
+
+export interface GqlWalletAccount {
+  id: string;
+  userId: string;
+  type: string;
+  accountNumber: string;
+  accountName: string;
+  bankCode: string | null;
+  network: MomoNetworkValue | null;
+  networkLabel: string | null;
+  isPrimary: boolean;
+  isVerified: boolean;
+  verifiedAt: string | null;
+  createdAt: string;
+}
+
+export interface GqlResolvedAccount {
+  accountName: string;
+  accountNumber: string;
+}
+
+export interface GqlWalletBalance {
+  balance: number;
+}
+
+export interface GqlWalletTransaction {
+  id: string;
+  type: "deposit" | "withdraw";
+  amount: number;
+  confirmed: boolean;
+  meta: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface ResolveMomoAccountData {
+  resolveMomoAccount: GqlResolvedAccount;
+}
+
+export interface AddWalletAccountData {
+  addWalletAccount: GqlWalletAccount;
+}
+
+export interface SetWalletPrimaryData {
+  setWalletPrimary: GqlWalletAccount;
+}
+
+export interface RemoveWalletAccountData {
+  removeWalletAccount: boolean;
+}
+
+export interface MyWalletAccountsData {
+  myWalletAccounts: GqlWalletAccount[];
+}
+
+export interface MyWalletBalanceData {
+  myWalletBalance: GqlWalletBalance;
+}
+
+export interface MyWalletTransactionsData {
+  myWalletTransactions: GqlWalletTransaction[];
+}
+
+export type ExternalPaymentMethodValue =
+  | "cash"
+  | "direct_momo"
+  | "bank_transfer"
+  | "other";
+
+export type ExternalPaymentStatusValue = "pending" | "confirmed" | "rejected";
+
+export interface GqlExternalPayment {
+  id: string;
+  orderId: string;
+  recordedBy: string;
+  confirmedBy: string | null;
+  amount: number;
+  method: ExternalPaymentMethodValue;
+  methodLabel: string;
+  status: ExternalPaymentStatusValue;
+  statusLabel: string;
+  paidAt: string;
+  notes: string | null;
+  rejectionReason: string | null;
+  proofImages: Array<{
+    url: string;
+    fileId?: string;
+    thumbnailUrl?: string;
+  }> | null;
+  createdAt: string;
+}
+
+export interface RecordExternalPaymentData {
+  recordExternalPayment: GqlExternalPayment;
+}
+
+export interface ConfirmExternalPaymentData {
+  confirmExternalPayment: GqlExternalPayment;
+}
+
+export interface RejectExternalPaymentData {
+  rejectExternalPayment: GqlExternalPayment;
 }

@@ -20,13 +20,17 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Calendar, AlertTriangle, Ruler, MessageSquare } from "lucide-react";
+import { ArrowLeft, Calendar, AlertTriangle, Ruler, MessageSquare, Star } from "lucide-react";
 import { OrderProgressBar } from "@/components/order/order-progress-bar";
 import { OrderTimeline } from "@/components/order/order-timeline";
 import { DesignerResponseSheet } from "@/components/order/designer-response-sheet";
 import { CostBookPanel } from "@/components/order/cost-book-panel";
 import { OrderEditSheet } from "@/components/orders/order-edit-sheet";
 import { PaymentSection } from "@/components/payment/payment-section";
+import { PayoutSection } from "@/components/payment/payout-section";
+import { ExternalPaymentSection } from "@/components/payment/external-payment-section";
+import { ReviewPromptDialog } from "@/components/reviews/review-prompt-dialog";
+import { StarRating } from "@/components/reviews/star-rating";
 import {
   getStatusConfig,
   formatPesewas,
@@ -56,6 +60,7 @@ export default function OrderDetailPage({
   const [showCancel, setShowCancel] = useState(false);
   const [updateNotes, setUpdateNotes] = useState("");
   const [showUpdate, setShowUpdate] = useState(false);
+  const [showReviewPrompt, setShowReviewPrompt] = useState(false);
 
   if (!isReady || !user || loading) {
     return (
@@ -320,6 +325,7 @@ export default function OrderDetailPage({
                 onClick={async () => {
                   await confirmDelivery(order.id);
                   refetch();
+                  if (isClient) setShowReviewPrompt(true);
                 }}
                 disabled={delivering}
               >
@@ -375,6 +381,68 @@ export default function OrderDetailPage({
           </div>
         )}
 
+        {/* Review section — delivered orders */}
+        {order.status === "delivered" && order.review && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Star className="h-4 w-4" />
+                Your Review
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <StarRating value={order.review.rating} size="sm" showLabel />
+              {order.review.comment && (
+                <p className="text-sm">{order.review.comment}</p>
+              )}
+              {order.review.photos && order.review.photos.length > 0 && (
+                <div className="flex gap-2 overflow-x-auto">
+                  {order.review.photos.map((photo, i) => (
+                    <a
+                      key={i}
+                      href={photo.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="h-16 w-16 shrink-0 overflow-hidden rounded-lg"
+                    >
+                      <img
+                        src={photo.thumbnail_url}
+                        alt={`Review photo ${i + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
+              {order.review.designerResponse && (
+                <div className="mt-3 border-l-2 border-muted pl-3">
+                  <p className="text-xs font-medium text-muted-foreground">Designer Response</p>
+                  <p className="mt-0.5 text-sm">{order.review.designerResponse}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Leave a review button — client, delivered, no review yet */}
+        {order.status === "delivered" && isClient && !order.review && (
+          <Button variant="outline" onClick={() => setShowReviewPrompt(true)}>
+            <Star className="mr-2 h-4 w-4" />
+            Leave a Review
+          </Button>
+        )}
+
+        {/* Review Prompt Dialog */}
+        <ReviewPromptDialog
+          open={showReviewPrompt}
+          orderId={order.id}
+          designerName={order.designer.fullName ?? "the designer"}
+          onComplete={() => {
+            setShowReviewPrompt(false);
+            refetch();
+          }}
+        />
+
         {/* Payment section — clients see pay buttons, both sides see history */}
         {order.confirmedPrice && (
           <PaymentSection
@@ -384,6 +452,25 @@ export default function OrderDetailPage({
             summary={order.paymentSummary ?? null}
             isClient={isClient}
             orderStatus={order.status}
+          />
+        )}
+
+        {/* Payout section — shows designer payout status, retry button for failed */}
+        {order.confirmedPrice && (order.payouts ?? []).length > 0 && (
+          <PayoutSection
+            orderId={order.id}
+            payouts={order.payouts}
+            isDesigner={isDesigner}
+          />
+        )}
+
+        {/* External/offline payments — record & confirm */}
+        {order.confirmedPrice && (
+          <ExternalPaymentSection
+            orderId={order.id}
+            externalPayments={order.externalPayments ?? []}
+            isClient={isClient}
+            isDesigner={isDesigner}
           />
         )}
 

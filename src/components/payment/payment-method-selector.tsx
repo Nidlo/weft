@@ -59,7 +59,7 @@ export function PaymentMethodSelector({
                 <div className="flex-1">
                   <p className="text-sm font-medium">{config.label}</p>
                   <p className="text-xs text-muted-foreground">
-                    {config.isMomo ? "Pay via USSD prompt" : "Visa / Mastercard"}
+                    {config.isMomo ? "Pay with Mobile Money" : "Visa / Mastercard"}
                   </p>
                 </div>
                 {isSelected && (
@@ -83,7 +83,7 @@ export function PaymentMethodSelector({
             maxLength={15}
           />
           <p className="text-xs text-muted-foreground">
-            You&apos;ll receive a USSD prompt on this number to approve the payment.
+            Your Mobile Money number for this payment.
           </p>
         </div>
       )}

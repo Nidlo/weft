@@ -41,6 +41,13 @@ export const MY_ORDERS = gql`
           balanceStatus
           depositAmount
           balanceAmount
+          totalPaidGateway
+          totalPaidExternal
+          totalPaid
+          amountRemaining
+          depositOwed
+          balanceOwed
+          isFullyPaid
         }
       }
       paginatorInfo {
@@ -139,6 +146,39 @@ export const GET_ORDER = gql`
         paidAt
         createdAt
       }
+      payouts {
+        id
+        paymentId
+        designerId
+        orderId
+        grossAmount
+        platformFee
+        feeRate
+        netAmount
+        provider
+        status
+        reference
+        recipientPhone
+        recipientNetwork
+        transferredAt
+        createdAt
+      }
+      externalPayments {
+        id
+        orderId
+        recordedBy
+        confirmedBy
+        amount
+        method
+        methodLabel
+        status
+        statusLabel
+        paidAt
+        notes
+        rejectionReason
+        proofImages
+        createdAt
+      }
       paymentSummary {
         depositStatus
         balanceStatus
@@ -147,6 +187,25 @@ export const GET_ORDER = gql`
       }
       conversation {
         id
+      }
+      review {
+        id
+        orderId
+        reviewerId
+        designerId
+        rating
+        comment
+        photos
+        designerResponse
+        designerRespondedAt
+        createdAt
+        reviewer {
+          id
+          firstName
+          lastName
+          fullName
+          avatarUrl
+        }
       }
     }
   }

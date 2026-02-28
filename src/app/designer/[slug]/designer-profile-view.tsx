@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ReviewsSection } from "@/components/reviews/reviews-section";
 import type { GqlUserWithProfile, PortfolioImage } from "@/types/graphql";
 
 interface Props {
@@ -231,6 +232,14 @@ export function DesignerProfileView({ designer }: Props) {
             </div>
           </div>
         )}
+
+        {/* Reviews */}
+        <Separator />
+        <ReviewsSection
+          designerId={designer.id}
+          averageRating={profile?.ratingAvg ?? 0}
+          totalReviews={profile?.totalReviews ?? 0}
+        />
 
         {/* Lightbox Dialog */}
         <Dialog

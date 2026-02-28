@@ -6,10 +6,10 @@ import {
   Home,
   Search,
   MessageSquare,
-  Bell,
   User,
   ClipboardList,
   Ruler,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -27,7 +27,7 @@ const designerNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/orders", label: "Orders", icon: ClipboardList },
   { href: "/messages", label: "Messages", icon: MessageSquare },
-  { href: "/notifications", label: "Alerts", icon: Bell },
+  { href: "/wallet", label: "Wallet", icon: Wallet },
   { href: "/profile", label: "Profile", icon: User },
 ];
 
