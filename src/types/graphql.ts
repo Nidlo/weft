@@ -905,3 +905,71 @@ export interface ConfirmExternalPaymentData {
 export interface RejectExternalPaymentData {
   rejectExternalPayment: GqlExternalPayment;
 }
+
+// --- Sprint 8: Notifications ---
+
+export interface GqlNotification {
+  id: string;
+  type: string;
+  typeLabel: string;
+  typeIcon: string;
+  title: string;
+  body: string;
+  data: Record<string, unknown> | null;
+  actionUrl: string | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface NotificationChannels {
+  push: boolean;
+  sms: boolean;
+}
+
+export interface GqlNotificationPreferences {
+  orderCreated: NotificationChannels;
+  orderStatusChanged: NotificationChannels;
+  messageReceived: NotificationChannels;
+  paymentReceived: NotificationChannels;
+  paymentConfirmed: NotificationChannels;
+  reviewReceived: NotificationChannels;
+  payoutProcessed: NotificationChannels;
+  externalPaymentRecorded: NotificationChannels;
+}
+
+export interface NotificationConnection {
+  data: GqlNotification[];
+  paginatorInfo: PaginatorInfo;
+}
+
+export interface MyNotificationsData {
+  myNotifications: NotificationConnection;
+}
+
+export interface UnreadNotificationsCountData {
+  unreadNotificationsCount: number;
+}
+
+export interface MyNotificationPreferencesData {
+  myNotificationPreferences: GqlNotificationPreferences;
+}
+
+export interface MarkNotificationReadData {
+  markNotificationRead: { id: string; readAt: string | null };
+}
+
+export interface MarkAllNotificationsReadData {
+  markAllNotificationsRead: boolean;
+}
+
+export interface UpdateNotificationPreferencesData {
+  updateNotificationPreferences: GqlNotificationPreferences;
+}
+
+export interface UpdateQuietHoursData {
+  updateQuietHours: boolean;
+}
+
+export interface RegisterFcmTokenData {
+  registerFcmToken: boolean;
+}

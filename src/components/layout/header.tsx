@@ -8,6 +8,7 @@ import { LOGOUT } from "@/lib/graphql/mutations/auth";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useMessagesStore } from "@/lib/stores/messages";
+import { useNotificationsStore } from "@/lib/stores/notifications";
 import { toast } from "sonner";
 
 export function Header() {
@@ -16,6 +17,7 @@ export function Header() {
   const router = useRouter();
   const [logoutMutation] = useMutation(LOGOUT);
   const unreadCount = useMessagesStore((s) => s.unreadCount);
+  const notifUnread = useNotificationsStore((s) => s.unreadCount);
 
   const handleLogout = async () => {
     try {
@@ -63,11 +65,16 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="hidden md:flex"
+              className="relative hidden md:flex"
               asChild
             >
               <Link href="/notifications">
                 <Bell className="h-5 w-5" />
+                {notifUnread > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
+                    {notifUnread > 99 ? "99+" : notifUnread}
+                  </span>
+                )}
               </Link>
             </Button>
             <Button
