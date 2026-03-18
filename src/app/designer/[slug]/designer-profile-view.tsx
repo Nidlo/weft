@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@apollo/client/react";
+import { TRACK_PROFILE_VIEW } from "@/lib/graphql/mutations/profile";
 import { AppShell } from "@/components/layout/app-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ReviewsSection } from "@/components/reviews/reviews-section";
+import { ShareButtons } from "@/components/shared/share-buttons";
 import type { GqlUserWithProfile, PortfolioImage } from "@/types/graphql";
 
 interface Props {
@@ -63,6 +66,16 @@ export function DesignerProfileView({ designer }: Props) {
   const profile = designer.designerProfile;
   const images = parseImages(profile?.portfolioImages);
   const specs = parseSpecs(profile?.specializations);
+
+  // Fire-and-forget profile view tracking
+  const [trackView] = useMutation(TRACK_PROFILE_VIEW);
+  const tracked = useRef(false);
+  useEffect(() => {
+    if (profile?.slug && !tracked.current) {
+      tracked.current = true;
+      trackView({ variables: { slug: profile.slug } }).catch(() => {});
+    }
+  }, [profile?.slug, trackView]);
 
   return (
     <AppShell>
@@ -126,6 +139,13 @@ export function DesignerProfileView({ designer }: Props) {
             Message
           </Button>
         </div>
+
+        {/* Share */}
+        <ShareButtons
+          url={`${typeof window !== "undefined" ? window.location.origin : ""}/designer/${profile?.slug ?? ""}`}
+          title={profile?.displayName ?? designer.fullName ?? "Designer"}
+          specializations={specs}
+        />
 
         {/* Bio */}
         {profile?.bio && (

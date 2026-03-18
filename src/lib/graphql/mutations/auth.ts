@@ -75,6 +75,21 @@ export const COMPLETE_ONBOARDING = gql`
   }
 `;
 
+export const COMPLETE_CLIENT_ONBOARDING = gql`
+  mutation CompleteClientOnboarding($input: CompleteClientOnboardingInput!) {
+    completeClientOnboarding(input: $input) {
+      id
+      firstName
+      lastName
+      fullName
+      email
+      city
+      isOnboarded
+      onboardedAt
+    }
+  }
+`;
+
 export const LOGOUT = gql`
   mutation Logout {
     logout

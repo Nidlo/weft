@@ -5,13 +5,21 @@ export interface User {
   id: string;
   firstName: string | null;
   lastName: string | null;
+  otherNames?: string | null;
   fullName: string | null;
   phone: string;
   email: string | null;
   avatarUrl: string | null;
   city: string | null;
+  isVerified?: boolean;
   isDesigner: boolean;
   isOnboarded: boolean;
+  hasVerifiedWalletAccount?: boolean;
+  designerProfile?: {
+    slug: string | null;
+    profileViewsCount: number;
+    profileViewsThisWeek: number;
+  } | null;
 }
 
 interface AuthState {

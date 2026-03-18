@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
-import { BECOME_DESIGNER, COMPLETE_ONBOARDING } from "@/lib/graphql/mutations/auth";
-import type { BecomeDesignerData, CompleteOnboardingData } from "@/types/graphql";
+import { BECOME_DESIGNER } from "@/lib/graphql/mutations/auth";
+import type { BecomeDesignerData } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
 import {
   Card,
@@ -52,10 +52,7 @@ const roles: RoleOption[] = [
 export default function RoleSelectionPage() {
   const router = useRouter();
   const { user, setUser, isAuthenticated, isLoading } = useAuthStore();
-  const [becomeDesigner, { loading: designerLoading }] = useMutation(BECOME_DESIGNER);
-  const [completeOnboarding, { loading: onboardingLoading }] = useMutation(COMPLETE_ONBOARDING);
-
-  const loading = designerLoading || onboardingLoading;
+  const [becomeDesigner, { loading }] = useMutation(BECOME_DESIGNER);
 
   useEffect(() => {
     if (isLoading) return;
@@ -104,18 +101,9 @@ export default function RoleSelectionPage() {
           router.push("/onboarding");
         }
       } else {
-        // Client — just complete onboarding
-        const { data } = await completeOnboarding();
-        const result = data as CompleteOnboardingData | undefined;
-
-        if (result?.completeOnboarding) {
-          setUser({
-            ...user!,
-            isOnboarded: true,
-          });
-          toast.success("Welcome to StitchHub!");
-          router.push("/dashboard");
-        }
+        // Client — go through client onboarding wizard
+        toast.success("Welcome to StitchHub!");
+        router.push("/onboarding/client");
       }
     } catch (error) {
       const message =

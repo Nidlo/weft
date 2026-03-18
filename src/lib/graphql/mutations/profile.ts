@@ -1,5 +1,19 @@
 import { gql } from "@apollo/client/core";
 
+export const UPDATE_MY_INFO = gql`
+  mutation UpdateMyInfo($input: UpdateMyInfoInput!) {
+    updateMyInfo(input: $input) {
+      id
+      firstName
+      lastName
+      otherNames
+      fullName
+      city
+      avatarUrl
+    }
+  }
+`;
+
 export const UPDATE_PROFILE = gql`
   mutation UpdateProfile($input: UpdateProfileInput!) {
     updateProfile(input: $input) {
@@ -52,5 +66,11 @@ export const REORDER_PORTFOLIO_IMAGES = gql`
       id
       portfolioImages
     }
+  }
+`;
+
+export const TRACK_PROFILE_VIEW = gql`
+  mutation TrackProfileView($slug: String!) {
+    trackProfileView(slug: $slug)
   }
 `;

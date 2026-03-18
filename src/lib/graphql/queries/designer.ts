@@ -92,3 +92,33 @@ export const GET_CITIES = gql`
     }
   }
 `;
+
+export const GET_FASHION_INTERESTS = gql`
+  query GetFashionInterests($category: String) {
+    fashionInterests(category: $category) {
+      id
+      name
+      slug
+      category
+      isDefault
+    }
+  }
+`;
+
+export const GET_COUNTRIES = gql`
+  query GetCountries($activeOnly: Boolean) {
+    countries(activeOnly: $activeOnly) {
+      id
+      name
+      iso2
+      phoneCode
+      emoji
+      currency
+      currencySymbol
+      isActive
+      phoneDigits
+      phoneStartsWithZero
+      phonePlaceholder
+    }
+  }
+`;

@@ -1,3 +1,9 @@
+export interface GqlDesignerProfileSummary {
+  slug: string | null;
+  profileViewsCount: number;
+  profileViewsThisWeek: number;
+}
+
 export interface GqlUser {
   id: string;
   firstName: string | null;
@@ -54,7 +60,7 @@ export interface CompleteOnboardingData {
 }
 
 export interface MeData {
-  me: GqlUser;
+  me: GqlUser & { designerProfile?: GqlDesignerProfileSummary | null };
 }
 
 export interface LogoutData {
@@ -80,6 +86,8 @@ export interface GqlDesignerProfile {
   responseTimeAvg: number | null;
   isAcceptingOrders: boolean;
   profileCompleteness: number;
+  profileViewsCount: number;
+  profileViewsThisWeek: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -137,6 +145,49 @@ export interface City {
   countryCode: string;
 }
 
+export interface FashionInterest {
+  id: string;
+  name: string;
+  slug: string;
+  category: string | null;
+  isDefault: boolean;
+}
+
+export interface GqlCountry {
+  id: string;
+  name: string;
+  iso2: string;
+  phoneCode: string;
+  emoji: string | null;
+  currency: string | null;
+  currencySymbol: string | null;
+  isActive: boolean;
+  phoneDigits: number | null;
+  phoneStartsWithZero: boolean;
+  phonePlaceholder: string | null;
+}
+
+export interface FashionInterestsData {
+  fashionInterests: FashionInterest[];
+}
+
+export interface CountriesData {
+  countries: GqlCountry[];
+}
+
+export interface CompleteClientOnboardingData {
+  completeClientOnboarding: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    fullName: string | null;
+    email: string | null;
+    city: string | null;
+    isOnboarded: boolean;
+    onboardedAt: string | null;
+  };
+}
+
 export interface SearchDesignersInput {
   query?: string;
   city?: string;
@@ -160,10 +211,16 @@ export interface UpdateProfileInput {
   pricingMin?: number;
   pricingMax?: number;
   city?: string;
+  addressLine?: string;
+  region?: string;
+  postalCode?: string;
+  formattedAddress?: string;
+  countryCode?: string;
   locationLat?: number;
   locationLng?: number;
   isAcceptingOrders?: boolean;
   equipment?: string[];
+  yearsOfExperience?: number;
 }
 
 // --- GraphQL Response Types ---
@@ -972,4 +1029,37 @@ export interface UpdateQuietHoursData {
 
 export interface RegisterFcmTokenData {
   registerFcmToken: boolean;
+}
+
+// --- Verification Documents ---
+
+export type DocumentTypeValue =
+  | "national_id"
+  | "business_registration"
+  | "certificate"
+  | "portfolio_proof"
+  | "other";
+
+export type DocumentStatusValue = "pending" | "approved" | "rejected";
+
+export interface GqlVerificationDocument {
+  id: string;
+  type: DocumentTypeValue;
+  documentUrl: string;
+  status: DocumentStatusValue;
+  rejectionReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
+export interface MyVerificationDocumentsData {
+  myVerificationDocuments: GqlVerificationDocument[];
+}
+
+export interface UploadVerificationDocumentData {
+  uploadVerificationDocument: GqlVerificationDocument;
+}
+
+export interface DeleteVerificationDocumentData {
+  deleteVerificationDocument: boolean;
 }

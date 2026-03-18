@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Wallet,
   Bell,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -90,6 +91,11 @@ export default function ProfilePage() {
                 </Badge>
               </div>
             </div>
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/profile/edit">
+                <Pencil className="h-4 w-4" />
+              </Link>
+            </Button>
           </CardContent>
         </Card>
 

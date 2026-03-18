@@ -18,10 +18,14 @@ import {
   TrendingUp,
   ArrowRight,
   Plus,
+  Share2,
+  Eye,
 } from "lucide-react";
 import { useOrders } from "@/lib/hooks/use-orders";
 import { OrderCard } from "@/components/order/order-card";
+import { ShareButtons } from "@/components/shared/share-buttons";
 import { ACTIVE_STATUSES } from "@/lib/utils/order";
+import type { User as AuthUser } from "@/lib/stores/auth";
 
 function ClientDashboard({ firstName }: { firstName: string | null }) {
   return (
@@ -148,7 +152,14 @@ function ClientDashboard({ firstName }: { firstName: string | null }) {
   );
 }
 
-function DesignerDashboard({ firstName }: { firstName: string | null }) {
+function DesignerDashboard({ user }: { user: AuthUser }) {
+  const firstName = user.firstName;
+  const slug = user.designerProfile?.slug;
+  const viewsThisWeek = user.designerProfile?.profileViewsThisWeek ?? 0;
+  const viewsTotal = user.designerProfile?.profileViewsCount ?? 0;
+  const profileUrl = slug
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/designer/${slug}`
+    : "";
   const { orders } = useOrders(undefined, 5);
   const activeOrders = orders.filter((o) => ACTIVE_STATUSES.includes(o.status));
   const pendingOrders = orders.filter((o) => o.status === "pending");
@@ -203,10 +214,10 @@ function DesignerDashboard({ firstName }: { firstName: string | null }) {
                 Profile Views
               </span>
             </div>
-            <p className="mt-2 text-2xl font-bold">--</p>
-            <Badge variant="secondary" className="mt-1 text-xs">
-              Analytics in Sprint 9
-            </Badge>
+            <p className="mt-2 text-2xl font-bold">{viewsTotal}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {viewsThisWeek} this week
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -230,6 +241,38 @@ function DesignerDashboard({ firstName }: { firstName: string | null }) {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Share Your Profile */}
+      {slug && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Share2 className="h-4 w-4" />
+              Share Your Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
+              <Eye className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="truncate text-sm font-mono">
+                {profileUrl.replace(/^https?:\/\//, "")}
+              </span>
+            </div>
+            {viewsThisWeek > 0 && (
+              <p className="text-sm text-muted-foreground">
+                Viewed {viewsThisWeek} time{viewsThisWeek !== 1 ? "s" : ""} this week
+              </p>
+            )}
+            <ShareButtons
+              url={profileUrl}
+              title={user.fullName ?? "My Profile"}
+            />
+            <p className="text-xs text-muted-foreground">
+              Share your profile to get more bookings
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent orders */}
       {orders.length > 0 && (
@@ -334,7 +377,7 @@ export default function DashboardPage() {
   return (
     <AppShell>
       {user.isDesigner ? (
-        <DesignerDashboard firstName={user.firstName} />
+        <DesignerDashboard user={user} />
       ) : (
         <ClientDashboard firstName={user.firstName} />
       )}

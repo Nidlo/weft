@@ -15,6 +15,11 @@ export const ME_QUERY = gql`
       isVerified
       isDesigner
       isOnboarded
+      designerProfile {
+        slug
+        profileViewsCount
+        profileViewsThisWeek
+      }
     }
   }
 `;

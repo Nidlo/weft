@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { REQUEST_OTP, SOCIAL_LOGIN } from "@/lib/graphql/mutations/auth";
-import type { RequestOtpData, SocialLoginData } from "@/types/graphql";
+import { GET_COUNTRIES } from "@/lib/graphql/queries/designer";
+import type {
+  RequestOtpData,
+  SocialLoginData,
+  CountriesData,
+  GqlCountry,
+} from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
 import { Button } from "@/components/ui/button";
@@ -29,43 +35,74 @@ import { GoogleSignInButton } from "./google-sign-in-button";
 
 const APPLE_CLIENT_ID = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID;
 
-const COUNTRY_CODES = [
-  { code: "+233", country: "GH", label: "Ghana", flag: "🇬🇭", digits: 10, startsWithZero: true },
-  { code: "+234", country: "NG", label: "Nigeria", flag: "🇳🇬", digits: 11, startsWithZero: true },
-  { code: "+225", country: "CI", label: "Côte d'Ivoire", flag: "🇨🇮", digits: 10, startsWithZero: false },
-  { code: "+228", country: "TG", label: "Togo", flag: "🇹🇬", digits: 8, startsWithZero: false },
-  { code: "+226", country: "BF", label: "Burkina Faso", flag: "🇧🇫", digits: 8, startsWithZero: false },
-] as const;
+const FALLBACK_COUNTRIES: GqlCountry[] = [
+  {
+    id: "gh",
+    name: "Ghana",
+    iso2: "GH",
+    phoneCode: "233",
+    emoji: null,
+    currency: "GHS",
+    currencySymbol: null,
+    isActive: true,
+    phoneDigits: 10,
+    phoneStartsWithZero: true,
+    phonePlaceholder: "024 123 4567",
+  },
+];
 
 export default function PhoneAuthPage() {
   const { isGuest, isLoading } = useGuestGuard();
   const router = useRouter();
   const [phone, setPhone] = useState("");
-  const [countryCode, setCountryCode] = useState("+233");
+  const [selectedCode, setSelectedCode] = useState("+233");
   const [requestOtp, { loading }] = useMutation(REQUEST_OTP);
   const [socialLogin, { loading: socialLoading }] = useMutation(SOCIAL_LOGIN);
   const setUser = useAuthStore((s) => s.setUser);
   const setToken = useAuthStore((s) => s.setToken);
 
-  const selectedCountry = COUNTRY_CODES.find((c) => c.code === countryCode) ?? COUNTRY_CODES[0];
+  const { data: countriesData } = useQuery<CountriesData>(GET_COUNTRIES, {
+    variables: { activeOnly: true },
+  });
+
+  const countries = useMemo(() => {
+    const fetched = countriesData?.countries ?? [];
+    return fetched.length > 0 ? fetched : FALLBACK_COUNTRIES;
+  }, [countriesData]);
+
+  const selectedCountry = useMemo(
+    () =>
+      countries.find((c) => `+${c.phoneCode}` === selectedCode) ??
+      countries[0],
+    [countries, selectedCode]
+  );
+
+  const maxDigits = selectedCountry?.phoneDigits ?? 10;
+  const startsWithZero = selectedCountry?.phoneStartsWithZero ?? true;
+  const minDigits = startsWithZero ? maxDigits - 1 : maxDigits;
 
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, "");
-    return digits.slice(0, selectedCountry.digits);
+    return digits.slice(0, maxDigits);
   };
 
   const isValidPhone = (value: string) => {
     const digits = value.replace(/\D/g, "");
-    if (selectedCountry.startsWithZero) {
-      return digits.length === selectedCountry.digits && digits.startsWith("0");
+    if (startsWithZero) {
+      return (
+        (digits.length === maxDigits && digits.startsWith("0")) ||
+        (digits.length === minDigits && !digits.startsWith("0"))
+      );
     }
-    return digits.length === selectedCountry.digits;
+    return digits.length === maxDigits;
   };
 
   const toInternational = (value: string) => {
     const digits = value.replace(/\D/g, "");
-    const withoutLeadingZero = digits.startsWith("0") ? digits.slice(1) : digits;
-    return `${countryCode}${withoutLeadingZero}`;
+    const withoutLeadingZero = digits.startsWith("0")
+      ? digits.slice(1)
+      : digits;
+    return `${selectedCode}${withoutLeadingZero}`;
   };
 
   const handleSocialLogin = useCallback(
@@ -122,7 +159,8 @@ export default function PhoneAuthPage() {
           script.src =
             "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js";
           script.onload = () => resolve();
-          script.onerror = () => reject(new Error("Failed to load Apple SDK"));
+          script.onerror = () =>
+            reject(new Error("Failed to load Apple SDK"));
           document.head.appendChild(script);
         });
       }
@@ -137,7 +175,10 @@ export default function PhoneAuthPage() {
       const response = await window.AppleID!.auth.signIn();
       await handleSocialLogin("apple", response.authorization.id_token);
     } catch (error) {
-      if (error instanceof Error && error.message !== "popup_closed_by_user") {
+      if (
+        error instanceof Error &&
+        error.message !== "popup_closed_by_user"
+      ) {
         toast.error("Apple sign-in failed. Please try again.");
       }
     }
@@ -147,7 +188,13 @@ export default function PhoneAuthPage() {
     e.preventDefault();
 
     if (!isValidPhone(phone)) {
-      toast.error(`Please enter a valid ${selectedCountry.digits}-digit ${selectedCountry.label} phone number`);
+      const digitHint =
+        startsWithZero && minDigits !== maxDigits
+          ? `${minDigits} or ${maxDigits}`
+          : `${maxDigits}`;
+      toast.error(
+        `Please enter a valid ${digitHint}-digit ${selectedCountry?.name ?? ""} phone number`
+      );
       return;
     }
 
@@ -161,7 +208,9 @@ export default function PhoneAuthPage() {
 
       if (result?.requestOtp.success) {
         toast.success("Verification code sent!");
-        router.push(`/auth/verify?phone=${encodeURIComponent(internationalPhone)}`);
+        router.push(
+          `/auth/verify?phone=${encodeURIComponent(internationalPhone)}`
+        );
       } else {
         toast.error(result?.requestOtp.message || "Failed to send code");
       }
@@ -188,6 +237,9 @@ export default function PhoneAuthPage() {
   }
 
   const isBusy = loading || socialLoading;
+  const placeholder =
+    selectedCountry?.phonePlaceholder ??
+    (startsWithZero ? "024 123 4567" : "90 12 34 56");
 
   return (
     <Card>
@@ -200,24 +252,24 @@ export default function PhoneAuthPage() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-2">
-            <Select value={countryCode} onValueChange={setCountryCode}>
-              <SelectTrigger className="w-30 shrink-0">
+            <Select value={selectedCode} onValueChange={setSelectedCode}>
+              <SelectTrigger className="w-32 shrink-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {COUNTRY_CODES.map((c) => (
-                  <SelectItem key={c.code} value={c.code}>
-                    {c.flag} {c.code}
+                {countries.map((c) => (
+                  <SelectItem key={c.iso2} value={`+${c.phoneCode}`}>
+                    {c.emoji ?? ""} +{c.phoneCode}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Input
               type="tel"
-              placeholder={selectedCountry.startsWithZero ? "024 123 4567" : "90 12 34 56"}
+              placeholder={placeholder}
               value={phone}
               onChange={(e) => setPhone(formatPhone(e.target.value))}
-              maxLength={selectedCountry.digits}
+              maxLength={maxDigits}
               autoFocus
               className="flex-1"
             />
@@ -249,6 +301,7 @@ export default function PhoneAuthPage() {
             onToken={(token) => handleSocialLogin("google", token)}
           />
           <Button
+            type="button"
             variant="outline"
             className="w-full"
             disabled={isBusy}
