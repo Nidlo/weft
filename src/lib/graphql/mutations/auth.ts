@@ -12,7 +12,6 @@ export const REQUEST_OTP = gql`
 export const VERIFY_OTP = gql`
   mutation VerifyOtp($phone: String!, $code: String!) {
     verifyOtp(phone: $phone, code: $code) {
-      token
       isNew
       user {
         id
@@ -34,7 +33,6 @@ export const VERIFY_OTP = gql`
 export const SOCIAL_LOGIN = gql`
   mutation SocialLogin($provider: String!, $token: String!) {
     socialLogin(provider: $provider, token: $token) {
-      token
       isNew
       user {
         id

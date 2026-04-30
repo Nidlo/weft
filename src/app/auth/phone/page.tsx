@@ -59,7 +59,6 @@ export default function PhoneAuthPage() {
   const [requestOtp, { loading }] = useMutation(REQUEST_OTP);
   const [socialLogin, { loading: socialLoading }] = useMutation(SOCIAL_LOGIN);
   const setUser = useAuthStore((s) => s.setUser);
-  const setToken = useAuthStore((s) => s.setToken);
 
   const { data: countriesData } = useQuery<CountriesData>(GET_COUNTRIES, {
     variables: { activeOnly: true },
@@ -114,8 +113,7 @@ export default function PhoneAuthPage() {
         const result = data as SocialLoginData | undefined;
 
         if (result?.socialLogin) {
-          const { token: authToken, user, isNew } = result.socialLogin;
-          setToken(authToken);
+          const { user, isNew } = result.socialLogin;
           setUser({
             id: user.id,
             firstName: user.firstName,
@@ -143,7 +141,7 @@ export default function PhoneAuthPage() {
         toast.error(message);
       }
     },
-    [socialLogin, setToken, setUser, router]
+    [socialLogin, setUser, router]
   );
 
   const handleAppleLogin = useCallback(async () => {

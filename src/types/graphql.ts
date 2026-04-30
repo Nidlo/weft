@@ -29,7 +29,7 @@ export interface RequestOtpData {
 
 export interface VerifyOtpData {
   verifyOtp: {
-    token: string;
+    token: string | null;
     isNew: boolean;
     user: GqlUser;
   };
@@ -37,7 +37,7 @@ export interface VerifyOtpData {
 
 export interface SocialLoginData {
   socialLogin: {
-    token: string;
+    token: string | null;
     isNew: boolean;
     user: GqlUser;
   };

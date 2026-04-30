@@ -56,7 +56,6 @@ function VerifyOtpContent() {
   const searchParams = useSearchParams();
   const phone = searchParams.get("phone") || "";
   const setUser = useAuthStore((s) => s.setUser);
-  const setToken = useAuthStore((s) => s.setToken);
 
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
@@ -86,8 +85,7 @@ function VerifyOtpContent() {
         const result = data as VerifyOtpData | undefined;
 
         if (result?.verifyOtp) {
-          const { token, user, isNew } = result.verifyOtp;
-          setToken(token);
+          const { user, isNew } = result.verifyOtp;
           setUser({
             id: user.id,
             firstName: user.firstName,
@@ -117,7 +115,7 @@ function VerifyOtpContent() {
         inputRefs.current[0]?.focus();
       }
     },
-    [phone, verifyOtp, setUser, setToken, router]
+    [phone, verifyOtp, setUser, router]
   );
 
   const handleChange = (index: number, value: string) => {

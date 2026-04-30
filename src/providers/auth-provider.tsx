@@ -7,7 +7,7 @@ import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import type { MeData } from "@/types/graphql";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user, token, setUser, setLoading, logout } = useAuthStore();
+  const { user, setUser, setLoading, logout } = useAuthStore();
   const hasHydrated = useHasHydrated();
   const didValidate = useRef(false);
 
@@ -17,12 +17,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (didValidate.current) return;
     didValidate.current = true;
 
-    if (!user || !token) {
+    if (!user) {
       setLoading(false);
       return;
     }
 
-    // Validate the persisted session against the backend
+    // Validate the persisted session against the backend.
+    // The session cookie is sent automatically via credentials: 'include'.
     apolloClient
       .query<MeData>({ query: ME_QUERY, fetchPolicy: "network-only" })
       .then(({ data }) => {
@@ -45,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch((err: unknown) => {
-        // Only logout on explicit auth errors (token revoked/expired).
+        // Only logout on explicit auth errors (session expired/invalidated).
         // Network errors or backend-down should NOT log the user out —
         // keep them authenticated optimistically with cached profile data.
         const graphQLErrors =

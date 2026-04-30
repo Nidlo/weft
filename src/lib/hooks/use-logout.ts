@@ -15,12 +15,13 @@ export function useLogout() {
 
   const handleLogout = useCallback(async () => {
     try {
+      // Backend invalidates session + revokes all tokens
       await logoutMutation();
     } catch {
       // Server logout failed — still clear local state
     }
 
-    logout();
+    logout(); // Clears Zustand user + resets CSRF state
     await apolloClient.clearStore();
     router.replace("/auth/phone");
     toast.success("Signed out");

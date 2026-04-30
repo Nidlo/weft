@@ -24,12 +24,10 @@ export interface User {
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   _hasHydrated: boolean;
   setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
 }
@@ -38,25 +36,22 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
       isLoading: true,
       _hasHydrated: false,
       setUser: (user) =>
         set({ user, isAuthenticated: !!user, isLoading: false }),
-      setToken: (token) => set({ token }),
       setLoading: (isLoading) => set({ isLoading }),
       logout: () =>
         set({
           user: null,
-          token: null,
           isAuthenticated: false,
           isLoading: false,
         }),
     }),
     {
       name: "stitchhub-auth",
-      partialize: (state) => ({ user: state.user, token: state.token }),
+      partialize: (state) => ({ user: state.user }),
       // skipHydration: rehydrate manually after registering onFinishHydration
       // so that setState inside the callback is not overwritten by the
       // persist middleware's own merge (Zustand v5 breaking change).
@@ -71,7 +66,7 @@ export const useAuthStore = create<AuthState>()(
 // so setState calls here persist correctly.
 if (typeof window !== "undefined") {
   useAuthStore.persist.onFinishHydration((state) => {
-    const hasAuth = !!state.user && !!state.token;
+    const hasAuth = !!state.user;
     useAuthStore.setState({ _hasHydrated: true, isAuthenticated: hasAuth });
   });
   useAuthStore.persist.rehydrate();

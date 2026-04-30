@@ -1,5 +1,6 @@
 import Echo from "laravel-echo";
 import Pusher from "pusher-js";
+import type { ChannelAuthorizationData } from "pusher-js/types/src/core/auth/options";
 import { useAuthStore } from "@/lib/stores/auth";
 
 // Make Pusher available globally for Echo
@@ -14,8 +15,8 @@ export function getEcho(): Echo<"reverb"> | null {
 
   if (echoInstance) return echoInstance;
 
-  const token = useAuthStore.getState().token;
-  if (!token) return null;
+  const isAuthenticated = useAuthStore.getState().isAuthenticated;
+  if (!isAuthenticated) return null;
 
   echoInstance = new Echo({
     broadcaster: "reverb",
@@ -31,10 +32,33 @@ export function getEcho(): Echo<"reverb"> | null {
       "/broadcasting/auth",
     auth: {
       headers: {
-        Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
     },
+    // Send session cookie with broadcasting auth requests
+    authorizer: (channel: { name: string }) => ({
+      authorize: (socketId: string, callback: (error: Error | null, data: ChannelAuthorizationData | null) => void) => {
+        const authUrl =
+          (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/graphql$/, "") +
+          "/broadcasting/auth";
+
+        fetch(authUrl, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            socket_id: socketId,
+            channel_name: channel.name,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => callback(null, data))
+          .catch((error) => callback(error instanceof Error ? error : new Error(String(error)), null));
+      },
+    }),
   });
 
   return echoInstance;

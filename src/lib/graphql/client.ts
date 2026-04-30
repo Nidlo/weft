@@ -16,19 +16,6 @@ const uploadLink = new UploadHttpLink({
   },
 });
 
-const authLink = new ApolloLink((operation, forward) => {
-  const token = useAuthStore.getState().token;
-  if (token) {
-    operation.setContext(({ headers = {} }) => ({
-      headers: {
-        ...headers,
-        Authorization: `Bearer ${token}`,
-      },
-    }));
-  }
-  return forward(operation);
-});
-
 const errorLink = new ErrorLink(({ error, operation }) => {
   if (CombinedGraphQLErrors.is(error)) {
     const isUnauthenticated = error.errors.some(
@@ -52,7 +39,7 @@ const errorLink = new ErrorLink(({ error, operation }) => {
 });
 
 export const apolloClient = new ApolloClient({
-  link: ApolloLink.from([errorLink, authLink, uploadLink]),
+  link: ApolloLink.from([errorLink, uploadLink]),
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
