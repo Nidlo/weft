@@ -1104,4 +1104,19 @@ For Figma-dependent rows the expected exchange is:
 
 ---
 
-**Last updated:** 2026-05-01 by Snad + Claude
+## QA roadmap-gap addendum (audit gap, 2026-05-04)
+
+Sourced from [audits/qa-roadmap-gaps-2026-05-04.md](../audits/qa-roadmap-gaps-2026-05-04.md). New ⬜ entries identified during QA CSV generation that warrant roadmap tracking. Each cross-references the gap report's `QA-GAP-A-NN` ID.
+
+- [ ] **FE-NIDLO-AUTH-22** — Multi-tab logout sync via `storage` event in `auth-store.ts`. Today logout in tab A leaves tab B authenticated until next mutation 401s (failure-modes §1.7 residual). _(audit gap, 2026-05-04 — QA-GAP-A-01)_
+- [ ] **FE-NIDLO-AUTH-23** — Global "trying to reconnect" banner when `errorLink` sees N consecutive network errors. Today user gets per-component toasts only (failure-modes §2.1 residual). _(audit gap, 2026-05-04 — QA-GAP-A-02)_
+- [ ] **FE-NIDLO-PAY-18** — Idempotency-key on `initiatePayment` mutation; client sends `Idempotency-Key: <uuid>` header to dedupe double-tap during gateway latency. Pairs with backend `BE-NIDLO-PAY-15`. (failure-modes §3.11 / BE-H4 residual.) _(audit gap, 2026-05-04 — QA-GAP-A-03)_
+- [ ] **FE-NIDLO-MEAS-08** — Determinate progress bar + cancel button on Fitscan upload (`ImageUpload.tsx`). Today shows "Uploading…" only (failure-modes §2.4 residual). _(audit gap, 2026-05-04 — QA-GAP-A-04)_
+- [ ] **FE-NIDLO-OPS-20** — Service-worker update prompt: when new SW activates with app open, show "A new version is available — reload" toast. (failure-modes §9.1 — component exists but not wired to user affordance.) _(audit gap, 2026-05-04 — QA-GAP-A-05)_
+- [ ] **FE-NIDLO-MSG-19** — Real-time typing indicator on conversation page; subscribes to a `typing` event broadcast on `private-conversation.{id}`. Spec'd in `02-designer.md` but missing from roadmap. _(audit gap, 2026-05-04 — QA-GAP-A-06)_
+- [ ] **FE-NIDLO-A11Y-06** — Reduced-motion sweep across all `animate-*` classes; add `motion-reduce:` variants. Cross-cutting §6 known gap. _(audit gap, 2026-05-04 — QA-GAP-A-07)_
+- [ ] **FE-NIDLO-PWA-01** — iOS A2HS instruction sheet ("Tap share → Add to Home Screen") because Safari doesn't expose `beforeinstallprompt`. Explicitly deferred under FE-NIDLO-OPS-05 — separate task tracked. _(audit gap, 2026-05-04 — QA-GAP-A-08)_
+
+---
+
+**Last updated:** 2026-05-04 by Claude (QA gap addendum) + Snad
