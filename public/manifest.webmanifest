@@ -1,7 +1,7 @@
 {
-  "name": "StitchHub - Custom Fashion, Connected",
-  "short_name": "StitchHub",
-  "description": "Connect with talented seamstresses, tailors, and fashion designers for custom-made clothing.",
+  "name": "Nidlo",
+  "short_name": "Nidlo",
+  "description": "Connect with talented seamstresses, tailors, and fashion designers for custom-made clothing in Ghana and West Africa.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#faf9f6",

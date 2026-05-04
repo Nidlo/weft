@@ -37,7 +37,7 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = "en-GH";
+    recognition.lang = navigator.language || "en-GH";
     recognition.continuous = true;
     recognition.interimResults = false;
 
@@ -80,6 +80,7 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
       onClick={toggleListening}
       disabled={disabled}
       title={listening ? "Stop recording" : "Start voice input"}
+      aria-label={listening ? "Stop recording" : "Start voice input"}
     >
       {listening ? (
         <MicOff className="h-4 w-4" />

@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://stitchhub.com";
+import { APP_URL } from "@/lib/config";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface SlugEntry {
@@ -49,6 +48,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
+    },
+    {
+      url: `${APP_URL}/terms`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    {
+      url: `${APP_URL}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    {
+      url: `${APP_URL}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
     },
   ];
 

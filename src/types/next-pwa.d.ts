@@ -9,6 +9,14 @@ declare module "next-pwa" {
     scope?: string;
     sw?: string;
     runtimeCaching?: unknown[];
+    fallbacks?: {
+      document?: string;
+      image?: string;
+      audio?: string;
+      video?: string;
+      font?: string;
+      data?: string;
+    };
   }
 
   export default function withPWAInit(

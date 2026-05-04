@@ -1,9 +1,12 @@
 "use client";
 
 import { use, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
+import { useRealtime } from "@/providers/realtime-provider";
+import { useEchoReconnect } from "@/lib/hooks/use-echo-reconnect";
 import {
   useOrder,
   useConfirmOrder,
@@ -17,12 +20,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Calendar, AlertTriangle, Ruler, MessageSquare, Star } from "lucide-react";
 import { OrderProgressBar } from "@/components/order/order-progress-bar";
 import { OrderTimeline } from "@/components/order/order-timeline";
+import { ResponseCountdown } from "@/components/order/response-countdown";
 import { DesignerResponseSheet } from "@/components/order/designer-response-sheet";
 import { CostBookPanel } from "@/components/order/cost-book-panel";
 import { OrderEditSheet } from "@/components/orders/order-edit-sheet";
@@ -36,6 +46,7 @@ import {
   formatPesewas,
   getDeadlineColor,
   getDaysUntilDeadline,
+  getReviewDeadlineLabel,
   PRODUCTION_STAGES,
 } from "@/lib/utils/order";
 import { useStartConversation } from "@/lib/hooks/use-messages";
@@ -49,6 +60,10 @@ export default function OrderDetailPage({
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
   const router = useRouter();
   const { order, loading, refetch } = useOrder(id);
+  const { echo } = useRealtime();
+  // Refetch the order when the WebSocket reconnects so any status / payment
+  // events that fired while the socket was down don't leave the UI stale.
+  useEchoReconnect(echo, refetch);
   const { confirmOrder, loading: confirming } = useConfirmOrder();
   const { cancelOrder, loading: cancelling } = useCancelOrder();
   const { confirmDelivery, loading: delivering } = useConfirmDelivery();
@@ -56,7 +71,8 @@ export default function OrderDetailPage({
 
   const { startConversation, loading: startingChat } = useStartConversation();
 
-  const [cancelReason, setCancelReason] = useState("");
+  const [cancelReasonCategory, setCancelReasonCategory] = useState("");
+  const [cancelReasonNotes, setCancelReasonNotes] = useState("");
   const [showCancel, setShowCancel] = useState(false);
   const [updateNotes, setUpdateNotes] = useState("");
   const [showUpdate, setShowUpdate] = useState(false);
@@ -112,9 +128,15 @@ export default function OrderDetailPage({
   const nextStageConfig = nextStage ? getStatusConfig(nextStage) : null;
 
   const handleCancel = async () => {
-    await cancelOrder(order.id, cancelReason || undefined);
+    const composedReason = cancelReasonCategory
+      ? cancelReasonNotes.trim()
+        ? `${cancelReasonCategory}: ${cancelReasonNotes.trim()}`
+        : cancelReasonCategory
+      : cancelReasonNotes.trim() || undefined;
+    await cancelOrder(order.id, composedReason);
     setShowCancel(false);
-    setCancelReason("");
+    setCancelReasonCategory("");
+    setCancelReasonNotes("");
     refetch();
   };
 
@@ -180,6 +202,9 @@ export default function OrderDetailPage({
                 {getDaysUntilDeadline(order.deadline)}
               </span>
             </span>
+            {order.status === "pending" && (
+              <ResponseCountdown createdAt={order.createdAt} />
+            )}
           </div>
         </div>
 
@@ -206,7 +231,7 @@ export default function OrderDetailPage({
             {order.counterPrice && !order.confirmedPrice && (
               <div>
                 <p className="text-xs text-muted-foreground">Counter Offer</p>
-                <p className="text-sm font-semibold text-yellow-600">
+                <p className="text-sm font-semibold text-status-warning">
                   {formatPesewas(order.counterPrice)}
                 </p>
               </div>
@@ -240,10 +265,10 @@ export default function OrderDetailPage({
 
         {/* Counter message */}
         {order.counterMessage && !order.confirmedPrice && (
-          <Card className="border-yellow-200 bg-yellow-50">
+          <Card className="border-status-warning-soft bg-status-warning-soft/50">
             <CardContent className="py-3">
-              <p className="text-sm font-medium text-yellow-800">Counter Offer Message</p>
-              <p className="mt-1 text-sm text-yellow-700">{order.counterMessage}</p>
+              <p className="text-sm font-medium text-status-warning-fg">Counter Offer Message</p>
+              <p className="mt-1 text-sm text-status-warning-fg">{order.counterMessage}</p>
             </CardContent>
           </Card>
         )}
@@ -351,17 +376,57 @@ export default function OrderDetailPage({
                         <AlertTriangle className="h-4 w-4" />
                         Are you sure you want to cancel?
                       </div>
-                      <Input
-                        placeholder="Reason (optional)"
-                        value={cancelReason}
-                        onChange={(e) => setCancelReason(e.target.value)}
+                      <p className="text-xs text-muted-foreground">
+                        If a deposit was paid, refund timing depends on the
+                        production stage. The designer keeps fabric &amp;
+                        material costs already incurred.
+                      </p>
+                      <Select
+                        value={cancelReasonCategory}
+                        onValueChange={setCancelReasonCategory}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Reason for cancelling" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="changed_mind">
+                            Changed my mind
+                          </SelectItem>
+                          <SelectItem value="found_another_designer">
+                            Found another designer
+                          </SelectItem>
+                          <SelectItem value="designer_unresponsive">
+                            Designer unresponsive
+                          </SelectItem>
+                          <SelectItem value="price_too_high">
+                            Price too high
+                          </SelectItem>
+                          <SelectItem value="timeline_too_long">
+                            Timeline too long
+                          </SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Textarea
+                        placeholder={
+                          cancelReasonCategory === "other"
+                            ? "Tell us more (required)"
+                            : "Add details (optional)"
+                        }
+                        value={cancelReasonNotes}
+                        onChange={(e) => setCancelReasonNotes(e.target.value)}
+                        rows={2}
                       />
                       <div className="flex gap-2">
                         <Button
                           variant="destructive"
                           size="sm"
                           onClick={handleCancel}
-                          disabled={cancelling}
+                          disabled={
+                            cancelling ||
+                            (cancelReasonCategory === "other" &&
+                              !cancelReasonNotes.trim())
+                          }
                         >
                           {cancelling ? "Cancelling..." : "Confirm Cancel"}
                         </Button>
@@ -403,12 +468,15 @@ export default function OrderDetailPage({
                       href={photo.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="h-16 w-16 shrink-0 overflow-hidden rounded-lg"
+                      aria-label={`Open review photo ${i + 1} full size`}
+                      className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg"
                     >
-                      <img
+                      <Image
                         src={photo.thumbnail_url}
                         alt={`Review photo ${i + 1}`}
-                        className="h-full w-full object-cover"
+                        fill
+                        sizes="64px"
+                        className="object-cover"
                       />
                     </a>
                   ))}
@@ -426,10 +494,24 @@ export default function OrderDetailPage({
 
         {/* Leave a review button — client, delivered, no review yet */}
         {order.status === "delivered" && isClient && !order.review && (
-          <Button variant="outline" onClick={() => setShowReviewPrompt(true)}>
-            <Star className="mr-2 h-4 w-4" />
-            Leave a Review
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={() => setShowReviewPrompt(true)}>
+              <Star className="mr-2 h-4 w-4" />
+              Leave a Review
+            </Button>
+            {(() => {
+              const label = getReviewDeadlineLabel(order.deliveredAt);
+              return label ? (
+                <span
+                  className="text-xs text-muted-foreground"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {label}
+                </span>
+              ) : null;
+            })()}
+          </div>
         )}
 
         {/* Review Prompt Dialog */}
@@ -642,12 +724,15 @@ export default function OrderDetailPage({
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="aspect-square overflow-hidden rounded-lg"
+                          aria-label={`Open reference image ${i + 1} full size`}
+                          className="relative aspect-square overflow-hidden rounded-lg"
                         >
-                          <img
+                          <Image
                             src={url}
                             alt={`Reference ${i + 1}`}
-                            className="h-full w-full object-cover transition-transform hover:scale-105"
+                            fill
+                            sizes="(max-width: 640px) 33vw, 200px"
+                            className="object-cover transition-transform hover:scale-105"
                           />
                         </a>
                       ))}

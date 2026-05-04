@@ -102,20 +102,35 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
   if (pendingImage) {
     return (
       <div className="border-t bg-background">
-        <div className="relative mx-3 mt-3">
+        <div className="relative mx-3 mt-3 inline-block">
+          {/* Object-URL preview can't be served by next/image's optimiser. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={pendingImage.previewUrl}
             alt="Preview"
             className="max-h-48 rounded-lg object-contain"
           />
-          <Button
-            variant="secondary"
-            size="icon"
-            className="absolute -right-2 -top-2 h-7 w-7 rounded-full shadow-md"
-            onClick={handleCancelImage}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          {uploading && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-lg bg-black/50 text-white"
+            >
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span className="text-xs font-medium">Uploading...</span>
+            </div>
+          )}
+          {!uploading && (
+            <Button
+              variant="secondary"
+              size="icon"
+              aria-label="Remove attached image"
+              className="absolute -right-2 -top-2 h-7 w-7 rounded-full shadow-md"
+              onClick={handleCancelImage}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-2 p-3">
           <Input
@@ -133,6 +148,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
             onClick={handleSendImage}
             disabled={disabled}
             title="Send photo"
+            aria-label="Send photo"
           >
             {uploading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -160,7 +176,8 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
         size="icon"
         onClick={() => fileRef.current?.click()}
         disabled={disabled}
-        title="Send photo"
+        title="Attach photo"
+        aria-label="Attach photo"
       >
         <ImagePlus className="h-5 w-5" />
       </Button>
@@ -180,6 +197,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
         onClick={handleSend}
         disabled={disabled || !text.trim()}
         title="Send message"
+        aria-label="Send message"
       >
         {sending ? (
           <Loader2 className="h-5 w-5 animate-spin" />

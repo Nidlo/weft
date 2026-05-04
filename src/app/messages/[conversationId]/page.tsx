@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback, useEffect, useRef } from "react";
+import { use, useCallback, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
@@ -10,6 +10,7 @@ import {
   useSendMessage,
 } from "@/lib/hooks/use-messages";
 import { useRealtime } from "@/providers/realtime-provider";
+import { useEchoReconnect } from "@/lib/hooks/use-echo-reconnect";
 import { useMessagesStore } from "@/lib/stores/messages";
 import { AppShell } from "@/components/layout/app-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -99,6 +100,10 @@ export default function ChatPage({
     };
   }, [echo, conversationId, user?.id, refetch, markRead]);
 
+  // Refetch when the WebSocket reconnects — fills the gap of any events
+  // that fired while we were disconnected.
+  useEchoReconnect(echo, refetch);
+
   // Handle scroll to top for loading more messages
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
@@ -116,6 +121,22 @@ export default function ChatPage({
     });
   };
 
+  // Hooks must run on every render — keep useMemo above any early return.
+  const messagesByDate = useMemo(() => {
+    const displayMessages = [...messages].reverse();
+    const groups: { date: string; msgs: typeof displayMessages }[] = [];
+    let currentDate = "";
+    for (const msg of displayMessages) {
+      const msgDate = new Date(msg.createdAt).toDateString();
+      if (msgDate !== currentDate) {
+        currentDate = msgDate;
+        groups.push({ date: msg.createdAt, msgs: [] });
+      }
+      groups[groups.length - 1].msgs.push(msg);
+    }
+    return groups;
+  }, [messages]);
+
   const other =
     conversation?.designerId === user?.id
       ? conversation?.client
@@ -132,27 +153,12 @@ export default function ChatPage({
     );
   }
 
-  // Reverse messages for display (API returns newest first, we need oldest first)
-  const displayMessages = [...messages].reverse();
-
-  // Group by date for separators
-  const messagesByDate: { date: string; msgs: typeof displayMessages }[] = [];
-  let currentDate = "";
-  for (const msg of displayMessages) {
-    const msgDate = new Date(msg.createdAt).toDateString();
-    if (msgDate !== currentDate) {
-      currentDate = msgDate;
-      messagesByDate.push({ date: msg.createdAt, msgs: [] });
-    }
-    messagesByDate[messagesByDate.length - 1].msgs.push(msg);
-  }
-
   return (
     <AppShell>
       <div className="flex h-[calc(100dvh-3.5rem-4rem)] flex-col md:h-[calc(100dvh-3.5rem-1rem)]">
         {/* Chat header */}
         <div className="flex items-center gap-3 border-b px-2 py-3">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+          <Button variant="ghost" size="icon" aria-label="Back" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           {other ? (
@@ -229,7 +235,7 @@ export default function ChatPage({
             </div>
           ))}
 
-          {displayMessages.length === 0 && !loading && (
+          {messages.length === 0 && !loading && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <p className="text-sm text-muted-foreground">
                 No messages yet. Say hello!

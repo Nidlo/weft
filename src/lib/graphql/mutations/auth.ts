@@ -93,3 +93,18 @@ export const LOGOUT = gql`
     logout
   }
 `;
+
+export const SIGN_OUT_ALL_DEVICES = gql`
+  mutation SignOutAllDevices {
+    signOutAllDevices
+  }
+`;
+
+export const ACCEPT_UPDATED_TERMS = gql`
+  mutation AcceptUpdatedTerms {
+    acceptUpdatedTerms {
+      id
+      termsAcceptedVersion
+    }
+  }
+`;

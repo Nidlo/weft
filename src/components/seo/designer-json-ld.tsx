@@ -1,36 +1,23 @@
 import type { GqlUserWithProfile } from "@/types/graphql";
+import { APP_URL } from "@/lib/config";
+import { safeJsonForScript } from "@/lib/utils/safe-json";
+import { parseStringList } from "@/lib/utils/parse-list";
+import { pesewasToGhs } from "@/lib/utils/order";
 
 interface Props {
   designer: GqlUserWithProfile;
-}
-
-function parseSpecs(raw: unknown): string[] {
-  if (Array.isArray(raw)) return raw;
-  if (typeof raw === "string") {
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
-
-function formatPrice(pesewas: number): string {
-  return (pesewas / 100).toFixed(2);
 }
 
 export function DesignerJsonLd({ designer }: Props) {
   const profile = designer.designerProfile;
   const displayName =
     profile?.displayName ?? designer.fullName ?? "Designer";
-  const specs = parseSpecs(profile?.specializations);
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://stitchhub.com";
+  const specs = parseStringList(profile?.specializations);
+  const appUrl = APP_URL;
 
   const priceRange =
     profile?.pricingMin != null && profile?.pricingMax != null
-      ? `GHS ${formatPrice(profile.pricingMin)} - GHS ${formatPrice(profile.pricingMax)}`
+      ? `GHS ${pesewasToGhs(profile.pricingMin)} - GHS ${pesewasToGhs(profile.pricingMax)}`
       : undefined;
 
   const jsonLd = {
@@ -41,7 +28,7 @@ export function DesignerJsonLd({ designer }: Props) {
       profile?.bio ??
       (specs.length > 0
         ? `${displayName} specializes in ${specs.slice(0, 3).join(", ")}`
-        : `Fashion designer on StitchHub`),
+        : `Fashion designer on Nidlo`),
     url: `${appUrl}/designer/${profile?.slug ?? ""}`,
     ...(designer.avatarUrl ? { image: designer.avatarUrl } : {}),
     ...(designer.city
@@ -67,7 +54,7 @@ export function DesignerJsonLd({ designer }: Props) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonForScript(jsonLd) }}
     />
   );
 }

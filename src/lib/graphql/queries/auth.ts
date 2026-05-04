@@ -15,11 +15,21 @@ export const ME_QUERY = gql`
       isVerified
       isDesigner
       isOnboarded
+      termsAcceptedVersion
       designerProfile {
         slug
         profileViewsCount
         profileViewsThisWeek
       }
+    }
+  }
+`;
+
+export const LEGAL_VERSIONS = gql`
+  query LegalVersions {
+    legalVersions {
+      termsVersion
+      privacyVersion
     }
   }
 `;

@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -15,6 +16,7 @@ import { useAuthStore } from "@/lib/stores/auth";
 import { useMessagesStore } from "@/lib/stores/messages";
 import { useNotificationsStore } from "@/lib/stores/notifications";
 import { getEcho, disconnectEcho } from "@/lib/echo";
+import { useEchoReconnect } from "@/lib/hooks/use-echo-reconnect";
 import { UNREAD_MESSAGES_COUNT } from "@/lib/graphql/queries/message";
 import { UNREAD_NOTIFICATIONS_COUNT } from "@/lib/graphql/queries/notification";
 import { usePushNotifications } from "@/lib/hooks/use-push-notifications";
@@ -48,8 +50,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   const echoRef = useRef<Echo<"reverb"> | null>(null);
   const [echoState, setEchoState] = useState<Echo<"reverb"> | null>(null);
 
-  // Fetch unread count once on authentication
-  useEffect(() => {
+  const refreshUnreadCounts = useCallback(() => {
     if (!hasHydrated || !isAuthenticated || !userId) return;
 
     apolloClient
@@ -80,6 +81,15 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
         // Silently fail — badge will show 0
       });
   }, [hasHydrated, isAuthenticated, userId, apolloClient, setUnreadCount, setNotifUnread]);
+
+  // Fetch unread count once on authentication
+  useEffect(() => {
+    refreshUnreadCounts();
+  }, [refreshUnreadCounts]);
+
+  // Re-sync unread counts when the socket reconnects — increments fired
+  // while disconnected would otherwise be lost.
+  useEchoReconnect(echoState, refreshUnreadCounts);
 
   // Set up WebSocket connection and subscriptions
   useEffect(() => {

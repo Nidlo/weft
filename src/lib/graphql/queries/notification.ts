@@ -65,6 +65,8 @@ export const MY_NOTIFICATION_PREFERENCES = gql`
         push
         sms
       }
+      quietHoursStart
+      quietHoursEnd
     }
   }
 `;

@@ -14,6 +14,8 @@ export const PAYMENT_STATUS = gql`
       reference
       provider
       paidAt
+      refundedAt
+      refundReason
       createdAt
     }
   }
@@ -33,6 +35,8 @@ export const ORDER_PAYMENTS = gql`
       reference
       provider
       paidAt
+      refundedAt
+      refundReason
       createdAt
     }
   }

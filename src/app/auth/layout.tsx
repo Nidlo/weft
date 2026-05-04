@@ -11,7 +11,10 @@ export default function AuthLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, isLoading, _hasHydrated } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const _hasHydrated = useAuthStore((s) => s._hasHydrated);
 
   useEffect(() => {
     if (!_hasHydrated || isLoading) return;
@@ -35,14 +38,14 @@ export default function AuthLayout({
         return;
       }
     }
-  }, [isAuthenticated, isLoading, user, pathname, router]);
+  }, [_hasHydrated, isAuthenticated, isLoading, user, pathname, router]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            StitchHub
+            Nidlo
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Custom fashion, connected

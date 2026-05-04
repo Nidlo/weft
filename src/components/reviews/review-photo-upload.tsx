@@ -52,6 +52,8 @@ export function ReviewPhotoUpload({ files, onChange }: ReviewPhotoUploadProps) {
       <div className="flex gap-2 overflow-x-auto">
         {files.map((file, i) => (
           <div key={i} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-lg">
+            {/* Local File preview via createObjectURL — unoptimisable by next/image. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={URL.createObjectURL(file)}
               alt={`Photo ${i + 1}`}

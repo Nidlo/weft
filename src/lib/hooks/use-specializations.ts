@@ -6,7 +6,8 @@ import type { SpecializationsData } from "@/types/graphql";
 
 export function useSpecializations() {
   const { data, loading, error } = useQuery<SpecializationsData>(
-    GET_SPECIALIZATIONS
+    GET_SPECIALIZATIONS,
+    { fetchPolicy: "cache-first" }
   );
 
   const specializations = data?.specializations ?? [];

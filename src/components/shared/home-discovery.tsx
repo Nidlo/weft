@@ -66,7 +66,7 @@ export function HomeDiscovery() {
 
       {/* Newest */}
       <DesignerScrollSection
-        title="New on StitchHub"
+        title="New on Nidlo"
         designers={newest.designers}
         loading={newest.loading}
         browseHref="/search?sort=newest"

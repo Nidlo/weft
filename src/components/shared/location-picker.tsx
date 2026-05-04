@@ -149,6 +149,10 @@ export function LocationPicker({
 
     mapInstanceRef.current = map;
     markerRef.current = marker;
+    // Intentional one-time map setup: re-running on `value` / `onChange` /
+    // `reverseGeocode` would tear down the map element and re-instantiate it
+    // on every keystroke. The map and marker hold their own state; the click
+    // handler closure captures `reverseGeocode` once at construction. (H14.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, showMap]);
 
@@ -189,6 +193,10 @@ export function LocationPicker({
     });
 
     autocompleteRef.current = autocomplete;
+    // Intentional one-time autocomplete setup: the place_changed listener
+    // closes over `onChange` / `updateMarker` once at construction. Re-running
+    // on every value change would attach duplicate listeners and the dropdown
+    // would stop behaving. (H14.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded]);
 

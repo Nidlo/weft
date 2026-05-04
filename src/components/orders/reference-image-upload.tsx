@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { UPLOAD_REFERENCE_IMAGE } from "@/lib/graphql/mutations/order";
@@ -92,16 +93,22 @@ export function ReferenceImageUpload({
       {images.length > 0 && (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           {images.map((url, i) => (
-            <div key={i} className="group relative aspect-square">
-              <img
+            <div
+              key={i}
+              className="group relative aspect-square overflow-hidden rounded-lg"
+            >
+              <Image
                 src={url}
                 alt={`Reference ${i + 1}`}
-                className="h-full w-full rounded-lg object-cover"
+                fill
+                sizes="(max-width: 640px) 33vw, 20vw"
+                className="object-cover"
               />
               <Button
                 type="button"
                 variant="destructive"
                 size="icon"
+                aria-label={`Remove image ${i + 1}`}
                 className="absolute right-1 top-1 h-5 w-5 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={() => handleRemove(i)}
               >

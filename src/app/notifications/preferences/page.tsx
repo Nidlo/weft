@@ -32,8 +32,16 @@ import type {
   UpdateQuietHoursData,
 } from "@/types/graphql";
 
+// Channel-toggle category keys only — excludes the quiet-hours string fields
+// added to `GqlNotificationPreferences` for the quiet-window query payload.
+type CategoryKey = {
+  [K in keyof GqlNotificationPreferences]: GqlNotificationPreferences[K] extends NotificationChannels
+    ? K
+    : never;
+}[keyof GqlNotificationPreferences];
+
 interface CategoryConfig {
-  key: keyof GqlNotificationPreferences;
+  key: CategoryKey;
   label: string;
   description: string;
 }
@@ -107,7 +115,7 @@ export default function NotificationPreferencesPage() {
   }, [data]);
 
   const handleToggle = (
-    category: keyof GqlNotificationPreferences,
+    category: CategoryKey,
     channel: keyof NotificationChannels,
     value: boolean
   ) => {
@@ -123,9 +131,10 @@ export default function NotificationPreferencesPage() {
 
     const input: Record<string, { push: boolean; sms: boolean }> = {};
     for (const cat of CATEGORIES) {
+      const channels = prefs[cat.key];
       input[cat.key] = {
-        push: prefs[cat.key].push,
-        sms: prefs[cat.key].sms,
+        push: channels.push,
+        sms: channels.sms,
       };
     }
 
@@ -167,7 +176,7 @@ export default function NotificationPreferencesPage() {
         {/* Header */}
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/notifications">
+            <Link href="/notifications" aria-label="Back to notifications">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useBlueprintStore } from "@/lib/stores/blueprint";
 import { useBlueprintOptions } from "@/lib/hooks/use-blueprint-options";
 import { useMeasurements } from "@/lib/hooks/use-measurements";
@@ -125,12 +126,18 @@ export function StepReview({ onEditStep }: StepReviewProps) {
           <CardContent>
             <div className="grid grid-cols-5 gap-2">
               {store.referenceImages.map((img, i) => (
-                <img
+                <div
                   key={i}
-                  src={img.url}
-                  alt={img.name}
-                  className="aspect-square rounded-md object-cover"
-                />
+                  className="relative aspect-square overflow-hidden rounded-md"
+                >
+                  <Image
+                    src={img.url}
+                    alt={img.name}
+                    fill
+                    sizes="(max-width: 640px) 20vw, 100px"
+                    className="object-cover"
+                  />
+                </div>
               ))}
             </div>
           </CardContent>

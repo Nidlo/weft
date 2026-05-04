@@ -13,19 +13,19 @@ const PAYOUT_STATUS_CONFIG: Record<
   PayoutStatusValue,
   { label: string; color: string; bgColor: string }
 > = {
-  pending: { label: "Pending", color: "text-yellow-700", bgColor: "bg-yellow-100" },
-  processing: { label: "Processing", color: "text-blue-700", bgColor: "bg-blue-100" },
-  success: { label: "Paid", color: "text-green-700", bgColor: "bg-green-100" },
-  failed: { label: "Failed", color: "text-red-700", bgColor: "bg-red-100" },
-  wallet_pending: { label: "Awaiting Wallet", color: "text-orange-700", bgColor: "bg-orange-100" },
+  pending: { label: "Pending", color: "text-status-warning-fg", bgColor: "bg-status-warning-soft" },
+  processing: { label: "Processing", color: "text-status-info-fg", bgColor: "bg-status-info-soft" },
+  success: { label: "Paid", color: "text-status-success-fg", bgColor: "bg-status-success-soft" },
+  failed: { label: "Failed", color: "text-status-error-fg", bgColor: "bg-status-error-soft" },
+  wallet_pending: { label: "Awaiting Wallet", color: "text-status-warning-fg", bgColor: "bg-status-warning-soft" },
 };
 
 function getPayoutStatusConfig(status: string) {
   return (
     PAYOUT_STATUS_CONFIG[status as PayoutStatusValue] ?? {
       label: status,
-      color: "text-gray-700",
-      bgColor: "bg-gray-100",
+      color: "text-muted-foreground",
+      bgColor: "bg-muted",
     }
   );
 }
@@ -75,7 +75,7 @@ export function PayoutSection({ orderId, payouts, isDesigner }: PayoutSectionPro
                     {formatPesewas(payout.netAmount)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Fee: {formatPesewas(payout.platformFee)} ({payout.feeRate / 100}%)
+                    Fee: {formatPesewas(payout.platformFee)} ({/* feeRate is basis points (1000 = 10.00%) */ payout.feeRate / 100}%)
                     {payout.transferredAt && (
                       <> &middot; {new Date(payout.transferredAt).toLocaleDateString()}</>
                     )}

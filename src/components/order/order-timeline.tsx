@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getStatusConfig } from "@/lib/utils/order";
 import type { GqlOrderUpdate } from "@/types/graphql";
@@ -61,12 +62,18 @@ export function OrderTimeline({ updates }: OrderTimelineProps) {
               {update.photos && update.photos.length > 0 && (
                 <div className="mt-2 flex gap-2 overflow-x-auto">
                   {update.photos.map((url, i) => (
-                    <img
+                    <div
                       key={i}
-                      src={url}
-                      alt={`Update photo ${i + 1}`}
-                      className="h-16 w-16 shrink-0 rounded-md object-cover"
-                    />
+                      className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md"
+                    >
+                      <Image
+                        src={url}
+                        alt={`Update photo ${i + 1}`}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    </div>
                   ))}
                 </div>
               )}

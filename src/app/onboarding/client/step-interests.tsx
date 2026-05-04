@@ -24,7 +24,8 @@ export function StepInterests() {
   const [search, setSearch] = useState("");
 
   const { data, loading } = useQuery<FashionInterestsData>(
-    GET_FASHION_INTERESTS
+    GET_FASHION_INTERESTS,
+    { fetchPolicy: "cache-first" }
   );
 
   const interests = data?.fashionInterests ?? [];

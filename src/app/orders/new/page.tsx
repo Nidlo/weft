@@ -59,7 +59,11 @@ import { VoiceInput } from "@/components/orders/voice-input";
 
 export default function NewOrderPage() {
   const router = useRouter();
-  const { user, isReady } = useAuthGuard({ requireOnboarded: true });
+  const { user, isReady } = useAuthGuard({
+    requireOnboarded: true,
+    requireDesigner: true,
+    designerRedirectTo: "/dashboard",
+  });
   const { options, loading: optionsLoading } = useBlueprintOptions();
   const { createInternalOrder, loading: submitting } =
     useCreateInternalOrder();
@@ -131,11 +135,6 @@ export default function NewOrderPage() {
         </div>
       </AppShell>
     );
-  }
-
-  if (!user.isDesigner) {
-    router.replace("/dashboard");
-    return null;
   }
 
   const budgetMinValid = parseFloat(budgetMinGhs) > 0;
@@ -220,7 +219,7 @@ export default function NewOrderPage() {
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/orders">
+            <Link href="/orders" aria-label="Back to orders">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -514,6 +513,7 @@ export default function NewOrderPage() {
                         type="button"
                         variant="ghost"
                         size="icon"
+                        aria-label="Clear selected client"
                         onClick={clearSelectedClient}
                       >
                         <X className="h-4 w-4" />

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useState } from "react";
 import { useBlueprintStore, type ReferenceImage } from "@/lib/stores/blueprint";
 import { useMutation } from "@apollo/client/react";
@@ -137,11 +138,16 @@ export function StepReferenceImages() {
       {referenceImages.length > 0 && (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
           {referenceImages.map((img, i) => (
-            <div key={i} className="group relative aspect-square">
-              <img
+            <div
+              key={i}
+              className="group relative aspect-square overflow-hidden rounded-lg"
+            >
+              <Image
                 src={img.url}
                 alt={img.name}
-                className="h-full w-full rounded-lg object-cover"
+                fill
+                sizes="(max-width: 640px) 33vw, 20vw"
+                className="object-cover"
               />
               <Button
                 type="button"

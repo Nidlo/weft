@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useConversations } from "@/lib/hooks/use-messages";
 import { useRealtime } from "@/providers/realtime-provider";
+import { useEchoReconnect } from "@/lib/hooks/use-echo-reconnect";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConversationListItem } from "@/components/messages/conversation-list-item";
@@ -27,6 +28,10 @@ export default function MessagesPage() {
       channel.stopListening(".message.sent");
     };
   }, [echo, user?.id, refetch]);
+
+  // Refetch on reconnect — events that fired while the socket was down would
+  // otherwise be silent.
+  useEchoReconnect(echo, refetch);
 
   if (!isReady || !user) {
     return (

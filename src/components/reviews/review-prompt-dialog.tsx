@@ -57,8 +57,8 @@ export function ReviewPromptDialog({
           </>
         ) : (
           <div className="flex flex-col items-center gap-4 py-6 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-status-success-soft">
+              <CheckCircle2 className="h-8 w-8 text-status-success" />
             </div>
             <div>
               <h3 className="text-lg font-semibold">Thank you!</h3>

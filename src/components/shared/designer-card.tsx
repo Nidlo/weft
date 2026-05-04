@@ -4,15 +4,11 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatPesewasShort } from "@/lib/utils/order";
 import type { DesignerCard as DesignerCardType } from "@/types/graphql";
 
 interface Props {
   designer: DesignerCardType;
-}
-
-function formatPrice(pesewas: number): string {
-  const ghs = pesewas / 100;
-  return `GHS ${ghs.toLocaleString()}`;
 }
 
 function getInitials(name: string | null): string {
@@ -93,8 +89,8 @@ export function DesignerCard({ designer }: Props) {
             </div>
             {designer.pricingMin != null && designer.pricingMax != null && (
               <span className="text-muted-foreground">
-                {formatPrice(designer.pricingMin)} -{" "}
-                {formatPrice(designer.pricingMax)}
+                {formatPesewasShort(designer.pricingMin)} -{" "}
+                {formatPesewasShort(designer.pricingMax)}
               </span>
             )}
           </div>

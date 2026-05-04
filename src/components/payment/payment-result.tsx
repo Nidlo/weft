@@ -10,7 +10,6 @@ interface PaymentResultProps {
   status: "success" | "failed" | "timeout";
   amount: number;
   paymentType: PaymentTypeValue;
-  orderId: string;
   onRetry?: () => void;
   onBackToOrder: () => void;
 }
@@ -19,7 +18,6 @@ export function PaymentResult({
   status,
   amount,
   paymentType,
-  orderId,
   onRetry,
   onBackToOrder,
 }: PaymentResultProps) {
@@ -27,8 +25,8 @@ export function PaymentResult({
     <div className="flex flex-col items-center space-y-6 py-8 text-center">
       {status === "success" && (
         <>
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle2 className="h-10 w-10 text-green-600" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-success-soft">
+            <CheckCircle2 className="h-10 w-10 text-status-success" />
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Payment Successful</h2>
@@ -42,8 +40,8 @@ export function PaymentResult({
 
       {status === "failed" && (
         <>
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
-            <XCircle className="h-10 w-10 text-red-600" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-error-soft">
+            <XCircle className="h-10 w-10 text-status-error" />
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Payment Failed</h2>
@@ -58,8 +56,8 @@ export function PaymentResult({
 
       {status === "timeout" && (
         <>
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-yellow-100">
-            <Clock className="h-10 w-10 text-yellow-600" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-warning-soft">
+            <Clock className="h-10 w-10 text-status-warning" />
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Payment Pending</h2>

@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,14 +7,10 @@ import { WalletManager } from "@/components/wallet/wallet-manager";
 import { WalletTransactions } from "@/components/wallet/wallet-transactions";
 
 export default function WalletPage() {
-  const { user, isReady } = useAuthGuard({ requireOnboarded: true });
-  const router = useRouter();
-
-  useEffect(() => {
-    if (isReady && user && !user.isDesigner) {
-      router.replace("/profile");
-    }
-  }, [isReady, user, router]);
+  const { user, isReady } = useAuthGuard({
+    requireOnboarded: true,
+    requireDesigner: true,
+  });
 
   if (!isReady || !user) {
     return (
@@ -28,8 +22,6 @@ export default function WalletPage() {
       </AppShell>
     );
   }
-
-  if (!user.isDesigner) return null;
 
   return (
     <AppShell>

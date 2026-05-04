@@ -21,27 +21,42 @@ interface PaymentSectionProps {
 function PaymentRow({ payment }: { payment: GqlPayment }) {
   const statusConfig = getPaymentStatusConfig(payment.status);
   const methodConfig = getPaymentMethodConfig(payment.method);
+  const isRefunded = !!payment.refundedAt;
 
   return (
-    <div className="flex items-center justify-between py-2">
-      <div>
-        <p className="text-sm font-medium">{formatPaymentType(payment.type)}</p>
-        <p className="text-xs text-muted-foreground">
-          {methodConfig.shortLabel}
-          {payment.paidAt && (
-            <> &middot; {new Date(payment.paidAt).toLocaleDateString()}</>
+    <div className="flex flex-col gap-1 py-2">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium">{formatPaymentType(payment.type)}</p>
+          <p className="text-xs text-muted-foreground">
+            {methodConfig.shortLabel}
+            {payment.paidAt && (
+              <> &middot; {new Date(payment.paidAt).toLocaleDateString()}</>
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold">
+            {formatPesewas(payment.amount)}
+          </span>
+          <Badge
+            variant="secondary"
+            className={`${statusConfig.bgColor} ${statusConfig.color} border-0`}
+          >
+            {statusConfig.label}
+          </Badge>
+        </div>
+      </div>
+      {isRefunded && (
+        <div className="flex items-center gap-1 rounded-md bg-status-info-soft px-2 py-1 text-xs text-status-info-fg">
+          <span>
+            Refunded {new Date(payment.refundedAt!).toLocaleDateString()}
+          </span>
+          {payment.refundReason && (
+            <span className="truncate">&middot; {payment.refundReason}</span>
           )}
-        </p>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold">{formatPesewas(payment.amount)}</span>
-        <Badge
-          variant="secondary"
-          className={`${statusConfig.bgColor} ${statusConfig.color} border-0`}
-        >
-          {statusConfig.label}
-        </Badge>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -80,7 +95,7 @@ export function PaymentSection({
           <CreditCard className="h-4 w-4" />
           Payments
           {isFullyPaid && (
-            <Badge variant="secondary" className="ml-auto bg-green-100 text-green-700 border-0">
+            <Badge variant="secondary" className="ml-auto bg-status-success-soft text-status-success-fg border-0">
               <CheckCircle2 className="mr-1 h-3 w-3" />
               Fully Paid
             </Badge>

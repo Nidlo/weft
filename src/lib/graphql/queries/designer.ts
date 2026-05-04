@@ -42,8 +42,6 @@ export const GET_DESIGNER = gql`
       firstName
       lastName
       fullName
-      phone
-      email
       avatarUrl
       city
       countryCode

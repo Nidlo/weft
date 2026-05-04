@@ -62,7 +62,7 @@ export default function SearchPage() {
     lng: sortBy === "nearest" && lng ? lng : undefined,
   };
 
-  const { designers, loading, hasMore, loadMore } = useDesignerSearch(input);
+  const { designers, loading, error, hasMore, loadMore } = useDesignerSearch(input);
 
   // Debounce search input
   const handleSearch = useCallback((value: string) => {
@@ -230,7 +230,16 @@ export default function SearchPage() {
           </div>
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="relative">
+              <Button
+                variant="outline"
+                size="icon"
+                className="relative"
+                aria-label={
+                  activeFilterCount > 0
+                    ? `Filters, ${activeFilterCount} active`
+                    : "Filters"
+                }
+              >
                 <SlidersHorizontal className="h-4 w-4" />
                 {activeFilterCount > 0 && (
                   <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
@@ -293,40 +302,56 @@ export default function SearchPage() {
             {city && (
               <Badge variant="secondary" className="gap-1">
                 {city}
-                <X
-                  className="h-3 w-3 cursor-pointer"
+                <button
+                  type="button"
+                  aria-label={`Remove ${city} filter`}
                   onClick={() => setCity("")}
-                />
+                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </Badge>
             )}
             {(priceMin || priceMax) && (
               <Badge variant="secondary" className="gap-1">
                 GHS {priceMin || "0"} - {priceMax || "any"}
-                <X
-                  className="h-3 w-3 cursor-pointer"
+                <button
+                  type="button"
+                  aria-label="Remove price filter"
                   onClick={() => {
                     setPriceMin("");
                     setPriceMax("");
                   }}
-                />
+                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </Badge>
             )}
             {minRating && (
               <Badge variant="secondary" className="gap-1">
                 {minRating}+ stars
-                <X
-                  className="h-3 w-3 cursor-pointer"
+                <button
+                  type="button"
+                  aria-label="Remove rating filter"
                   onClick={() => setMinRating("")}
-                />
+                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </Badge>
             )}
             {acceptingOnly && (
               <Badge variant="secondary" className="gap-1">
                 Accepting orders
-                <X
-                  className="h-3 w-3 cursor-pointer"
+                <button
+                  type="button"
+                  aria-label="Remove accepting orders filter"
                   onClick={() => setAcceptingOnly(false)}
-                />
+                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </Badge>
             )}
           </div>
@@ -359,8 +384,18 @@ export default function SearchPage() {
             </div>
           )}
 
+          {/* Error state */}
+          {error && !loading && (
+            <div className="py-12 text-center">
+              <p className="text-lg font-medium">Something went wrong</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                We couldn&apos;t load designers. Check your connection and try again.
+              </p>
+            </div>
+          )}
+
           {/* Empty state */}
-          {!loading && designers.length === 0 && (
+          {!loading && !error && designers.length === 0 && (
             <div className="py-12 text-center">
               <p className="text-lg font-medium">No designers found</p>
               <p className="mt-1 text-sm text-muted-foreground">

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Phone, RefreshCw } from "lucide-react";
-import { useMomoPolling, type MomoPollingStatus } from "@/lib/hooks/use-payments";
+import { useMomoPolling } from "@/lib/hooks/use-payments";
 import { getPaymentMethodConfig } from "@/lib/utils/payment";
 import { formatPesewas } from "@/lib/utils/order";
 
@@ -43,8 +43,8 @@ export function MomoPendingScreen({
 
   return (
     <div className="flex flex-col items-center space-y-6 py-8 text-center">
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-yellow-100">
-        <Phone className="h-10 w-10 text-yellow-600" />
+      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-warning-soft">
+        <Phone className="h-10 w-10 text-status-warning" />
       </div>
 
       <div className="space-y-2">

@@ -45,9 +45,9 @@ const METHOD_OPTIONS: {
 ];
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  pending: { bg: "bg-yellow-100", text: "text-yellow-700" },
-  confirmed: { bg: "bg-green-100", text: "text-green-700" },
-  rejected: { bg: "bg-red-100", text: "text-red-700" },
+  pending: { bg: "bg-status-warning-soft", text: "text-status-warning-fg" },
+  confirmed: { bg: "bg-status-success-soft", text: "text-status-success-fg" },
+  rejected: { bg: "bg-status-error-soft", text: "text-status-error-fg" },
 };
 
 interface ExternalPaymentSectionProps {

@@ -2,6 +2,7 @@
 
 import { Header } from "./header";
 import { MobileNav } from "./mobile-nav";
+import { TermsReacceptDialog } from "@/components/legal/terms-reaccept-dialog";
 import { useAuthStore } from "@/lib/stores/auth";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -20,6 +21,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       {showMobileNav && <MobileNav />}
+      {showMobileNav && <TermsReacceptDialog />}
     </div>
   );
 }

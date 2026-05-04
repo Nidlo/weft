@@ -16,8 +16,13 @@ export function linkify(text: string, className?: string): ReactNode[] {
   URL_REGEX.lastIndex = 0;
 
   while ((match = URL_REGEX.exec(text)) !== null) {
-    const url = match[0];
+    const raw = match[0];
     const index = match.index;
+
+    // Trim trailing sentence punctuation that the regex over-greedily captured.
+    const trimmed = raw.replace(/[.,;:!?)\]]+$/, "");
+    const url = trimmed || raw;
+    const trailing = raw.slice(url.length);
 
     // Add text before URL
     if (index > lastIndex) {
@@ -38,7 +43,9 @@ export function linkify(text: string, className?: string): ReactNode[] {
       </a>
     );
 
-    lastIndex = index + url.length;
+    if (trailing) parts.push(trailing);
+
+    lastIndex = index + raw.length;
   }
 
   // Add remaining text

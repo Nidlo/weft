@@ -168,7 +168,7 @@ export function WalletManager() {
                   {account.isPrimary ? (
                     <Badge
                       variant="secondary"
-                      className="border-0 bg-green-100 text-green-700"
+                      className="border-0 bg-status-success-soft text-status-success-fg"
                     >
                       Primary
                     </Badge>

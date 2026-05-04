@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -68,13 +69,15 @@ export function ReviewCard({ review, isDesigner, onResponseSubmitted }: ReviewCa
               href={photo.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="h-20 w-20 shrink-0 overflow-hidden rounded-lg"
+              aria-label={`Open review photo ${i + 1} full size`}
+              className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg"
             >
-              <img
+              <Image
                 src={photo.thumbnail_url}
                 alt={`Review photo ${i + 1}`}
-                className="h-full w-full object-cover transition-transform hover:scale-105"
-                loading="lazy"
+                fill
+                sizes="80px"
+                className="object-cover transition-transform hover:scale-105"
               />
             </a>
           ))}

@@ -1,42 +1,31 @@
 "use client";
 
-import { useEffect } from "react";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 interface MessageLightboxProps {
   src: string;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function MessageLightbox({ src, onClose }: MessageLightboxProps) {
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
-
+export function MessageLightbox({ src, open, onOpenChange }: MessageLightboxProps) {
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
-      onClick={onClose}
-    >
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-4 top-4 text-white hover:bg-white/20"
-        onClick={onClose}
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-w-[95vw] border-0 bg-transparent p-0 shadow-none"
+        showCloseButton
       >
-        <X className="h-6 w-6" />
-      </Button>
-      <img
-        src={src}
-        alt="Full size"
-        className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain"
-        onClick={(e) => e.stopPropagation()}
-      />
-    </div>
+        <DialogTitle className="sr-only">Photo</DialogTitle>
+        <Image
+          src={src}
+          alt="Full-size photo"
+          width={1600}
+          height={1600}
+          sizes="95vw"
+          className="mx-auto h-auto max-h-[90vh] w-auto max-w-full rounded-lg object-contain"
+        />
+      </DialogContent>
+    </Dialog>
   );
 }

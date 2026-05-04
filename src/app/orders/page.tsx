@@ -107,10 +107,16 @@ export default function OrdersPage() {
               <div className="py-12 text-center">
                 <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground/50" />
                 <p className="mt-3 text-sm text-muted-foreground">
-                  {tab === "all"
-                    ? "No orders yet. Browse designers to get started!"
-                    : `No ${tab} orders.`}
+                  {tab === "all" && "No orders yet."}
+                  {tab === "active" && "No active orders right now."}
+                  {tab === "completed" && "No completed orders yet."}
+                  {tab === "cancelled" && "No cancelled orders."}
                 </p>
+                {!user.isDesigner && (tab === "all" || tab === "active") && (
+                  <Button asChild className="mt-4" size="sm">
+                    <Link href="/search">Browse Designers</Link>
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="space-y-3">

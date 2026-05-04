@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,7 +30,7 @@ export function StepFinish() {
       </div>
 
       <div className="space-y-3">
-        <Label>How did you hear about StitchHub?</Label>
+        <Label>How did you hear about Nidlo?</Label>
         <div className="flex flex-wrap gap-2">
           {REFERRAL_OPTIONS.map((opt) => (
             <Badge

@@ -147,6 +147,7 @@ export function CostBookPanel({
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label={`Remove ${m.name}`}
                   className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
                   onClick={() => handleRemove(m.id)}
                 >

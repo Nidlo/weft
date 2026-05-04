@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, Camera, User } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
+import { useAutosave } from "@/lib/hooks/use-autosave";
 import { useAuthStore } from "@/lib/stores/auth";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ export default function ProfileEditPage() {
   const { data: citiesData } = useQuery<CitiesData>(GET_CITIES, {
     variables: { countryCode: "GH" },
     skip: !isReady,
+    fetchPolicy: "cache-first",
   });
 
   const [updateMyInfo, { loading: saving }] = useMutation(UPDATE_MY_INFO, {
@@ -68,6 +70,50 @@ export default function ProfileEditPage() {
       setCity(user.city ?? "");
     }
   }, [user]);
+
+  const personalInfoDirty =
+    !!user &&
+    ((firstName.trim() || null) !== (user.firstName ?? null) ||
+      (lastName.trim() || null) !== (user.lastName ?? null) ||
+      (otherNames.trim() || null) !== (user.otherNames ?? null) ||
+      ((showNewCity ? newCity.trim() : city) || null) !== (user.city ?? null));
+
+  // Persist a draft so a session-expiry mid-edit doesn't lose unsaved name +
+  // city changes (per docs/journeys/05-failure-modes.md §1.1). We only enable
+  // autosave once the user has actually modified something — otherwise the
+  // initial sync from `user` would write a redundant draft on every mount.
+  const { restored: draftRestored, clear: clearDraft } = useAutosave(
+    `nidlo:draft:profile:${user?.id ?? "anon"}`,
+    { firstName, lastName, otherNames, city, newCity, showNewCity },
+    { enabled: personalInfoDirty }
+  );
+
+  // One-shot toast prompt if a draft is found that differs from server state.
+  useEffect(() => {
+    if (!draftRestored || !user) return;
+    const draftDiffersFromUser =
+      draftRestored.firstName !== (user.firstName ?? "") ||
+      draftRestored.lastName !== (user.lastName ?? "") ||
+      draftRestored.otherNames !== (user.otherNames ?? "") ||
+      (draftRestored.showNewCity ? draftRestored.newCity : draftRestored.city) !==
+        (user.city ?? "");
+    if (!draftDiffersFromUser) return;
+    toast("Resume editing?", {
+      description: "We saved your unsaved changes from last time.",
+      action: {
+        label: "Resume",
+        onClick: () => {
+          setFirstName(draftRestored.firstName);
+          setLastName(draftRestored.lastName);
+          setOtherNames(draftRestored.otherNames);
+          setCity(draftRestored.city);
+          setNewCity(draftRestored.newCity);
+          setShowNewCity(draftRestored.showNewCity);
+        },
+      },
+      duration: 10_000,
+    });
+  }, [draftRestored, user]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -124,6 +170,9 @@ export default function ProfileEditPage() {
         city: cityValue || null,
       });
 
+      // Submitted successfully — drop the draft so we don't keep prompting.
+      clearDraft();
+
       toast.success("Profile updated");
       router.push("/profile");
     } catch {
@@ -151,7 +200,7 @@ export default function ProfileEditPage() {
         {/* Header */}
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/profile">
+            <Link href="/profile" aria-label="Back to profile">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -164,9 +213,13 @@ export default function ProfileEditPage() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="group relative h-24 w-24 overflow-hidden rounded-full bg-muted"
+              disabled={uploadingAvatar}
+              aria-label={uploadingAvatar ? "Uploading avatar" : "Change avatar"}
+              className="group relative h-24 w-24 overflow-hidden rounded-full bg-muted disabled:cursor-wait"
             >
               {displayAvatar ? (
+                // FileReader data URL preview is unoptimisable by next/image.
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={displayAvatar}
                   alt="Avatar"
@@ -177,9 +230,19 @@ export default function ProfileEditPage() {
                   <User className="h-10 w-10 text-muted-foreground" />
                 </div>
               )}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                <Camera className="h-6 w-6 text-white" />
-              </div>
+              {uploadingAvatar ? (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="absolute inset-0 flex items-center justify-center bg-black/60"
+                >
+                  <Loader2 className="h-6 w-6 animate-spin text-white" />
+                </div>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Camera className="h-6 w-6 text-white" />
+                </div>
+              )}
             </button>
             <input
               ref={fileInputRef}
@@ -281,9 +344,13 @@ export default function ProfileEditPage() {
         </Card>
 
         {/* Save */}
-        <Button onClick={handleSave} disabled={saving} className="w-full">
+        <Button
+          onClick={handleSave}
+          disabled={saving || !personalInfoDirty}
+          className="w-full"
+        >
           {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Changes
+          {personalInfoDirty ? "Save Changes" : "Saved"}
         </Button>
       </div>
     </AppShell>

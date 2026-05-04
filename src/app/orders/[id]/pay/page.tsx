@@ -1,8 +1,8 @@
 "use client";
 
-import { use, useState } from "react";
+import { Suspense, use, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useOrder } from "@/lib/hooks/use-orders";
 import { useInitiatePayment } from "@/lib/hooks/use-payments";
@@ -11,15 +11,42 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { PaymentMethodSelector } from "@/components/payment/payment-method-selector";
+import { OtpVerification } from "@/components/payment/otp-verification";
+import { MomoPendingScreen } from "@/components/payment/momo-pending-screen";
 import { formatPesewas } from "@/lib/utils/order";
 import type { PaymentMethodValue } from "@/types/graphql";
+
+type PayStep = "method" | "otp" | "momo-pending";
 
 export default function PaymentPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  return (
+    <Suspense
+      fallback={
+        <AppShell>
+          <div className="mx-auto max-w-md space-y-4">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+        </AppShell>
+      }
+    >
+      <PaymentPageContent params={params} />
+    </Suspense>
+  );
+}
+
+function PaymentPageContent({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id: orderId } = use(params);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const paymentType = (searchParams.get("type") ?? "deposit") as "deposit" | "balance";
 
@@ -28,17 +55,54 @@ export default function PaymentPage({
   const { initiatePayment, loading: initiating } = useInitiatePayment();
 
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<PayStep>("method");
+  const [pendingMethod, setPendingMethod] = useState<PaymentMethodValue | null>(null);
+  const [pendingPhone, setPendingPhone] = useState<string | undefined>(undefined);
+  const [otpSessionId, setOtpSessionId] = useState<string | null>(null);
+  const [paymentReference, setPaymentReference] = useState<string | null>(null);
 
   const confirmedPrice = order?.confirmedPrice ?? 0;
   const summary = order?.paymentSummary;
-  const amount = paymentType === "deposit"
-    ? (summary?.depositOwed ?? Math.ceil(confirmedPrice / 2))
-    : (summary?.balanceOwed ?? confirmedPrice - Math.ceil(confirmedPrice / 2));
+  // Always trust server-computed amounts — never reconstruct money client-side.
+  const amount = summary
+    ? paymentType === "deposit"
+      ? summary.depositOwed
+      : summary.balanceOwed
+    : null;
+
+  const callbackPath = `/orders/${orderId}/pay/callback`;
+
+  const handleInitiationResult = (
+    result: { authorizationUrl: string | null; requiresOtp: boolean; sessionId: string | null; isMomo: boolean; payment: { reference: string } } | null
+  ) => {
+    if (!result) return;
+
+    if (result.authorizationUrl) {
+      window.location.href = result.authorizationUrl;
+      return;
+    }
+
+    if (result.requiresOtp && result.sessionId) {
+      setOtpSessionId(result.sessionId);
+      setStep("otp");
+      return;
+    }
+
+    if (result.isMomo) {
+      setPaymentReference(result.payment.reference);
+      setStep("momo-pending");
+      return;
+    }
+
+    setError("Payment couldn't be started. Please try a different method.");
+  };
 
   const handleMethodSelect = async (method: PaymentMethodValue, phoneNumber?: string) => {
     setError(null);
+    setPendingMethod(method);
+    setPendingPhone(phoneNumber);
 
-    const callbackUrl = `${window.location.origin}/orders/${orderId}/pay/callback`;
+    const callbackUrl = `${window.location.origin}${callbackPath}`;
 
     try {
       const result = await initiatePayment({
@@ -49,16 +113,33 @@ export default function PaymentPage({
         phone: phoneNumber,
       });
 
-      if (!result) return;
-
-      // Hosted payment page (Moolre or Paystack) — redirect
-      if (result.authorizationUrl) {
-        window.location.href = result.authorizationUrl;
-      } else {
-        setError("No payment URL returned. Please try again.");
-      }
+      handleInitiationResult(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Payment initiation failed. Please try again.";
+      setError(message);
+    }
+  };
+
+  const handleOtpSubmit = async (otp: string) => {
+    if (!pendingMethod || !otpSessionId) return;
+    setError(null);
+
+    const callbackUrl = `${window.location.origin}${callbackPath}`;
+
+    try {
+      const result = await initiatePayment({
+        orderId,
+        type: paymentType,
+        method: pendingMethod,
+        callbackUrl,
+        phone: pendingPhone,
+        otp,
+        sessionId: otpSessionId,
+      });
+
+      handleInitiationResult(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "OTP verification failed. Please try again.";
       setError(message);
     }
   };
@@ -83,6 +164,19 @@ export default function PaymentPage({
           <Button variant="link" asChild className="mt-2">
             <Link href="/orders">Back to Orders</Link>
           </Button>
+        </div>
+      </AppShell>
+    );
+  }
+
+  // Don't render the form until the server has resolved the payment summary.
+  if (amount === null) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-md space-y-4">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-48 w-full" />
         </div>
       </AppShell>
     );
@@ -118,7 +212,6 @@ export default function PaymentPage({
   return (
     <AppShell>
       <div className="mx-auto max-w-md space-y-6">
-        {/* Back link */}
         <Link
           href={`/orders/${orderId}`}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -127,7 +220,6 @@ export default function PaymentPage({
           Back to Order
         </Link>
 
-        {/* Header */}
         <div>
           <h1 className="text-xl font-bold">
             Pay {paymentType === "deposit" ? "Deposit" : "Balance"}
@@ -140,19 +232,54 @@ export default function PaymentPage({
           </p>
         </div>
 
-        {/* Error message */}
         {error && (
           <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
             {error}
           </div>
         )}
 
-        {/* Payment method selection */}
-        <PaymentMethodSelector
-          onSelect={handleMethodSelect}
-          loading={initiating}
-          defaultPhone={user.phone ?? undefined}
-        />
+        {step === "method" && (
+          <PaymentMethodSelector
+            onSelect={handleMethodSelect}
+            loading={initiating}
+            defaultPhone={user.phone ?? undefined}
+          />
+        )}
+
+        {step === "otp" && (
+          <OtpVerification
+            phone={pendingPhone}
+            onSubmit={handleOtpSubmit}
+            onResend={
+              pendingMethod
+                ? () => handleMethodSelect(pendingMethod, pendingPhone)
+                : undefined
+            }
+            loading={initiating}
+            resending={initiating}
+            error={error}
+          />
+        )}
+
+        {step === "momo-pending" && paymentReference && pendingMethod && (
+          <MomoPendingScreen
+            reference={paymentReference}
+            method={pendingMethod}
+            amount={amount}
+            phone={pendingPhone}
+            onSuccess={() => router.replace(`${callbackPath}?reference=${paymentReference}`)}
+            onFailed={() => {
+              setError("Payment failed or was declined. Please try again.");
+              setStep("method");
+              setPaymentReference(null);
+            }}
+            onTimeout={() => {
+              setError("Payment timed out. Please try again or use a different method.");
+              setStep("method");
+              setPaymentReference(null);
+            }}
+          />
+        )}
       </div>
     </AppShell>
   );

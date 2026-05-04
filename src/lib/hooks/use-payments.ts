@@ -18,7 +18,11 @@ export function useInitiatePayment() {
   const [mutate, { loading, error }] = useMutation<InitiatePaymentData>(INITIATE_PAYMENT);
 
   const initiatePayment = async (input: InitiatePaymentInput) => {
-    const result = await mutate({ variables: { input } });
+    const withKey: InitiatePaymentInput = {
+      ...input,
+      idempotencyKey: input.idempotencyKey ?? crypto.randomUUID(),
+    };
+    const result = await mutate({ variables: { input: withKey } });
     return result.data?.initiatePayment ?? null;
   };
 

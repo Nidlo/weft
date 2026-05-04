@@ -36,7 +36,7 @@ export function ShareButtons({
           .join(", ")}`
       : "";
 
-  const whatsappMessage = `Check out ${title} on StitchHub${specsText}. View their portfolio: ${url}`;
+  const whatsappMessage = `Check out ${title} on Nidlo${specsText}. View their portfolio: ${url}`;
 
   const handleCopy = async () => {
     try {
@@ -94,7 +94,12 @@ export function ShareButtons({
       </Button>
 
       {supportsNativeShare && (
-        <Button variant="outline" size="icon" onClick={handleNativeShare}>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleNativeShare}
+          aria-label="Share"
+        >
           <Share2 className="h-4 w-4" />
         </Button>
       )}

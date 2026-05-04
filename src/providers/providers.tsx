@@ -8,6 +8,7 @@ import { apolloClient } from "@/lib/graphql/client";
 import { AuthProvider } from "@/providers/auth-provider";
 import { GoogleAuthProvider } from "@/providers/google-oauth-provider";
 import { RealtimeProvider } from "@/providers/realtime-provider";
+import { AppSplash } from "@/components/shared/app-splash";
 import { useState } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -35,6 +36,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         >
           <GoogleAuthProvider>
             <AuthProvider>
+              <AppSplash />
               <RealtimeProvider>
                 {children}
               </RealtimeProvider>

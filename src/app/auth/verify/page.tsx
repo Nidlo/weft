@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useRef, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
 import { VERIFY_OTP, REQUEST_OTP } from "@/lib/graphql/mutations/auth";
 import type {
@@ -53,9 +53,15 @@ export default function VerifyOtpPage() {
 function VerifyOtpContent() {
   const { isGuest, isLoading: guestLoading } = useGuestGuard();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const phone = searchParams.get("phone") || "";
+  const [phone, setPhone] = useState("");
   const setUser = useAuthStore((s) => s.setUser);
+
+  // Phone is handed off from /auth/phone via sessionStorage, never the URL,
+  // so it doesn't end up in browser history, access logs, or Referer headers.
+  useEffect(() => {
+    const stored = sessionStorage.getItem("nidlo:auth:pendingPhone") ?? "";
+    setPhone(stored);
+  }, []);
 
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
@@ -65,10 +71,15 @@ function VerifyOtpContent() {
   const [requestOtp, { loading: resending }] = useMutation(REQUEST_OTP);
 
   useEffect(() => {
-    if (!phone) {
+    // Wait one tick for the phone-from-sessionStorage effect to run before
+    // bouncing — otherwise direct page loads always redirect even when the
+    // value is present.
+    if (typeof window === "undefined") return;
+    const stored = sessionStorage.getItem("nidlo:auth:pendingPhone");
+    if (!stored) {
       router.replace("/auth/phone");
     }
-  }, [phone, router]);
+  }, [router]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -100,6 +111,7 @@ function VerifyOtpContent() {
           });
 
           toast.success("Phone verified!");
+          sessionStorage.removeItem("nidlo:auth:pendingPhone");
 
           if (isNew || !user.isOnboarded) {
             router.push("/auth/role");

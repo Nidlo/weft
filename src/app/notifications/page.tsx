@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import {
   Bell,
   BellOff,
+  BellRing,
   CheckCheck,
   Package,
   MessageSquare,
@@ -31,6 +32,7 @@ import {
   MARK_ALL_NOTIFICATIONS_READ,
 } from "@/lib/graphql/mutations/notification";
 import { useNotificationsStore } from "@/lib/stores/notifications";
+import { usePushPermission } from "@/lib/hooks/use-push-notifications";
 import type {
   GqlNotification,
   MyNotificationsData,
@@ -68,6 +70,8 @@ export default function NotificationsPage() {
   const router = useRouter();
   const setUnreadCount = useNotificationsStore((s) => s.setUnreadCount);
   const resetUnread = useNotificationsStore((s) => s.resetUnread);
+  const { shouldPromptUi: shouldPromptPush, requestPermission: requestPushPermission } =
+    usePushPermission();
 
   const { data, loading, fetchMore } = useQuery<MyNotificationsData>(
     MY_NOTIFICATIONS,
@@ -194,12 +198,35 @@ export default function NotificationsPage() {
               </Button>
             )}
             <Button variant="ghost" size="icon" asChild>
-              <Link href="/notifications/preferences">
+              <Link
+                href="/notifications/preferences"
+                aria-label="Notification preferences"
+              >
                 <Settings className="h-4 w-4" />
               </Link>
             </Button>
           </div>
         </div>
+
+        {/* Push permission prompt */}
+        {shouldPromptPush && (
+          <div className="flex items-center gap-3 rounded-lg border bg-status-info-soft p-3">
+            <BellRing className="h-5 w-5 shrink-0 text-status-info" />
+            <div className="flex-1 text-sm">
+              <p className="font-medium">Enable push notifications</p>
+              <p className="text-xs text-muted-foreground">
+                Get instant alerts for orders, messages, and payments — even
+                when Nidlo isn&apos;t open.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => requestPushPermission()}
+            >
+              Enable
+            </Button>
+          </div>
+        )}
 
         {/* Notification List */}
         {loading && notifications.length === 0 ? (

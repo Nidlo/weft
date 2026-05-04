@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
@@ -13,15 +14,12 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ReviewsSection } from "@/components/reviews/reviews-section";
 import { ShareButtons } from "@/components/shared/share-buttons";
+import { parseStringList } from "@/lib/utils/parse-list";
+import { formatPesewasShort } from "@/lib/utils/order";
 import type { GqlUserWithProfile, PortfolioImage } from "@/types/graphql";
 
 interface Props {
   designer: GqlUserWithProfile;
-}
-
-function formatPrice(pesewas: number): string {
-  const ghs = pesewas / 100;
-  return `GHS ${ghs.toLocaleString()}`;
 }
 
 function getInitials(name: string | null): string {
@@ -47,33 +45,29 @@ function parseImages(raw: unknown): PortfolioImage[] {
   return [];
 }
 
-function parseSpecs(raw: unknown): string[] {
-  if (!raw) return [];
-  if (Array.isArray(raw)) return raw;
-  if (typeof raw === "string") {
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
 
 export function DesignerProfileView({ designer }: Props) {
   const router = useRouter();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const profile = designer.designerProfile;
   const images = parseImages(profile?.portfolioImages);
-  const specs = parseSpecs(profile?.specializations);
+  const specs = parseStringList(profile?.specializations);
 
-  // Fire-and-forget profile view tracking
+  // Fire-and-forget profile view tracking. Silent-swallow is intentional:
+  // a failed view-count increment must not surface as an error to the
+  // viewer (the page renders fine without it). Logged at debug so a
+  // sudden flood of failures still shows up in the console / Sentry
+  // breadcrumb stream during incident triage. (Q-02)
   const [trackView] = useMutation(TRACK_PROFILE_VIEW);
   const tracked = useRef(false);
   useEffect(() => {
     if (profile?.slug && !tracked.current) {
       tracked.current = true;
-      trackView({ variables: { slug: profile.slug } }).catch(() => {});
+      trackView({ variables: { slug: profile.slug } }).catch((err) => {
+        if (process.env.NODE_ENV !== "production") {
+          console.debug("[trackView] swallowed failure:", err);
+        }
+      });
     }
   }, [profile?.slug, trackView]);
 
@@ -181,8 +175,8 @@ export function DesignerProfileView({ designer }: Props) {
             <CardContent className="p-4">
               <h2 className="mb-2 font-semibold">Pricing</h2>
               <p className="text-lg font-medium">
-                {formatPrice(profile.pricingMin)} -{" "}
-                {formatPrice(profile.pricingMax)}
+                {formatPesewasShort(profile.pricingMin)} -{" "}
+                {formatPesewasShort(profile.pricingMax)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Final price varies by design complexity and materials
@@ -234,11 +228,12 @@ export function DesignerProfileView({ designer }: Props) {
                   onClick={() => setLightboxIndex(i)}
                   className="group relative aspect-square overflow-hidden rounded-lg bg-muted"
                 >
-                  <img
+                  <Image
                     src={img.thumbnail_url || img.url}
                     alt={img.caption || `Portfolio image ${i + 1}`}
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    loading="lazy"
+                    fill
+                    sizes="(max-width: 640px) 50vw, 33vw"
+                    className="object-cover transition-transform group-hover:scale-105"
                   />
                   {img.caption && (
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
@@ -269,13 +264,16 @@ export function DesignerProfileView({ designer }: Props) {
           <DialogContent className="max-w-4xl p-0">
             {lightboxIndex !== null && images[lightboxIndex] && (
               <div className="relative">
-                <img
+                <Image
                   src={images[lightboxIndex].url}
                   alt={
                     images[lightboxIndex].caption ||
                     `Portfolio image ${lightboxIndex + 1}`
                   }
-                  className="w-full rounded-lg"
+                  width={1200}
+                  height={1200}
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  className="h-auto w-full rounded-lg"
                 />
                 {images[lightboxIndex].caption && (
                   <p className="p-4 text-sm text-muted-foreground">

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatPesewasShort } from "@/lib/utils/order";
 import type { DesignerCard } from "@/types/graphql";
 
 interface Props {
@@ -13,11 +14,6 @@ interface Props {
   designers: DesignerCard[];
   loading: boolean;
   browseHref?: string;
-}
-
-function formatPrice(pesewas: number): string {
-  const ghs = pesewas / 100;
-  return `GHS ${ghs.toLocaleString()}`;
 }
 
 function getInitials(name: string | null): string {
@@ -140,7 +136,7 @@ function MiniDesignerCard({ designer }: { designer: DesignerCard }) {
             </div>
             {designer.pricingMin != null && designer.pricingMax != null && (
               <span className="text-muted-foreground">
-                {formatPrice(designer.pricingMin)}+
+                {formatPesewasShort(designer.pricingMin)}+
               </span>
             )}
           </div>

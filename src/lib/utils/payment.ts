@@ -42,18 +42,18 @@ export const PAYMENT_STATUS_CONFIG: Record<
   PaymentStatusValue,
   { label: string; color: string; bgColor: string }
 > = {
-  pending: { label: "Pending", color: "text-yellow-700", bgColor: "bg-yellow-100" },
-  success: { label: "Paid", color: "text-green-700", bgColor: "bg-green-100" },
-  failed: { label: "Failed", color: "text-red-700", bgColor: "bg-red-100" },
-  refunded: { label: "Refunded", color: "text-blue-700", bgColor: "bg-blue-100" },
+  pending: { label: "Pending", color: "text-status-warning-fg", bgColor: "bg-status-warning-soft" },
+  success: { label: "Paid", color: "text-status-success-fg", bgColor: "bg-status-success-soft" },
+  failed: { label: "Failed", color: "text-status-error-fg", bgColor: "bg-status-error-soft" },
+  refunded: { label: "Refunded", color: "text-status-info-fg", bgColor: "bg-status-info-soft" },
 };
 
 export function getPaymentStatusConfig(status: string) {
   return (
     PAYMENT_STATUS_CONFIG[status as PaymentStatusValue] ?? {
       label: status,
-      color: "text-gray-700",
-      bgColor: "bg-gray-100",
+      color: "text-muted-foreground",
+      bgColor: "bg-muted",
     }
   );
 }
@@ -82,13 +82,8 @@ export function formatPaymentType(type: PaymentTypeValue): string {
   return map[type] ?? type;
 }
 
-export function calculateDeposit(confirmedPrice: number): number {
-  return Math.ceil(confirmedPrice / 2);
-}
-
-export function calculateBalance(confirmedPrice: number): number {
-  return confirmedPrice - calculateDeposit(confirmedPrice);
-}
+// NOTE: deposit / balance amounts are server-computed on `paymentSummary`
+// (see `pay/page.tsx`). Per W-NEXT-11, never reconstruct money client-side.
 
 export const MOMO_POLL_INTERVAL_MS = 3000;
 export const MOMO_POLL_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes

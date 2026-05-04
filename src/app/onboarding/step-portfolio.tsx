@@ -1,13 +1,21 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { AlertCircle, RefreshCw, X } from "lucide-react";
 import { useAddPortfolioImage } from "@/lib/hooks/use-profile-mutations";
 
 interface UploadedImage {
   url: string;
   thumbnailUrl: string;
+}
+
+interface FailedUpload {
+  id: string;
+  file: File;
+  reason: string;
 }
 
 const MAX_IMAGES = 20;
@@ -17,8 +25,35 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 export function StepPortfolio() {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [failed, setFailed] = useState<FailedUpload[]>([]);
+  const [retrying, setRetrying] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { addImage } = useAddPortfolioImage();
+
+  const uploadOne = useCallback(
+    async (file: File): Promise<{ ok: true } | { ok: false; reason: string }> => {
+      try {
+        const result = await addImage(file);
+        if (result?.portfolioImages) {
+          const latest =
+            result.portfolioImages[result.portfolioImages.length - 1];
+          setImages((prev) => [
+            ...prev,
+            { url: latest.url, thumbnailUrl: latest.thumbnail_url },
+          ]);
+          return { ok: true };
+        }
+        return { ok: false, reason: "Server didn't return the new image." };
+      } catch (err) {
+        const reason =
+          err instanceof Error
+            ? err.message
+            : "Upload failed. Check your connection and try again.";
+        return { ok: false, reason };
+      }
+    },
+    [addImage]
+  );
 
   const handleFiles = useCallback(
     async (files: FileList | null) => {
@@ -32,42 +67,74 @@ export function StepPortfolio() {
         return;
       }
 
-      for (const file of toUpload) {
-        if (!ACCEPTED_TYPES.includes(file.type)) {
-          toast.error(`${file.name}: Only JPEG, PNG, and WebP are accepted`);
-          continue;
-        }
-        if (file.size > MAX_FILE_SIZE) {
-          toast.error(`${file.name}: File exceeds 10MB limit`);
-          continue;
-        }
-
-        setUploading(true);
-        try {
-          const result = await addImage(file);
-          if (result?.portfolioImages) {
-            const latest =
-              result.portfolioImages[result.portfolioImages.length - 1];
-            setImages((prev) => [
+      setUploading(true);
+      try {
+        for (const file of toUpload) {
+          if (!ACCEPTED_TYPES.includes(file.type)) {
+            setFailed((prev) => [
               ...prev,
               {
-                url: latest.url,
-                thumbnailUrl: latest.thumbnail_url,
+                id: `${file.name}-${Date.now()}-${Math.random()}`,
+                file,
+                reason: "Only JPEG, PNG, and WebP are accepted.",
+              },
+            ]);
+            continue;
+          }
+          if (file.size > MAX_FILE_SIZE) {
+            setFailed((prev) => [
+              ...prev,
+              {
+                id: `${file.name}-${Date.now()}-${Math.random()}`,
+                file,
+                reason: "File exceeds the 10MB limit.",
+              },
+            ]);
+            continue;
+          }
+
+          const result = await uploadOne(file);
+          if (!result.ok) {
+            setFailed((prev) => [
+              ...prev,
+              {
+                id: `${file.name}-${Date.now()}-${Math.random()}`,
+                file,
+                reason: result.reason,
               },
             ]);
           }
-        } catch {
-          toast.error(`Failed to upload ${file.name}`);
-        } finally {
-          setUploading(false);
         }
+      } finally {
+        setUploading(false);
+        // Reset the input so the same file can be re-selected if it failed.
+        if (inputRef.current) inputRef.current.value = "";
       }
-
-      // Reset the input
-      if (inputRef.current) inputRef.current.value = "";
     },
-    [images.length, addImage]
+    [images.length, uploadOne]
   );
+
+  const handleRetry = useCallback(
+    async (entry: FailedUpload) => {
+      setRetrying(entry.id);
+      const result = await uploadOne(entry.file);
+      setRetrying(null);
+      if (result.ok) {
+        setFailed((prev) => prev.filter((f) => f.id !== entry.id));
+      } else {
+        setFailed((prev) =>
+          prev.map((f) =>
+            f.id === entry.id ? { ...f, reason: result.reason } : f
+          )
+        );
+      }
+    },
+    [uploadOne]
+  );
+
+  const handleDismissFailure = (id: string) => {
+    setFailed((prev) => prev.filter((f) => f.id !== id));
+  };
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -133,6 +200,55 @@ export function StepPortfolio() {
         </p>
       </div>
 
+      {/* Failed uploads — persistent, with retry */}
+      {failed.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-status-error-fg">
+            {failed.length} upload{failed.length === 1 ? "" : "s"} failed
+          </p>
+          <ul className="space-y-2">
+            {failed.map((entry) => (
+              <li
+                key={entry.id}
+                className="flex items-center gap-3 rounded-lg border border-status-error-soft bg-status-error-soft/40 p-3"
+              >
+                <AlertCircle className="h-4 w-4 shrink-0 text-status-error" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">
+                    {entry.file.name}
+                  </p>
+                  <p className="text-xs text-status-error-fg">{entry.reason}</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRetry(entry)}
+                  disabled={retrying === entry.id}
+                >
+                  <RefreshCw
+                    className={`mr-1 h-3 w-3 ${
+                      retrying === entry.id ? "animate-spin" : ""
+                    }`}
+                  />
+                  Retry
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Dismiss ${entry.file.name}`}
+                  className="h-8 w-8"
+                  onClick={() => handleDismissFailure(entry.id)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Image Grid */}
       {images.length > 0 && (
         <div className="grid grid-cols-3 gap-2">
@@ -141,11 +257,12 @@ export function StepPortfolio() {
               key={i}
               className="relative aspect-square overflow-hidden rounded-md"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={img.thumbnailUrl}
                 alt={`Portfolio ${i + 1}`}
-                className="h-full w-full object-cover"
+                fill
+                sizes="(max-width: 640px) 33vw, 200px"
+                className="object-cover"
               />
             </div>
           ))}

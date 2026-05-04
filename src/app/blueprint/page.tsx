@@ -158,8 +158,29 @@ function BlueprintWizard() {
         toast.success("Order submitted successfully!");
         router.push("/dashboard");
       }
-    } catch {
-      toast.error("Failed to submit order. Please check your details and try again.");
+    } catch (err) {
+      const raw = err instanceof Error ? err.message.toLowerCase() : "";
+      let friendly =
+        "We couldn't submit your order. Please review your details and try again.";
+      if (
+        raw.includes("not accepting") ||
+        raw.includes("isacceptingorders") ||
+        raw.includes("not available")
+      ) {
+        friendly =
+          "This designer isn't accepting new orders right now. Try a different designer or check back later.";
+      } else if (
+        raw.includes("network") ||
+        raw.includes("fetch") ||
+        raw.includes("failed to fetch")
+      ) {
+        friendly =
+          "We couldn't reach the server. Check your connection and try again.";
+      } else if (raw.includes("validation") || raw.includes("invalid")) {
+        friendly =
+          "Some details look invalid. Please review each step and try again.";
+      }
+      toast.error(friendly);
     }
   };
 

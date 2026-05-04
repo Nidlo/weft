@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import { useDesignerReviews, useRatingBreakdown } from "@/lib/hooks/use-reviews";
 import { RatingBreakdown } from "./rating-breakdown";

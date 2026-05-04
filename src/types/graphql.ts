@@ -18,6 +18,16 @@ export interface GqlUser {
   isDesigner: boolean;
   isOnboarded: boolean;
   hasVerifiedWalletAccount: boolean;
+  termsAcceptedVersion: string | null;
+}
+
+export interface GqlLegalVersions {
+  termsVersion: string;
+  privacyVersion: string;
+}
+
+export interface LegalVersionsData {
+  legalVersions: GqlLegalVersions;
 }
 
 export interface RequestOtpData {
@@ -705,6 +715,10 @@ export interface GqlPayment {
   providerReference: string | null;
   providerStatus: string | null;
   paidAt: string | null;
+  /** ISO 8601 timestamp set when payment is refunded; null otherwise. */
+  refundedAt: string | null;
+  /** Optional human reason recorded when the refund was issued. */
+  refundReason: string | null;
   createdAt: string;
 }
 
@@ -738,6 +752,7 @@ export interface InitiatePaymentInput {
   phone?: string;
   otp?: string;
   sessionId?: string;
+  idempotencyKey?: string;
 }
 
 export interface InitiatePaymentData {
@@ -992,6 +1007,10 @@ export interface GqlNotificationPreferences {
   reviewReceived: NotificationChannels;
   payoutProcessed: NotificationChannels;
   externalPaymentRecorded: NotificationChannels;
+  /** "HH:MM" 24h start of quiet-hours window. null when not set. */
+  quietHoursStart: string | null;
+  /** "HH:MM" 24h end of quiet-hours window. null when not set. */
+  quietHoursEnd: string | null;
 }
 
 export interface NotificationConnection {

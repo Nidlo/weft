@@ -5,7 +5,6 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import {
   MY_CONVERSATIONS,
   CONVERSATION_MESSAGES,
-  UNREAD_MESSAGES_COUNT,
 } from "@/lib/graphql/queries/message";
 import {
   SEND_MESSAGE,
@@ -15,7 +14,6 @@ import {
 import type {
   MyConversationsData,
   ConversationMessagesData,
-  UnreadMessagesCountData,
   SendMessageData,
   SendMessageInput,
   MarkMessagesReadData,
@@ -132,19 +130,6 @@ export function useMarkMessagesRead() {
   );
 
   return { markRead };
-}
-
-export function useUnreadCount() {
-  const { data, loading, refetch } =
-    useQuery<UnreadMessagesCountData>(UNREAD_MESSAGES_COUNT, {
-      fetchPolicy: "cache-first",
-    });
-
-  return {
-    unreadCount: data?.unreadMessagesCount ?? 0,
-    loading,
-    refetch,
-  };
 }
 
 export function useStartConversation() {

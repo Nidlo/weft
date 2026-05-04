@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useBlueprintOptions } from "@/lib/hooks/use-blueprint-options";
 import { useUpdateOrder } from "@/lib/hooks/use-orders";
+import { pesewasToGhs } from "@/lib/utils/order";
 import type { GqlOrderDetail } from "@/types/graphql";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -65,8 +66,8 @@ export function OrderEditSheet({
       setReferenceImages(
         (bp?.reference_images as string[] | undefined) ?? []
       );
-      setBudgetMinGhs((order.budgetMin / 100).toFixed(2));
-      setBudgetMaxGhs((order.budgetMax / 100).toFixed(2));
+      setBudgetMinGhs(pesewasToGhs(order.budgetMin));
+      setBudgetMaxGhs(pesewasToGhs(order.budgetMax));
       setNotes(order.notes ?? "");
       setMeasurementId(order.measurementId ?? undefined);
     }

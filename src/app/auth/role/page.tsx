@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
 import { BECOME_DESIGNER } from "@/lib/graphql/mutations/auth";
 import type { BecomeDesignerData } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
+import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import {
   Card,
   CardContent,
@@ -51,21 +51,16 @@ const roles: RoleOption[] = [
 
 export default function RoleSelectionPage() {
   const router = useRouter();
-  const { user, setUser, isAuthenticated, isLoading } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
+  // The role chooser is the authed-but-not-onboarded interstitial. Anyone
+  // already onboarded gets bounced to /dashboard by the guard itself —
+  // this page no longer rolls its own redirect / loading state.
+  // (FE-NIDLO-AUTH-18 / audit H6)
+  const { isReady } = useAuthGuard({ redirectOnboardedTo: "/dashboard" });
   const [becomeDesigner, { loading }] = useMutation(BECOME_DESIGNER);
 
-  useEffect(() => {
-    if (isLoading) return;
-    if (!isAuthenticated) {
-      router.replace("/auth/phone");
-      return;
-    }
-    if (user?.isOnboarded) {
-      router.replace("/dashboard");
-    }
-  }, [isAuthenticated, isLoading, user, router]);
-
-  if (isLoading || !isAuthenticated || user?.isOnboarded) {
+  if (!isReady) {
     return (
       <Card>
         <CardHeader>
@@ -97,12 +92,12 @@ export default function RoleSelectionPage() {
             ...user!,
             isDesigner: true,
           });
-          toast.success("Welcome to StitchHub!");
+          toast.success("Welcome to Nidlo!");
           router.push("/onboarding");
         }
       } else {
         // Client — go through client onboarding wizard
-        toast.success("Welcome to StitchHub!");
+        toast.success("Welcome to Nidlo!");
         router.push("/onboarding/client");
       }
     } catch (error) {
@@ -115,7 +110,7 @@ export default function RoleSelectionPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>How will you use StitchHub?</CardTitle>
+        <CardTitle>How will you use Nidlo?</CardTitle>
         <CardDescription>
           This helps us personalize your experience. Choose one to get started.
         </CardDescription>

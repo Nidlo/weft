@@ -8,7 +8,6 @@ import {
   MessageSquare,
   User,
   ClipboardList,
-  Ruler,
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";

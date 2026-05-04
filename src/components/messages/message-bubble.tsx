@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getImageKitThumbnail } from "@/lib/utils/imagekit";
 import { linkify } from "@/lib/utils/linkify";
@@ -64,17 +65,20 @@ export function MessageBubble({
           {hasMedia && (
             <button
               type="button"
+              aria-label="View photo full size"
               className={cn(
                 "block overflow-hidden rounded-xl",
                 hasBody && "mb-1"
               )}
               onClick={() => setLightboxOpen(true)}
             >
-              <img
+              <Image
                 src={getImageKitThumbnail(message.mediaUrl!, 400)}
                 alt="Photo message"
-                className="max-w-[220px] rounded-xl"
-                loading="lazy"
+                width={220}
+                height={220}
+                sizes="220px"
+                className="h-auto max-w-[220px] rounded-xl"
               />
             </button>
           )}
@@ -130,10 +134,11 @@ export function MessageBubble({
         </div>
       </div>
 
-      {hasMedia && lightboxOpen && (
+      {hasMedia && (
         <MessageLightbox
           src={message.mediaUrl!}
-          onClose={() => setLightboxOpen(false)}
+          open={lightboxOpen}
+          onOpenChange={setLightboxOpen}
         />
       )}
     </>

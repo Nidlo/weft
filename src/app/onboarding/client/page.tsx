@@ -20,8 +20,11 @@ const STEPS = ["Your Name", "Interests", "Location", "Finish"];
 
 export default function ClientOnboardingPage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading, _hasHydrated, setUser } =
-    useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const _hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const setUser = useAuthStore((s) => s.setUser);
   const store = useClientOnboardingStore();
   const { step, setStep, reset } = store;
   const [completeClientOnboarding, { loading: saving }] = useMutation(
@@ -133,7 +136,7 @@ export default function ClientOnboardingPage() {
           isOnboarded: true,
         });
         reset();
-        toast.success("Welcome to StitchHub! Let's find you a designer.");
+        toast.success("Welcome to Nidlo! Let's find you a designer.");
         router.push("/dashboard");
       }
     } catch {

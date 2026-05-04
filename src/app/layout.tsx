@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/providers/providers";
+import { PwaInstallPrompt } from "@/components/shared/pwa-install-prompt";
+import { APP_URL } from "@/lib/config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,28 +15,47 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Next 15+ wants `themeColor` / `viewport` here rather than in `metadata` —
+// gives the splash background and the Android chrome bar a consistent colour
+// (matches `manifest.theme_color`).
+export const viewport: Viewport = {
+  themeColor: "#6b21a8",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://stitchhub.com"
-  ),
+  metadataBase: new URL(APP_URL),
   title: {
-    default: "StitchHub - Custom Fashion, Connected",
-    template: "%s | StitchHub",
+    default: "Nidlo — Where every stitch begins",
+    template: "%s | Nidlo",
   },
   description:
-    "Connect with talented seamstresses, tailors, and fashion designers for custom-made clothing. Track your garment from design to delivery.",
+    "Connect with talented seamstresses, tailors, and fashion designers for custom-made clothing in Ghana and West Africa. Track your garment from design to delivery.",
   keywords: [
     "custom clothing",
     "tailor",
     "seamstress",
     "fashion designer",
     "Ghana",
+    "West Africa",
     "bespoke fashion",
+    "Nidlo",
   ],
   openGraph: {
     type: "website",
     locale: "en_GH",
-    siteName: "StitchHub",
+    siteName: "Nidlo",
+  },
+  twitter: {
+    // The root opengraph-image.tsx auto-populates the image; designer
+    // profiles override via their own file-convention OG image.
+    card: "summary_large_image",
+  },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    apple: "/icons/icon-192x192.svg",
   },
 };
 
@@ -45,14 +66,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="manifest" href="/manifest.webmanifest" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <PwaInstallPrompt />
+        </Providers>
       </body>
     </html>
   );

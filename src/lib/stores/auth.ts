@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { resetCsrfState } from "@/lib/graphql/csrf";
 
 export interface User {
   id: string;
@@ -15,6 +16,7 @@ export interface User {
   isDesigner: boolean;
   isOnboarded: boolean;
   hasVerifiedWalletAccount?: boolean;
+  termsAcceptedVersion?: string | null;
   designerProfile?: {
     slug: string | null;
     profileViewsCount: number;
@@ -42,12 +44,14 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) =>
         set({ user, isAuthenticated: !!user, isLoading: false }),
       setLoading: (isLoading) => set({ isLoading }),
-      logout: () =>
+      logout: () => {
+        resetCsrfState();
         set({
           user: null,
           isAuthenticated: false,
           isLoading: false,
-        }),
+        });
+      },
     }),
     {
       name: "stitchhub-auth",

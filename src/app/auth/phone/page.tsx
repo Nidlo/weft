@@ -62,6 +62,7 @@ export default function PhoneAuthPage() {
 
   const { data: countriesData } = useQuery<CountriesData>(GET_COUNTRIES, {
     variables: { activeOnly: true },
+    fetchPolicy: "cache-first",
   });
 
   const countries = useMemo(() => {
@@ -206,9 +207,11 @@ export default function PhoneAuthPage() {
 
       if (result?.requestOtp.success) {
         toast.success("Verification code sent!");
-        router.push(
-          `/auth/verify?phone=${encodeURIComponent(internationalPhone)}`
-        );
+        // Phone is the primary login credential — keep it out of URLs,
+        // browser history, Referer headers, and access logs. sessionStorage
+        // is per-tab and clears on close; the verify page reads it once.
+        sessionStorage.setItem("nidlo:auth:pendingPhone", internationalPhone);
+        router.push("/auth/verify");
       } else {
         toast.error(result?.requestOtp.message || "Failed to send code");
       }

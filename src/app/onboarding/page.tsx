@@ -21,7 +21,10 @@ import { StepPortfolio } from "./step-portfolio";
 const STEPS = ["Basic Info", "Specializations", "Pricing", "Portfolio"];
 
 export default function OnboardingPage() {
-  const { user, isReady } = useAuthGuard();
+  const { user, isReady } = useAuthGuard({
+    requireDesigner: true,
+    designerRedirectTo: "/dashboard",
+  });
   const router = useRouter();
   const store = useOnboardingStore();
   const { step, setStep, reset } = store;
@@ -36,11 +39,6 @@ export default function OnboardingPage() {
         <Skeleton className="h-96 w-full" />
       </div>
     );
-  }
-
-  if (!user.isDesigner) {
-    router.replace("/dashboard");
-    return null;
   }
 
   const progress = ((step + 1) / STEPS.length) * 100;

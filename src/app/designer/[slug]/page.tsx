@@ -6,7 +6,11 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+const SLUG_RE = /^[a-z0-9-]+$/;
+
 async function fetchDesigner(slug: string) {
+  if (!SLUG_RE.test(slug)) return null;
+
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) return null;
 
@@ -56,34 +60,10 @@ async function fetchDesigner(slug: string) {
 
     const json = await res.json();
     return json?.data?.designer ?? null;
-  } catch {
+  } catch (err) {
+    console.error(`[designer SSR] fetchDesigner("${slug}") failed:`, err);
     return null;
   }
-}
-
-function getOgImage(designer: Record<string, unknown>): string | null {
-  const profile = designer.designerProfile as Record<string, unknown> | null;
-  const IMAGEKIT_ENDPOINT =
-    process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "https://ik.imagekit.io/snad";
-
-  // Try first portfolio image
-  let images: Array<{ url: string }> = [];
-  const raw = profile?.portfolioImages;
-  if (Array.isArray(raw)) images = raw;
-  else if (typeof raw === "string") {
-    try { images = JSON.parse(raw); } catch { /* ignore */ }
-  }
-
-  const sourceUrl = images[0]?.url ?? (designer.avatarUrl as string | null);
-  if (!sourceUrl) return null;
-
-  // Apply ImageKit 1200x630 transform for OG
-  if (sourceUrl.includes("ik.imagekit.io")) {
-    const path = sourceUrl.replace(IMAGEKIT_ENDPOINT, "");
-    return `${IMAGEKIT_ENDPOINT}/tr:w-1200,h-630,c-maintain_ratio,fo-auto${path}`;
-  }
-
-  return sourceUrl;
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -91,7 +71,7 @@ export async function generateMetadata({ params }: Props) {
   const designer = await fetchDesigner(slug);
 
   if (!designer) {
-    return { title: "Designer Not Found - StitchHub" };
+    return { title: "Designer Not Found - Nidlo" };
   }
 
   const profile = designer.designerProfile;
@@ -109,31 +89,30 @@ export async function generateMetadata({ params }: Props) {
   const description = profile?.bio
     ? profile.bio.slice(0, 160)
     : specsText
-      ? `${displayName} specializes in ${specsText}. Book custom fashion on StitchHub.`
-      : `${displayName} is a fashion designer on StitchHub. View portfolio and request a quote.`;
+      ? `${displayName} specializes in ${specsText}. Book custom fashion on Nidlo.`
+      : `${displayName} is a fashion designer on Nidlo. View portfolio and request a quote.`;
 
-  const ogImage = getOgImage(designer);
   const url = `/designer/${slug}`;
 
+  // openGraph.images / twitter.images are auto-populated by the
+  // [opengraph-image](./opengraph-image.tsx) file convention.
   return {
-    title: `${displayName} - StitchHub Designer`,
+    title: `${displayName} - Nidlo Designer`,
     description,
     alternates: {
       canonical: url,
     },
     openGraph: {
       type: "profile" as const,
-      title: `${displayName} - StitchHub`,
+      title: `${displayName} - Nidlo`,
       description,
       url,
-      siteName: "StitchHub",
-      images: ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: displayName }] : [],
+      siteName: "Nidlo",
     },
     twitter: {
       card: "summary_large_image" as const,
-      title: `${displayName} - StitchHub`,
+      title: `${displayName} - Nidlo`,
       description,
-      ...(ogImage ? { images: [ogImage] } : {}),
     },
   };
 }

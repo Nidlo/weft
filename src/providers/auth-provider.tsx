@@ -3,13 +3,24 @@
 import { useEffect, useRef } from "react";
 import { useAuthStore, useHasHydrated } from "@/lib/stores/auth";
 import { apolloClient } from "@/lib/graphql/client";
+import { ensureCsrfCookie } from "@/lib/graphql/csrf";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import type { MeData } from "@/types/graphql";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user, setUser, setLoading, logout } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
+  const setLoading = useAuthStore((s) => s.setLoading);
+  const logout = useAuthStore((s) => s.logout);
   const hasHydrated = useHasHydrated();
   const didValidate = useRef(false);
+
+  useEffect(() => {
+    // Prime the Sanctum XSRF-TOKEN cookie once per page load. The csrfLink
+    // in apolloClient mirrors it as X-XSRF-TOKEN on every mutation; without
+    // this, every state-changing request 419s.
+    void ensureCsrfCookie();
+  }, []);
 
   useEffect(() => {
     // Wait for Zustand to rehydrate from localStorage before making decisions
@@ -76,7 +87,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setLoading(false);
         }
       });
-  }, [hasHydrated]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Intentional single-fire: run the Me validation once after hydration. The
+    // `didValidate.current` ref guards re-runs; adding the rest of the deps
+    // (user / setUser / logout) would trigger re-validation every time auth
+    // state mutates and put us in a loop. (H14 documented.)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasHydrated]);
 
   return <>{children}</>;
 }

@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation } from "@apollo/client/react";
+import Image from "next/image";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
-import { useAuthStore } from "@/lib/stores/auth";
-import { LOGOUT } from "@/lib/graphql/mutations/auth";
+import { useLogout } from "@/lib/hooks/use-logout";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,27 +21,11 @@ import {
   Bell,
   Pencil,
 } from "lucide-react";
-import { toast } from "sonner";
 import Link from "next/link";
 
 export default function ProfilePage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
-  const clearAuth = useAuthStore((s) => s.logout);
-  const router = useRouter();
-  const [logoutMutation] = useMutation(LOGOUT);
-  const [loggingOut, setLoggingOut] = useState(false);
-
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    try {
-      await logoutMutation();
-    } catch {
-      // Even if backend call fails, clear local state
-    }
-    clearAuth();
-    toast.success("Logged out");
-    router.push("/");
-  };
+  const { logout: handleLogout, loading: loggingOut } = useLogout();
 
   if (!isReady || !user) {
     return (
@@ -72,9 +53,12 @@ export default function ProfilePage() {
           <CardContent className="flex items-center gap-4 pt-6">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               {user.avatarUrl ? (
-                <img
+                <Image
                   src={user.avatarUrl}
                   alt={user.fullName || "Profile"}
+                  width={64}
+                  height={64}
+                  sizes="64px"
                   className="h-16 w-16 rounded-full object-cover"
                 />
               ) : (
@@ -92,7 +76,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <Button variant="ghost" size="icon" asChild>
-              <Link href="/profile/edit">
+              <Link href="/profile/edit" aria-label="Edit profile">
                 <Pencil className="h-4 w-4" />
               </Link>
             </Button>
