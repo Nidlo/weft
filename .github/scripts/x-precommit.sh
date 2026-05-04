@@ -391,7 +391,7 @@ scan_pattern "WARNING" "Q-01" "TypeScript : any" \
 # S-02: Committed .env files (special-case: filename check, not content)
 # ============================================================
 
-ENV_FILES=$(printf "%s\n" "$CODE_FILES" | grep -E '(^|/)\.env($|\.|[^/]*$)' | grep -vE '\.example|example\.env|\.env\.template' || true)
+ENV_FILES=$(printf "%s\n" "$CODE_FILES" | grep -E '(^|/)\.env($|\.|[^/]*$)' | grep -vE '\.example|example\.env|\.env\.template|\.env\.test$|\.env\.testing$' || true)
 if [ -n "$ENV_FILES" ]; then
     while IFS= read -r file; do
         [ -z "$file" ] && continue
