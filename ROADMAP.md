@@ -1106,7 +1106,7 @@ For Figma-dependent rows the expected exchange is:
 
 ## QA roadmap-gap addendum (audit gap, 2026-05-04)
 
-Sourced from [audits/qa-roadmap-gaps-2026-05-04.md](../audits/qa-roadmap-gaps-2026-05-04.md). New ⬜ entries identified during QA CSV generation that warrant roadmap tracking. Each cross-references the gap report's `QA-GAP-A-NN` ID.
+Sourced from [backend/audits/qa-roadmap-gaps-2026-05-04.md](../backend/audits/qa-roadmap-gaps-2026-05-04.md). New ⬜ entries identified during QA CSV generation that warrant roadmap tracking. Each cross-references the gap report's `QA-GAP-A-NN` ID.
 
 - [ ] **FE-NIDLO-AUTH-22** — Multi-tab logout sync via `storage` event in `auth-store.ts`. Today logout in tab A leaves tab B authenticated until next mutation 401s (failure-modes §1.7 residual). _(audit gap, 2026-05-04 — QA-GAP-A-01)_
 - [ ] **FE-NIDLO-AUTH-23** — Global "trying to reconnect" banner when `errorLink` sees N consecutive network errors. Today user gets per-component toasts only (failure-modes §2.1 residual). _(audit gap, 2026-05-04 — QA-GAP-A-02)_

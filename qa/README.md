@@ -43,7 +43,7 @@ Full schema reference: [../../qa/README.md](../../qa/README.md).
 - ✅ Every `page.tsx` route under `frontend/src/app/` has at least one row.
 - ✅ Every Sprint 1–9 deliverable in commit history is represented.
 - ✅ Every row references a `roadmap_ref` (FE-NIDLO-* task ID) for traceability.
-- ✅ Roadmap gaps from [audits/qa-roadmap-gaps-2026-05-04.md](../../audits/qa-roadmap-gaps-2026-05-04.md) tagged `roadmap-gap` in `dependencies`.
+- ✅ Roadmap gaps from [backend/audits/qa-roadmap-gaps-2026-05-04.md](../../backend/audits/qa-roadmap-gaps-2026-05-04.md) tagged `roadmap-gap` in `dependencies`.
 
 ## When to update this file
 
