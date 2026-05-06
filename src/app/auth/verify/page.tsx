@@ -66,6 +66,13 @@ function VerifyOtpContent() {
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  // Synchronous in-flight guard. `useMutation`'s `verifying` flag flips
+  // a tick AFTER the mutation is fired — long enough for a second
+  // auto-submit (e.g. fast paste + onChange duplication) to slip
+  // through and double-submit the same code. Once the first call wins
+  // and clears the OTP key, the second response says "expired" and
+  // the user thinks the correct code was rejected.
+  const submitting = useRef(false);
 
   const [verifyOtp, { loading: verifying }] = useMutation(VERIFY_OTP);
   const [requestOtp, { loading: resending }] = useMutation(REQUEST_OTP);
@@ -89,6 +96,8 @@ function VerifyOtpContent() {
 
   const handleVerify = useCallback(
     async (code: string) => {
+      if (submitting.current) return;
+      submitting.current = true;
       try {
         const { data } = await verifyOtp({
           variables: { phone, code },
@@ -125,6 +134,7 @@ function VerifyOtpContent() {
         toast.error(message);
         setDigits(Array(OTP_LENGTH).fill(""));
         inputRefs.current[0]?.focus();
+        submitting.current = false;
       }
     },
     [phone, verifyOtp, setUser, router]

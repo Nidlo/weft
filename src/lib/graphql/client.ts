@@ -9,6 +9,7 @@ import { RetryLink } from "@apollo/client/link/retry";
 import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 import { useAuthStore } from "@/lib/stores/auth";
 import { ensureCsrfCookie, resetCsrfState, readXsrfCookie } from "@/lib/graphql/csrf";
+import { ME_QUERY } from "@/lib/graphql/queries/auth";
 
 const uploadLink = new UploadHttpLink({
   uri: process.env.NEXT_PUBLIC_API_URL,
@@ -50,6 +51,38 @@ const retryLink = new RetryLink({
   delay: { initial: 0, max: 0, jitter: false },
 });
 
+// One-shot Me probe state. A non-Me Unauthenticated could be a real session
+// death OR a race (cookie not yet primed, stale request from a previous
+// route, CSRF blip). Probing Me distinguishes the two — only logout when
+// Me also fails. inFlight dedupes concurrent probes (e.g. several queries
+// all 401 at once after a session expiry); pending: true stops a thundering
+// herd of probes from firing in the same tick.
+let probeInFlight: Promise<void> | null = null;
+
+// Exported for tests. Production callers go through errorLink — the public
+// surface of this module is just `apolloClient`.
+export function probeSessionAndLogoutIfDead(): Promise<void> {
+  if (probeInFlight) return probeInFlight;
+  probeInFlight = apolloClient
+    .query({ query: ME_QUERY, fetchPolicy: "network-only" })
+    .then((res) => {
+      // Apollo v4 default errorPolicy is "none" — a GraphQL error rejects.
+      // If we resolve here and `me` is null, the server confirms no session.
+      if (!res.data || !(res.data as { me?: unknown }).me) {
+        useAuthStore.getState().logout();
+      }
+    })
+    .catch(() => {
+      // Me itself rejected (Unauthenticated or network). Either way the
+      // session is not usable — log the user out so the UI re-routes them.
+      useAuthStore.getState().logout();
+    })
+    .finally(() => {
+      probeInFlight = null;
+    });
+  return probeInFlight;
+}
+
 const errorLink = new ErrorLink(({ error, operation }) => {
   if (CombinedGraphQLErrors.is(error)) {
     const isUnauthenticated = error.errors.some(
@@ -59,7 +92,12 @@ const errorLink = new ErrorLink(({ error, operation }) => {
     );
 
     if (isUnauthenticated && operation.operationName !== "Me") {
-      useAuthStore.getState().logout();
+      // Defer logout: probe Me first. Without this, ANY transient
+      // Unauthenticated (e.g. UnreadMessagesCount fired by RealtimeProvider
+      // racing the freshly-set session cookie post-verifyOtp) silently
+      // kicks the just-logged-in user back to /auth/phone — the user
+      // sees the OTP form again and assumes their code was rejected.
+      probeSessionAndLogoutIfDead();
     }
 
     error.errors.forEach(({ message, locations, path }) => {

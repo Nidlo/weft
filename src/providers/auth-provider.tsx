@@ -18,8 +18,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Prime the Sanctum XSRF-TOKEN cookie once per page load. The csrfLink
     // in apolloClient mirrors it as X-XSRF-TOKEN on every mutation; without
-    // this, every state-changing request 419s.
-    void ensureCsrfCookie();
+    // this, every state-changing request 419s. Catch is intentional — when
+    // the backend is unreachable (dev with API down, brief network blip)
+    // we don't want an unhandled-rejection in the console; the next
+    // mutation will retry the prime via inflight semantics.
+    ensureCsrfCookie().catch((err: unknown) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.debug("[csrf] prime deferred:", err);
+      }
+    });
   }, []);
 
   useEffect(() => {
