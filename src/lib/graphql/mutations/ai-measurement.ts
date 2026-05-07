@@ -16,6 +16,7 @@ export const EXTRACT_AI_MEASUREMENTS = gql`
       photoUrl
       photoPublicId
       photoDisk
+      degradedModes
     }
   }
 `;

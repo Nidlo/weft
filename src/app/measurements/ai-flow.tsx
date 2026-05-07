@@ -81,6 +81,11 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoPublicId, setPhotoPublicId] = useState<string | null>(null);
   const [photoDisk, setPhotoDisk] = useState<string | null>(null);
+  // FS-NIDLO-VALID-03 — Structured signals from the AI run. When
+  // non-empty (e.g. ["validators_disagree"]) we render a "Manual
+  // review recommended" notice on the review step so designers /
+  // clients know to scrutinise the values before saving.
+  const [degradedModes, setDegradedModes] = useState<string[]>([]);
   // S2.5d — bumping this key remounts ManualForm so a recompute apply can
   // re-seed `initialData`. We don't want to remount on every drag (kills
   // focus + in-progress edits), only on explicit "Apply".
@@ -149,6 +154,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       setPhotoUrl(data?.extractAiMeasurements?.photoUrl ?? null);
       setPhotoPublicId(data?.extractAiMeasurements?.photoPublicId ?? null);
       setPhotoDisk(data?.extractAiMeasurements?.photoDisk ?? null);
+      setDegradedModes(data?.extractAiMeasurements?.degradedModes ?? []);
       setAiStep("review");
     } catch (err) {
       if (cancelledRef.current) return;
@@ -397,6 +403,31 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
           </p>
         </div>
       </GlassCard>
+
+      {/* FS-NIDLO-VALID-03 — surface AI-pipeline degraded signals.
+          When the rule + Claude validators disagreed, render a warning
+          band so the reviewer knows to scrutinise the numbers before
+          saving. Empty array → component is invisible. */}
+      {degradedModes.length > 0 && (
+        <GlassCard
+          variant="solid"
+          className="flex items-start gap-3 border-status-warning-soft bg-status-warning-soft/40 p-4"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-status-warning/15 text-status-warning">
+            <Lightbulb className="h-5 w-5" aria-hidden />
+          </span>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-status-warning-fg">
+              Manual review recommended
+            </p>
+            <p className="mt-0.5 text-sm text-foreground/90">
+              {degradedModes.includes("validators_disagree")
+                ? "Our rule check and the AI vision check disagreed about whether this scan is reliable. Look at the values below carefully — adjust anything that doesn't match your body before saving."
+                : "The AI flagged something unusual about this scan. Review the values carefully before saving."}
+            </p>
+          </div>
+        </GlassCard>
+      )}
 
       {/* S2.5b — editable photo overlay. Drag dots to reposition them;
           the corrected positions persist on save via `landmarks_normalized`.

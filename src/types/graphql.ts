@@ -456,6 +456,14 @@ export interface ExtractAiMeasurementsResult {
   photoPublicId: string | null;
   /** Which disk wrote the asset: `'local'` | `'imagekit'` | `'s3'`. Pass through verbatim on save. */
   photoDisk: string | null;
+  /**
+   * Structured signals about the AI run (FS-NIDLO-VALID-03). Empty when
+   * nothing degraded. Currently emitted: `'validators_disagree'` when
+   * the rule validator and Claude validator disagreed on `is_valid`.
+   * Render a "Manual review recommended" badge when this array is
+   * non-empty.
+   */
+  degradedModes: string[];
 }
 
 export interface ExtractAiMeasurementsData {
