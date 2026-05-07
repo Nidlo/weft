@@ -16,6 +16,11 @@ export interface User {
   isDesigner: boolean;
   isOnboarded: boolean;
   hasVerifiedWalletAccount?: boolean;
+  // QA-AD-USER-012 — true when the current session was started by a
+  // super-admin via the admin panel's Impersonate action. Powers the
+  // sticky banner + Stop-impersonating button.
+  isImpersonated?: boolean;
+  impersonatorEmail?: string | null;
   termsAcceptedVersion?: string | null;
   designerProfile?: {
     slug: string | null;

@@ -9,6 +9,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { GoogleAuthProvider } from "@/providers/google-oauth-provider";
 import { RealtimeProvider } from "@/providers/realtime-provider";
 import { AppSplash } from "@/components/shared/app-splash";
+import { ImpersonationBanner } from "@/components/shared/impersonation-banner";
 import { useState } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -37,6 +38,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <GoogleAuthProvider>
             <AuthProvider>
               <AppSplash />
+              {/* QA-AD-USER-012: sticky banner shown only when the
+                  active session is an admin impersonation. No-op for
+                  normal sessions; does not affect layout flow. */}
+              <ImpersonationBanner />
               <RealtimeProvider>
                 {children}
               </RealtimeProvider>

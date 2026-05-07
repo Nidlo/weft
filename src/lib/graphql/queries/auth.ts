@@ -15,6 +15,8 @@ export const ME_QUERY = gql`
       isVerified
       isDesigner
       isOnboarded
+      isImpersonated
+      impersonatorEmail
       termsAcceptedVersion
       designerProfile {
         slug
