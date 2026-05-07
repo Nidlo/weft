@@ -167,3 +167,32 @@ export const REMOVE_MATERIAL = gql`
     removeMaterial(materialId: $materialId)
   }
 `;
+
+export const SET_ORDER_GARMENT_EASE = gql`
+  mutation SetOrderGarmentEase($input: SetOrderGarmentEaseInput!) {
+    setOrderGarmentEase(input: $input) {
+      id
+      orderId
+      section
+      field
+      deltaMm
+      note
+      createdBy {
+        id
+        fullName
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const CLEAR_ORDER_GARMENT_EASE = gql`
+  mutation ClearOrderGarmentEase(
+    $orderId: ID!
+    $section: String!
+    $field: String!
+  ) {
+    clearOrderGarmentEase(orderId: $orderId, section: $section, field: $field)
+  }
+`;

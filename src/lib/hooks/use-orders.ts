@@ -14,6 +14,8 @@ import {
   ADD_MATERIAL,
   TOGGLE_PURCHASED,
   REMOVE_MATERIAL,
+  SET_ORDER_GARMENT_EASE,
+  CLEAR_ORDER_GARMENT_EASE,
 } from "@/lib/graphql/mutations/order";
 import type {
   MyOrdersData,
@@ -37,6 +39,9 @@ import type {
   CreateBlueprintOptionData,
   ClientMeasurementsData,
   SearchClientsData,
+  SetOrderGarmentEaseData,
+  SetOrderGarmentEaseInput,
+  ClearOrderGarmentEaseData,
 } from "@/types/graphql";
 
 export function useOrders(status?: string, first = 20, page = 1) {
@@ -181,6 +186,43 @@ export function useRemoveMaterial() {
   };
 
   return { removeMaterial, loading, error };
+}
+
+export function useSetOrderGarmentEase(orderId: string) {
+  const [mutate, { loading, error }] = useMutation<SetOrderGarmentEaseData>(
+    SET_ORDER_GARMENT_EASE,
+    {
+      refetchQueries: [{ query: GET_ORDER, variables: { id: orderId } }],
+    }
+  );
+
+  const setOrderGarmentEase = async (input: SetOrderGarmentEaseInput) => {
+    const result = await mutate({ variables: { input } });
+    return result.data?.setOrderGarmentEase ?? null;
+  };
+
+  return { setOrderGarmentEase, loading, error };
+}
+
+export function useClearOrderGarmentEase(orderId: string) {
+  const [mutate, { loading, error }] = useMutation<ClearOrderGarmentEaseData>(
+    CLEAR_ORDER_GARMENT_EASE,
+    {
+      refetchQueries: [{ query: GET_ORDER, variables: { id: orderId } }],
+    }
+  );
+
+  const clearOrderGarmentEase = async (
+    section: string,
+    field: string
+  ) => {
+    const result = await mutate({
+      variables: { orderId, section, field },
+    });
+    return result.data?.clearOrderGarmentEase ?? false;
+  };
+
+  return { clearOrderGarmentEase, loading, error };
 }
 
 export function useCreateInternalOrder() {

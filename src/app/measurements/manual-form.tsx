@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Ruler } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { GlassCard } from "@/components/ui/glass-card";
 import {
   Select,
   SelectContent,
@@ -17,43 +20,14 @@ import {
   FIELD_LABELS,
   SECTION_LABELS,
 } from "@/components/shared/measurement-summary";
-
-// Reasonable adult body-measurement ranges in cm. Children's garments will
-// trip these — they are warnings, not hard validation.
-const BOUNDS_CM: Record<string, { min: number; max: number }> = {
-  bust: { min: 60, max: 160 },
-  waist: { min: 50, max: 160 },
-  hips: { min: 60, max: 170 },
-  shoulder: { min: 30, max: 60 },
-  chest: { min: 60, max: 160 },
-  neck: { min: 25, max: 55 },
-  arm_length: { min: 40, max: 80 },
-  bicep: { min: 18, max: 55 },
-  wrist: { min: 12, max: 25 },
-  thigh: { min: 35, max: 90 },
-  inseam: { min: 50, max: 95 },
-  outseam: { min: 70, max: 120 },
-  knee: { min: 25, max: 60 },
-  calf: { min: 25, max: 60 },
-  ankle: { min: 15, max: 35 },
-  height: { min: 120, max: 220 },
-  back_length: { min: 30, max: 70 },
-  front_length: { min: 30, max: 70 },
-};
-
-const CM_PER_INCH = 2.54;
-
-function checkBounds(field: string, value: number, unit: string): string | null {
-  const bound = BOUNDS_CM[field];
-  if (!bound) return null;
-  const cm = unit === "inches" ? value * CM_PER_INCH : value;
-  if (cm < bound.min || cm > bound.max) {
-    const minDisp = unit === "inches" ? (bound.min / CM_PER_INCH).toFixed(1) : bound.min;
-    const maxDisp = unit === "inches" ? (bound.max / CM_PER_INCH).toFixed(1) : bound.max;
-    return `Outside typical range (${minDisp}–${maxDisp} ${unit}). Double-check before saving.`;
-  }
-  return null;
-}
+import { usePreferencesStore } from "@/lib/stores/preferences";
+import {
+  checkBounds,
+  unitLabel,
+  unitName,
+  type MeasurementUnit,
+} from "@/lib/utils/measurement";
+import { cn } from "@/lib/utils";
 
 // Garment-template → list of measurement fields that actually matter for that
 // garment. `all` (default) shows everything; pickers for everything else
@@ -126,7 +100,7 @@ const TEMPLATE_LABELS: Record<MeasurementTemplate, string> = {
 
 function isFieldInTemplate(
   template: MeasurementTemplate,
-  field: string,
+  field: string
 ): boolean {
   if (template === "all") return true;
   return TEMPLATE_FIELDS[template].includes(field);
@@ -142,17 +116,28 @@ interface ManualFormProps {
   onCancel?: () => void;
 }
 
+function isMeasurementUnit(value: string): value is MeasurementUnit {
+  return value === "cm" || value === "inches";
+}
+
 export function ManualForm({
   initialLabel = "",
-  initialUnit = "cm",
+  initialUnit,
   initialData,
   initialTemplate = "all",
   onSave,
   saving = false,
   onCancel,
 }: ManualFormProps) {
+  const preferredUnit = usePreferencesStore((s) => s.measurementUnit);
+  // Editing an existing profile keeps its stored unit so existing numeric
+  // values aren't reinterpreted; new profiles default to the user's
+  // preferred display unit.
+  const startingUnit: MeasurementUnit =
+    initialUnit && isMeasurementUnit(initialUnit) ? initialUnit : preferredUnit;
+
   const [label, setLabel] = useState(initialLabel);
-  const [unit, setUnit] = useState(initialUnit);
+  const [unit, setUnit] = useState<MeasurementUnit>(startingUnit);
   const [template, setTemplate] = useState<MeasurementTemplate>(initialTemplate);
   const [data, setData] = useState<MeasurementData>(
     initialData ?? { upper_body: {}, lower_body: {}, vertical: {} }
@@ -182,78 +167,119 @@ export function ManualForm({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="label">Profile Name</Label>
-        <Input
-          id="label"
-          placeholder="e.g. My Body, Formal Wear"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          maxLength={100}
-        />
-      </div>
-
-      <div className="flex items-center gap-3">
-        <Label htmlFor="unit-toggle">Unit: {unit}</Label>
-        <Switch
-          id="unit-toggle"
-          checked={unit === "inches"}
-          onCheckedChange={handleUnitToggle}
-        />
-        <span className="text-sm text-muted-foreground">
-          {unit === "cm" ? "Centimeters" : "Inches"}
-        </span>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="template">Garment template</Label>
-        <Select
-          value={template}
-          onValueChange={(v) => setTemplate(v as MeasurementTemplate)}
-        >
-          <SelectTrigger id="template">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {(Object.keys(TEMPLATE_LABELS) as MeasurementTemplate[]).map(
-              (key) => (
-                <SelectItem key={key} value={key}>
-                  {TEMPLATE_LABELS[key]}
-                </SelectItem>
-              )
-            )}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground">
-          Pick a template to focus on the fields that matter for that garment.
-          Switch to &ldquo;All measurements&rdquo; any time to enter the full set.
+    <div className="space-y-7">
+      <header>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          Measurements
         </p>
-      </div>
+        <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          {initialLabel ? "Edit profile" : "New profile"}
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Fill in the fields you know. Leave anything blank — designers can ask
+          for the rest at fitting.
+        </p>
+      </header>
 
-      {(Object.entries(FIELD_LABELS) as [keyof MeasurementData, Record<string, string>][]).map(
-        ([section, fields]) => {
-          const visibleFields = Object.entries(fields).filter(([field]) =>
-            isFieldInTemplate(template, field)
-          );
-          if (visibleFields.length === 0) return null;
-          return (
-            <div key={section} className="space-y-3">
-              <h3 className="text-base font-semibold">
+      {/* Profile basics */}
+      <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
+        <div className="space-y-2">
+          <Label htmlFor="label" className="text-sm">
+            Profile name
+          </Label>
+          <Input
+            id="label"
+            placeholder="My body, formal wear, etc."
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            maxLength={100}
+            className="h-11"
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card/60 px-4 py-3">
+          <div>
+            <Label htmlFor="unit-toggle" className="text-sm">
+              Input unit
+            </Label>
+            <p className="text-xs text-muted-foreground tabular-nums">
+              {unitName(unit)} · {unitLabel(unit)}
+            </p>
+          </div>
+          <Switch
+            id="unit-toggle"
+            checked={unit === "inches"}
+            onCheckedChange={handleUnitToggle}
+            aria-label={`Switch input unit, currently ${unitName(unit)}`}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="template" className="text-sm">
+            Garment template
+          </Label>
+          <Select
+            value={template}
+            onValueChange={(v) => setTemplate(v as MeasurementTemplate)}
+          >
+            <SelectTrigger id="template" className="h-11">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.keys(TEMPLATE_LABELS) as MeasurementTemplate[]).map(
+                (key) => (
+                  <SelectItem key={key} value={key}>
+                    {TEMPLATE_LABELS[key]}
+                  </SelectItem>
+                )
+              )}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Pick a template to focus on the fields that matter for that garment.
+            Switch to &ldquo;All measurements&rdquo; any time to enter the full set.
+          </p>
+        </div>
+      </GlassCard>
+
+      {/* Measurement sections */}
+      {(
+        Object.entries(FIELD_LABELS) as [
+          keyof MeasurementData,
+          Record<string, string>,
+        ][]
+      ).map(([section, fields]) => {
+        const visibleFields = Object.entries(fields).filter(([field]) =>
+          isFieldInTemplate(template, field)
+        );
+        if (visibleFields.length === 0) return null;
+        return (
+          <section key={section}>
+            <header className="mb-3 flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-secondary text-foreground">
+                <Ruler className="h-3.5 w-3.5" aria-hidden />
+              </span>
+              <h2 className="text-display text-lg font-semibold tracking-tight">
                 {SECTION_LABELS[section]}
-              </h3>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              </h2>
+            </header>
+            <GlassCard variant="solid" className="p-5 sm:p-6">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 {visibleFields.map(([field, fieldLabel]) => {
                   const value =
-                    data[section]?.[field as keyof (typeof data)[typeof section]] ??
-                    "";
+                    data[section]?.[
+                      field as keyof (typeof data)[typeof section]
+                    ] ?? "";
                   const warning =
                     typeof value === "number"
                       ? checkBounds(field, value, unit)
                       : null;
                   return (
-                    <div key={field} className="space-y-1">
-                      <Label htmlFor={`${section}-${field}`} className="text-xs">
+                    <div key={field} className="space-y-1.5">
+                      <Label
+                        htmlFor={`${section}-${field}`}
+                        className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+                      >
                         {fieldLabel}
                       </Label>
                       <Input
@@ -261,16 +287,16 @@ export function ManualForm({
                         type="number"
                         step="0.1"
                         min="0"
-                        placeholder={unit}
+                        placeholder={unitLabel(unit)}
                         value={value}
                         onChange={(e) =>
                           handleFieldChange(section, field, e.target.value)
                         }
-                        className={
-                          warning
-                            ? "border-status-warning focus-visible:ring-status-warning"
-                            : undefined
-                        }
+                        className={cn(
+                          "h-10 tabular-nums",
+                          warning &&
+                            "border-status-warning focus-visible:ring-status-warning"
+                        )}
                       />
                       {warning && (
                         <p className="text-[10px] leading-tight text-status-warning-fg">
@@ -281,23 +307,38 @@ export function ManualForm({
                   );
                 })}
               </div>
-            </div>
-          );
-        }
-      )}
+            </GlassCard>
+          </section>
+        );
+      })}
 
-      <div className="flex justify-end gap-3 pt-4">
-        {onCancel && (
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
+      <div className="flex flex-col gap-2 pt-2 sm:flex-row-reverse">
         <Button
+          variant="luxe"
+          size="xl"
+          className="gap-1.5 sm:flex-1"
           onClick={handleSubmit}
           disabled={saving || !label.trim()}
         >
-          {saving ? "Saving..." : "Save Measurements"}
+          {saving ? (
+            "Saving…"
+          ) : (
+            <>
+              Save measurements
+              <Check className="h-4 w-4" aria-hidden />
+            </>
+          )}
         </Button>
+        {onCancel && (
+          <Button
+            variant="ghost"
+            size="xl"
+            className="text-muted-foreground"
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+        )}
       </div>
     </div>
   );

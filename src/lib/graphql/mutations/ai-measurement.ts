@@ -10,6 +10,11 @@ export const EXTRACT_AI_MEASUREMENTS = gql`
       frontImage: $frontImage
       sideImage: $sideImage
       heightCm: $heightCm
-    )
+    ) {
+      data
+      landmarks
+      photoUrl
+      photoPublicId
+    }
   }
 `;

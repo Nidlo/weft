@@ -107,8 +107,12 @@ export const GET_ORDER = gql`
       measurement {
         id
         label
-        unit
-        data
+        dataMm
+        aiBaselineMm
+        manualOverridesMm
+        landmarksNormalized
+        photoUrl
+        confirmedAt
         source
         isDefault
       }
@@ -132,6 +136,20 @@ export const GET_ORDER = gql`
         totalCost
         isPurchased
         createdAt
+      }
+      garmentEases {
+        id
+        orderId
+        section
+        field
+        deltaMm
+        note
+        createdBy {
+          id
+          fullName
+        }
+        createdAt
+        updatedAt
       }
       payments {
         id
@@ -245,8 +263,12 @@ export const CLIENT_MEASUREMENTS = gql`
     clientMeasurements(clientId: $clientId) {
       id
       label
-      unit
-      data
+      dataMm
+      aiBaselineMm
+      manualOverridesMm
+      landmarksNormalized
+      photoUrl
+      confirmedAt
       source
       isDefault
       createdAt

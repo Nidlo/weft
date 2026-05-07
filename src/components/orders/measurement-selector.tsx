@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Ruler } from "lucide-react";
+import { usePreferencesStore } from "@/lib/stores/preferences";
+import { formatMeasurement, unitLabel } from "@/lib/utils/measurement";
 
 interface MeasurementSelectorProps {
   clientId: string | null;
@@ -25,6 +27,7 @@ export function MeasurementSelector({
   onChange,
 }: MeasurementSelectorProps) {
   const { measurements, loading } = useClientMeasurements(clientId);
+  const displayUnit = usePreferencesStore((s) => s.measurementUnit);
 
   if (!clientId) {
     return (
@@ -49,12 +52,26 @@ export function MeasurementSelector({
   }
 
   const formatSummary = (m: GqlMeasurement) => {
+    const bust = m.dataMm?.upper_body?.bust ?? null;
+    const waist = m.dataMm?.upper_body?.waist ?? null;
+    const hips = m.dataMm?.lower_body?.hips ?? null;
+
     const parts: string[] = [];
-    if (m.data?.upper_body?.bust) parts.push(`Bust: ${m.data.upper_body.bust}`);
-    if (m.data?.upper_body?.waist)
-      parts.push(`Waist: ${m.data.upper_body.waist}`);
-    if (m.data?.lower_body?.hips) parts.push(`Hips: ${m.data.lower_body.hips}`);
-    return parts.length > 0 ? parts.join(" · ") + ` ${m.unit}` : m.source;
+    if (bust)
+      parts.push(
+        `Bust: ${formatMeasurement(bust, "mm", displayUnit, { withUnit: false })}`,
+      );
+    if (waist)
+      parts.push(
+        `Waist: ${formatMeasurement(waist, "mm", displayUnit, { withUnit: false })}`,
+      );
+    if (hips)
+      parts.push(
+        `Hips: ${formatMeasurement(hips, "mm", displayUnit, { withUnit: false })}`,
+      );
+    return parts.length > 0
+      ? parts.join(" · ") + ` ${unitLabel(displayUnit)}`
+      : m.source;
   };
 
   return (

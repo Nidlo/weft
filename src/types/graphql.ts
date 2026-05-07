@@ -314,11 +314,39 @@ export interface MeasurementData {
   vertical?: Record<string, number | null>;
 }
 
+/**
+ * Canonical mm-integer payload returned by `Measurement.dataMm` /
+ * `aiBaselineMm` / `manualOverridesMm`. Same shape as `MeasurementData`
+ * but the leaf values are integer millimetres (S1B). The display path
+ * still reads `data` + `unit` until S2 switches it; new components can
+ * read `dataMm` directly via the helper's `mm` source unit.
+ */
+export type MeasurementMmData = {
+  upper_body?: Record<string, number | null>;
+  lower_body?: Record<string, number | null>;
+  vertical?: Record<string, number | null>;
+};
+
 export interface GqlMeasurement {
   id: string;
   label: string;
-  unit: string;
-  data: MeasurementData;
+  /**
+   * Canonical mm-integer payload — the only persisted measurement values
+   * post-S1c. Display layers convert through `formatMeasurement(mm, "mm",
+   * displayUnit)`.
+   */
+  dataMm: MeasurementMmData;
+  aiBaselineMm: MeasurementMmData | null;
+  manualOverridesMm: MeasurementMmData;
+  /**
+   * User-corrected MediaPipe landmark positions captured from the
+   * editable LandmarkOverlay (S2.5b). Null on manual rows or AI rows
+   * where the user didn't touch the overlay.
+   */
+  landmarksNormalized: Landmarks | null;
+  /** ImageKit URL of the source photo (S2.5c). Null on manual rows. */
+  photoUrl: string | null;
+  confirmedAt: string | null;
   source: string;
   isDefault: boolean;
   createdAt: string;
@@ -345,8 +373,80 @@ export interface SetDefaultMeasurementData {
   setDefaultMeasurement: GqlMeasurement;
 }
 
+export interface ResetMeasurementFieldData {
+  resetMeasurementField: GqlMeasurement;
+}
+
+export type RescanTier = "auto" | "prompt" | "reject";
+
+export interface GqlMeasurementSnapshot {
+  id: string;
+  dataMm: MeasurementMmData;
+  sourceKind: string;
+  notes: string | null;
+  recordedAt: string;
+}
+
+export interface MeasurementHistoryData {
+  measurementHistory: GqlMeasurementSnapshot[];
+}
+
+export interface MeasurementFieldRef {
+  section: string;
+  field: string;
+}
+
+export interface MeasurementFieldDelta {
+  section: string;
+  field: string;
+  baselineMm: number | null;
+  proposedMm: number | null;
+  deltaMm: number | null;
+  tier: RescanTier;
+}
+
+export interface ApplyRescanInput {
+  data: MeasurementData;
+  unit?: string;
+  confirmedFields?: MeasurementFieldRef[];
+}
+
+export interface ApplyRescanResult {
+  measurement: GqlMeasurement;
+  deltas: MeasurementFieldDelta[];
+  applied: MeasurementFieldRef[];
+  rejected: MeasurementFieldRef[];
+}
+
+export interface ApplyRescanData {
+  applyMeasurementRescan: ApplyRescanResult;
+}
+
+/**
+ * Per-landmark normalized 0-1 coordinates returned from the AI service
+ * (S2.5). Names match the MediaPipe pose taxonomy (e.g. "left_shoulder",
+ * "right_hip"). `null` when the upstream service is the legacy Flask path
+ * (Live-Measurements-Api) that doesn't emit pose data.
+ */
+export interface PoseLandmark {
+  x: number;
+  y: number;
+  visibility: number;
+}
+
+export type Landmarks = Record<string, PoseLandmark>;
+
+export interface ExtractAiMeasurementsResult {
+  data: MeasurementData;
+  landmarks: Landmarks | null;
+  /** ImageKit URL of the source photo (S2.5c). Null when ImageKit isn't configured or the upload failed. */
+  photoUrl: string | null;
+  /** ImageKit public ID — needed for right-to-be-forgotten asset cleanup. */
+  photoPublicId: string | null;
+}
+
 export interface ExtractAiMeasurementsData {
-  extractAiMeasurements: MeasurementData;
+  extractAiMeasurements: ExtractAiMeasurementsResult;
 }
 
 export interface CreateMeasurementInput {
@@ -354,6 +454,12 @@ export interface CreateMeasurementInput {
   unit?: string;
   data: MeasurementData;
   source?: string;
+  /** User-corrected landmark coordinates from the editable overlay (S2.5b). */
+  landmarks?: Landmarks;
+  /** ImageKit URL of the source photo (S2.5c) — pass through verbatim from the extractAiMeasurements result. */
+  photoUrl?: string;
+  /** ImageKit public ID for the source photo (S2.5c). */
+  photoPublicId?: string;
 }
 
 export interface UpdateMeasurementInput {
@@ -413,12 +519,46 @@ export interface GqlOrderDetail extends GqlOrder {
   measurement: GqlMeasurement | null;
   updates: GqlOrderUpdate[];
   materials: GqlOrderMaterial[];
+  garmentEases: GqlOrderGarmentEase[];
   payments: GqlPayment[];
   payouts: GqlPayout[];
   externalPayments: GqlExternalPayment[];
   paymentSummary: GqlPaymentSummary | null;
   conversation: { id: string } | null;
   review: GqlReview | null;
+}
+
+export interface GqlOrderGarmentEase {
+  id: string;
+  orderId: string;
+  section: string;
+  field: string;
+  /** Signed mm offset. Positive = extra room, negative = take in. */
+  deltaMm: number;
+  note: string | null;
+  createdBy: GqlUser | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SetOrderGarmentEaseInput {
+  orderId: string;
+  section: string;
+  field: string;
+  /** Pass deltaMm directly... */
+  deltaMm?: number;
+  /** ...OR (delta + unit) for cm/inches input. */
+  delta?: number;
+  unit?: "cm" | "inches";
+  note?: string | null;
+}
+
+export interface SetOrderGarmentEaseData {
+  setOrderGarmentEase: GqlOrderGarmentEase;
+}
+
+export interface ClearOrderGarmentEaseData {
+  clearOrderGarmentEase: boolean;
 }
 
 export interface GqlOrderUpdate {

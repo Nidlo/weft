@@ -5,12 +5,28 @@ export const MY_MEASUREMENTS = gql`
     myMeasurements {
       id
       label
-      unit
-      data
+      dataMm
+      aiBaselineMm
+      manualOverridesMm
+      landmarksNormalized
+      photoUrl
+      confirmedAt
       source
       isDefault
       createdAt
       updatedAt
+    }
+  }
+`;
+
+export const MEASUREMENT_HISTORY = gql`
+  query MeasurementHistory($measurementId: ID!) {
+    measurementHistory(measurementId: $measurementId) {
+      id
+      sourceKind
+      dataMm
+      notes
+      recordedAt
     }
   }
 `;

@@ -1,12 +1,17 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { MY_MEASUREMENTS } from "@/lib/graphql/queries/measurement";
+import {
+  MY_MEASUREMENTS,
+  MEASUREMENT_HISTORY,
+} from "@/lib/graphql/queries/measurement";
 import {
   CREATE_MEASUREMENT,
   UPDATE_MEASUREMENT,
   DELETE_MEASUREMENT,
   SET_DEFAULT_MEASUREMENT,
+  RESET_MEASUREMENT_FIELD,
+  APPLY_MEASUREMENT_RESCAN,
 } from "@/lib/graphql/mutations/measurement";
 import type {
   MyMeasurementsData,
@@ -14,8 +19,12 @@ import type {
   UpdateMeasurementData,
   DeleteMeasurementData,
   SetDefaultMeasurementData,
+  ResetMeasurementFieldData,
   CreateMeasurementInput,
   UpdateMeasurementInput,
+  MeasurementHistoryData,
+  ApplyRescanData,
+  ApplyRescanInput,
 } from "@/types/graphql";
 
 export function useMeasurements() {
@@ -92,4 +101,57 @@ export function useSetDefaultMeasurement() {
   };
 
   return { setDefaultMeasurement, loading, error };
+}
+
+export function useResetMeasurementField() {
+  const [mutate, { loading, error }] = useMutation<ResetMeasurementFieldData>(
+    RESET_MEASUREMENT_FIELD,
+    {
+      refetchQueries: [{ query: MY_MEASUREMENTS }],
+    },
+  );
+
+  const resetMeasurementField = async (
+    id: string,
+    section: string,
+    field: string,
+  ) => {
+    const result = await mutate({ variables: { id, section, field } });
+    return result.data?.resetMeasurementField ?? null;
+  };
+
+  return { resetMeasurementField, loading, error };
+}
+
+export function useMeasurementHistory(measurementId: string | null) {
+  const { data, loading, error, refetch } = useQuery<MeasurementHistoryData>(
+    MEASUREMENT_HISTORY,
+    {
+      variables: { measurementId: measurementId ?? "" },
+      skip: !measurementId,
+    },
+  );
+
+  return {
+    history: data?.measurementHistory ?? [],
+    loading,
+    error,
+    refetch,
+  };
+}
+
+export function useApplyMeasurementRescan() {
+  const [mutate, { loading, error }] = useMutation<ApplyRescanData>(
+    APPLY_MEASUREMENT_RESCAN,
+    {
+      refetchQueries: [{ query: MY_MEASUREMENTS }],
+    },
+  );
+
+  const applyRescan = async (id: string, input: ApplyRescanInput) => {
+    const result = await mutate({ variables: { id, input } });
+    return result.data?.applyMeasurementRescan ?? null;
+  };
+
+  return { applyRescan, loading, error };
 }
