@@ -1,12 +1,12 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Nidlo — Where every stitch begins";
+export const alt = "Nidlo. Where every stitch begins";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /**
- * Root OG image — used as the share card for any route that doesn't define
+ * Root OG image. Used as the share card for any route that doesn't define
  * its own `opengraph-image.tsx` (currently only `/designer/[slug]` has one).
  * Static brand card, generated at the edge.
  */
@@ -30,7 +30,7 @@ export default async function OgImage() {
           textAlign: "center",
         }}
       >
-        {/* Tagline above wordmark — the way the home hero composes it. */}
+        {/* Tagline above wordmark, the way the home hero composes it. */}
         <div
           style={{
             fontSize: 28,
@@ -65,8 +65,8 @@ export default async function OgImage() {
             display: "flex",
           }}
         >
-          Custom fashion in Ghana — connecting clients with seamstresses,
-          tailors, and designers.
+          Custom fashion. Connecting you with seamstresses, tailors, and
+          designers anywhere.
         </div>
       </div>
     ),

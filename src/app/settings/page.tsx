@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
 import {
   ArrowLeft,
   Bell,
   ChevronRight,
+  Info,
   Loader2,
   Lock,
   LogOut,
@@ -13,17 +14,15 @@ import {
   ShieldOff,
   User,
   Wallet,
-  Info,
+  type LucideIcon,
 } from "lucide-react";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useLogout, useSignOutAllDevices } from "@/lib/hooks/use-logout";
 import { APP_VERSION } from "@/lib/config";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface Tile {
   href: string;
-  icon: typeof User;
+  icon: LucideIcon;
   label: string;
   description: string;
   designerOnly?: boolean;
@@ -63,22 +62,41 @@ const TILES: Tile[] = [
     designerOnly: true,
   },
   {
-    href: "/contact",
+    href: "/privacy",
     icon: ShieldCheck,
     label: "Privacy",
     description: "How we handle your data",
   },
   {
-    href: "/contact",
+    href: "/#contact",
     icon: Info,
-    label: "Help & Support",
+    label: "Help & support",
     description: "Contact us or browse FAQs",
   },
   {
-    href: "/about",
+    href: "/#about",
     icon: Info,
-    label: "About",
-    description: "Terms, privacy, and what Nidlo is",
+    label: "About Nidlo",
+    description: "What we're building and why",
+  },
+];
+
+interface ComingSoonTile {
+  icon: LucideIcon;
+  label: string;
+  description: string;
+}
+
+const COMING_SOON: ComingSoonTile[] = [
+  {
+    icon: Lock,
+    label: "Change phone number",
+    description: "Re-verify with a new phone via OTP",
+  },
+  {
+    icon: Lock,
+    label: "Delete account",
+    description: "Permanently remove your data after a 30-day cool-off",
   },
 ];
 
@@ -91,9 +109,11 @@ export default function SettingsPage() {
   if (!isReady || !user) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
+        <div className="mx-auto max-w-lg space-y-6">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-10 w-56" />
+          <Skeleton className="h-72 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
         </div>
       </AppShell>
     );
@@ -103,96 +123,101 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-lg space-y-6">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/profile" aria-label="Back to profile">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-bold">Settings</h1>
+      <div className="mx-auto max-w-lg space-y-7">
+        <div>
+          <Link
+            href="/profile"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Back to profile
+          </Link>
+          <header className="mt-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Account
+            </p>
+            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+              Settings
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+              Manage your preferences, privacy, and account access.
+            </p>
+          </header>
         </div>
 
-        <div className="space-y-2">
-          {tiles.map((tile) => {
-            const Icon = tile.icon;
-            return (
-              <Link key={`${tile.href}-${tile.label}`} href={tile.href}>
-                <Card className="transition-colors hover:border-primary/50 hover:bg-accent/30">
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                      <Icon className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium">{tile.label}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {tile.description}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
+        {/* Available tiles */}
+        <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+          {tiles.map((tile) => (
+            <SettingsTile key={`${tile.href}-${tile.label}`} tile={tile} />
+          ))}
+        </GlassCard>
 
-        {/* Phase 2 placeholders */}
-        <div className="space-y-2 opacity-60">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {/* Coming soon */}
+        <section>
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Coming soon
           </p>
-          <Card>
-            <CardContent className="flex items-center gap-3 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Lock className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">Change phone number</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  Re-verify with a new phone via OTP
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex items-center gap-3 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Lock className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">Delete account</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  Permanently remove your data after a 30-day cool-off
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <GlassCard
+            variant="solid"
+            className="divide-y divide-border/60 p-2 opacity-70"
+          >
+            {COMING_SOON.map((tile) => {
+              const Icon = tile.icon;
+              return (
+                <div
+                  key={tile.label}
+                  className="flex items-center gap-3 px-3 py-3"
+                >
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground ring-1 ring-border">
+                    <Icon className="h-4 w-4" aria-hidden />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-2 text-display text-sm font-semibold tracking-tight">
+                      {tile.label}
+                      <span className="rounded-full border border-copper/40 bg-copper/10 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wider text-copper-soft">
+                        Soon
+                      </span>
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {tile.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </GlassCard>
+        </section>
 
+        {/* Sign-out actions */}
         <div className="space-y-2">
           <Button
-            variant="outline"
-            className="w-full"
+            variant="luxe-outline"
+            size="lg"
+            className="w-full gap-1.5"
             onClick={logout}
             disabled={loggingOut || signingOutAll}
           >
-            <LogOut className="mr-2 h-4 w-4" />
-            {loggingOut ? "Logging out..." : "Log out"}
+            {loggingOut ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <LogOut className="h-4 w-4" aria-hidden />
+            )}
+            {loggingOut ? "Logging out…" : "Log out"}
           </Button>
 
           <Button
             variant="ghost"
-            className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+            size="lg"
+            className="w-full gap-1.5 text-status-error hover:bg-status-error-soft hover:text-status-error-fg"
             onClick={() => setConfirmAllOpen(true)}
             disabled={loggingOut || signingOutAll}
           >
-            <ShieldOff className="mr-2 h-4 w-4" />
+            <ShieldOff className="h-4 w-4" aria-hidden />
             Sign out of all devices
           </Button>
         </div>
 
-        <p className="pt-2 text-center text-xs text-muted-foreground">
+        <p className="pt-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Nidlo · v{APP_VERSION}
         </p>
       </div>
@@ -200,16 +225,19 @@ export default function SettingsPage() {
       <Dialog open={confirmAllOpen} onOpenChange={setConfirmAllOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Sign out of all devices?</DialogTitle>
-            <DialogDescription>
-              This signs you out of every browser and tab where you&apos;re
-              currently logged in — phone, laptop, tablet, anywhere. You&apos;ll
-              need to log in again on each device.
+            <DialogTitle className="text-display text-2xl font-semibold tracking-tight">
+              Sign out of all devices?
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              This signs you out of every browser and tab where you&rsquo;re
+              currently logged in — phone, laptop, tablet, anywhere.
+              You&rsquo;ll need to log in again on each device.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
+              size="lg"
               onClick={() => setConfirmAllOpen(false)}
               disabled={signingOutAll}
             >
@@ -217,6 +245,8 @@ export default function SettingsPage() {
             </Button>
             <Button
               variant="destructive"
+              size="lg"
+              className="gap-1.5"
               onClick={async () => {
                 setConfirmAllOpen(false);
                 await signOutAll();
@@ -224,13 +254,40 @@ export default function SettingsPage() {
               disabled={signingOutAll}
             >
               {signingOutAll && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
               )}
+              <ShieldOff className="h-4 w-4" aria-hidden />
               Sign out everywhere
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </AppShell>
+  );
+}
+
+function SettingsTile({ tile }: { tile: Tile }) {
+  const Icon = tile.icon;
+  return (
+    <Link
+      href={tile.href}
+      className="group flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 hover:bg-card focus-visible:bg-card focus-visible:outline-none"
+    >
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground ring-1 ring-border transition-colors group-hover:bg-foreground group-hover:text-background">
+        <Icon className="h-4 w-4" aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-display text-sm font-semibold tracking-tight">
+          {tile.label}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">
+          {tile.description}
+        </p>
+      </div>
+      <ChevronRight
+        className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-copper"
+        aria-hidden
+      />
+    </Link>
   );
 }

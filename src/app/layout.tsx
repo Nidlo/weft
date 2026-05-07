@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import { Providers } from "@/providers/providers";
 import { PwaInstallPrompt } from "@/components/shared/pwa-install-prompt";
 import { APP_URL } from "@/lib/config";
@@ -15,11 +15,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Next 15+ wants `themeColor` / `viewport` here rather than in `metadata` —
-// gives the splash background and the Android chrome bar a consistent colour
-// (matches `manifest.theme_color`).
+// Editorial display serif. Paired with Geist for body copy; the
+// optical-size axis pushes high for large headlines (opsz: 144 in
+// .text-display).
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
+  axes: ["SOFT", "WONK", "opsz"],
+});
+
+// Match `manifest.theme_color` and the new bone-light surface so Android
+// chrome bar / iOS status bar blend into the brand surface.
 export const viewport: Viewport = {
-  themeColor: "#6b21a8",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fbf7f0" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1612" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -28,24 +40,22 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "Nidlo — Where every stitch begins",
+    default: "Nidlo. Where every stitch begins",
     template: "%s | Nidlo",
   },
   description:
-    "Connect with talented seamstresses, tailors, and fashion designers for custom-made clothing in Ghana and West Africa. Track your garment from design to delivery.",
+    "Connect with talented seamstresses, tailors, and fashion designers for custom-made clothing. Track your garment from design to delivery.",
   keywords: [
     "custom clothing",
     "tailor",
     "seamstress",
     "fashion designer",
-    "Ghana",
-    "West Africa",
     "bespoke fashion",
     "Nidlo",
   ],
   openGraph: {
     type: "website",
-    locale: "en_GH",
+    locale: "en",
     siteName: "Nidlo",
   },
   twitter: {
@@ -67,7 +77,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased`}
         suppressHydrationWarning
       >
         <Providers>

@@ -1,6 +1,10 @@
 "use client";
 
+import Link from "next/link";
+
 import { DesignerScrollSection } from "@/components/shared/designer-scroll-section";
+import { Section } from "@/components/ui/section";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   useTopRated,
   useNewDesigners,
@@ -8,9 +12,7 @@ import {
 } from "@/lib/hooks/use-discovery";
 import { useGeolocation } from "@/lib/hooks/use-geolocation";
 import { useSpecializations } from "@/lib/hooks/use-specializations";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export function HomeDiscovery() {
   const { lat, lng } = useGeolocation();
@@ -20,52 +22,55 @@ export function HomeDiscovery() {
   const nearby = useNearbyDesigners(lat, lng);
 
   return (
-    <div className="space-y-8">
-      {/* Quick Filter Chips */}
+    <div className="space-y-2">
       {quickFilters.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-lg font-semibold">Browse by Category</h2>
-          <ScrollArea className="w-full">
-            <div className="flex gap-2 pb-2">
+        <Section
+          density="compact"
+          eyebrow="Discover"
+          title="Browse by craft"
+        >
+          <ScrollArea className="-mx-4 w-screen sm:mx-0 sm:w-full">
+            <div className="flex gap-2 px-4 pb-3 sm:px-0">
               {quickFilters.map((spec) => (
                 <Link
                   key={spec.id}
                   href={`/search?spec=${spec.slug}`}
+                  className={cn(
+                    "group inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium",
+                    "transition-colors duration-150",
+                    "hover:border-foreground/30 hover:bg-foreground hover:text-background"
+                  )}
                 >
-                  <Badge
-                    variant="outline"
-                    className="shrink-0 cursor-pointer px-3 py-1.5 text-sm hover:bg-accent"
-                  >
-                    {spec.name}
-                  </Badge>
+                  <span className="size-1 rounded-full bg-copper" aria-hidden />
+                  {spec.name}
                 </Link>
               ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
-        </section>
+        </Section>
       )}
 
-      {/* Top Rated */}
       <DesignerScrollSection
-        title="Top Rated Designers"
+        eyebrow="Acclaimed"
+        title="Top-rated designers"
         designers={topRated.designers}
         loading={topRated.loading}
         browseHref="/search?sort=rating"
       />
 
-      {/* Near You */}
       {(nearby.loading || nearby.designers.length > 0) && (
         <DesignerScrollSection
-          title="Near You"
+          eyebrow="Local"
+          title="Near you"
           designers={nearby.designers}
           loading={nearby.loading}
           browseHref="/search?sort=distance"
         />
       )}
 
-      {/* Newest */}
       <DesignerScrollSection
+        eyebrow="Fresh"
         title="New on Nidlo"
         designers={newest.designers}
         loading={newest.loading}

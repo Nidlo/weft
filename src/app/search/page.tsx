@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { Search, SearchX, Sparkles, SlidersHorizontal, X } from "lucide-react";
+
 import { AppShell } from "@/components/layout/app-shell";
 import { DesignerCard } from "@/components/shared/designer-card";
 import { useDesignerSearch } from "@/lib/hooks/use-designer-search";
@@ -8,11 +10,11 @@ import { useSpecializations } from "@/lib/hooks/use-specializations";
 import { useCities } from "@/lib/hooks/use-cities";
 import { useGeolocation } from "@/lib/hooks/use-geolocation";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { GlassCard } from "@/components/ui/glass-card";
 import {
   Select,
   SelectContent,
@@ -29,8 +31,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import type { SearchDesignersInput } from "@/types/graphql";
-import { Search, SlidersHorizontal, X } from "lucide-react";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -62,7 +64,8 @@ export default function SearchPage() {
     lng: sortBy === "nearest" && lng ? lng : undefined,
   };
 
-  const { designers, loading, error, hasMore, loadMore } = useDesignerSearch(input);
+  const { designers, loading, error, hasMore, loadMore } =
+    useDesignerSearch(input);
 
   // Debounce search input
   const handleSearch = useCallback((value: string) => {
@@ -117,23 +120,22 @@ export default function SearchPage() {
 
   const sortOptions = [
     { value: "recommended", label: "Recommended" },
-    { value: "rating", label: "Top Rated" },
+    { value: "rating", label: "Top rated" },
     { value: "newest", label: "Newest" },
-    { value: "price_low", label: "Price: Low" },
-    { value: "price_high", label: "Price: High" },
+    { value: "price_low", label: "Price · Low" },
+    { value: "price_high", label: "Price · High" },
     ...(lat && lng ? [{ value: "nearest", label: "Nearest" }] : []),
   ];
 
   const filterPanel = (
     <div className="space-y-6">
-      {/* City */}
       <div className="space-y-2">
-        <Label>City</Label>
+        <Label className="text-sm">City</Label>
         <Select
           value={city || "all"}
           onValueChange={(v) => setCity(v === "all" ? "" : v)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-11">
             <SelectValue placeholder="All cities" />
           </SelectTrigger>
           <SelectContent>
@@ -147,36 +149,54 @@ export default function SearchPage() {
         </Select>
       </div>
 
-      {/* Price Range */}
       <div className="space-y-2">
-        <Label>Price range (GHS)</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            type="number"
-            placeholder="Min"
-            value={priceMin}
-            onChange={(e) => setPriceMin(e.target.value)}
-            min={0}
-          />
-          <span className="text-muted-foreground">-</span>
-          <Input
-            type="number"
-            placeholder="Max"
-            value={priceMax}
-            onChange={(e) => setPriceMax(e.target.value)}
-            min={0}
-          />
+        <Label className="text-sm">Price range (GHS)</Label>
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <div className="relative">
+            <span
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+              aria-hidden
+            >
+              GHS
+            </span>
+            <Input
+              type="number"
+              placeholder="Min"
+              value={priceMin}
+              onChange={(e) => setPriceMin(e.target.value)}
+              min={0}
+              className="h-11 pl-12 tabular-nums"
+              aria-label="Minimum price"
+            />
+          </div>
+          <span className="text-muted-foreground">to</span>
+          <div className="relative">
+            <span
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+              aria-hidden
+            >
+              GHS
+            </span>
+            <Input
+              type="number"
+              placeholder="Max"
+              value={priceMax}
+              onChange={(e) => setPriceMax(e.target.value)}
+              min={0}
+              className="h-11 pl-12 tabular-nums"
+              aria-label="Maximum price"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Minimum Rating */}
       <div className="space-y-2">
-        <Label>Minimum rating</Label>
+        <Label className="text-sm">Minimum rating</Label>
         <Select
           value={minRating || "any"}
           onValueChange={(v) => setMinRating(v === "any" ? "" : v)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-11">
             <SelectValue placeholder="Any rating" />
           </SelectTrigger>
           <SelectContent>
@@ -189,25 +209,28 @@ export default function SearchPage() {
         </Select>
       </div>
 
-      {/* Accepting Orders */}
-      <div className="flex items-center justify-between">
-        <Label htmlFor="accepting-orders">Accepting orders only</Label>
+      <GlassCard
+        variant="ghost"
+        className="flex items-center justify-between p-4"
+      >
+        <Label htmlFor="accepting-orders" className="cursor-pointer text-sm">
+          Accepting orders only
+        </Label>
         <Switch
           id="accepting-orders"
           checked={acceptingOnly}
           onCheckedChange={setAcceptingOnly}
         />
-      </div>
+      </GlassCard>
 
-      {/* Clear Filters */}
       {activeFilterCount > 0 && (
         <Button
           variant="ghost"
           size="sm"
           onClick={clearFilters}
-          className="w-full"
+          className="w-full gap-1.5 text-muted-foreground hover:text-foreground"
         >
-          <X className="mr-1 h-4 w-4" />
+          <X className="h-3.5 w-3.5" aria-hidden />
           Clear all filters
         </Button>
       )}
@@ -216,143 +239,165 @@ export default function SearchPage() {
 
   return (
     <AppShell>
-      <div className="space-y-4">
-        {/* Search Bar + Filter Button */}
+      <div className="space-y-7">
+        <header>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            Discover
+          </p>
+          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            Find your designer
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            Search tailors, seamstresses, and fashion designers by craft,
+            location, price, or rating.
+          </p>
+        </header>
+
+        {/* Search bar + filter trigger */}
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search
+              className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-copper"
+              aria-hidden
+            />
             <Input
-              placeholder="Search designers by name or keyword..."
+              placeholder="Search designers by name or keyword"
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10"
+              className="h-12 rounded-full pl-10 text-base"
+              aria-label="Search designers"
             />
           </div>
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
               <Button
-                variant="outline"
-                size="icon"
-                className="relative"
+                variant="luxe-outline"
+                size="lg"
+                className="relative h-12 gap-1.5 rounded-full px-5"
                 aria-label={
                   activeFilterCount > 0
                     ? `Filters, ${activeFilterCount} active`
                     : "Filters"
                 }
               >
-                <SlidersHorizontal className="h-4 w-4" />
+                <SlidersHorizontal className="h-4 w-4" aria-hidden />
+                Filters
                 {activeFilterCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                  <span className="ml-0.5 inline-flex size-5 items-center justify-center rounded-full bg-copper text-[10px] font-bold tabular-nums text-foreground">
                     {activeFilterCount}
                   </span>
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent
+              side="bottom"
+              className="max-h-[85vh] overflow-y-auto"
+            >
               <SheetHeader>
-                <SheetTitle>Filters</SheetTitle>
+                <SheetTitle className="text-display text-2xl font-semibold tracking-tight">
+                  Filters
+                </SheetTitle>
                 <SheetDescription>
-                  Narrow down your search results
+                  Narrow down your search results.
                 </SheetDescription>
               </SheetHeader>
-              <div className="mt-6">{filterPanel}</div>
+              <div className="mt-6 px-4 pb-4">{filterPanel}</div>
             </SheetContent>
           </Sheet>
         </div>
 
-        {/* Quick Filter Chips */}
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-2 pb-2">
-            {quickFilters.map((spec) => (
-              <Badge
-                key={spec.id}
-                variant={
-                  selectedSpecs.includes(spec.slug) ? "default" : "outline"
-                }
-                className="shrink-0 cursor-pointer"
-                onClick={() => toggleSpec(spec.slug)}
+        {/* Quick filter chip rail */}
+        {quickFilters.length > 0 && (
+          <ScrollArea className="-mx-4 w-screen sm:mx-0 sm:w-full">
+            <div className="flex gap-2 px-4 pb-2 sm:px-0">
+              {quickFilters.map((spec) => {
+                const isActive = selectedSpecs.includes(spec.slug);
+                return (
+                  <button
+                    key={spec.id}
+                    type="button"
+                    onClick={() => toggleSpec(spec.slug)}
+                    className={cn(
+                      "inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium",
+                      "transition-all duration-200 hover:-translate-y-0.5",
+                      isActive
+                        ? "bg-foreground text-background shadow-(--shadow-2)"
+                        : "border border-border bg-card hover:border-foreground/30"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "size-1 rounded-full transition-transform",
+                        isActive
+                          ? "bg-copper scale-150"
+                          : "bg-copper"
+                      )}
+                      aria-hidden
+                    />
+                    {spec.name}
+                  </button>
+                );
+              })}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        )}
+
+        {/* Sort options pill bar */}
+        <ScrollArea className="-mx-4 w-screen sm:mx-0 sm:w-full">
+          <div className="flex gap-1 rounded-full border border-border bg-card p-1 sm:w-fit mx-4 sm:mx-0">
+            {sortOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setSortBy(option.value)}
+                className={cn(
+                  "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                  sortBy === option.value
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
-                {spec.name}
-              </Badge>
+                {option.label}
+              </button>
             ))}
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
-        {/* Sort Options */}
-        <div className="flex gap-2 text-sm">
-          {sortOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => setSortBy(option.value)}
-              className={`rounded-full px-3 py-1 transition-colors ${
-                sortBy === option.value
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-accent"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Active Filter Tags */}
+        {/* Active filter tags */}
         {activeFilterCount > 0 && (
           <div className="flex flex-wrap gap-2">
             {city && (
-              <Badge variant="secondary" className="gap-1">
-                {city}
-                <button
-                  type="button"
-                  aria-label={`Remove ${city} filter`}
-                  onClick={() => setCity("")}
-                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
+              <FilterTag
+                label={city}
+                onRemove={() => setCity("")}
+                ariaLabel={`Remove ${city} filter`}
+              />
             )}
             {(priceMin || priceMax) && (
-              <Badge variant="secondary" className="gap-1">
-                GHS {priceMin || "0"} - {priceMax || "any"}
-                <button
-                  type="button"
-                  aria-label="Remove price filter"
-                  onClick={() => {
-                    setPriceMin("");
-                    setPriceMax("");
-                  }}
-                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
+              <FilterTag
+                label={`GHS ${priceMin || "0"} to ${priceMax || "any"}`}
+                onRemove={() => {
+                  setPriceMin("");
+                  setPriceMax("");
+                }}
+                ariaLabel="Remove price filter"
+              />
             )}
             {minRating && (
-              <Badge variant="secondary" className="gap-1">
-                {minRating}+ stars
-                <button
-                  type="button"
-                  aria-label="Remove rating filter"
-                  onClick={() => setMinRating("")}
-                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
+              <FilterTag
+                label={`${minRating}+ stars`}
+                onRemove={() => setMinRating("")}
+                ariaLabel="Remove rating filter"
+              />
             )}
             {acceptingOnly && (
-              <Badge variant="secondary" className="gap-1">
-                Accepting orders
-                <button
-                  type="button"
-                  aria-label="Remove accepting orders filter"
-                  onClick={() => setAcceptingOnly(false)}
-                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
+              <FilterTag
+                label="Accepting orders"
+                onRemove={() => setAcceptingOnly(false)}
+                ariaLabel="Remove accepting orders filter"
+              />
             )}
           </div>
         )}
@@ -363,21 +408,25 @@ export default function SearchPage() {
             <DesignerCard key={designer.id} designer={designer} />
           ))}
 
-          {/* Loading skeletons */}
+          {/* Loading skeletons match the DesignerCard layout below. */}
           {loading && designers.length === 0 && (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="rounded-lg border p-4">
-                  <div className="flex gap-3">
+                <div
+                  key={i}
+                  className="rounded-2xl border border-border bg-card p-5"
+                >
+                  <div className="flex gap-4">
                     <Skeleton className="h-14 w-14 rounded-full" />
                     <div className="flex-1 space-y-2">
                       <Skeleton className="h-5 w-32" />
-                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-24" />
                     </div>
                   </div>
-                  <div className="mt-3 flex gap-2">
-                    <Skeleton className="h-5 w-16" />
-                    <Skeleton className="h-5 w-20" />
+                  <div className="mt-4 flex gap-1.5">
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                    <Skeleton className="h-6 w-24 rounded-full" />
                   </div>
                 </div>
               ))}
@@ -386,22 +435,50 @@ export default function SearchPage() {
 
           {/* Error state */}
           {error && !loading && (
-            <div className="py-12 text-center">
-              <p className="text-lg font-medium">Something went wrong</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                We couldn&apos;t load designers. Check your connection and try again.
+            <GlassCard
+              variant="solid"
+              className="flex flex-col items-center py-16 text-center"
+            >
+              <span className="flex size-16 items-center justify-center rounded-2xl bg-status-error-soft text-status-error">
+                <SearchX className="h-7 w-7" aria-hidden />
+              </span>
+              <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
+                Something went wrong.
+              </h2>
+              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+                We couldn&rsquo;t load designers. Check your connection and try
+                again.
               </p>
-            </div>
+            </GlassCard>
           )}
 
           {/* Empty state */}
           {!loading && !error && designers.length === 0 && (
-            <div className="py-12 text-center">
-              <p className="text-lg font-medium">No designers found</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Try adjusting your search or filters
+            <GlassCard
+              variant="solid"
+              className="flex flex-col items-center py-16 text-center"
+            >
+              <span className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-foreground">
+                <Sparkles className="h-7 w-7" aria-hidden />
+              </span>
+              <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
+                No designers found.
+              </h2>
+              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+                Try adjusting your search or clearing some filters.
               </p>
-            </div>
+              {activeFilterCount > 0 && (
+                <Button
+                  variant="luxe-outline"
+                  size="lg"
+                  className="mt-6 gap-1.5"
+                  onClick={clearFilters}
+                >
+                  <X className="h-4 w-4" aria-hidden />
+                  Clear all filters
+                </Button>
+              )}
+            </GlassCard>
           )}
 
           {/* Infinite scroll trigger */}
@@ -410,20 +487,50 @@ export default function SearchPage() {
           {/* Loading more indicator */}
           {loading && designers.length > 0 && (
             <div className="flex justify-center py-4">
-              <Button type="button" variant="ghost" disabled>
-                Loading more...
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled
+                className="text-muted-foreground"
+              >
+                Loading more
               </Button>
             </div>
           )}
 
           {/* End of results */}
           {!hasMore && designers.length > 0 && (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-              Showing all {designers.length} designers
+            <p className="py-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              All <span className="tabular-nums text-foreground">{designers.length}</span>{" "}
+              designers shown
             </p>
           )}
         </div>
       </div>
     </AppShell>
+  );
+}
+
+interface FilterTagProps {
+  label: string;
+  onRemove: () => void;
+  ariaLabel: string;
+}
+
+function FilterTag({ label, onRemove, ariaLabel }: FilterTagProps) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium">
+      <span className="size-1 rounded-full bg-copper" aria-hidden />
+      {label}
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        onClick={onRemove}
+        className="ml-0.5 rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <X className="h-3 w-3" aria-hidden />
+      </button>
+    </span>
   );
 }
