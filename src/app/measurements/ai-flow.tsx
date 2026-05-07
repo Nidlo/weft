@@ -44,6 +44,7 @@ interface AiFlowProps {
     landmarks: Landmarks | null,
     photoUrl: string | null,
     photoPublicId: string | null,
+    photoDisk: string | null,
   ) => Promise<void>;
   saving?: boolean;
   onCancel?: () => void;
@@ -73,10 +74,13 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   );
   const [extractedLandmarks, setExtractedLandmarks] =
     useState<Landmarks | null>(null);
-  // S2.5c — ImageKit references captured from extractAiMeasurements so the
-  // saved overlay can re-render on revisit. Pass through verbatim on save.
+  // S2.5c — disk-aware photo references captured from extractAiMeasurements
+  // so the saved overlay can re-render on revisit. The triplet
+  // (url / public_id / disk) is what the backend resolver needs to
+  // build the right URL at read time. Pass through verbatim on save.
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoPublicId, setPhotoPublicId] = useState<string | null>(null);
+  const [photoDisk, setPhotoDisk] = useState<string | null>(null);
   // S2.5d — bumping this key remounts ManualForm so a recompute apply can
   // re-seed `initialData`. We don't want to remount on every drag (kills
   // focus + in-progress edits), only on explicit "Apply".
@@ -144,6 +148,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       setExtractedLandmarks(data?.extractAiMeasurements?.landmarks ?? null);
       setPhotoUrl(data?.extractAiMeasurements?.photoUrl ?? null);
       setPhotoPublicId(data?.extractAiMeasurements?.photoPublicId ?? null);
+      setPhotoDisk(data?.extractAiMeasurements?.photoDisk ?? null);
       setAiStep("review");
     } catch (err) {
       if (cancelledRef.current) return;
@@ -352,7 +357,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         variant="solid"
         className="bg-thread-mesh flex flex-col items-center py-16 text-center"
       >
-        <StitchLoader size={28} />
+        <StitchLoader size={32} tone="copper" />
         <p className="text-display mt-6 text-xl font-semibold tracking-tight">
           {stage}
         </p>
@@ -425,7 +430,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         initialLabel="Fitscan AI"
         initialData={extractedData ?? undefined}
         onSave={(label, unit, data) =>
-          onComplete(label, unit, data, extractedLandmarks, photoUrl, photoPublicId)
+          onComplete(label, unit, data, extractedLandmarks, photoUrl, photoPublicId, photoDisk)
         }
         saving={saving}
         onCancel={onCancel}

@@ -10,6 +10,7 @@ export const CREATE_MEASUREMENT = gql`
       manualOverridesMm
       landmarksNormalized
       photoUrl
+      photoDisk
       confirmedAt
       source
       isDefault
@@ -29,6 +30,7 @@ export const UPDATE_MEASUREMENT = gql`
       manualOverridesMm
       landmarksNormalized
       photoUrl
+      photoDisk
       confirmedAt
       source
       isDefault
@@ -64,6 +66,7 @@ export const RESET_MEASUREMENT_FIELD = gql`
       manualOverridesMm
       landmarksNormalized
       photoUrl
+      photoDisk
       confirmedAt
       source
       isDefault
@@ -83,6 +86,7 @@ export const APPLY_MEASUREMENT_RESCAN = gql`
         manualOverridesMm
         landmarksNormalized
         photoUrl
+        photoDisk
         confirmedAt
         source
         isDefault

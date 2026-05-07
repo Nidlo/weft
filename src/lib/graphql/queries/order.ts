@@ -112,6 +112,7 @@ export const GET_ORDER = gql`
         manualOverridesMm
         landmarksNormalized
         photoUrl
+        photoDisk
         confirmedAt
         source
         isDefault
@@ -268,6 +269,7 @@ export const CLIENT_MEASUREMENTS = gql`
       manualOverridesMm
       landmarksNormalized
       photoUrl
+      photoDisk
       confirmedAt
       source
       isDefault

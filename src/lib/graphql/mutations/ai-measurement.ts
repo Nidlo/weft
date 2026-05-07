@@ -15,6 +15,7 @@ export const EXTRACT_AI_MEASUREMENTS = gql`
       landmarks
       photoUrl
       photoPublicId
+      photoDisk
     }
   }
 `;

@@ -344,8 +344,19 @@ export interface GqlMeasurement {
    * where the user didn't touch the overlay.
    */
   landmarksNormalized: Landmarks | null;
-  /** ImageKit URL of the source photo (S2.5c). Null on manual rows. */
+  /**
+   * Read-time URL for the AI-extracted source photo (S2.5c). The shape
+   * depends on `photoDisk` — a signed Laravel route for `'local'`, the
+   * stable CDN URL for `'imagekit'`, or a short-lived signed URL for
+   * `'s3'`. Null on manual rows or rows whose upload failed.
+   */
   photoUrl: string | null;
+  /**
+   * Which storage backend wrote the photo. `'local'` (default) | `'imagekit'`
+   * | `'s3'`. Surfaced so callers can decide rendering strategy if
+   * needed; null on rows without a photo.
+   */
+  photoDisk: string | null;
   confirmedAt: string | null;
   source: string;
   isDefault: boolean;
@@ -439,10 +450,12 @@ export type Landmarks = Record<string, PoseLandmark>;
 export interface ExtractAiMeasurementsResult {
   data: MeasurementData;
   landmarks: Landmarks | null;
-  /** ImageKit URL of the source photo (S2.5c). Null when ImageKit isn't configured or the upload failed. */
+  /** Cached URL when the disk returns one (ImageKit); null for local + s3 — those are computed at read time. */
   photoUrl: string | null;
-  /** ImageKit public ID — needed for right-to-be-forgotten asset cleanup. */
+  /** Disk-specific identifier the storage layer needs to delete the asset. */
   photoPublicId: string | null;
+  /** Which disk wrote the asset: `'local'` | `'imagekit'` | `'s3'`. Pass through verbatim on save. */
+  photoDisk: string | null;
 }
 
 export interface ExtractAiMeasurementsData {
@@ -456,10 +469,12 @@ export interface CreateMeasurementInput {
   source?: string;
   /** User-corrected landmark coordinates from the editable overlay (S2.5b). */
   landmarks?: Landmarks;
-  /** ImageKit URL of the source photo (S2.5c) — pass through verbatim from the extractAiMeasurements result. */
+  /** Cached URL of the source photo (S2.5c). Set only for the imagekit disk; pass through verbatim from the extractAiMeasurements result. */
   photoUrl?: string;
-  /** ImageKit public ID for the source photo (S2.5c). */
+  /** Disk-specific identifier (path on local, fileId on imagekit, S3 key on backblaze). */
   photoPublicId?: string;
+  /** Which storage disk wrote the asset — pass through verbatim from extractAiMeasurements. */
+  photoDisk?: string;
 }
 
 export interface UpdateMeasurementInput {

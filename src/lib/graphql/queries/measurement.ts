@@ -10,6 +10,7 @@ export const MY_MEASUREMENTS = gql`
       manualOverridesMm
       landmarksNormalized
       photoUrl
+      photoDisk
       confirmedAt
       source
       isDefault

@@ -97,6 +97,7 @@ export default function MeasurementsPage() {
     landmarks: Landmarks | null,
     photoUrl: string | null,
     photoPublicId: string | null,
+    photoDisk: string | null,
   ) => {
     try {
       await createMeasurement({
@@ -107,6 +108,7 @@ export default function MeasurementsPage() {
         landmarks: landmarks ?? undefined,
         photoUrl: photoUrl ?? undefined,
         photoPublicId: photoPublicId ?? undefined,
+        photoDisk: photoDisk ?? undefined,
       });
       toast.success("AI measurement profile saved!");
       setViewMode("list");
