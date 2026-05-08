@@ -244,15 +244,15 @@ export function RescanFlow({ measurement, onComplete, onCancel }: RescanFlowProp
   if (step === "processing") {
     const stage =
       elapsed < 4
-        ? "Detecting body landmarks…"
+        ? "Detecting body landmarks..."
         : elapsed < 10
-          ? "Computing measurements…"
+          ? "Computing measurements..."
           : elapsed < 20
-            ? "Refining results…"
-            : "Almost there…";
+            ? "Refining results..."
+            : "Almost there...";
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <StitchLoader size={28} label="Analysing photo" />
+        <StitchLoader size={32} tone="copper" label="Analysing photo" />
         <p className="mt-4 text-sm font-medium">{stage}</p>
         <p className="mt-1 text-xs tabular-nums text-muted-foreground">
           {elapsed}s elapsed · usually 5–15s

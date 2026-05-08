@@ -2,27 +2,30 @@
 
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
+  Banknote,
   Bell,
   BellOff,
   BellRing,
   CheckCheck,
-  Package,
-  MessageSquare,
   CreditCard,
+  Loader2,
+  MessageSquare,
+  Package,
+  Settings,
   Star,
   Wallet,
-  Banknote,
-  Settings,
-  Loader2,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import Link from "next/link";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GlassCard } from "@/components/ui/glass-card";
 import {
   MY_NOTIFICATIONS,
   UNREAD_NOTIFICATIONS_COUNT,
@@ -33,6 +36,7 @@ import {
 } from "@/lib/graphql/mutations/notification";
 import { useNotificationsStore } from "@/lib/stores/notifications";
 import { usePushPermission } from "@/lib/hooks/use-push-notifications";
+import { cn } from "@/lib/utils";
 import type {
   GqlNotification,
   MyNotificationsData,
@@ -40,7 +44,7 @@ import type {
   MarkAllNotificationsReadData,
 } from "@/types/graphql";
 
-const ICON_MAP: Record<string, typeof Bell> = {
+const ICON_MAP: Record<string, LucideIcon> = {
   package: Package,
   "message-square": MessageSquare,
   "credit-card": CreditCard,
@@ -70,8 +74,10 @@ export default function NotificationsPage() {
   const router = useRouter();
   const setUnreadCount = useNotificationsStore((s) => s.setUnreadCount);
   const resetUnread = useNotificationsStore((s) => s.resetUnread);
-  const { shouldPromptUi: shouldPromptPush, requestPermission: requestPushPermission } =
-    usePushPermission();
+  const {
+    shouldPromptUi: shouldPromptPush,
+    requestPermission: requestPushPermission,
+  } = usePushPermission();
 
   const { data, loading, fetchMore } = useQuery<MyNotificationsData>(
     MY_NOTIFICATIONS,
@@ -88,7 +94,6 @@ export default function NotificationsPage() {
   const [markAllRead, { loading: markingAll }] =
     useMutation<MarkAllNotificationsReadData>(MARK_ALL_NOTIFICATIONS_READ);
 
-  // Sync unread count on load
   useEffect(() => {
     if (!data) return;
     const unreadOnPage = data.myNotifications.data.filter(
@@ -156,11 +161,12 @@ export default function NotificationsPage() {
   if (!isReady || !user) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
+        <div className="space-y-6">
+          <Skeleton className="h-3 w-32" />
+          <Skeleton className="h-10 w-56" />
+          <Skeleton className="h-5 w-72" />
+          <Skeleton className="h-16 w-full rounded-2xl" />
+          <Skeleton className="h-72 w-full rounded-2xl" />
         </div>
       </AppShell>
     );
@@ -172,27 +178,32 @@ export default function NotificationsPage() {
 
   return (
     <AppShell>
-      <div className="space-y-4">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+      <div className="space-y-7">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Notifications</h1>
-            <p className="text-sm text-muted-foreground">
-              Stay updated on your orders and activity
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Inbox
+            </p>
+            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+              Notifications
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+              Stay updated on orders, messages, and payments.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:shrink-0">
             {hasUnread && (
               <Button
-                variant="outline"
+                variant="luxe-outline"
                 size="sm"
                 onClick={handleMarkAllRead}
                 disabled={markingAll}
+                className="gap-1.5"
               >
                 {markingAll ? (
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
                 ) : (
-                  <CheckCheck className="mr-1.5 h-4 w-4" />
+                  <CheckCheck className="h-3.5 w-3.5" aria-hidden />
                 )}
                 Mark all read
               </Button>
@@ -206,46 +217,62 @@ export default function NotificationsPage() {
               </Link>
             </Button>
           </div>
-        </div>
+        </header>
 
         {/* Push permission prompt */}
         {shouldPromptPush && (
-          <div className="flex items-center gap-3 rounded-lg border bg-status-info-soft p-3">
-            <BellRing className="h-5 w-5 shrink-0 text-status-info" />
-            <div className="flex-1 text-sm">
-              <p className="font-medium">Enable push notifications</p>
-              <p className="text-xs text-muted-foreground">
+          <GlassCard
+            variant="solid"
+            className="flex flex-col items-start gap-3 border-copper/30 bg-copper/5 p-4 sm:flex-row sm:items-center sm:gap-4"
+          >
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-copper/15 text-copper">
+              <BellRing className="h-5 w-5" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-display text-sm font-semibold tracking-tight">
+                Enable push notifications
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 Get instant alerts for orders, messages, and payments — even
                 when Nidlo isn&apos;t open.
               </p>
             </div>
             <Button
+              variant="luxe"
               size="sm"
               onClick={() => requestPushPermission()}
+              className="self-stretch sm:self-auto"
             >
               Enable
             </Button>
-          </div>
+          </GlassCard>
         )}
 
-        {/* Notification List */}
+        {/* Notification list */}
         {loading && notifications.length === 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              <Skeleton key={i} className="h-20 w-full rounded-2xl" />
             ))}
           </div>
         ) : notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <BellOff className="mb-4 h-12 w-12 text-muted-foreground/40" />
-            <h3 className="text-lg font-medium">No notifications yet</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              When you get order updates, messages, or payments,
-              they&apos;ll show up here.
+          <GlassCard
+            variant="solid"
+            className="flex flex-col items-center py-16 text-center"
+          >
+            <span className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-foreground">
+              <BellOff className="h-7 w-7" aria-hidden />
+            </span>
+            <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
+              No notifications yet.
+            </h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+              When you get order updates, messages, or payments, they&apos;ll
+              show up here.
             </p>
-          </div>
+          </GlassCard>
         ) : (
-          <div className="divide-y rounded-lg border">
+          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
             {notifications.map((notification) => {
               const IconComponent = ICON_MAP[notification.typeIcon] ?? Bell;
               const isUnread = !notification.readAt;
@@ -255,47 +282,66 @@ export default function NotificationsPage() {
                   key={notification.id}
                   type="button"
                   onClick={() => handleNotificationClick(notification)}
-                  className="flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-muted/50"
+                  className={cn(
+                    "group flex w-full items-start gap-3 rounded-xl px-3 py-3.5 text-left",
+                    "transition-colors duration-200 hover:bg-card focus-visible:bg-card focus-visible:outline-none"
+                  )}
                 >
-                  <div
-                    className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                  <span
+                    className={cn(
+                      "mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl ring-1 transition-colors",
                       isUnread
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground"
-                    }`}
+                        ? "bg-copper/15 text-copper-soft ring-copper/30"
+                        : "bg-secondary text-muted-foreground ring-border"
+                    )}
                   >
-                    <IconComponent className="h-4 w-4" />
-                  </div>
+                    <IconComponent className="h-4 w-4" aria-hidden />
+                  </span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-start gap-2">
                       <span
-                        className={`text-sm ${
-                          isUnread ? "font-semibold" : "font-medium"
-                        }`}
+                        className={cn(
+                          "text-display text-sm tracking-tight",
+                          isUnread
+                            ? "font-semibold text-foreground"
+                            : "font-medium text-foreground/80"
+                        )}
                       >
                         {notification.title}
                       </span>
                       {isUnread && (
-                        <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                        <span
+                          className="mt-1.5 size-1.5 shrink-0 rounded-full bg-copper"
+                          aria-hidden
+                        />
                       )}
                     </div>
-                    <p className="mt-0.5 text-sm text-muted-foreground line-clamp-2">
+                    <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
                       {notification.body}
                     </p>
-                    <span className="mt-1 text-xs text-muted-foreground">
+                    <span
+                      className={cn(
+                        "mt-1 inline-block text-[11px] font-medium tabular-nums",
+                        isUnread ? "text-copper" : "text-muted-foreground"
+                      )}
+                    >
                       {timeAgo(notification.createdAt)}
                     </span>
                   </div>
                 </button>
               );
             })}
-          </div>
+          </GlassCard>
         )}
 
-        {/* Load More */}
+        {/* Load more */}
         {hasMore && (
-          <div className="flex justify-center py-4">
-            <Button variant="outline" size="sm" onClick={loadMore}>
+          <div className="flex justify-center pt-2">
+            <Button
+              variant="luxe-outline"
+              size="sm"
+              onClick={loadMore}
+            >
               Load more
             </Button>
           </div>

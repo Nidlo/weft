@@ -1,10 +1,12 @@
 "use client";
 
+import { CalendarIcon, Flame } from "lucide-react";
+
 import { useBlueprintStore } from "@/lib/stores/blueprint";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const MIN_DEADLINE_DAYS = 3;
 const RUSH_THRESHOLD_DAYS = 7;
@@ -26,64 +28,122 @@ export function StepBudget() {
     useBlueprintStore();
 
   const daysFromNow = getDaysFromNow(deadline);
-  const isRush = deadline && daysFromNow > 0 && daysFromNow < RUSH_THRESHOLD_DAYS;
+  const isRush =
+    deadline && daysFromNow > 0 && daysFromNow < RUSH_THRESHOLD_DAYS;
+  const isInverted =
+    budgetMin &&
+    budgetMax &&
+    Number(budgetMax) < Number(budgetMin);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <div>
-        <Label className="mb-3 block text-base font-semibold">
-          Budget Range (GHS)
+        <Label className="flex items-center gap-1.5 text-sm">
+          Budget range
+          <span className="text-copper" aria-label="required">
+            *
+          </span>
         </Label>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
           <div className="space-y-2">
-            <Label htmlFor="budget-min">Minimum</Label>
-            <Input
-              id="budget-min"
-              type="number"
-              min="1"
-              step="1"
-              placeholder="e.g. 200"
-              value={budgetMin}
-              onChange={(e) => setField("budgetMin", e.target.value)}
-            />
+            <Label htmlFor="budget-min" className="text-xs text-muted-foreground">
+              Minimum
+            </Label>
+            <div className="relative">
+              <span
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+                aria-hidden
+              >
+                GHS
+              </span>
+              <Input
+                id="budget-min"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                step="1"
+                placeholder="200"
+                value={budgetMin}
+                onChange={(e) => setField("budgetMin", e.target.value)}
+                className="h-11 pl-12 tabular-nums"
+              />
+            </div>
           </div>
+          <div
+            className="hidden h-px w-full bg-linear-to-r from-transparent via-copper/60 to-transparent sm:block sm:h-11 sm:w-12 sm:bg-linear-to-b"
+            aria-hidden
+          />
           <div className="space-y-2">
-            <Label htmlFor="budget-max">Maximum</Label>
-            <Input
-              id="budget-max"
-              type="number"
-              min="1"
-              step="1"
-              placeholder="e.g. 500"
-              value={budgetMax}
-              onChange={(e) => setField("budgetMax", e.target.value)}
-            />
+            <Label htmlFor="budget-max" className="text-xs text-muted-foreground">
+              Maximum
+            </Label>
+            <div className="relative">
+              <span
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+                aria-hidden
+              >
+                GHS
+              </span>
+              <Input
+                id="budget-max"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                step="1"
+                placeholder="500"
+                value={budgetMax}
+                onChange={(e) => setField("budgetMax", e.target.value)}
+                className="h-11 pl-12 tabular-nums"
+              />
+            </div>
           </div>
         </div>
-        {budgetMin && budgetMax && Number(budgetMax) < Number(budgetMin) && (
-          <p className="mt-2 text-sm text-destructive">
+        {isInverted && (
+          <p className="mt-2 text-sm text-status-error-fg">
             Maximum budget must be at least the minimum.
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="deadline" className="text-base font-semibold">
+        <Label htmlFor="deadline" className="flex items-center gap-1.5 text-sm">
           Deadline
+          <span className="text-copper" aria-label="required">
+            *
+          </span>
         </Label>
-        <Input
-          id="deadline"
-          type="date"
-          min={getMinDate()}
-          value={deadline}
-          onChange={(e) => setField("deadline", e.target.value)}
-        />
+        <div className="relative">
+          <CalendarIcon
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-copper"
+            aria-hidden
+          />
+          <Input
+            id="deadline"
+            type="date"
+            min={getMinDate()}
+            value={deadline}
+            onChange={(e) => setField("deadline", e.target.value)}
+            className="h-11 pl-9 tabular-nums"
+          />
+        </div>
         {deadline && daysFromNow > 0 && (
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-muted-foreground">
-              {daysFromNow} day{daysFromNow !== 1 ? "s" : ""} from now
-            </p>
-            {isRush && <Badge variant="destructive">Rush Order</Badge>}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="text-sm text-muted-foreground tabular-nums">
+              <span className="font-semibold text-foreground">
+                {daysFromNow}
+              </span>{" "}
+              day{daysFromNow !== 1 ? "s" : ""} from now
+            </span>
+            {isRush && (
+              <span className={cn(
+                "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5",
+                "text-[10px] font-semibold uppercase tracking-wider",
+                "bg-copper/15 text-copper-soft ring-1 ring-copper/30"
+              )}>
+                <Flame className="h-3 w-3" aria-hidden />
+                Rush order
+              </span>
+            )}
           </div>
         )}
         <p className="text-xs text-muted-foreground">
@@ -92,9 +152,9 @@ export function StepBudget() {
         </p>
       </div>
 
-      <div>
-        <Label htmlFor="notes" className="mb-2 block text-base font-semibold">
-          Additional Notes (optional)
+      <div className="space-y-2">
+        <Label htmlFor="notes" className="text-sm">
+          Additional notes <span className="text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="notes"
@@ -103,8 +163,9 @@ export function StepBudget() {
           onChange={(e) => setField("notes", e.target.value)}
           maxLength={500}
           rows={3}
+          className="resize-none"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground tabular-nums">
           {notes.length} / 500 characters
         </p>
       </div>

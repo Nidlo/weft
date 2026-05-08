@@ -1,27 +1,74 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import {
+  Bell,
+  ChevronRight,
+  LogOut,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  Ruler,
+  Scissors,
+  ShoppingBag,
+  User,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useLogout } from "@/lib/hooks/use-logout";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  User,
-  MapPin,
-  Phone,
-  Mail,
-  LogOut,
-  Ruler,
-  Scissors,
-  ChevronRight,
-  Wallet,
-  Bell,
-  Pencil,
-} from "lucide-react";
-import Link from "next/link";
+import { GlassCard } from "@/components/ui/glass-card";
+import { StyleProfileCard } from "@/components/profile/style-profile-card";
+import { cn } from "@/lib/utils";
+
+interface QuickLink {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  description: string;
+  designerOnly?: boolean;
+}
+
+const QUICK_LINKS: QuickLink[] = [
+  {
+    href: "/measurements",
+    icon: Ruler,
+    label: "Body Vault",
+    description: "Saved measurements + Fitscan AI",
+  },
+  {
+    href: "/dashboard",
+    icon: Scissors,
+    label: "Designer dashboard",
+    description: "Stats + active orders",
+    designerOnly: true,
+  },
+  {
+    href: "/orders",
+    icon: ShoppingBag,
+    label: "My orders",
+    description: "Track every garment",
+  },
+  {
+    href: "/wallet",
+    icon: Wallet,
+    label: "Wallet & payouts",
+    description: "Balance + MoMo accounts",
+    designerOnly: true,
+  },
+  {
+    href: "/notifications/preferences",
+    icon: Bell,
+    label: "Notifications",
+    description: "Push, email, SMS preferences",
+  },
+];
 
 export default function ProfilePage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
@@ -30,162 +77,196 @@ export default function ProfilePage() {
   if (!isReady || !user) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
+        <div className="space-y-6">
+          <Skeleton className="h-3 w-32" />
+          <Skeleton className="h-10 w-56" />
+          <Skeleton className="h-5 w-72" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
+          <Skeleton className="h-64 w-full rounded-2xl" />
         </div>
       </AppShell>
     );
   }
 
+  const visibleLinks = QUICK_LINKS.filter(
+    (l) => !l.designerOnly || user.isDesigner
+  );
+
   return (
     <AppShell>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">My Profile</h1>
-          <p className="text-muted-foreground">
-            Manage your account and settings
+      <div className="space-y-7">
+        <header>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            Account
           </p>
-        </div>
+          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            My profile
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            Manage your account, contact info, and notifications.
+          </p>
+        </header>
 
-        {/* Profile card */}
-        <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+        {/* Profile hero */}
+        <GlassCard variant="solid" className="relative overflow-hidden bg-thread-mesh p-6 sm:p-7">
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-copper/40 to-transparent"
+            aria-hidden
+          />
+          <div className="flex items-center gap-4">
+            <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary ring-2 ring-background sm:size-24">
               {user.avatarUrl ? (
                 <Image
                   src={user.avatarUrl}
                   alt={user.fullName || "Profile"}
-                  width={64}
-                  height={64}
-                  sizes="64px"
-                  className="h-16 w-16 rounded-full object-cover"
+                  width={96}
+                  height={96}
+                  sizes="96px"
+                  className="h-full w-full object-cover"
                 />
               ) : (
-                <User className="h-8 w-8 text-primary" />
+                <User className="h-10 w-10 text-muted-foreground" aria-hidden />
               )}
             </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-display truncate text-xl font-semibold tracking-tight sm:text-2xl">
                 {user.fullName || "No name set"}
               </h2>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Badge variant={user.isDesigner ? "default" : "secondary"}>
-                  {user.isDesigner ? "Designer" : "Client"}
-                </Badge>
+              <div className="mt-2 flex items-center gap-2">
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+                    user.isDesigner
+                      ? "bg-copper/15 text-copper-soft ring-1 ring-copper/30"
+                      : "bg-secondary text-foreground/80"
+                  )}
+                >
+                  {user.isDesigner ? (
+                    <>
+                      <Scissors className="h-3 w-3" aria-hidden />
+                      Designer
+                    </>
+                  ) : (
+                    "Client"
+                  )}
+                </span>
               </div>
             </div>
-            <Button variant="ghost" size="icon" asChild>
+            <Button
+              variant="luxe-outline"
+              size="icon"
+              asChild
+              className="shrink-0"
+            >
               <Link href="/profile/edit" aria-label="Edit profile">
                 <Pencil className="h-4 w-4" />
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </GlassCard>
 
         {/* Contact info */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Contact Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center gap-3 text-sm">
-              <Phone className="h-4 w-4 text-muted-foreground" />
-              <span>{user.phone}</span>
-            </div>
+        <section>
+          <header className="mb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Contact
+            </p>
+            <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+              How to reach you
+            </h2>
+          </header>
+          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+            <ContactRow icon={Phone} label="Phone" value={user.phone} />
             {user.email && (
-              <div className="flex items-center gap-3 text-sm">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>{user.email}</span>
-              </div>
+              <ContactRow icon={Mail} label="Email" value={user.email} />
             )}
             {user.city && (
-              <div className="flex items-center gap-3 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span>{user.city}</span>
-              </div>
+              <ContactRow icon={MapPin} label="City" value={user.city} />
             )}
-          </CardContent>
-        </Card>
+          </GlassCard>
+        </section>
+
+        {/* Style profile (Anthropic Fitscan) */}
+        <StyleProfileCard />
 
         {/* Quick links */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Quick Links</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <Link
-              href="/measurements"
-              className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-accent"
-            >
-              <div className="flex items-center gap-3">
-                <Ruler className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">My Measurements (Body Vault)</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
-
-            {user.isDesigner && (
-              <Link
-                href="/dashboard"
-                className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-accent"
-              >
-                <div className="flex items-center gap-3">
-                  <Scissors className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">Designer Dashboard</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-            )}
-
-            <Link
-              href="/orders"
-              className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-accent"
-            >
-              <div className="flex items-center gap-3">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">My Orders</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
-
-            {user.isDesigner && (
-              <Link
-                href="/wallet"
-                className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-accent"
-              >
-                <div className="flex items-center gap-3">
-                  <Wallet className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">Wallet & Payouts</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-            )}
-
-            <Link
-              href="/notifications/preferences"
-              className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-accent"
-            >
-              <div className="flex items-center gap-3">
-                <Bell className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Notification Settings</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
-          </CardContent>
-        </Card>
+        <section>
+          <header className="mb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Shortcuts
+            </p>
+            <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+              Quick links
+            </h2>
+          </header>
+          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+            {visibleLinks.map((link) => (
+              <QuickLinkRow key={link.href} link={link} />
+            ))}
+          </GlassCard>
+        </section>
 
         {/* Logout */}
         <Button
-          variant="outline"
-          className="w-full"
+          variant="luxe-outline"
+          size="lg"
+          className="w-full gap-1.5 text-status-error hover:bg-status-error-soft hover:text-status-error-fg"
           onClick={handleLogout}
           disabled={loggingOut}
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          {loggingOut ? "Logging out..." : "Log Out"}
+          <LogOut className="h-4 w-4" aria-hidden />
+          {loggingOut ? "Logging out..." : "Log out"}
         </Button>
       </div>
     </AppShell>
+  );
+}
+
+interface ContactRowProps {
+  icon: LucideIcon;
+  label: string;
+  value: string | null | undefined;
+}
+
+function ContactRow({ icon: Icon, label, value }: ContactRowProps) {
+  return (
+    <div className="flex items-center gap-3 px-3 py-3">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground ring-1 ring-border">
+        <Icon className="h-4 w-4" aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          {label}
+        </p>
+        <p className="truncate text-sm font-medium tabular-nums">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function QuickLinkRow({ link }: { link: QuickLink }) {
+  const Icon = link.icon;
+  return (
+    <Link
+      href={link.href}
+      className="group flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 hover:bg-card focus-visible:bg-card focus-visible:outline-none"
+    >
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground ring-1 ring-border transition-colors group-hover:bg-foreground group-hover:text-background">
+        <Icon className="h-4 w-4" aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-display text-sm font-semibold tracking-tight">
+          {link.label}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">
+          {link.description}
+        </p>
+      </div>
+      <ChevronRight
+        className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-copper"
+        aria-hidden
+      />
+    </Link>
   );
 }

@@ -120,7 +120,7 @@ export function TermsReacceptDialog() {
 
         <DialogFooter>
           <Button onClick={handleAccept} disabled={loading}>
-            {loading ? "Accepting…" : "I accept the updated Terms"}
+            {loading ? "Accepting..." : "I accept the updated Terms"}
           </Button>
         </DialogFooter>
       </DialogContent>

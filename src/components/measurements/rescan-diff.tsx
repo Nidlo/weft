@@ -294,7 +294,7 @@ export function RescanDiff({
         )}
         <Button onClick={handleApply} disabled={applying}>
           {applying
-            ? "Applying…"
+            ? "Applying..."
             : promptRows.length > 0
               ? "Apply confirmed changes"
               : "Apply auto changes"}

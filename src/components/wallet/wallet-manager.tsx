@@ -1,13 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Wallet, Plus, Star, Trash2, Phone, Loader2 } from "lucide-react";
+import {
+  CheckCircle2,
+  Loader2,
+  Phone,
+  Plus,
+  Star,
+  Trash2,
+  Wallet,
+} from "lucide-react";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { GlassCard } from "@/components/ui/glass-card";
 import {
   Select,
   SelectContent,
@@ -16,14 +24,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  useAddWalletAccount,
+  useRemoveWalletAccount,
+  useResolveMomoAccount,
+  useSetWalletPrimary,
   useWalletAccounts,
   useWalletBalance,
-  useResolveMomoAccount,
-  useAddWalletAccount,
-  useSetWalletPrimary,
-  useRemoveWalletAccount,
 } from "@/lib/hooks/use-wallet";
 import { formatPesewas } from "@/lib/utils/order";
+import { cn } from "@/lib/utils";
 import type { MomoNetworkValue } from "@/types/graphql";
 
 const NETWORK_OPTIONS: { value: MomoNetworkValue; label: string }[] = [
@@ -94,112 +103,148 @@ export function WalletManager() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Balance Card */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Wallet className="h-4 w-4" />
-            Virtual Wallet
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">{formatPesewas(balance)}</p>
-          <p className="text-xs text-muted-foreground">
-            Earnings pending withdrawal
-          </p>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      {/* Balance hero card */}
+      <GlassCard
+        variant="solid"
+        className="relative overflow-hidden bg-thread-mesh p-6 sm:p-8"
+      >
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-copper/40 to-transparent"
+          aria-hidden
+        />
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          <Wallet className="h-3.5 w-3.5" aria-hidden />
+          Available balance
+        </div>
+        <p className="text-display mt-3 text-4xl font-semibold tabular-nums tracking-tight sm:text-5xl">
+          {formatPesewas(balance)}
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Earnings ready to withdraw to your primary MoMo account.
+        </p>
+      </GlassCard>
 
-      {/* Payout Accounts */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-base">Payout Accounts</CardTitle>
-          {!showAdd && (
+      {/* Payout accounts */}
+      <section>
+        <header className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Payout
+            </p>
+            <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+              MoMo accounts
+            </h2>
+          </div>
+          {!showAdd && accounts.length > 0 && (
             <Button
-              variant="outline"
+              variant="luxe-outline"
               size="sm"
+              className="gap-1.5"
               onClick={() => setShowAdd(true)}
             >
-              <Plus className="mr-1 h-3 w-3" />
+              <Plus className="h-3.5 w-3.5" aria-hidden />
               Add
             </Button>
           )}
-        </CardHeader>
-        <CardContent className="space-y-3">
+        </header>
+
+        <div className="space-y-3">
           {accountsLoading && accounts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <GlassCard variant="ghost" className="p-4">
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            </GlassCard>
           ) : accounts.length === 0 && !showAdd ? (
-            <div className="rounded-lg border border-dashed p-4 text-center">
-              <Phone className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                No payout account yet. Add your MoMo number to receive
-                payments.
+            <GlassCard
+              variant="solid"
+              className="flex flex-col items-center py-12 text-center"
+            >
+              <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-foreground">
+                <Phone className="h-6 w-6" aria-hidden />
+              </span>
+              <h3 className="text-display mt-4 text-xl font-semibold tracking-tight">
+                No payout account yet.
+              </h3>
+              <p className="mx-auto mt-1.5 max-w-xs text-sm text-muted-foreground">
+                Add your MoMo number so we can deliver your earnings the moment
+                an order is paid.
               </p>
               <Button
-                variant="outline"
-                size="sm"
-                className="mt-2"
+                variant="luxe"
+                size="lg"
+                className="mt-5 gap-1.5"
                 onClick={() => setShowAdd(true)}
               >
-                <Plus className="mr-1 h-3 w-3" />
-                Add MoMo Account
+                <Plus className="h-4 w-4" aria-hidden />
+                Add MoMo account
               </Button>
-            </div>
+            </GlassCard>
           ) : (
             accounts.map((account) => (
-              <div
+              <GlassCard
                 key={account.id}
-                className="flex items-center justify-between rounded-lg border p-3"
+                variant="solid"
+                className="flex items-center justify-between p-4"
               >
                 <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground ring-1 ring-border">
+                    <Phone className="h-4 w-4" aria-hidden />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-display truncate text-sm font-semibold tracking-tight">
                       {account.accountName}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {account.accountNumber} &middot;{" "}
+                    <p className="truncate text-xs text-muted-foreground tabular-nums">
+                      {account.accountNumber}
+                      <span className="text-muted-foreground/60"> · </span>
                       {account.networkLabel}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
                   {account.isPrimary ? (
-                    <Badge
-                      variant="secondary"
-                      className="border-0 bg-status-success-soft text-status-success-fg"
-                    >
+                    <span className="inline-flex items-center gap-1 rounded-full bg-copper/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-copper-soft ring-1 ring-copper/30">
+                      <CheckCircle2 className="h-3 w-3" aria-hidden />
                       Primary
-                    </Badge>
+                    </span>
                   ) : (
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => handleSetPrimary(account.id)}
                       disabled={settingPrimary}
+                      aria-label="Make primary"
+                      title="Make primary"
                     >
-                      <Star className="h-3 w-3" />
+                      <Star className="h-3.5 w-3.5" />
                     </Button>
                   )}
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon-sm"
                     onClick={() => handleRemove(account.id)}
                     disabled={removing}
+                    aria-label="Remove account"
+                    title="Remove account"
+                    className="text-muted-foreground hover:bg-status-error-soft hover:text-status-error-fg"
                   >
-                    <Trash2 className="h-3 w-3 text-red-500" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-              </div>
+              </GlassCard>
             ))
           )}
 
-          {/* Add Account Form */}
+          {/* Add account form */}
           {showAdd && (
-            <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+            <GlassCard variant="ghost" className="space-y-4 p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                {accounts.length === 0
+                  ? "Add your first MoMo account"
+                  : "Add another MoMo account"}
+              </p>
               <div className="space-y-2">
-                <Label>Network</Label>
+                <Label className="text-sm">Network</Label>
                 <Select
                   value={network}
                   onValueChange={(v) => {
@@ -207,7 +252,7 @@ export function WalletManager() {
                     setResolvedName(null);
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -220,40 +265,85 @@ export function WalletManager() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Phone Number</Label>
-                <Input
-                  placeholder="+233241234567"
-                  value={phone}
-                  onChange={(e) => {
-                    setPhone(e.target.value);
-                    setResolvedName(null);
-                  }}
-                />
+                <Label className="text-sm">Phone number</Label>
+                <div className="relative">
+                  <Phone
+                    className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden
+                  />
+                  <Input
+                    placeholder="+233 24 123 4567"
+                    value={phone}
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      setResolvedName(null);
+                    }}
+                    autoComplete="tel"
+                    inputMode="numeric"
+                    className="h-11 pl-9 tabular-nums"
+                  />
+                </div>
               </div>
 
               {!resolvedName ? (
-                <Button
-                  onClick={handleResolve}
-                  disabled={resolving || phone.length < 10}
-                  className="w-full"
-                >
-                  {resolving && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Look Up Account
-                </Button>
+                <div className="flex flex-col gap-2 sm:flex-row-reverse">
+                  <Button
+                    variant="luxe"
+                    size="lg"
+                    onClick={handleResolve}
+                    disabled={resolving || phone.length < 10}
+                    className={cn("gap-1.5", "sm:flex-1")}
+                  >
+                    {resolving && (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    )}
+                    Look up account
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    className="text-muted-foreground"
+                    onClick={() => {
+                      setShowAdd(false);
+                      setPhone("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-lg border bg-green-50 p-3">
-                    <p className="text-xs text-muted-foreground">
-                      Account Name
-                    </p>
-                    <p className="text-sm font-semibold">{resolvedName}</p>
+                  <div className="flex items-center gap-3 rounded-xl border border-status-success-soft bg-status-success-soft/40 p-3">
+                    <CheckCircle2
+                      className="h-5 w-5 shrink-0 text-status-success"
+                      aria-hidden
+                    />
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-status-success-fg">
+                        Account verified
+                      </p>
+                      <p className="text-display mt-0.5 text-base font-semibold tracking-tight">
+                        {resolvedName}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row-reverse">
                     <Button
-                      variant="outline"
-                      className="flex-1"
+                      variant="luxe"
+                      size="lg"
+                      className="gap-1.5 sm:flex-1"
+                      onClick={handleConfirmAndAdd}
+                      disabled={adding}
+                    >
+                      {adding && (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      )}
+                      Confirm & add
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="lg"
+                      className="text-muted-foreground"
                       onClick={() => {
                         setResolvedName(null);
                         setShowAdd(false);
@@ -261,37 +351,13 @@ export function WalletManager() {
                     >
                       Cancel
                     </Button>
-                    <Button
-                      className="flex-1"
-                      onClick={handleConfirmAndAdd}
-                      disabled={adding}
-                    >
-                      {adding && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      Confirm & Add
-                    </Button>
                   </div>
                 </div>
               )}
-
-              {!resolvedName && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => {
-                    setShowAdd(false);
-                    setPhone("");
-                  }}
-                >
-                  Cancel
-                </Button>
-              )}
-            </div>
+            </GlassCard>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   );
 }

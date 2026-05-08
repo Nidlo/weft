@@ -321,7 +321,7 @@ export function ManualForm({
           disabled={saving || !label.trim()}
         >
           {saving ? (
-            "Saving…"
+            "Saving..."
           ) : (
             <>
               Save measurements

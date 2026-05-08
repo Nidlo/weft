@@ -5,7 +5,7 @@
  *   1. Already an array → return as-is (cast to string[]).
  *   2. A JSON-encoded string → parse, return only if the parse result is an
  *      array. Anything else (object, scalar) → empty.
- *   3. Anything else (null, undefined, number, …) → empty.
+ *   3. Anything else (null, undefined, number, ...) → empty.
  *
  * The safety guard around `JSON.parse` matters: backend can hand us
  * `'"<single>"'` for a single-value field, and we don't want a string of

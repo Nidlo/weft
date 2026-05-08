@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 const SCRIPT_ID = "google-maps-script";
@@ -50,24 +50,27 @@ function loadGoogleMapsScript(): Promise<void> {
 
 export function useGoogleMaps() {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    if (!GOOGLE_MAPS_API_KEY) {
-      setError("Google Maps API key not configured");
-      return;
-    }
-    try {
-      await loadGoogleMapsScript();
-      setIsLoaded(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load Google Maps");
-    }
-  }, []);
+  const [error, setError] = useState<string | null>(() =>
+    GOOGLE_MAPS_API_KEY ? null : "Google Maps API key not configured"
+  );
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (!GOOGLE_MAPS_API_KEY) return;
+    let cancelled = false;
+    loadGoogleMapsScript()
+      .then(() => {
+        if (!cancelled) setIsLoaded(true);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setError(
+          err instanceof Error ? err.message : "Failed to load Google Maps"
+        );
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return { isLoaded, error };
 }

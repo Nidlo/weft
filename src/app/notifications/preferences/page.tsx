@@ -1,24 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@apollo/client/react";
-import { ArrowLeft, Loader2, Moon } from "lucide-react";
-import { toast } from "sonner";
+import { useState } from "react";
 import Link from "next/link";
+import { useQuery, useMutation } from "@apollo/client/react";
+import { ArrowLeft, Check, Loader2, Moon } from "lucide-react";
+import { toast } from "sonner";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GlassCard } from "@/components/ui/glass-card";
 import { MY_NOTIFICATION_PREFERENCES } from "@/lib/graphql/queries/notification";
 import {
   UPDATE_NOTIFICATION_PREFERENCES,
@@ -49,42 +44,42 @@ interface CategoryConfig {
 const CATEGORIES: CategoryConfig[] = [
   {
     key: "orderCreated",
-    label: "New Orders",
+    label: "New orders",
     description: "When a new order is placed",
   },
   {
     key: "orderStatusChanged",
-    label: "Order Updates",
+    label: "Order updates",
     description: "When an order status changes",
   },
   {
     key: "messageReceived",
-    label: "New Messages",
+    label: "New messages",
     description: "When you receive a message",
   },
   {
     key: "paymentReceived",
-    label: "Payment Received",
+    label: "Payment received",
     description: "When a payment is received",
   },
   {
     key: "paymentConfirmed",
-    label: "Payment Confirmed",
+    label: "Payment confirmed",
     description: "When your payment is confirmed",
   },
   {
     key: "reviewReceived",
-    label: "New Reviews",
+    label: "New reviews",
     description: "When you receive a review",
   },
   {
     key: "payoutProcessed",
-    label: "Payout Processed",
+    label: "Payout processed",
     description: "When a payout is completed",
   },
   {
     key: "externalPaymentRecorded",
-    label: "Offline Payments",
+    label: "Offline payments",
     description: "When an offline payment is recorded",
   },
 ];
@@ -97,7 +92,11 @@ export default function NotificationPreferencesPage() {
     { skip: !isReady || !user, fetchPolicy: "network-only" }
   );
 
-  const [prefs, setPrefs] = useState<GqlNotificationPreferences | null>(null);
+  // Local edits override the server snapshot until saved or dropped. Deriving
+  // `prefs` from `(override ?? data)` avoids the React 19 cascading-render
+  // anti-pattern of syncing fetched data into state via useEffect.
+  const [overridePrefs, setOverridePrefs] =
+    useState<GqlNotificationPreferences | null>(null);
   const [quietStart, setQuietStart] = useState("");
   const [quietEnd, setQuietEnd] = useState("");
 
@@ -108,11 +107,7 @@ export default function NotificationPreferencesPage() {
   const [updateQuiet, { loading: savingQuiet }] =
     useMutation<UpdateQuietHoursData>(UPDATE_QUIET_HOURS);
 
-  useEffect(() => {
-    if (data?.myNotificationPreferences) {
-      setPrefs(data.myNotificationPreferences);
-    }
-  }, [data]);
+  const prefs = overridePrefs ?? data?.myNotificationPreferences ?? null;
 
   const handleToggle = (
     category: CategoryKey,
@@ -120,7 +115,7 @@ export default function NotificationPreferencesPage() {
     value: boolean
   ) => {
     if (!prefs) return;
-    setPrefs({
+    setOverridePrefs({
       ...prefs,
       [category]: { ...prefs[category], [channel]: value },
     });
@@ -162,9 +157,11 @@ export default function NotificationPreferencesPage() {
   if (!isReady || !user) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
+        <div className="space-y-6">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-10 w-72" />
+          <Skeleton className="h-96 w-full rounded-2xl" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
         </div>
       </AppShell>
     );
@@ -172,31 +169,43 @@ export default function NotificationPreferencesPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/notifications" aria-label="Back to notifications">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Notification Settings</h1>
-            <p className="text-sm text-muted-foreground">
-              Choose how you want to be notified
+      <div className="space-y-7">
+        <div>
+          <Link
+            href="/notifications"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Back to notifications
+          </Link>
+          <header className="mt-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Inbox
             </p>
-          </div>
+            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+              Notification settings
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+              Choose how you want to be notified for each event.
+            </p>
+          </header>
         </div>
 
-        {/* Channel Preferences */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Notification Channels</CardTitle>
-            <CardDescription>
-              Toggle push notifications and SMS for each category
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        {/* Channel preferences */}
+        <section>
+          <header className="mb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Channels
+            </p>
+            <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+              Per-event preferences
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Toggle push notifications and SMS for each category below.
+            </p>
+          </header>
+
+          <GlassCard variant="solid" className="p-5 sm:p-6">
             {loading || !prefs ? (
               <div className="space-y-4">
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -204,9 +213,8 @@ export default function NotificationPreferencesPage() {
                 ))}
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* Column headers */}
-                <div className="flex items-center justify-end gap-8 border-b pb-2 text-xs font-medium text-muted-foreground">
+              <div className="space-y-5">
+                <div className="flex items-center justify-end gap-8 border-b border-border/60 pb-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   <span className="w-12 text-center">Push</span>
                   <span className="w-12 text-center">SMS</span>
                 </div>
@@ -214,13 +222,13 @@ export default function NotificationPreferencesPage() {
                 {CATEGORIES.map((cat) => (
                   <div
                     key={cat.key}
-                    className="flex items-center justify-between"
+                    className="flex items-center justify-between gap-4"
                   >
-                    <div className="flex-1">
-                      <Label className="text-sm font-medium">
+                    <div className="min-w-0 flex-1">
+                      <Label className="text-display text-sm font-semibold tracking-tight">
                         {cat.label}
                       </Label>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {cat.description}
                       </p>
                     </div>
@@ -231,6 +239,7 @@ export default function NotificationPreferencesPage() {
                           onCheckedChange={(v) =>
                             handleToggle(cat.key, "push", v)
                           }
+                          aria-label={`Push notifications for ${cat.label}`}
                         />
                       </div>
                       <div className="flex w-12 justify-center">
@@ -239,6 +248,7 @@ export default function NotificationPreferencesPage() {
                           onCheckedChange={(v) =>
                             handleToggle(cat.key, "sms", v)
                           }
+                          aria-label={`SMS notifications for ${cat.label}`}
                         />
                       </div>
                     </div>
@@ -246,37 +256,45 @@ export default function NotificationPreferencesPage() {
                 ))}
 
                 <Button
+                  variant="luxe"
+                  size="lg"
                   onClick={handleSavePreferences}
                   disabled={savingPrefs}
-                  className="w-full"
+                  className="w-full gap-1.5"
                 >
-                  {savingPrefs && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {savingPrefs ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Check className="h-4 w-4" aria-hidden />
                   )}
-                  Save Preferences
+                  {savingPrefs ? "Saving..." : "Save preferences"}
                 </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </GlassCard>
+        </section>
 
-        {/* Quiet Hours */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Moon className="h-5 w-5" />
-              Quiet Hours
-            </CardTitle>
-            <CardDescription>
-              Pause push and SMS notifications during specific hours. In-app
-              notifications are still saved.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        {/* Quiet hours */}
+        <section>
+          <header className="mb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Do not disturb
+            </p>
+            <h2 className="text-display mt-1.5 flex items-center gap-2 text-xl font-semibold tracking-tight sm:text-2xl">
+              <Moon className="h-5 w-5 text-foreground/80" aria-hidden />
+              Quiet hours
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Pause push and SMS during specific hours. In-app notifications
+              are still saved.
+            </p>
+          </header>
+
+          <GlassCard variant="solid" className="space-y-4 p-5 sm:p-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="quiet-start" className="text-sm">
-                  Start Time
+                  Start
                 </Label>
                 <Input
                   id="quiet-start"
@@ -284,11 +302,12 @@ export default function NotificationPreferencesPage() {
                   value={quietStart}
                   onChange={(e) => setQuietStart(e.target.value)}
                   placeholder="22:00"
+                  className="h-11 tabular-nums"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="quiet-end" className="text-sm">
-                  End Time
+                  End
                 </Label>
                 <Input
                   id="quiet-end"
@@ -296,27 +315,34 @@ export default function NotificationPreferencesPage() {
                   value={quietEnd}
                   onChange={(e) => setQuietEnd(e.target.value)}
                   placeholder="07:00"
+                  className="h-11 tabular-nums"
                 />
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Leave both empty to disable quiet hours. Supports overnight
-              windows (e.g., 22:00 to 07:00).
+              Leave both empty to disable. Supports overnight windows
+              (e.g. 22:00 → 07:00).
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row-reverse">
               <Button
+                variant="luxe"
+                size="lg"
                 onClick={handleSaveQuietHours}
                 disabled={savingQuiet}
-                className="flex-1"
+                className="gap-1.5 sm:flex-1"
               >
-                {savingQuiet && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {savingQuiet ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : (
+                  <Check className="h-4 w-4" aria-hidden />
                 )}
-                Save Quiet Hours
+                {savingQuiet ? "Saving..." : "Save quiet hours"}
               </Button>
               {(quietStart || quietEnd) && (
                 <Button
-                  variant="outline"
+                  variant="ghost"
+                  size="lg"
+                  className="text-muted-foreground"
                   onClick={() => {
                     setQuietStart("");
                     setQuietEnd("");
@@ -326,8 +352,8 @@ export default function NotificationPreferencesPage() {
                 </Button>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </GlassCard>
+        </section>
       </div>
     </AppShell>
   );

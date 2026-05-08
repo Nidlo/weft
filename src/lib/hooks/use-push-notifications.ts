@@ -37,7 +37,17 @@ function readPermissionState(): PushPermissionState {
 async function registerForPushImpl(
   registerToken: (vars: { variables: { token: string } }) => Promise<unknown>,
 ): Promise<void> {
-  if (typeof window === "undefined" || !VAPID_KEY) return;
+  if (typeof window === "undefined") return;
+  if (!VAPID_KEY) {
+    // L-6 - tagged warning so a deployed environment without push config
+    // is at least visible in DevTools / production log forwarding.
+    // Without a Sentry SDK on the frontend this is the loudest signal
+    // we can give without breaking the user's session.
+    console.warn(
+      "[nidlo:push] NEXT_PUBLIC_FIREBASE_VAPID_KEY is not set; push notifications will not register on this device.",
+    );
+    return;
+  }
   const messaging = getFirebaseMessaging();
   if (!messaging) return;
   try {
@@ -46,10 +56,15 @@ async function registerForPushImpl(
       vapidKey: VAPID_KEY,
       serviceWorkerRegistration: swRegistration,
     });
-    if (!token) return;
+    if (!token) {
+      console.warn(
+        "[nidlo:push] FCM getToken returned null; permission may be revoked or the SW may have failed to register.",
+      );
+      return;
+    }
     await registerToken({ variables: { token } });
-  } catch {
-    // FCM unavailable — silently fail
+  } catch (err) {
+    console.warn("[nidlo:push] Failed to register FCM token:", err);
   }
 }
 
@@ -60,11 +75,8 @@ async function registerForPushImpl(
  */
 export function usePushPermission() {
   const [registerToken] = useMutation<RegisterFcmTokenData>(REGISTER_FCM_TOKEN);
-  const [permission, setPermission] = useState<PushPermissionState>("default");
-
-  useEffect(() => {
-    setPermission(readPermissionState());
-  }, []);
+  const [permission, setPermission] =
+    useState<PushPermissionState>(readPermissionState);
 
   const requestPermission = useCallback(async (): Promise<PushPermissionState> => {
     if (typeof window === "undefined" || !("Notification" in window)) {
@@ -143,13 +155,46 @@ export function usePushNotifications(enabled: boolean) {
     prefsData?.myNotificationPreferences?.quietHoursEnd ?? null;
 
   // If the user already granted permission in a prior session, register the
-  // device token silently — no prompt UI needed.
+  // device token silently - no prompt UI needed.
   useEffect(() => {
     if (!enabled || registered.current) return;
     if (readPermissionState() !== "granted") return;
     registered.current = true;
     registerForPushImpl(registerToken);
   }, [enabled, registerToken]);
+
+  // Watch the OS permission state. If a user denies notifications and then
+  // re-grants them later, the registration flag must reset so the silent
+  // re-registration effect above will fire again on the next render. Without
+  // this, the user would have to fully reload the app for pushes to start
+  // working again.
+  useEffect(() => {
+    if (!enabled) return;
+    if (typeof navigator === "undefined" || !navigator.permissions) return;
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
+    navigator.permissions
+      .query({ name: "notifications" as PermissionName })
+      .then((status) => {
+        if (cancelled) return;
+        const onChange = (): void => {
+          if (status.state !== "granted") {
+            registered.current = false;
+          }
+        };
+        status.addEventListener("change", onChange);
+        cleanup = () => status.removeEventListener("change", onChange);
+      })
+      .catch(() => {
+        // Some browsers (older Safari) don't expose Permissions API for
+        // notifications. The user can still trigger re-registration via
+        // the explicit prompt path; this is a best-effort enhancement.
+      });
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
+  }, [enabled]);
 
   useEffect(() => {
     if (!enabled) return;

@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { Star, MapPin } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatPesewasShort } from "@/lib/utils/order";
+import { cn } from "@/lib/utils";
 import type { DesignerCard as DesignerCardType } from "@/types/graphql";
 
 interface Props {
@@ -28,74 +31,96 @@ export function DesignerCard({ designer }: Props) {
       ? JSON.parse(designer.specializations as string)
       : [];
 
+  const name = designer.displayName ?? designer.fullName ?? "Designer";
+
   return (
-    <Link href={`/designer/${designer.slug}`}>
-      <Card className="transition-shadow hover:shadow-md">
-        <CardContent className="p-4">
-          <div className="flex gap-3">
-            <Avatar className="h-14 w-14">
-              <AvatarImage
-                src={designer.avatarUrl ?? undefined}
-                alt={designer.displayName ?? designer.fullName ?? "Designer"}
-              />
-              <AvatarFallback>{getInitials(designer.displayName ?? designer.fullName)}</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <h3 className="truncate font-semibold">
-                  {designer.displayName ?? designer.fullName ?? "Designer"}
-                </h3>
-                {!designer.isAcceptingOrders && (
-                  <Badge variant="secondary" className="ml-2 shrink-0 text-xs">
-                    Unavailable
-                  </Badge>
-                )}
-              </div>
-              {designer.city && (
-                <p className="text-sm text-muted-foreground">
+    <Link
+      href={`/designer/${designer.slug}`}
+      className="group block outline-none rounded-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      <GlassCard variant="solid" interactive glow="copper" className="p-5">
+        <div className="flex items-start gap-4">
+          <Avatar className="h-14 w-14 ring-1 ring-border">
+            <AvatarImage src={designer.avatarUrl ?? undefined} alt={name} />
+            <AvatarFallback className="bg-secondary font-medium">
+              {getInitials(designer.displayName ?? designer.fullName)}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-display truncate text-lg font-semibold tracking-tight">
+                {name}
+              </h3>
+              {!designer.isAcceptingOrders && (
+                <Badge variant="secondary" className="shrink-0 text-[10px] uppercase tracking-wider">
+                  Unavailable
+                </Badge>
+              )}
+            </div>
+            {designer.city && (
+              <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-3 w-3" aria-hidden />
+                <span className="truncate">
                   {designer.city}
                   {designer.distance != null && (
-                    <span> &middot; {designer.distance.toFixed(1)} km</span>
+                    <span className="text-muted-foreground/70">
+                      {" · "}
+                      {designer.distance.toFixed(1)} km
+                    </span>
                   )}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {specs.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1">
-              {specs.slice(0, 3).map((s: string) => (
-                <Badge key={s} variant="outline" className="text-xs">
-                  {s.replace(/-/g, " ")}
-                </Badge>
-              ))}
-              {specs.length > 3 && (
-                <Badge variant="outline" className="text-xs">
-                  +{specs.length - 3}
-                </Badge>
-              )}
-            </div>
-          )}
-
-          <div className="mt-3 flex items-center justify-between text-sm">
-            <div className="flex items-center gap-1">
-              <span className="text-yellow-500">&#9733;</span>
-              <span className="font-medium">
-                {designer.ratingAvg.toFixed(1)}
-              </span>
-              <span className="text-muted-foreground">
-                ({designer.totalReviews})
-              </span>
-            </div>
-            {designer.pricingMin != null && designer.pricingMax != null && (
-              <span className="text-muted-foreground">
-                {formatPesewasShort(designer.pricingMin)} -{" "}
-                {formatPesewasShort(designer.pricingMax)}
-              </span>
+                </span>
+              </p>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {specs.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {specs.slice(0, 3).map((s: string) => (
+              <Badge
+                key={s}
+                variant="outline"
+                className="rounded-full border-border bg-background/50 text-[11px] font-medium capitalize"
+              >
+                {s.replace(/-/g, " ")}
+              </Badge>
+            ))}
+            {specs.length > 3 && (
+              <Badge
+                variant="outline"
+                className="rounded-full border-border bg-background/50 text-[11px] font-medium"
+              >
+                +{specs.length - 3}
+              </Badge>
+            )}
+          </div>
+        )}
+
+        <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-sm">
+          <div className="flex items-center gap-1.5">
+            <Star
+              className={cn(
+                "h-4 w-4 fill-copper text-copper transition-transform duration-300",
+                "group-hover:scale-110 group-hover:rotate-12"
+              )}
+              aria-hidden
+            />
+            <span className="font-semibold tabular-nums">
+              {designer.ratingAvg.toFixed(1)}
+            </span>
+            <span className="text-muted-foreground">
+              ({designer.totalReviews})
+            </span>
+          </div>
+          {designer.pricingMin != null && designer.pricingMax != null && (
+            <span className="font-medium tabular-nums text-foreground/80">
+              {formatPesewasShort(designer.pricingMin)} –{" "}
+              {formatPesewasShort(designer.pricingMax)}
+            </span>
+          )}
+        </div>
+      </GlassCard>
     </Link>
   );
 }

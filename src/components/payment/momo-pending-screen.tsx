@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
+import { Phone, RefreshCw } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Loader2, Phone, RefreshCw } from "lucide-react";
+import { StitchLoader } from "@/components/ui/stitch-loader";
 import { useMomoPolling } from "@/lib/hooks/use-payments";
 import { getPaymentMethodConfig } from "@/lib/utils/payment";
 import { formatPesewas } from "@/lib/utils/order";
@@ -43,33 +45,40 @@ export function MomoPendingScreen({
 
   return (
     <div className="flex flex-col items-center space-y-6 py-8 text-center">
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-warning-soft">
-        <Phone className="h-10 w-10 text-status-warning" />
+      <div className="flex size-20 items-center justify-center rounded-2xl bg-copper/15 text-copper-soft ring-1 ring-copper/30">
+        <Phone className="h-9 w-9" aria-hidden />
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-xl font-bold">Check Your Phone</h2>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          Confirm on your phone
+        </p>
+        <h2 className="text-display text-2xl font-semibold tracking-tight sm:text-3xl">
+          Check your phone.
+        </h2>
         <p className="text-sm text-muted-foreground">
           A {methodConfig.shortLabel} prompt has been sent
-          {phone ? ` to ${phone}` : ""}.
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Approve the payment of <strong>{formatPesewas(amount)}</strong> to complete your transaction.
+          {phone ? ` to ${phone}` : ""}. Approve the payment of{" "}
+          <strong className="text-foreground">{formatPesewas(amount)}</strong>{" "}
+          to complete your transaction.
         </p>
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Waiting for confirmation...
-      </div>
+      <StitchLoader
+        size={28}
+        tone="copper"
+        label="Waiting for confirmation..."
+      />
 
       <Button
-        variant="outline"
+        variant="luxe-outline"
+        size="lg"
         onClick={() => checkNow()}
         disabled={status !== "polling"}
+        className="gap-2"
       >
-        <RefreshCw className="mr-2 h-4 w-4" />
-        I&apos;ve Approved — Check Now
+        <RefreshCw className="h-4 w-4" aria-hidden />
+        I&apos;ve approved — check now
       </Button>
 
       <p className="text-xs text-muted-foreground">

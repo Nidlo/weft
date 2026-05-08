@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { ImageIcon, Package } from "lucide-react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import type { GqlConversation } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
 import { getImageKitThumbnail } from "@/lib/utils/imagekit";
-import { ImageIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { GqlConversation } from "@/types/graphql";
 
 function formatRelativeTime(dateString: string | null): string {
   if (!dateString) return "";
@@ -58,53 +59,79 @@ export function ConversationListItem({
       preview = "Sent a photo";
     } else if (latest.body) {
       preview =
-        latest.body.length > 50
-          ? latest.body.substring(0, 50) + "..."
+        latest.body.length > 60
+          ? latest.body.substring(0, 60) + "..."
           : latest.body;
     }
   }
 
+  const isUnread = conversation.unreadCount > 0;
+
   return (
     <Link
       href={`/messages/${conversation.id}`}
-      className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50"
+      className={cn(
+        "group flex items-center gap-3 px-4 py-3.5 transition-colors duration-200",
+        "hover:bg-card focus-visible:bg-card focus-visible:outline-none"
+      )}
     >
-      <Avatar className="h-12 w-12 shrink-0">
+      <Avatar className="size-12 shrink-0 ring-1 ring-border">
         {other.avatarUrl && (
           <AvatarImage
             src={getImageKitThumbnail(other.avatarUrl, 100)}
             alt={other.fullName ?? ""}
           />
         )}
-        <AvatarFallback>{getInitials(other.fullName)}</AvatarFallback>
+        <AvatarFallback className="bg-secondary font-medium">
+          {getInitials(other.fullName)}
+        </AvatarFallback>
       </Avatar>
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between">
-          <span className="truncate font-medium">{other.fullName}</span>
-          <span className="shrink-0 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className={cn(
+              "truncate text-sm tracking-tight",
+              isUnread ? "font-semibold text-foreground" : "font-medium text-foreground/90"
+            )}
+          >
+            {other.fullName}
+          </span>
+          <span
+            className={cn(
+              "shrink-0 text-[11px] font-medium tabular-nums",
+              isUnread ? "text-copper" : "text-muted-foreground"
+            )}
+          >
             {formatRelativeTime(conversation.lastMessageAt)}
           </span>
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm text-muted-foreground">
-            {latest?.mediaUrl && !latest.body && (
-              <ImageIcon className="mr-1 inline h-3.5 w-3.5" />
+
+        <div className="mt-0.5 flex items-center justify-between gap-2">
+          <span
+            className={cn(
+              "flex min-w-0 items-center gap-1 truncate text-sm",
+              isUnread ? "text-foreground/85" : "text-muted-foreground"
             )}
-            {preview || "No messages yet"}
+          >
+            {latest?.mediaUrl && !latest.body && (
+              <ImageIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            )}
+            <span className="truncate">{preview || "No messages yet"}</span>
           </span>
-          {conversation.unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="h-5 min-w-5 shrink-0 justify-center rounded-full px-1.5 text-xs"
-            >
+          {isUnread && (
+            <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-copper px-1.5 text-[10px] font-semibold tabular-nums text-foreground ring-2 ring-card">
               {conversation.unreadCount}
-            </Badge>
+            </span>
           )}
         </div>
+
         {garmentType && (
-          <span className="mt-0.5 text-xs text-muted-foreground/70">
-            Order — {garmentType}
+          <span className="mt-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground/80">
+            <Package className="h-3 w-3 text-copper" aria-hidden />
+            <span className="capitalize">
+              {garmentType.replace(/_/g, " ")}
+            </span>
           </span>
         )}
       </div>

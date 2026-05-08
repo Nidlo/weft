@@ -1,44 +1,55 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight, Compass } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/stores/auth";
 
 /**
- * Client island for the home-page hero CTAs. Branches on auth state so the
- * label switches from "Get Started" → "My Dashboard" once the user is
- * signed in. Hidden until hydration to avoid a label flash.
+ * Home-page hero CTA pair. Branches on auth state — "Get started" pre-auth,
+ * "My dashboard" once signed in. Hidden until hydration to avoid label
+ * flash, but the wrapper still reserves vertical space.
  */
 export function HeroCta() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
   const user = useAuthStore((s) => s.user);
 
-  // Reserve layout until hydrated so the buttons don't flicker swap.
   if (!hasHydrated) {
-    return <div className="mt-8 h-11" aria-hidden />;
+    return <div className="mt-10 h-13" aria-hidden />;
   }
 
   const authed = isAuthenticated && user;
 
   return (
-    <div className="mt-8 flex gap-4">
+    <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
       {authed ? (
         <>
-          <Button size="lg" asChild>
-            <Link href="/search">Browse Designers</Link>
+          <Button variant="luxe" size="xl" asChild>
+            <Link href="/search">
+              Browse designers <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
           </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/dashboard">My Dashboard</Link>
+          <Button variant="luxe-outline" size="xl" asChild>
+            <Link href="/dashboard">
+              <Compass className="mr-1 h-4 w-4" />
+              My dashboard
+            </Link>
           </Button>
         </>
       ) : (
         <>
-          <Button size="lg" asChild>
-            <Link href="/auth/phone">Get Started</Link>
+          <Button variant="luxe" size="xl" asChild>
+            <Link href="/auth/phone">
+              Get started <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
           </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/search">Browse Designers</Link>
+          <Button variant="luxe-outline" size="xl" asChild>
+            <Link href="/search">
+              <Compass className="mr-1 h-4 w-4" />
+              Browse designers
+            </Link>
           </Button>
         </>
       )}

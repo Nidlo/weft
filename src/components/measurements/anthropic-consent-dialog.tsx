@@ -23,10 +23,11 @@ interface AnthropicConsentDialogProps {
 }
 
 /**
- * Consent gate before forwarding the user's body-scan photo to Anthropic for
- * style classification + garment recommendations. Required by FS-NIDLO-MEAS-03.
- * The acceptance handler should persist `anthropic_consent_at` on the user
- * profile so we don't ask again on every scan.
+ * Consent gate for the body-scan measurement-validation pass. When the
+ * user opts in, the photo is sent to our AI partner to sanity-check the
+ * measurements our own pipeline extracted. The user-facing copy stays
+ * vendor-neutral on purpose; the privacy policy is the place that names
+ * the third parties involved.
  */
 export function AnthropicConsentDialog({
   open,
@@ -56,38 +57,38 @@ export function AnthropicConsentDialog({
             <ShieldCheck className="h-6 w-6 text-status-info" />
           </div>
           <DialogTitle className="text-center">
-            Forward your photo for style help?
+            Use AI to double-check your measurements?
           </DialogTitle>
           <DialogDescription className="text-center">
-            To suggest cuts, fabrics, and silhouettes that flatter your shape,
-            we send your front photo to Anthropic&apos;s Claude. Your photo is
-            used once for the analysis and not retained for training.
+            With your permission, we&apos;ll send your front photo to our AI
+            assistant for a quick second look. It&apos;s used once for this
+            check and is not kept or used to train any model.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-2 text-sm">
           <ul className="list-inside list-disc space-y-1.5 text-muted-foreground">
-            <li>The photo never leaves the request — no advertising, no resale.</li>
-            <li>You can withdraw consent any time from Settings.</li>
+            <li>Used only for this measurement check. No ads. No resale.</li>
+            <li>You can switch this off any time in Settings.</li>
             <li>
-              Measurements stay computed in our own service. This step is
-              <em> only</em> for style suggestions.
+              Style suggestions on your profile use only your saved
+              measurements and interests, never your photo.
             </li>
           </ul>
 
           <div className="flex items-start gap-2 rounded-lg border bg-muted/40 p-3">
             <Checkbox
-              id="anthropic-consent"
+              id="ai-consent"
               checked={agreed}
               onCheckedChange={(v) => setAgreed(v === true)}
               className="mt-0.5"
             />
             <Label
-              htmlFor="anthropic-consent"
+              htmlFor="ai-consent"
               className="text-xs font-normal leading-relaxed"
             >
-              I&apos;m happy for Nidlo to send this single photo to Anthropic
-              for style analysis. I&apos;ve read the{" "}
+              I&apos;m happy for Nidlo to use this single photo with our AI
+              assistant for measurement checking. I&apos;ve read the{" "}
               <a
                 href="/privacy"
                 className="underline"
@@ -106,7 +107,7 @@ export function AnthropicConsentDialog({
             No thanks
           </Button>
           <Button onClick={handleAccept} disabled={!agreed || saving}>
-            {saving ? "Saving..." : "Accept & continue"}
+            {saving ? "Saving..." : "Accept and continue"}
           </Button>
         </DialogFooter>
       </DialogContent>

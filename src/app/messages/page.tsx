@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import { MessageSquare, Sparkles } from "lucide-react";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useConversations } from "@/lib/hooks/use-messages";
 import { useRealtime } from "@/providers/realtime-provider";
 import { useEchoReconnect } from "@/lib/hooks/use-echo-reconnect";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GlassCard } from "@/components/ui/glass-card";
 import { ConversationListItem } from "@/components/messages/conversation-list-item";
-import { MessageSquare } from "lucide-react";
 
 export default function MessagesPage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
@@ -36,28 +38,13 @@ export default function MessagesPage() {
   if (!isReady || !user) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
-      </AppShell>
-    );
-  }
-
-  return (
-    <AppShell>
-      <div className="space-y-4">
-        <div>
-          <h1 className="text-2xl font-bold">Messages</h1>
-          <p className="text-sm text-muted-foreground">
-            Chat with {user.isDesigner ? "your clients" : "your designers"}
-          </p>
-        </div>
-
-        {loading && conversations.length === 0 ? (
-          <div className="space-y-2">
+        <div className="space-y-6">
+          <div>
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="mt-3 h-10 w-56" />
+            <Skeleton className="mt-3 h-5 w-72" />
+          </div>
+          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 p-3">
                 <Skeleton className="h-12 w-12 rounded-full" />
@@ -67,23 +54,77 @@ export default function MessagesPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </GlassCard>
+        </div>
+      </AppShell>
+    );
+  }
+
+  return (
+    <AppShell>
+      <div className="space-y-7">
+        <header>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            Conversations
+          </p>
+          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            Messages
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            Chat with{" "}
+            {user.isDesigner ? "your clients" : "your designers"} about
+            orders, fittings, and updates.
+          </p>
+        </header>
+
+        {loading && conversations.length === 0 ? (
+          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-3">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+              </div>
+            ))}
+          </GlassCard>
         ) : conversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground/50" />
-            <h3 className="text-lg font-medium">No conversations yet</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {user.isDesigner
-                ? "Conversations will appear here when clients message you about orders."
-                : "Start a conversation by messaging a designer from your order page."}
+          <GlassCard
+            variant="solid"
+            className="flex flex-col items-center justify-center py-16 text-center"
+          >
+            <span className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-foreground">
+              <MessageSquare className="h-7 w-7" aria-hidden />
+            </span>
+            <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
+              No conversations yet.
+            </h2>
+            <p className="mx-auto mt-2 max-w-sm text-pretty text-sm text-muted-foreground">
+              {user.isDesigner ? (
+                "Conversations will appear here when clients message you about orders."
+              ) : (
+                <>
+                  Start one from any{" "}
+                  <Sparkles
+                    className="inline h-3.5 w-3.5 text-copper"
+                    aria-hidden
+                  />{" "}
+                  designer&apos;s order page — they&apos;ll reach out the
+                  moment they have an update.
+                </>
+              )}
             </p>
-          </div>
+          </GlassCard>
         ) : (
-          <div className="divide-y rounded-lg border">
+          <GlassCard
+            variant="solid"
+            className="divide-y divide-border/60 overflow-hidden p-0"
+          >
             {conversations.map((conv) => (
               <ConversationListItem key={conv.id} conversation={conv} />
             ))}
-          </div>
+          </GlassCard>
         )}
       </div>
     </AppShell>

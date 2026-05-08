@@ -23,21 +23,23 @@ function isStandalone(): boolean {
   );
 }
 
+function readInitialDismissed(): boolean {
+  if (typeof window === "undefined") return true;
+  if (isStandalone()) return true;
+  try {
+    return localStorage.getItem(DISMISSED_FLAG) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function PwaInstallPrompt() {
   const [event, setEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissed, setDismissed] = useState(true);
+  const [dismissed, setDismissed] = useState<boolean>(readInitialDismissed);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isStandalone()) return;
-
-    let stored = false;
-    try {
-      stored = localStorage.getItem(DISMISSED_FLAG) === "1";
-    } catch {
-      // localStorage unavailable — treat as not dismissed.
-    }
-    setDismissed(stored);
 
     const handler = (e: Event) => {
       // Stop the browser's default mini-infobar; we'll surface our own.

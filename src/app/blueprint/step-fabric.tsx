@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GlassCard } from "@/components/ui/glass-card";
+import { SelectableCard } from "./step-garment";
 
 export function StepFabric() {
   const {
@@ -24,40 +26,35 @@ export function StepFabric() {
     return <Skeleton className="h-40 w-full" />;
   }
 
+  const validHex = /^#[0-9A-Fa-f]{6}$/.test(fabricColourHex);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <div>
-        <Label className="mb-3 block text-base font-semibold">Fabric Type</Label>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <Label className="flex items-center gap-1.5 text-sm">
+          Fabric type
+          <span className="text-copper" aria-label="required">
+            *
+          </span>
+        </Label>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {options.fabricTypes.map((opt) => (
-            <button
+            <SelectableCard
               key={opt.value}
-              type="button"
+              label={opt.label}
+              isSelected={fabricType === opt.value}
               onClick={() => setField("fabricType", opt.value)}
-              className={`rounded-lg border p-3 text-left text-sm transition-colors ${
-                fabricType === opt.value
-                  ? "border-primary bg-primary/5 font-medium"
-                  : "border-border hover:border-primary/50"
-              }`}
-            >
-              {opt.label}
-            </button>
+            />
           ))}
-          <button
-            type="button"
+          <SelectableCard
+            label="Other"
+            isSelected={fabricType === "other"}
             onClick={() => setField("fabricType", "other")}
-            className={`rounded-lg border p-3 text-left text-sm transition-colors ${
-              fabricType === "other"
-                ? "border-primary bg-primary/5 font-medium"
-                : "border-border hover:border-primary/50"
-            }`}
-          >
-            Other
-          </button>
+          />
         </div>
         {fabricType === "other" && (
           <Input
-            className="mt-3"
+            className="mt-3 h-11"
             placeholder="Describe the fabric type..."
             value={fabricTypeOther}
             onChange={(e) => setField("fabricTypeOther", e.target.value)}
@@ -66,38 +63,56 @@ export function StepFabric() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="fabric-colour">Colour</Label>
+          <Label htmlFor="fabric-colour" className="text-sm">
+            Colour
+          </Label>
           <Input
             id="fabric-colour"
-            placeholder="e.g. Royal Blue"
+            placeholder="e.g. Royal blue"
             value={fabricColour}
             onChange={(e) => setField("fabricColour", e.target.value)}
             maxLength={50}
+            className="h-11"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="colour-hex">Hex Code (optional)</Label>
-          <div className="flex gap-2">
+          <Label htmlFor="colour-hex" className="text-sm">
+            Hex code <span className="text-muted-foreground">(optional)</span>
+          </Label>
+          <div className="flex items-center gap-2">
             <Input
               id="colour-hex"
               placeholder="#4169E1"
               value={fabricColourHex}
               onChange={(e) => setField("fabricColourHex", e.target.value)}
               maxLength={7}
+              className="h-11 tabular-nums"
             />
-            {fabricColourHex && /^#[0-9A-Fa-f]{6}$/.test(fabricColourHex) && (
+            {validHex && (
               <div
-                className="h-9 w-9 shrink-0 rounded border"
+                className="size-10 shrink-0 rounded-xl ring-1 ring-border"
                 style={{ backgroundColor: fabricColourHex }}
+                aria-label="Colour preview"
               />
             )}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <GlassCard
+        variant="ghost"
+        className="flex items-center justify-between gap-4 p-4"
+      >
+        <div>
+          <Label htmlFor="providing-fabric" className="cursor-pointer text-sm">
+            I will provide the fabric
+          </Label>
+          <p className="text-xs text-muted-foreground">
+            The designer won&apos;t source fabric for this order.
+          </p>
+        </div>
         <Switch
           id="providing-fabric"
           checked={clientProvidingFabric}
@@ -105,12 +120,11 @@ export function StepFabric() {
             setField("clientProvidingFabric", checked)
           }
         />
-        <Label htmlFor="providing-fabric">I will provide the fabric</Label>
-      </div>
+      </GlassCard>
 
-      <div>
-        <Label htmlFor="fabric-notes" className="mb-2 block">
-          Fabric Notes (optional)
+      <div className="space-y-2">
+        <Label htmlFor="fabric-notes" className="text-sm">
+          Fabric notes <span className="text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="fabric-notes"
@@ -119,8 +133,9 @@ export function StepFabric() {
           onChange={(e) => setField("fabricNotes", e.target.value)}
           maxLength={200}
           rows={2}
+          className="resize-none"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground tabular-nums">
           {fabricNotes.length} / 200 characters
         </p>
       </div>

@@ -1,16 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { ClipboardList, Plus, Search } from "lucide-react";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useOrders } from "@/lib/hooks/use-orders";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/ui/glass-card";
 import { OrderCard } from "@/components/order/order-card";
-import { ClipboardList, Plus } from "lucide-react";
 import { ACTIVE_STATUSES } from "@/lib/utils/order";
-import Link from "next/link";
 
 type TabValue = "all" | "active" | "completed" | "cancelled";
 
@@ -19,6 +26,13 @@ const STATUS_FILTERS: Record<TabValue, string | undefined> = {
   active: undefined, // filtered client-side
   completed: "delivered",
   cancelled: "cancelled",
+};
+
+const TAB_LABELS: Record<TabValue, string> = {
+  all: "All",
+  active: "Active",
+  completed: "Completed",
+  cancelled: "Cancelled",
 };
 
 export default function OrdersPage() {
@@ -35,12 +49,18 @@ export default function OrdersPage() {
   if (!isReady || !user) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
+        <div className="space-y-6">
+          <div>
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="mt-3 h-10 w-56" />
+            <Skeleton className="mt-3 h-5 w-72" />
+          </div>
+          <Skeleton className="h-10 w-full max-w-md" />
+          <div className="space-y-3">
+            <Skeleton className="h-24 w-full rounded-2xl" />
+            <Skeleton className="h-24 w-full rounded-2xl" />
+            <Skeleton className="h-24 w-full rounded-2xl" />
+          </div>
         </div>
       </AppShell>
     );
@@ -56,25 +76,30 @@ export default function OrdersPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
-        <div className="flex items-start justify-between">
+      <div className="space-y-7">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">My Orders</h1>
-            <p className="text-muted-foreground">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              {user.isDesigner ? "Studio orders" : "Your orders"}
+            </p>
+            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+              My orders
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               {user.isDesigner
-                ? "Manage incoming orders and track production"
-                : "Track your garment orders and their progress"}
+                ? "Manage incoming orders and track production from sketch to delivery."
+                : "Track your garment orders and follow every stitch from cutting to delivery."}
             </p>
           </div>
           {user.isDesigner && (
-            <Button asChild size="sm">
+            <Button variant="luxe" size="lg" asChild className="gap-1.5 sm:shrink-0">
               <Link href="/orders/new">
-                <Plus className="mr-1 h-4 w-4" />
-                New Order
+                <Plus className="h-4 w-4" aria-hidden />
+                New order
               </Link>
             </Button>
           )}
-        </div>
+        </header>
 
         <Tabs
           value={tab}
@@ -83,41 +108,66 @@ export default function OrdersPage() {
             setPage(1);
           }}
         >
-          <TabsList className="w-full justify-start">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+          <TabsList className="w-full justify-start gap-1 rounded-full border border-border bg-card p-1 sm:w-auto">
+            {(Object.keys(TAB_LABELS) as TabValue[]).map((key) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className="rounded-full px-4 py-1.5 text-sm font-medium data-[state=active]:bg-foreground data-[state=active]:text-background"
+              >
+                {TAB_LABELS[key]}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          <TabsContent value={tab} className="mt-4">
+          <TabsContent value={tab} className="mt-6">
             {loading && filteredOrders.length === 0 ? (
               <div className="space-y-3">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-24 w-full" />
+                  <Skeleton key={i} className="h-24 w-full rounded-2xl" />
                 ))}
               </div>
             ) : error ? (
-              <div className="py-12 text-center">
-                <p className="text-sm text-destructive">
-                  Failed to load orders. Please try again.
+              <GlassCard variant="solid" className="py-12 text-center">
+                <p className="text-sm font-medium text-status-error-fg">
+                  Couldn&apos;t load your orders.
                 </p>
-              </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Check your connection and try again.
+                </p>
+              </GlassCard>
             ) : filteredOrders.length === 0 ? (
-              <div className="py-12 text-center">
-                <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <p className="mt-3 text-sm text-muted-foreground">
+              <GlassCard
+                variant="solid"
+                className="flex flex-col items-center py-16 text-center"
+              >
+                <span className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-foreground">
+                  <ClipboardList className="h-7 w-7" aria-hidden />
+                </span>
+                <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
                   {tab === "all" && "No orders yet."}
-                  {tab === "active" && "No active orders right now."}
+                  {tab === "active" && "Nothing in flight."}
                   {tab === "completed" && "No completed orders yet."}
                   {tab === "cancelled" && "No cancelled orders."}
+                </h2>
+                <p className="mx-auto mt-2 max-w-sm text-pretty text-sm text-muted-foreground">
+                  {user.isDesigner
+                    ? tab === "all"
+                      ? "Once clients commission you, their orders will land here."
+                      : "Nothing matching this filter — try a different tab."
+                    : tab === "all"
+                      ? "Browse designers and place an order — you'll be able to follow every step from here."
+                      : "Nothing matching this filter — try a different tab."}
                 </p>
                 {!user.isDesigner && (tab === "all" || tab === "active") && (
-                  <Button asChild className="mt-4" size="sm">
-                    <Link href="/search">Browse Designers</Link>
+                  <Button variant="luxe" size="lg" className="mt-6 gap-1.5" asChild>
+                    <Link href="/search">
+                      <Search className="h-4 w-4" aria-hidden />
+                      Browse designers
+                    </Link>
                   </Button>
                 )}
-              </div>
+              </GlassCard>
             ) : (
               <div className="space-y-3">
                 {filteredOrders.map((order) => (
@@ -131,11 +181,11 @@ export default function OrdersPage() {
                 {paginatorInfo?.hasMorePages && (
                   <div className="flex justify-center pt-4">
                     <Button
-                      variant="outline"
+                      variant="luxe-outline"
                       onClick={() => setPage((p) => p + 1)}
                       disabled={loading}
                     >
-                      {loading ? "Loading..." : "Load More"}
+                      {loading ? "Loading..." : "Load more"}
                     </Button>
                   </div>
                 )}

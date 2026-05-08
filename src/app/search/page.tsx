@@ -446,7 +446,7 @@ export default function SearchPage() {
                 Something went wrong.
               </h2>
               <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-                We couldn&rsquo;t load designers. Check your connection and try
+                We couldn&apos;t load designers. Check your connection and try
                 again.
               </p>
             </GlassCard>

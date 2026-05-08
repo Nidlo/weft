@@ -2,16 +2,16 @@
 
 import { Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useMutation } from "@apollo/client/react";
+import { toast } from "sonner";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useBlueprintStore } from "@/lib/stores/blueprint";
-import { useMutation } from "@apollo/client/react";
 import { CREATE_ORDER } from "@/lib/graphql/mutations/order";
 import type { CreateOrderData, BlueprintData } from "@/types/graphql";
 import { AppShell } from "@/components/layout/app-shell";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
+import { OnboardingShell } from "@/components/shared/onboarding-shell";
 import { StepGarment } from "./step-garment";
 import { StepDesign } from "./step-design";
 import { StepReferenceImages } from "./step-reference-images";
@@ -21,21 +21,23 @@ import { StepBudget } from "./step-budget";
 import { StepReview } from "./step-review";
 
 const STEPS = [
-  "Garment & Occasion",
-  "Design Details",
-  "Reference Images",
+  "Garment",
+  "Design",
+  "References",
   "Fabric",
-  "Measurements",
-  "Budget & Timeline",
+  "Fit",
+  "Budget",
   "Review",
-];
+] as const;
 
 function BlueprintLoading() {
   return (
     <AppShell>
-      <div className="mx-auto max-w-2xl px-4 py-8">
-        <Skeleton className="mb-6 h-2 w-full" />
-        <Skeleton className="h-96 w-full" />
+      <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+        <Skeleton className="mx-auto mb-3 h-3 w-48" />
+        <Skeleton className="mx-auto mb-6 h-10 w-72" />
+        <Skeleton className="mx-auto mb-8 h-2 w-full" />
+        <Skeleton className="h-125 w-full rounded-2xl" />
       </div>
     </AppShell>
   );
@@ -65,9 +67,6 @@ function BlueprintWizard() {
     return <BlueprintLoading />;
   }
 
-  const progress = ((step + 1) / STEPS.length) * 100;
-  const isReviewStep = step === STEPS.length - 1;
-
   const handleNext = () => {
     if (step < STEPS.length - 1) {
       setStep(step + 1);
@@ -84,8 +83,9 @@ function BlueprintWizard() {
     switch (step) {
       case 0: // Garment & Occasion
         return (
-          (store.garmentType !== "" &&
-            (store.garmentType !== "other" || store.garmentTypeOther.trim().length > 0)) &&
+          store.garmentType !== "" &&
+          (store.garmentType !== "other" ||
+            store.garmentTypeOther.trim().length > 0) &&
           store.occasion !== ""
         );
       case 1: // Design Details
@@ -99,7 +99,8 @@ function BlueprintWizard() {
       case 3: // Fabric
         return (
           store.fabricType !== "" &&
-          (store.fabricType !== "other" || store.fabricTypeOther.trim().length > 0)
+          (store.fabricType !== "other" ||
+            store.fabricTypeOther.trim().length > 0)
         );
       case 4: // Measurements
         return store.measurementId !== "";
@@ -119,20 +120,30 @@ function BlueprintWizard() {
       const blueprint: BlueprintData = {
         garment_type: store.garmentType,
         occasion: store.occasion,
-        design_details: store.designDetails as Record<string, string | string[]>,
+        design_details: store.designDetails as Record<
+          string,
+          string | string[]
+        >,
         fabric_type: store.fabricType,
       };
 
-      if (store.garmentTypeOther) blueprint.garment_type_other = store.garmentTypeOther;
-      if (store.additionalDetails.length > 0) blueprint.additional_details = store.additionalDetails;
+      if (store.garmentTypeOther)
+        blueprint.garment_type_other = store.garmentTypeOther;
+      if (store.additionalDetails.length > 0)
+        blueprint.additional_details = store.additionalDetails;
       if (store.freeText) blueprint.free_text = store.freeText;
       if (store.referenceImages.length > 0) {
-        blueprint.reference_images = store.referenceImages.map((img) => img.url);
+        blueprint.reference_images = store.referenceImages.map(
+          (img) => img.url
+        );
       }
-      if (store.fabricTypeOther) blueprint.fabric_type_other = store.fabricTypeOther;
+      if (store.fabricTypeOther)
+        blueprint.fabric_type_other = store.fabricTypeOther;
       if (store.fabricColour) blueprint.fabric_colour = store.fabricColour;
-      if (store.fabricColourHex) blueprint.fabric_colour_hex = store.fabricColourHex;
-      if (store.clientProvidingFabric) blueprint.client_providing_fabric = true;
+      if (store.fabricColourHex)
+        blueprint.fabric_colour_hex = store.fabricColourHex;
+      if (store.clientProvidingFabric)
+        blueprint.client_providing_fabric = true;
       if (store.fabricNotes) blueprint.fabric_notes = store.fabricNotes;
 
       // Convert GHS to pesewas
@@ -186,40 +197,26 @@ function BlueprintWizard() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold">Create Your Blueprint</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Step {step + 1} of {STEPS.length}: {STEPS[step]}
-          </p>
-          <Progress value={progress} className="mt-4" />
-        </div>
-
-        <div className="min-h-[400px]">
-          {step === 0 && <StepGarment />}
-          {step === 1 && <StepDesign />}
-          {step === 2 && <StepReferenceImages />}
-          {step === 3 && <StepFabric />}
-          {step === 4 && <StepMeasurements />}
-          {step === 5 && <StepBudget />}
-          {step === 6 && <StepReview onEditStep={setStep} />}
-        </div>
-
-        <div className="mt-8 flex justify-between">
-          <Button variant="outline" onClick={handleBack} disabled={step === 0}>
-            Back
-          </Button>
-          {isReviewStep ? (
-            <Button onClick={handleSubmit} disabled={submitting}>
-              {submitting ? "Submitting..." : "Confirm & Submit"}
-            </Button>
-          ) : (
-            <Button onClick={handleNext} disabled={!canProceed()}>
-              Continue
-            </Button>
-          )}
-        </div>
-      </div>
+      <OnboardingShell
+        eyebrow="Custom order"
+        title="Build your blueprint."
+        steps={STEPS}
+        step={step}
+        onBack={handleBack}
+        onNext={handleNext}
+        onComplete={handleSubmit}
+        canProceed={canProceed()}
+        saving={submitting}
+        completeLabel="Confirm & submit"
+      >
+        {step === 0 && <StepGarment />}
+        {step === 1 && <StepDesign />}
+        {step === 2 && <StepReferenceImages />}
+        {step === 3 && <StepFabric />}
+        {step === 4 && <StepMeasurements />}
+        {step === 5 && <StepBudget />}
+        {step === 6 && <StepReview onEditStep={setStep} />}
+      </OnboardingShell>
     </AppShell>
   );
 }

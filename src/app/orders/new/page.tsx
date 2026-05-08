@@ -1,8 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarIcon,
+  Coins,
+  Loader2,
+  Scissors,
+  Search,
+  User,
+  UserPlus,
+  UserX,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useBlueprintOptions } from "@/lib/hooks/use-blueprint-options";
 import {
@@ -11,12 +27,6 @@ import {
 } from "@/lib/hooks/use-orders";
 import type { ClientSearchResult } from "@/types/graphql";
 import { AppShell } from "@/components/layout/app-shell";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
+import { GlassCard } from "@/components/ui/glass-card";
 import {
   Popover,
   PopoverContent,
@@ -37,25 +48,22 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  ArrowLeft,
-  CalendarIcon,
-  Loader2,
-  Search,
-  User,
-  X,
-} from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-// Sub-components
 import { GarmentTypeCombobox } from "@/components/orders/garment-type-combobox";
 import { FabricTypeCombobox } from "@/components/orders/fabric-type-combobox";
 import { ReferenceImageUpload } from "@/components/orders/reference-image-upload";
 import { MeasurementSelector } from "@/components/orders/measurement-selector";
 import { BudgetInput } from "@/components/orders/budget-input";
 import { VoiceInput } from "@/components/orders/voice-input";
+
+type ClientMode = "none" | "search" | "external";
+
+const CLIENT_MODES: { value: ClientMode; label: string; icon: typeof User }[] = [
+  { value: "none", label: "No client", icon: UserX },
+  { value: "search", label: "Find existing", icon: Search },
+  { value: "external", label: "External", icon: UserPlus },
+];
 
 export default function NewOrderPage() {
   const router = useRouter();
@@ -92,9 +100,7 @@ export default function NewOrderPage() {
   const [notes, setNotes] = useState("");
 
   // Client state
-  const [clientMode, setClientMode] = useState<
-    "none" | "search" | "external"
-  >("none");
+  const [clientMode, setClientMode] = useState<ClientMode>("none");
   const [clientSearchOpen, setClientSearchOpen] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState("");
   const [selectedClient, setSelectedClient] =
@@ -129,9 +135,13 @@ export default function NewOrderPage() {
   if (!isReady || !user) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
+        <div className="mx-auto max-w-2xl space-y-6">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-10 w-72" />
+          <Skeleton className="h-5 w-96" />
+          <Skeleton className="h-64 w-full rounded-2xl" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
         </div>
       </AppShell>
     );
@@ -216,35 +226,40 @@ export default function NewOrderPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-2xl space-y-6">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/orders" aria-label="Back to orders">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">New Order</h1>
-            <p className="text-sm text-muted-foreground">
-              Create an order for a walk-in or external client
+      <div className="mx-auto max-w-2xl space-y-8">
+        <div>
+          <Link
+            href="/orders"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Back to orders
+          </Link>
+          <header className="mt-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Studio
             </p>
-          </div>
+            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+              New order
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+              Create a new order — for a walk-in client, an external customer,
+              or a brief without a client yet.
+            </p>
+          </header>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* --- Garment Details --- */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Garment Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Garment Type - searchable combobox with create */}
-              <div className="space-y-2">
-                <Label>
-                  Garment Type <span className="text-destructive">*</span>
-                </Label>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Garment Details */}
+          <FormSection
+            eyebrow="Brief"
+            title="Garment details"
+            icon={Scissors}
+          >
+            <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
+              <Field label="Garment type" required>
                 {optionsLoading ? (
-                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-11 w-full" />
                 ) : (
                   <GarmentTypeCombobox
                     options={options?.garmentTypes ?? []}
@@ -252,13 +267,11 @@ export default function NewOrderPage() {
                     onChange={setGarmentType}
                   />
                 )}
-              </div>
+              </Field>
 
-              {/* Fabric Types - multi-select combobox with create */}
-              <div className="space-y-2">
-                <Label>Fabric Types</Label>
+              <Field label="Fabric types">
                 {optionsLoading ? (
-                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-11 w-full" />
                 ) : (
                   <FabricTypeCombobox
                     options={options?.fabricTypes ?? []}
@@ -266,11 +279,9 @@ export default function NewOrderPage() {
                     onChange={setSelectedFabrics}
                   />
                 )}
-              </div>
+              </Field>
 
-              {/* Additional details - checkboxes */}
-              <div className="space-y-2">
-                <Label>Additional Details</Label>
+              <Field label="Additional details">
                 {optionsLoading ? (
                   <Skeleton className="h-16 w-full" />
                 ) : (
@@ -278,56 +289,60 @@ export default function NewOrderPage() {
                     {options?.designFields?.additional_detail?.map((detail) => (
                       <label
                         key={detail.value}
-                        className="flex cursor-pointer items-center space-x-2"
+                        className={cn(
+                          "flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-sm",
+                          "transition-colors hover:border-foreground/30 hover:bg-card",
+                          selectedDetails.includes(detail.value) &&
+                            "border-foreground/40 bg-foreground/5"
+                        )}
                       >
                         <Checkbox
                           checked={selectedDetails.includes(detail.value)}
                           onCheckedChange={() => toggleDetail(detail.value)}
                         />
-                        <span className="text-sm">{detail.label}</span>
+                        <span>{detail.label}</span>
                       </label>
                     ))}
                   </div>
                 )}
-              </div>
+              </Field>
 
-              {/* Description with voice input */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description" className="text-sm">
+                    Description
+                  </Label>
                   <VoiceInput onTranscript={handleVoiceTranscript} />
                 </div>
                 <Textarea
                   id="description"
-                  placeholder="Describe the garment in detail — e.g. 'Kaba and slit with cotton and silk, beading on the neckline...' You can also use the mic button to dictate."
+                  placeholder="Describe the garment in detail — fabric, style, beading, special requests... You can also dictate via the mic."
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  className="resize-none"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Add any details about materials, style, or special requests
+                  Include any details about materials, style, or fit.
                 </p>
               </div>
 
-              {/* Reference Images */}
-              <div className="space-y-2">
-                <Label>Reference Images</Label>
+              <Field label="Reference images">
                 <ReferenceImageUpload
                   images={referenceImages}
                   onChange={setReferenceImages}
                 />
-              </div>
-            </CardContent>
-          </Card>
+              </Field>
+            </GlassCard>
+          </FormSection>
 
-          {/* --- Budget & Timeline --- */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                Budget &amp; Timeline
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          {/* Budget + Timeline */}
+          <FormSection
+            eyebrow="Pricing"
+            title="Budget & timeline"
+            icon={Coins}
+          >
+            <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
               <BudgetInput
                 minGhs={budgetMinGhs}
                 maxGhs={budgetMaxGhs}
@@ -335,10 +350,8 @@ export default function NewOrderPage() {
                 onMaxChange={setBudgetMaxGhs}
               />
 
-              {/* Deadline range */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Estimated Start</Label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Estimated start">
                   <Popover
                     open={deadlineStartOpen}
                     onOpenChange={setDeadlineStartOpen}
@@ -347,14 +360,17 @@ export default function NewOrderPage() {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal",
+                          "h-11 w-full justify-start text-left font-medium",
                           !deadlineStart && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        <CalendarIcon
+                          className="mr-2 h-4 w-4 shrink-0 text-copper"
+                          aria-hidden
+                        />
                         {deadlineStart
-                          ? format(deadlineStart, "MMM d")
-                          : "Start date"}
+                          ? format(deadlineStart, "MMM d, yyyy")
+                          : "Pick a start date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -369,27 +385,25 @@ export default function NewOrderPage() {
                       />
                     </PopoverContent>
                   </Popover>
-                </div>
+                </Field>
 
-                <div className="space-y-2">
-                  <Label>
-                    Completion Deadline{" "}
-                    <span className="text-destructive">*</span>
-                  </Label>
-                  <Popover
-                    open={deadlineOpen}
-                    onOpenChange={setDeadlineOpen}
-                  >
+                <Field label="Completion deadline" required>
+                  <Popover open={deadlineOpen} onOpenChange={setDeadlineOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal",
+                          "h-11 w-full justify-start text-left font-medium",
                           !deadline && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {deadline ? format(deadline, "MMM d") : "Deadline"}
+                        <CalendarIcon
+                          className="mr-2 h-4 w-4 shrink-0 text-copper"
+                          aria-hidden
+                        />
+                        {deadline
+                          ? format(deadline, "MMM d, yyyy")
+                          : "Pick a deadline"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -407,118 +421,96 @@ export default function NewOrderPage() {
                       />
                     </PopoverContent>
                   </Popover>
-                </div>
+                </Field>
               </div>
 
-              {/* Notes */}
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes" className="text-sm">
+                  Notes
+                </Label>
                 <Textarea
                   id="notes"
-                  placeholder="Order instructions, special requirements..."
+                  placeholder="Order instructions, fitting schedule, special requirements..."
                   rows={2}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
+                  className="resize-none"
                 />
               </div>
-            </CardContent>
-          </Card>
+            </GlassCard>
+          </FormSection>
 
-          {/* --- Client --- */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Client</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Client mode selector */}
+          {/* Client */}
+          <FormSection eyebrow="Recipient" title="Client" icon={User}>
+            <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
+              {/* Client mode pills */}
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setClientMode("none");
-                    clearSelectedClient();
-                    setClientName("");
-                    setClientPhone("");
-                  }}
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-sm transition-colors",
-                    clientMode === "none"
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-input hover:bg-accent"
-                  )}
-                >
-                  No client
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setClientMode("search");
-                    setClientName("");
-                    setClientPhone("");
-                  }}
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-sm transition-colors",
-                    clientMode === "search"
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-input hover:bg-accent"
-                  )}
-                >
-                  <Search className="mr-1 inline h-3 w-3" />
-                  Find existing client
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setClientMode("external");
-                    clearSelectedClient();
-                  }}
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-sm transition-colors",
-                    clientMode === "external"
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-input hover:bg-accent"
-                  )}
-                >
-                  <User className="mr-1 inline h-3 w-3" />
-                  External client
-                </button>
+                {CLIENT_MODES.map((mode) => {
+                  const Icon = mode.icon;
+                  const isActive = clientMode === mode.value;
+                  return (
+                    <button
+                      key={mode.value}
+                      type="button"
+                      onClick={() => {
+                        setClientMode(mode.value);
+                        if (mode.value === "none") {
+                          clearSelectedClient();
+                          setClientName("");
+                          setClientPhone("");
+                        } else if (mode.value === "search") {
+                          setClientName("");
+                          setClientPhone("");
+                        } else {
+                          clearSelectedClient();
+                        }
+                      }}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5",
+                        isActive
+                          ? "bg-foreground text-background shadow-(--shadow-2)"
+                          : "border border-border bg-card hover:border-foreground/30"
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5" aria-hidden />
+                      {mode.label}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Search existing client */}
               {clientMode === "search" && (
                 <div className="space-y-2">
                   {selectedClient ? (
-                    <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                          <User className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {selectedClient.fullName ?? "Unknown"}
-                          </p>
-                          {selectedClient.phone && (
-                            <p className="text-xs text-muted-foreground">
-                              {selectedClient.phone}
+                    <GlassCard variant="ghost" className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-foreground ring-1 ring-border">
+                            <User className="h-4 w-4" aria-hidden />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold tracking-tight">
+                              {selectedClient.fullName ?? "Unknown"}
                             </p>
-                          )}
-                          {selectedClient.city && (
-                            <p className="text-xs text-muted-foreground">
-                              {selectedClient.city}
+                            <p className="truncate text-xs text-muted-foreground">
+                              {[selectedClient.phone, selectedClient.city]
+                                .filter(Boolean)
+                                .join(" · ")}
                             </p>
-                          )}
+                          </div>
                         </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Clear selected client"
+                          onClick={clearSelectedClient}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Clear selected client"
-                        onClick={clearSelectedClient}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    </GlassCard>
                   ) : (
                     <Popover
                       open={clientSearchOpen}
@@ -529,9 +521,12 @@ export default function NewOrderPage() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={clientSearchOpen}
-                          className="w-full justify-start text-muted-foreground"
+                          className="h-11 w-full justify-start text-muted-foreground"
                         >
-                          <Search className="mr-2 h-4 w-4" />
+                          <Search
+                            className="mr-2 h-4 w-4 text-copper"
+                            aria-hidden
+                          />
                           Search by name or phone...
                         </Button>
                       </PopoverTrigger>
@@ -554,9 +549,7 @@ export default function NewOrderPage() {
                             {!searchingClients &&
                               clientSearchQuery.length >= 2 &&
                               clientResults.length === 0 && (
-                                <CommandEmpty>
-                                  No clients found.
-                                </CommandEmpty>
+                                <CommandEmpty>No clients found.</CommandEmpty>
                               )}
                             {clientResults.length > 0 && (
                               <CommandGroup>
@@ -569,7 +562,7 @@ export default function NewOrderPage() {
                                     }
                                   >
                                     <div className="flex items-center gap-3">
-                                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                                      <div className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
                                         <User className="h-3.5 w-3.5" />
                                       </div>
                                       <div>
@@ -598,29 +591,30 @@ export default function NewOrderPage() {
               {/* External client manual entry */}
               {clientMode === "external" && (
                 <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="clientName">Client Name</Label>
+                  <Field label="Client name">
                     <Input
                       id="clientName"
                       placeholder="e.g. Kwame Mensah"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
+                      className="h-11"
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="clientPhone">Client Phone</Label>
+                  </Field>
+                  <Field
+                    label="Client phone"
+                    hint="If provided, the client receives SMS updates. They can claim the order when they sign up."
+                  >
                     <Input
                       id="clientPhone"
                       type="tel"
-                      placeholder="e.g. 024 123 4567"
+                      placeholder="024 123 4567"
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
+                      autoComplete="tel"
+                      inputMode="numeric"
+                      className="h-11 tabular-nums"
                     />
-                    <p className="text-xs text-muted-foreground">
-                      If provided, the client will receive SMS updates. If
-                      they sign up later, the order links to their account.
-                    </p>
-                  </div>
+                  </Field>
                 </div>
               )}
 
@@ -630,7 +624,6 @@ export default function NewOrderPage() {
                 </p>
               )}
 
-              {/* Measurement selector (visible when client is linked) */}
               {linkedClientId && (
                 <MeasurementSelector
                   clientId={linkedClientId}
@@ -638,27 +631,84 @@ export default function NewOrderPage() {
                   onChange={setMeasurementId}
                 />
               )}
-            </CardContent>
-          </Card>
+            </GlassCard>
+          </FormSection>
 
           {/* Submit */}
           <Button
             type="submit"
-            className="w-full"
+            variant="luxe"
+            size="xl"
+            className="w-full gap-1.5"
             disabled={!canSubmit}
-            size="lg"
           >
             {submitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                Creating order...
               </>
             ) : (
-              "Create Order"
+              <>
+                Create order
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </>
             )}
           </Button>
         </form>
       </div>
     </AppShell>
+  );
+}
+
+interface FormSectionProps {
+  eyebrow: string;
+  title: string;
+  icon?: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  children: React.ReactNode;
+}
+
+function FormSection({
+  eyebrow,
+  title,
+  icon: Icon,
+  children,
+}: FormSectionProps) {
+  return (
+    <section>
+      <header className="mb-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          {eyebrow}
+        </p>
+        <h2 className="text-display mt-1.5 flex items-center gap-2 text-xl font-semibold tracking-tight sm:text-2xl">
+          {Icon && <Icon className="h-5 w-5 text-foreground/80" aria-hidden />}
+          {title}
+        </h2>
+      </header>
+      {children}
+    </section>
+  );
+}
+
+interface FieldProps {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  children: React.ReactNode;
+}
+
+function Field({ label, required, hint, children }: FieldProps) {
+  return (
+    <div className="space-y-2">
+      <Label className="flex items-center gap-1 text-sm">
+        {label}
+        {required && (
+          <span className="text-copper" aria-label="required">
+            *
+          </span>
+        )}
+      </Label>
+      {children}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
   );
 }

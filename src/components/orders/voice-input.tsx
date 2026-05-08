@@ -10,16 +10,15 @@ interface VoiceInputProps {
   disabled?: boolean;
 }
 
+function detectSupport(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+
 export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
   const [listening, setListening] = useState(false);
-  const [supported, setSupported] = useState(false);
+  const [supported] = useState<boolean>(detectSupport);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-
-  useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    setSupported(!!SpeechRecognition);
-  }, []);
 
   const toggleListening = useCallback(() => {
     if (listening) {

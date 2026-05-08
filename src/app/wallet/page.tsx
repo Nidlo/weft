@@ -15,9 +15,12 @@ export default function WalletPage() {
   if (!isReady || !user) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
+        <div className="space-y-6">
+          <Skeleton className="h-3 w-32" />
+          <Skeleton className="h-10 w-56" />
+          <Skeleton className="h-5 w-72" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
         </div>
       </AppShell>
     );
@@ -25,13 +28,19 @@ export default function WalletPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Wallet</h1>
-          <p className="text-muted-foreground">
-            Manage your payout accounts and view transactions
+      <div className="space-y-7">
+        <header>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            Earnings
           </p>
-        </div>
+          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            Wallet
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            Manage your MoMo payout accounts and review every transaction —
+            order earnings in, withdrawals out.
+          </p>
+        </header>
         <WalletManager />
         <WalletTransactions />
       </div>

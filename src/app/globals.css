@@ -9,6 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -38,6 +39,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-copper: var(--copper);
+  --color-copper-soft: var(--copper-soft);
+  --color-bone: var(--bone);
+  --color-ink: var(--ink);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -60,115 +65,339 @@
   --color-status-info-soft: var(--status-info-soft);
 }
 
+/* =========================================================================
+ * NIDLO DESIGN TOKENS
+ * Black + bone + copper palette. OKLCH for perceptual uniformity.
+ * Light is the default surface (Ghana mobile + outdoor legibility);
+ * dark mirrors the same hierarchy with intentional inversions, not blunt
+ * inversions. Hue stays in the 50–75° (warm) band so the brand reads
+ * consistently across modes.
+ * ========================================================================= */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.99 0.002 90);
-  --foreground: oklch(0.15 0.01 30);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.01 30);
+  --radius: 0.875rem;
+
+  /* Surfaces */
+  --background: oklch(0.985 0.005 75);   /* warm bone */
+  --foreground: oklch(0.16 0.012 50);    /* deep ink */
+  --card: oklch(1 0 0);                  /* pure white lift */
+  --card-foreground: oklch(0.16 0.012 50);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.01 30);
-  --primary: oklch(0.45 0.18 280);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.96 0.01 80);
-  --secondary-foreground: oklch(0.25 0.02 30);
-  --muted: oklch(0.96 0.005 80);
-  --muted-foreground: oklch(0.5 0.01 30);
-  --accent: oklch(0.75 0.15 55);
-  --accent-foreground: oklch(0.15 0.01 30);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.91 0.01 80);
-  --input: oklch(0.91 0.01 80);
-  --ring: oklch(0.45 0.18 280);
-  --chart-1: oklch(0.45 0.18 280);
-  --chart-2: oklch(0.75 0.15 55);
-  --chart-3: oklch(0.6 0.118 184.704);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.577 0.245 27.325);
-  --sidebar: oklch(0.98 0.005 80);
-  --sidebar-foreground: oklch(0.15 0.01 30);
-  --sidebar-primary: oklch(0.45 0.18 280);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.96 0.01 80);
-  --sidebar-accent-foreground: oklch(0.25 0.02 30);
-  --sidebar-border: oklch(0.91 0.01 80);
-  --sidebar-ring: oklch(0.45 0.18 280);
-  /* Status semantic values */
-  --status-success: oklch(0.52 0.18 142);
-  --status-success-fg: oklch(0.38 0.14 142);
-  --status-success-soft: oklch(0.94 0.04 142);
-  --status-warning: oklch(0.68 0.18 80);
-  --status-warning-fg: oklch(0.50 0.14 80);
-  --status-warning-soft: oklch(0.96 0.04 80);
+  --popover-foreground: oklch(0.16 0.012 50);
+
+  /* Brand */
+  --primary: oklch(0.18 0.018 50);       /* charcoal-ink with warmth */
+  --primary-foreground: oklch(0.985 0.005 75);
+  --secondary: oklch(0.94 0.012 75);     /* soft bone */
+  --secondary-foreground: oklch(0.22 0.018 50);
+  --muted: oklch(0.95 0.008 75);
+  --muted-foreground: oklch(0.45 0.015 50);
+  --accent: oklch(0.74 0.11 60);         /* champagne copper */
+  --accent-foreground: oklch(0.18 0.018 50);
+
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0.9 0.012 75);
+  --input: oklch(0.9 0.012 75);
+  --ring: oklch(0.74 0.11 60);
+
+  /* Brand semantic aliases (use these for needle/thread motifs) */
+  --copper: oklch(0.74 0.11 60);
+  --copper-soft: oklch(0.92 0.05 70);
+  --bone: oklch(0.985 0.005 75);
+  --ink: oklch(0.16 0.012 50);
+
+  /* Charts */
+  --chart-1: oklch(0.18 0.018 50);
+  --chart-2: oklch(0.74 0.11 60);
+  --chart-3: oklch(0.55 0.05 230);
+  --chart-4: oklch(0.65 0.16 145);
+  --chart-5: oklch(0.55 0.22 25);
+
+  /* Sidebar */
+  --sidebar: oklch(0.97 0.008 75);
+  --sidebar-foreground: oklch(0.16 0.012 50);
+  --sidebar-primary: oklch(0.18 0.018 50);
+  --sidebar-primary-foreground: oklch(0.985 0.005 75);
+  --sidebar-accent: oklch(0.94 0.012 75);
+  --sidebar-accent-foreground: oklch(0.22 0.018 50);
+  --sidebar-border: oklch(0.9 0.012 75);
+  --sidebar-ring: oklch(0.74 0.11 60);
+
+  /* Status — kept harmonized with the warm band */
+  --status-success: oklch(0.55 0.16 150);
+  --status-success-fg: oklch(0.40 0.13 150);
+  --status-success-soft: oklch(0.94 0.04 150);
+  --status-warning: oklch(0.74 0.13 75);
+  --status-warning-fg: oklch(0.50 0.13 75);
+  --status-warning-soft: oklch(0.96 0.04 75);
   --status-error: oklch(0.55 0.22 25);
   --status-error-fg: oklch(0.42 0.18 25);
   --status-error-soft: oklch(0.95 0.05 25);
-  --status-info: oklch(0.55 0.18 240);
-  --status-info-fg: oklch(0.40 0.14 240);
-  --status-info-soft: oklch(0.94 0.04 240);
+  --status-info: oklch(0.55 0.12 230);
+  --status-info-fg: oklch(0.40 0.10 230);
+  --status-info-soft: oklch(0.94 0.04 230);
+
+  /* Glass surfaces — use behind backdrop-blur for the iOS-26 frost effect.
+   * `--glass` sits over a busy background with 60–70% opacity; the border
+   * gives the soft 1px highlight that makes glass read as glass. */
+  --glass: oklch(1 0 0 / 0.62);
+  --glass-strong: oklch(1 0 0 / 0.85);
+  --glass-border: oklch(1 0 0 / 0.55);
+  --glass-shadow: oklch(0.16 0.012 50 / 0.06);
+
+  /* Elevation stack — short shadow + long shadow combo for modern depth */
+  --shadow-1: 0 1px 2px oklch(0.16 0.012 50 / 0.04), 0 1px 1px oklch(0.16 0.012 50 / 0.02);
+  --shadow-2: 0 4px 12px oklch(0.16 0.012 50 / 0.06), 0 1px 3px oklch(0.16 0.012 50 / 0.04);
+  --shadow-3: 0 12px 32px oklch(0.16 0.012 50 / 0.08), 0 4px 8px oklch(0.16 0.012 50 / 0.04);
+  --shadow-glow: 0 0 0 1px oklch(0.74 0.11 60 / 0.25), 0 8px 24px oklch(0.74 0.11 60 / 0.15);
+
+  /* Motion — easing curves used across the system. Stitch is the brand's
+   * signature: a soft snap that mimics the moment a needle pulls thread
+   * taut. Needle is gentler — used for hovers and incidental motion. */
+  --ease-stitch: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-needle: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+  --duration-slow: 420ms;
+  --duration-stitch: 720ms;
 }
 
 .dark {
-  --background: oklch(0.15 0.01 280);
-  --foreground: oklch(0.96 0.005 80);
-  --card: oklch(0.2 0.015 280);
-  --card-foreground: oklch(0.96 0.005 80);
-  --popover: oklch(0.2 0.015 280);
-  --popover-foreground: oklch(0.96 0.005 80);
-  --primary: oklch(0.65 0.2 280);
-  --primary-foreground: oklch(0.12 0.01 280);
-  --secondary: oklch(0.25 0.02 280);
-  --secondary-foreground: oklch(0.96 0.005 80);
-  --muted: oklch(0.25 0.015 280);
-  --muted-foreground: oklch(0.65 0.01 80);
-  --accent: oklch(0.75 0.15 55);
-  --accent-foreground: oklch(0.12 0.01 30);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.65 0.2 280);
-  --chart-1: oklch(0.65 0.2 280);
-  --chart-2: oklch(0.75 0.15 55);
-  --chart-3: oklch(0.696 0.17 162.48);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.2 0.015 280);
-  --sidebar-foreground: oklch(0.96 0.005 80);
-  --sidebar-primary: oklch(0.65 0.2 280);
-  --sidebar-primary-foreground: oklch(0.96 0.005 80);
-  --sidebar-accent: oklch(0.25 0.02 280);
-  --sidebar-accent-foreground: oklch(0.96 0.005 80);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.65 0.2 280);
-  /* Status semantic values */
-  --status-success: oklch(0.65 0.2 142);
-  --status-success-fg: oklch(0.78 0.15 142);
-  --status-success-soft: oklch(0.25 0.07 142);
-  --status-warning: oklch(0.72 0.18 80);
-  --status-warning-fg: oklch(0.82 0.13 80);
-  --status-warning-soft: oklch(0.25 0.06 80);
-  --status-error: oklch(0.65 0.22 25);
+  /* Surfaces — deep warm charcoal, never pure black (pure black flattens) */
+  --background: oklch(0.135 0.012 50);
+  --foreground: oklch(0.97 0.008 75);
+  --card: oklch(0.175 0.013 50);
+  --card-foreground: oklch(0.97 0.008 75);
+  --popover: oklch(0.175 0.013 50);
+  --popover-foreground: oklch(0.97 0.008 75);
+
+  /* Brand inverts — bone takes primary, copper pushes brighter */
+  --primary: oklch(0.97 0.008 75);
+  --primary-foreground: oklch(0.135 0.012 50);
+  --secondary: oklch(0.22 0.014 50);
+  --secondary-foreground: oklch(0.97 0.008 75);
+  --muted: oklch(0.21 0.013 50);
+  --muted-foreground: oklch(0.68 0.013 75);
+  --accent: oklch(0.78 0.13 65);
+  --accent-foreground: oklch(0.135 0.012 50);
+
+  --destructive: oklch(0.66 0.22 25);
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(1 0 0 / 0.12);
+  --ring: oklch(0.78 0.13 65);
+
+  --copper: oklch(0.78 0.13 65);
+  --copper-soft: oklch(0.32 0.07 65);
+  --bone: oklch(0.97 0.008 75);
+  --ink: oklch(0.135 0.012 50);
+
+  --chart-1: oklch(0.97 0.008 75);
+  --chart-2: oklch(0.78 0.13 65);
+  --chart-3: oklch(0.65 0.10 230);
+  --chart-4: oklch(0.72 0.15 145);
+  --chart-5: oklch(0.66 0.22 25);
+
+  --sidebar: oklch(0.155 0.013 50);
+  --sidebar-foreground: oklch(0.97 0.008 75);
+  --sidebar-primary: oklch(0.97 0.008 75);
+  --sidebar-primary-foreground: oklch(0.135 0.012 50);
+  --sidebar-accent: oklch(0.22 0.014 50);
+  --sidebar-accent-foreground: oklch(0.97 0.008 75);
+  --sidebar-border: oklch(1 0 0 / 0.08);
+  --sidebar-ring: oklch(0.78 0.13 65);
+
+  --status-success: oklch(0.68 0.18 150);
+  --status-success-fg: oklch(0.80 0.14 150);
+  --status-success-soft: oklch(0.25 0.07 150);
+  --status-warning: oklch(0.78 0.13 75);
+  --status-warning-fg: oklch(0.85 0.10 75);
+  --status-warning-soft: oklch(0.25 0.06 75);
+  --status-error: oklch(0.66 0.22 25);
   --status-error-fg: oklch(0.80 0.16 25);
   --status-error-soft: oklch(0.25 0.08 25);
-  --status-info: oklch(0.65 0.18 240);
-  --status-info-fg: oklch(0.78 0.14 240);
-  --status-info-soft: oklch(0.25 0.07 240);
+  --status-info: oklch(0.66 0.13 230);
+  --status-info-fg: oklch(0.80 0.10 230);
+  --status-info-soft: oklch(0.25 0.07 230);
+
+  /* Glass — darker base, lower opacity, brighter highlight */
+  --glass: oklch(0.18 0.015 50 / 0.55);
+  --glass-strong: oklch(0.18 0.015 50 / 0.82);
+  --glass-border: oklch(1 0 0 / 0.10);
+  --glass-shadow: oklch(0 0 0 / 0.5);
+
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.3), 0 1px 1px oklch(0 0 0 / 0.2);
+  --shadow-2: 0 4px 12px oklch(0 0 0 / 0.4), 0 1px 3px oklch(0 0 0 / 0.3);
+  --shadow-3: 0 12px 32px oklch(0 0 0 / 0.5), 0 4px 8px oklch(0 0 0 / 0.3);
+  --shadow-glow: 0 0 0 1px oklch(0.78 0.13 65 / 0.3), 0 8px 24px oklch(0.78 0.13 65 / 0.18);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
+  }
+  ::selection {
+    background: var(--copper);
+    color: var(--ink);
   }
 }
 
-@keyframes splash-bar {
-  0% {
-    transform: translateX(-100%);
+/* =========================================================================
+ * UTILITY LAYER — brand-specific composition helpers
+ * Keep these short. Anything more than ~6 lines should become a component.
+ * ========================================================================= */
+@layer utilities {
+  /* Glass surface — pair with `backdrop-blur-xl` */
+  .surface-glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 1px 0 0 var(--glass-border) inset, var(--shadow-2);
   }
-  100% {
-    transform: translateX(300%);
+  .surface-glass-strong {
+    background: var(--glass-strong);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 1px 0 0 var(--glass-border) inset, var(--shadow-3);
+  }
+
+  /* Subtle copper-thread underline that "stitches" on hover */
+  .stitch-underline {
+    background-image: linear-gradient(
+      to right,
+      var(--copper) 50%,
+      transparent 50%
+    );
+    background-size: 8px 1px;
+    background-repeat: repeat-x;
+    background-position: left bottom;
+    padding-bottom: 2px;
+  }
+
+  /* Editorial display type — Fraunces with optical-size axis pushed for
+   * headlines. Use sparingly; pairs with Geist sans for body. */
+  .text-display {
+    font-family: var(--font-display, var(--font-geist-sans));
+    font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 0;
+    letter-spacing: -0.02em;
+  }
+
+  /* Layered radial mesh — used behind the hero. Cheap, no JS, fades on dark. */
+  .bg-thread-mesh {
+    background-image:
+      radial-gradient(
+        ellipse 60% 40% at 12% 0%,
+        oklch(0.74 0.11 60 / 0.12) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 50% 35% at 95% 8%,
+        oklch(0.18 0.018 50 / 0.06) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 80% 50% at 50% 100%,
+        oklch(0.74 0.11 60 / 0.05) 0%,
+        transparent 60%
+      );
+  }
+  .dark .bg-thread-mesh {
+    background-image:
+      radial-gradient(
+        ellipse 60% 40% at 12% 0%,
+        oklch(0.78 0.13 65 / 0.10) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 50% 35% at 95% 8%,
+        oklch(0.97 0.008 75 / 0.04) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 80% 50% at 50% 100%,
+        oklch(0.78 0.13 65 / 0.06) 0%,
+        transparent 60%
+      );
+  }
+
+  /* Drag-disable for the hero composition — prevents accidental selection
+   * during the marquee interactions. */
+  .no-drag {
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Branded skeleton sweep. A soft copper gradient traverses a muted base
+   * — crispier than flat `animate-pulse`. Keyed off CSS custom props so
+   * it auto-adapts in dark mode. Reduced-motion is honored by the global
+   * `prefers-reduced-motion` block at the bottom of this file. */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--secondary);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklch, var(--copper) 18%, transparent) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    background-position: -200% 0;
+    animation: copper-shimmer 1.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+}
+
+/* =========================================================================
+ * KEYFRAMES — brand motion library
+ * Reduced-motion is honored per-component (motion library does this for
+ * us); these CSS keyframes are only used where JS animation would be
+ * overkill.
+ * ========================================================================= */
+@keyframes splash-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+/* The signature: a needle stitching across — used for ThreadDivider and
+ * any decorative dashed line. */
+@keyframes thread-stitch {
+  0% { stroke-dashoffset: var(--stitch-length, 200); }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* A slow shimmer that traverses an element (skeletons, copper accents) */
+@keyframes copper-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+
+/* Soft floating idle (logo idle, hero medallion) */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Needle wiggle — a tiny rotational jitter for the pin icon */
+@keyframes needle-wiggle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

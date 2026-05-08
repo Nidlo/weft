@@ -31,6 +31,7 @@ export function BudgetInput({
             type="number"
             min="0.01"
             step="0.01"
+            inputMode="decimal"
             placeholder="Min e.g. 300"
             value={minGhs}
             onChange={(e) => onMinChange(e.target.value)}

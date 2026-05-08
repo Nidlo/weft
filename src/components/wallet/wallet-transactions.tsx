@@ -1,89 +1,106 @@
 "use client";
 
-import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowDownLeft, ArrowUpRight, Receipt } from "lucide-react";
+
+import { GlassCard } from "@/components/ui/glass-card";
 import { useWalletTransactions } from "@/lib/hooks/use-wallet";
 import { formatPesewas } from "@/lib/utils/order";
+import { cn } from "@/lib/utils";
 
 export function WalletTransactions() {
   const { transactions, loading } = useWalletTransactions();
 
-  if (loading && transactions.length === 0) {
-    return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Transaction History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (transactions.length === 0) {
-    return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Transaction History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            No transactions yet.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Transaction History</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {transactions.map((tx) => {
-          const isDeposit = tx.type === "deposit";
-          const meta = tx.meta as Record<string, string> | null;
-          const label = getTransactionLabel(meta?.type);
+    <section>
+      <header className="mb-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          Activity
+        </p>
+        <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+          Transaction history
+        </h2>
+      </header>
 
-          return (
-            <div
-              key={tx.id}
-              className="flex items-center justify-between rounded-lg border p-3"
-            >
-              <div className="flex items-center gap-3">
-                {isDeposit ? (
-                  <ArrowDownLeft className="h-4 w-4 text-green-600" />
-                ) : (
-                  <ArrowUpRight className="h-4 w-4 text-red-500" />
-                )}
-                <div>
-                  <p className="text-sm font-medium">{label}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(tx.createdAt).toLocaleDateString("en-GH", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-              </div>
-              <p
-                className={`text-sm font-semibold ${
-                  isDeposit ? "text-green-600" : "text-red-500"
-                }`}
+      {loading && transactions.length === 0 ? (
+        <GlassCard variant="ghost" className="p-4">
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </GlassCard>
+      ) : transactions.length === 0 ? (
+        <GlassCard
+          variant="solid"
+          className="flex flex-col items-center py-12 text-center"
+        >
+          <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-foreground">
+            <Receipt className="h-6 w-6" aria-hidden />
+          </span>
+          <h3 className="text-display mt-4 text-xl font-semibold tracking-tight">
+            No transactions yet.
+          </h3>
+          <p className="mx-auto mt-1.5 max-w-xs text-sm text-muted-foreground">
+            Your earnings and withdrawals will appear here as soon as your
+            first order is paid.
+          </p>
+        </GlassCard>
+      ) : (
+        <div className="space-y-2">
+          {transactions.map((tx) => {
+            const isDeposit = tx.type === "deposit";
+            const meta = tx.meta as Record<string, string> | null;
+            const label = getTransactionLabel(meta?.type);
+
+            return (
+              <GlassCard
+                key={tx.id}
+                variant="solid"
+                className="flex items-center justify-between p-4"
               >
-                {isDeposit ? "+" : "-"}
-                {formatPesewas(tx.amount)}
-              </p>
-            </div>
-          );
-        })}
-      </CardContent>
-    </Card>
+                <div className="flex items-center gap-3">
+                  <span
+                    className={cn(
+                      "flex size-10 shrink-0 items-center justify-center rounded-xl ring-1",
+                      isDeposit
+                        ? "bg-status-success-soft text-status-success ring-status-success/20"
+                        : "bg-status-error-soft text-status-error ring-status-error/20"
+                    )}
+                  >
+                    {isDeposit ? (
+                      <ArrowDownLeft className="h-4 w-4" aria-hidden />
+                    ) : (
+                      <ArrowUpRight className="h-4 w-4" aria-hidden />
+                    )}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-display truncate text-sm font-semibold tracking-tight">
+                      {label}
+                    </p>
+                    <p className="text-xs text-muted-foreground tabular-nums">
+                      {new Date(tx.createdAt).toLocaleDateString("en-GH", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <p
+                  className={cn(
+                    "shrink-0 text-sm font-semibold tabular-nums",
+                    isDeposit
+                      ? "text-status-success-fg"
+                      : "text-status-error-fg"
+                  )}
+                >
+                  {isDeposit ? "+" : "−"}
+                  {formatPesewas(tx.amount)}
+                </p>
+              </GlassCard>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
 

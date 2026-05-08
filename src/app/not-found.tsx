@@ -1,22 +1,53 @@
 import Link from "next/link";
+import { Compass, Home, Search } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
-      <h1 className="text-6xl font-bold text-primary">404</h1>
-      <p className="mt-4 text-xl font-semibold">Page not found</p>
-      <p className="mt-2 text-muted-foreground">
-        The page you&apos;re looking for doesn&apos;t exist or has been moved.
-      </p>
-      <div className="mt-8 flex gap-4">
-        <Button asChild>
-          <Link href="/">Go Home</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/search">Browse Designers</Link>
-        </Button>
-      </div>
-    </div>
+    <main className="relative flex min-h-[80vh] flex-col items-center justify-center bg-thread-mesh px-4 py-16">
+      <GlassCard
+        variant="solid"
+        className="relative w-full max-w-md overflow-hidden p-8 text-center sm:p-10"
+      >
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-copper/40 to-transparent"
+          aria-hidden
+        />
+        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-copper/15 text-copper-soft ring-1 ring-copper/30">
+          <Compass className="h-7 w-7" aria-hidden />
+        </div>
+        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-copper tabular-nums">
+          404
+        </p>
+        <h1 className="text-display mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+          We can&apos;t find that page.
+        </h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          The link may be broken or the page has moved. Pick a path below to
+          get back on track.
+        </p>
+        <div className="mt-8 flex flex-col gap-2 sm:flex-row">
+          <Button asChild variant="luxe" size="lg" className="flex-1 gap-2">
+            <Link href="/">
+              <Home className="h-4 w-4" aria-hidden />
+              Home
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="luxe-outline"
+            size="lg"
+            className="flex-1 gap-2"
+          >
+            <Link href="/search">
+              <Search className="h-4 w-4" aria-hidden />
+              Browse designers
+            </Link>
+          </Button>
+        </div>
+      </GlassCard>
+    </main>
   );
 }

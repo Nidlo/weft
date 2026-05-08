@@ -46,8 +46,10 @@ if (isConfigured) {
     if (title) {
       self.registration.showNotification(title, {
         body: body || "",
-        icon: "/icons/icon-192x192.png",
-        badge: "/icons/badge-72x72.png",
+        // Use the SVG icon we actually ship — the previous PNG paths
+        // (icon-192x192.png, badge-72x72.png) didn't exist, so the
+        // browser fell back to a generic globe glyph.
+        icon: "/icons/icon-192x192.svg",
         data: { url: actionUrl },
       });
     }

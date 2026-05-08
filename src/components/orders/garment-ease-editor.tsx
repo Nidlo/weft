@@ -305,7 +305,7 @@ export function GarmentEaseEditor({
               Cancel
             </Button>
             <Button onClick={handleAdd} disabled={saving || !field}>
-              {saving ? "Saving…" : "Save ease"}
+              {saving ? "Saving..." : "Save ease"}
             </Button>
           </div>
         </GlassCard>

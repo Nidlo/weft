@@ -3,6 +3,10 @@
 import { Suspense, useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
+import { motion, useReducedMotion } from "motion/react";
+import { ArrowLeft, RotateCw } from "lucide-react";
+import { toast } from "sonner";
+
 import { VERIFY_OTP, REQUEST_OTP } from "@/lib/graphql/mutations/auth";
 import type {
   VerifyOtpData,
@@ -10,16 +14,12 @@ import type {
 } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
+import { maskPhone } from "@/lib/utils/phone";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
+import { StitchLoader } from "@/components/ui/stitch-loader";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 60;
@@ -28,21 +28,17 @@ export default function VerifyOtpPage() {
   return (
     <Suspense
       fallback={
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-40" />
-            <Skeleton className="mt-2 h-4 w-60" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center gap-2">
-              {Array(OTP_LENGTH)
-                .fill(0)
-                .map((_, i) => (
-                  <Skeleton key={i} className="h-14 w-12" />
-                ))}
-            </div>
-          </CardContent>
-        </Card>
+        <GlassCard variant="solid" className="p-8">
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="mt-2 h-4 w-64" />
+          <div className="mt-8 flex justify-center gap-2">
+            {Array(OTP_LENGTH)
+              .fill(0)
+              .map((_, i) => (
+                <Skeleton key={i} className="h-14 w-12 rounded-xl" />
+              ))}
+          </div>
+        </GlassCard>
       }
     >
       <VerifyOtpContent />
@@ -50,18 +46,19 @@ export default function VerifyOtpPage() {
   );
 }
 
+// Phone is handed off from /auth/phone via sessionStorage, never the URL,
+// so it doesn't end up in browser history, access logs, or Referer headers.
+function readPendingPhone(): string {
+  if (typeof window === "undefined") return "";
+  return sessionStorage.getItem("nidlo:auth:pendingPhone") ?? "";
+}
+
 function VerifyOtpContent() {
   const { isGuest, isLoading: guestLoading } = useGuestGuard();
   const router = useRouter();
-  const [phone, setPhone] = useState("");
+  const [phone] = useState<string>(readPendingPhone);
   const setUser = useAuthStore((s) => s.setUser);
-
-  // Phone is handed off from /auth/phone via sessionStorage, never the URL,
-  // so it doesn't end up in browser history, access logs, or Referer headers.
-  useEffect(() => {
-    const stored = sessionStorage.getItem("nidlo:auth:pendingPhone") ?? "";
-    setPhone(stored);
-  }, []);
+  const reduced = useReducedMotion();
 
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
@@ -201,90 +198,137 @@ function VerifyOtpContent() {
     }
   };
 
-  const maskedPhone = phone
-    ? phone.replace(/(\d{3})\d{4}(\d{3})/, "$1****$2")
-    : "";
+  const maskedPhone = maskPhone(phone);
 
   if (guestLoading || !isGuest) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="mt-2 h-4 w-60" />
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center gap-2">
-            {Array(OTP_LENGTH)
-              .fill(0)
-              .map((_, i) => (
-                <Skeleton key={i} className="h-14 w-12" />
-              ))}
-          </div>
-        </CardContent>
-      </Card>
+      <GlassCard variant="solid" className="p-8">
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="mt-2 h-4 w-64" />
+        <div className="mt-8 flex justify-center gap-2">
+          {Array(OTP_LENGTH)
+            .fill(0)
+            .map((_, i) => (
+              <Skeleton key={i} className="h-14 w-12 rounded-xl" />
+            ))}
+        </div>
+      </GlassCard>
     );
   }
 
+  const cooldownPct = Math.max(
+    0,
+    Math.min(100, ((RESEND_COOLDOWN - cooldown) / RESEND_COOLDOWN) * 100)
+  );
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Verify your phone</CardTitle>
-        <CardDescription>
-          Enter the 6-digit code sent to {maskedPhone}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex justify-center gap-2">
-          {digits.map((digit, index) => (
+    <GlassCard variant="solid" className="p-8">
+      <header className="mb-7">
+        <h1 className="text-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+          Check your phone.
+        </h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          We sent a 6-digit code to{" "}
+          <span className="font-medium text-foreground tabular-nums">
+            {maskedPhone}
+          </span>
+        </p>
+      </header>
+
+      <div className="flex justify-center gap-2 sm:gap-3" aria-label="One-time code">
+        {digits.map((digit, index) => (
+          <motion.div
+            key={index}
+            initial={reduced ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.4,
+              delay: reduced ? 0 : index * 0.05,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          >
             <input
-              key={index}
               ref={(el) => {
                 inputRefs.current[index] = el;
               }}
               type="text"
               inputMode="numeric"
+              autoComplete={index === 0 ? "one-time-code" : "off"}
               maxLength={6}
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="h-12 w-10 rounded-md border border-input bg-background text-center text-lg font-semibold focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring sm:h-14 sm:w-12 sm:text-xl"
+              className={cn(
+                "h-14 w-11 rounded-xl border-2 bg-background/60 text-center text-xl font-semibold tabular-nums transition-all duration-200",
+                "outline-none focus:scale-105 focus:border-copper focus:shadow-(--shadow-glow)",
+                digit
+                  ? "border-foreground/40 text-foreground"
+                  : "border-border text-muted-foreground",
+                "sm:h-16 sm:w-12 sm:text-2xl"
+              )}
               autoFocus={index === 0}
               disabled={verifying}
+              aria-label={`Digit ${index + 1} of ${OTP_LENGTH}`}
             />
-          ))}
+          </motion.div>
+        ))}
+      </div>
+
+      {verifying && (
+        <div className="mt-6 flex justify-center">
+          <StitchLoader label="Verifying..." size={20} />
         </div>
+      )}
 
-        {verifying && (
-          <p className="text-center text-sm text-muted-foreground">
-            Verifying...
-          </p>
-        )}
-
-        <div className="text-center">
-          {cooldown > 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Resend code in {cooldown}s
+      {/* Cooldown — visible thread-like progress bar that drains as time passes.
+          When it reaches zero the resend button takes its place. */}
+      <div className="mt-7 text-center">
+        {cooldown > 0 ? (
+          <div className="space-y-2.5">
+            <p className="text-xs text-muted-foreground">
+              Resend code in{" "}
+              <span className="font-semibold tabular-nums text-foreground">
+                {cooldown}s
+              </span>
             </p>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResend}
-              disabled={resending}
+            <div
+              className="mx-auto h-0.5 w-32 overflow-hidden rounded-full bg-border"
+              aria-hidden
             >
-              {resending ? "Sending..." : "Didn't receive it? Resend code"}
-            </Button>
-          )}
-        </div>
+              <div
+                className="h-full bg-copper transition-[width] duration-1000 ease-linear"
+                style={{ width: `${cooldownPct}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleResend}
+            disabled={resending}
+            className="gap-1.5"
+          >
+            <RotateCw
+              className={cn(
+                "h-3.5 w-3.5",
+                resending && "animate-spin"
+              )}
+              aria-hidden
+            />
+            {resending ? "Sending..." : "Resend code"}
+          </Button>
+        )}
+      </div>
 
-        <Button
-          variant="ghost"
-          className="w-full"
-          onClick={() => router.back()}
-        >
-          Use a different number
-        </Button>
-      </CardContent>
-    </Card>
+      <Button
+        variant="ghost"
+        className="mt-3 w-full gap-1.5 text-muted-foreground"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        Use a different number
+      </Button>
+    </GlassCard>
   );
 }

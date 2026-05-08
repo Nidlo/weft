@@ -1,8 +1,11 @@
 "use client";
 
-import { use, useCallback, useEffect, useMemo, useRef } from "react";
+import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useQuery } from "@apollo/client/react";
+import { ArrowLeft, ArrowUpRight, Loader2 } from "lucide-react";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import {
   useConversationMessages,
@@ -19,9 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MessageBubble } from "@/components/messages/message-bubble";
 import { ChatInput } from "@/components/messages/chat-input";
 import { DateSeparator } from "@/components/messages/date-separator";
-import { ArrowLeft, Loader2 } from "lucide-react";
 import { getImageKitThumbnail } from "@/lib/utils/imagekit";
-import { useQuery } from "@apollo/client/react";
 import { MY_CONVERSATIONS } from "@/lib/graphql/queries/message";
 import type { GqlMessage, MyConversationsData } from "@/types/graphql";
 
@@ -37,7 +38,9 @@ export default function ChatPage({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { echo } = useRealtime();
   const decrementUnread = useMessagesStore((s) => s.decrementUnreadCount);
-  const setActiveConversation = useMessagesStore((s) => s.setActiveConversation);
+  const setActiveConversation = useMessagesStore(
+    (s) => s.setActiveConversation
+  );
   const hasMarkedRead = useRef(false);
 
   // Track active conversation so RealtimeProvider skips unread increment
@@ -67,7 +70,14 @@ export default function ChatPage({
     if (conversation?.unreadCount) {
       decrementUnread(conversation.unreadCount);
     }
-  }, [isReady, user, conversationId, markRead, conversation?.unreadCount, decrementUnread]);
+  }, [
+    isReady,
+    user,
+    conversationId,
+    markRead,
+    conversation?.unreadCount,
+    decrementUnread,
+  ]);
 
   // Auto-scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -78,17 +88,32 @@ export default function ChatPage({
     scrollToBottom();
   }, [messages.length, scrollToBottom]);
 
-  // Subscribe to new messages via WebSocket
+  // Bump on reconnect so the subscription effect below re-runs and
+  // re-joins the conversation channel against the fresh socket. Without
+  // this, after a network blip the listener stays bound to the old
+  // socket and quietly misses any messages that arrive after reconnect.
+  const [reconnectVersion, setReconnectVersion] = useState(0);
+
+  // Subscribe to new messages via WebSocket. We debounce the read mutation
+  // because a burst of incoming messages would otherwise fire one POST per
+  // arrival - the server only needs to know "the user is in this thread,
+  // mark everything visible". 250ms collapses bursts without making the
+  // sender wait too long for the read receipt.
+  const markReadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!echo || !conversationId) return;
 
     const channel = echo.private(`conversation.${conversationId}`);
 
     channel.listen(".message.sent", (data: GqlMessage) => {
-      if (data.senderId !== user?.id) {
-        refetch();
+      // Skip events authored by the current user - they're already in the
+      // optimistic cache and don't need a refetch / read-receipt round-trip.
+      if (data.senderId === user?.id) return;
+      refetch();
+      if (markReadTimerRef.current) clearTimeout(markReadTimerRef.current);
+      markReadTimerRef.current = setTimeout(() => {
         markRead(conversationId);
-      }
+      }, 250);
     });
 
     channel.listen(".messages.read", () => {
@@ -96,13 +121,19 @@ export default function ChatPage({
     });
 
     return () => {
+      if (markReadTimerRef.current) clearTimeout(markReadTimerRef.current);
       echo.leave(`conversation.${conversationId}`);
     };
-  }, [echo, conversationId, user?.id, refetch, markRead]);
+  }, [echo, conversationId, user?.id, refetch, markRead, reconnectVersion]);
 
-  // Refetch when the WebSocket reconnects — fills the gap of any events
-  // that fired while we were disconnected.
-  useEchoReconnect(echo, refetch);
+  // Refetch + bump the channel-subscription version when the socket
+  // reconnects. Refetch fills the message-list gap; the version bump
+  // forces a clean re-join of the private channel above.
+  const handleReconnect = useCallback(() => {
+    refetch();
+    setReconnectVersion((v) => v + 1);
+  }, [refetch]);
+  useEchoReconnect(echo, handleReconnect);
 
   // Handle scroll to top for loading more messages
   const handleScroll = useCallback(() => {
@@ -155,33 +186,42 @@ export default function ChatPage({
 
   return (
     <AppShell>
-      <div className="flex h-[calc(100dvh-3.5rem-4rem)] flex-col md:h-[calc(100dvh-3.5rem-1rem)]">
-        {/* Chat header */}
-        <div className="flex items-center gap-3 border-b px-2 py-3">
-          <Button variant="ghost" size="icon" aria-label="Back" onClick={() => router.back()}>
-            <ArrowLeft className="h-5 w-5" />
+      <div className="-mx-4 flex h-[calc(100dvh-4rem-4rem)] flex-col sm:-mx-6 md:mx-0 md:h-[calc(100dvh-4rem-1rem)]">
+        {/* Chat header — glass surface, sticky to the top of the chat */}
+        <header className="flex items-center gap-3 border-b border-border/60 bg-background/70 px-3 py-3 backdrop-blur-xl backdrop-saturate-150 sm:px-4">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Back to messages"
+            onClick={() => router.back()}
+            className="shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4" />
           </Button>
           {other ? (
             <>
-              <Avatar className="h-9 w-9">
+              <Avatar className="size-10 shrink-0 ring-1 ring-border">
                 {other.avatarUrl && (
                   <AvatarImage
                     src={getImageKitThumbnail(other.avatarUrl, 80)}
                     alt={other.fullName ?? ""}
                   />
                 )}
-                <AvatarFallback>
+                <AvatarFallback className="bg-secondary text-sm font-medium">
                   {(other.fullName ?? "?").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{other.fullName}</p>
+                <p className="text-display truncate text-base font-semibold tracking-tight">
+                  {other.fullName}
+                </p>
                 {conversation?.order && (
                   <Link
                     href={`/orders/${conversation.order.id}`}
-                    className="text-xs text-muted-foreground hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                   >
                     View order
+                    <ArrowUpRight className="h-3 w-3" aria-hidden />
                   </Link>
                 )}
               </div>
@@ -189,13 +229,13 @@ export default function ChatPage({
           ) : (
             <Skeleton className="h-9 w-32" />
           )}
-        </div>
+        </header>
 
         {/* Messages area */}
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex-1 space-y-2 overflow-y-auto px-3 py-4"
+          className="flex-1 space-y-2 overflow-y-auto px-3 py-5 sm:px-4"
         >
           {hasMore && (
             <div className="flex justify-center py-2">
@@ -204,10 +244,11 @@ export default function ChatPage({
                 size="sm"
                 onClick={loadMore}
                 disabled={loading}
+                className="text-muted-foreground"
               >
-                {loading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
+                {loading && (
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                )}
                 Load older messages
               </Button>
             </div>
@@ -237,8 +278,12 @@ export default function ChatPage({
 
           {messages.length === 0 && !loading && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-sm text-muted-foreground">
-                No messages yet. Say hello!
+              <p className="text-display text-2xl font-semibold tracking-tight">
+                Say hello.
+              </p>
+              <p className="mt-2 max-w-xs text-pretty text-sm text-muted-foreground">
+                This is the start of your conversation. Share details, ask
+                questions, send photos.
               </p>
             </div>
           )}

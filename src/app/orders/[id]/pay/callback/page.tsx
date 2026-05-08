@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, use, useEffect, useState } from "react";
+import { Suspense, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { usePaymentStatus } from "@/lib/hooks/use-payments";
 import { AppShell } from "@/components/layout/app-shell";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StitchLoader } from "@/components/ui/stitch-loader";
 import { formatPesewas } from "@/lib/utils/order";
 
 export default function PaymentCallbackPage({
@@ -19,8 +20,10 @@ export default function PaymentCallbackPage({
       fallback={
         <AppShell>
           <div className="flex flex-col items-center space-y-4 py-16 text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Verifying your payment...</p>
+            <StitchLoader size={32} tone="copper" />
+            <p className="text-sm text-muted-foreground">
+              Verifying your payment...
+            </p>
           </div>
         </AppShell>
       }
@@ -42,20 +45,15 @@ function PaymentCallbackContent({
 
   const { isReady } = useAuthGuard({ requireOnboarded: true });
   const { payment, loading } = usePaymentStatus(reference);
-  const [verified, setVerified] = useState(false);
 
-  useEffect(() => {
-    if (payment && !verified) {
-      setVerified(true);
-    }
-  }, [payment, verified]);
-
-  if (!isReady || loading || !verified) {
+  if (!isReady || loading || !payment) {
     return (
       <AppShell>
         <div className="flex flex-col items-center space-y-4 py-16 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Verifying your payment...</p>
+          <StitchLoader size={32} tone="copper" />
+          <p className="text-sm text-muted-foreground">
+            Verifying your payment&hellip;
+          </p>
         </div>
       </AppShell>
     );

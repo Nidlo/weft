@@ -350,7 +350,7 @@ export default function OrderDetailPage({
                 className="gap-1.5"
               >
                 <MessageSquare className="h-4 w-4" aria-hidden />
-                {startingChat ? "Opening…" : "Message"}
+                {startingChat ? "Opening..." : "Message"}
               </Button>
             )}
 
@@ -383,7 +383,7 @@ export default function OrderDetailPage({
                       disabled={confirming}
                     >
                       {confirming
-                        ? "Confirming…"
+                        ? "Confirming..."
                         : `Accept counter (${formatPesewas(order.counterPrice)})`}
                       {!confirming && (
                         <ArrowRight className="h-4 w-4" aria-hidden />
@@ -409,7 +409,7 @@ export default function OrderDetailPage({
                           Notes for {nextStageConfig?.label} (optional)
                         </Label>
                         <Textarea
-                          placeholder="Add a note about this stage…"
+                          placeholder="Add a note about this stage..."
                           value={updateNotes}
                           onChange={(e) => setUpdateNotes(e.target.value)}
                           rows={3}
@@ -423,7 +423,7 @@ export default function OrderDetailPage({
                             disabled={updating}
                           >
                             {updating
-                              ? "Updating…"
+                              ? "Updating..."
                               : `Move to ${nextStageConfig?.label}`}
                           </Button>
                           <Button
@@ -453,7 +453,7 @@ export default function OrderDetailPage({
                       }}
                       disabled={delivering}
                     >
-                      {delivering ? "Confirming…" : "Confirm delivery"}
+                      {delivering ? "Confirming..." : "Confirm delivery"}
                       {!delivering && (
                         <ArrowRight className="h-4 w-4" aria-hidden />
                       )}
@@ -531,7 +531,7 @@ export default function OrderDetailPage({
                             !cancelReasonNotes.trim())
                         }
                       >
-                        {cancelling ? "Cancelling…" : "Confirm cancel"}
+                        {cancelling ? "Cancelling..." : "Confirm cancel"}
                       </Button>
                       <Button
                         variant="ghost"

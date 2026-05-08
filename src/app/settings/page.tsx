@@ -202,7 +202,7 @@ export default function SettingsPage() {
             ) : (
               <LogOut className="h-4 w-4" aria-hidden />
             )}
-            {loggingOut ? "Logging out…" : "Log out"}
+            {loggingOut ? "Logging out..." : "Log out"}
           </Button>
 
           <Button
@@ -229,9 +229,9 @@ export default function SettingsPage() {
               Sign out of all devices?
             </DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              This signs you out of every browser and tab where you&rsquo;re
+              This signs you out of every browser and tab where you&apos;re
               currently logged in — phone, laptop, tablet, anywhere.
-              You&rsquo;ll need to log in again on each device.
+              You&apos;ll need to log in again on each device.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">

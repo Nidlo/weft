@@ -3,6 +3,9 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client/react";
+import { ArrowRight, Phone } from "lucide-react";
+import { toast } from "sonner";
+
 import { REQUEST_OTP, SOCIAL_LOGIN } from "@/lib/graphql/mutations/auth";
 import { GET_COUNTRIES } from "@/lib/graphql/queries/designer";
 import type {
@@ -22,15 +25,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
+import { ThreadDivider } from "@/components/ui/thread-divider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
 import { GoogleSignInButton } from "./google-sign-in-button";
 
 const APPLE_CLIENT_ID = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID;
@@ -224,16 +221,15 @@ export default function PhoneAuthPage() {
 
   if (isLoading || !isGuest) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="mt-2 h-4 w-60" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="mt-4 h-10 w-full" />
-        </CardContent>
-      </Card>
+      <GlassCard variant="solid" className="p-8">
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="mt-2 h-4 w-64" />
+        <Skeleton className="mt-8 h-12 w-full" />
+        <Skeleton className="mt-3 h-12 w-full" />
+        <Skeleton className="mt-6 h-px w-full" />
+        <Skeleton className="mt-6 h-12 w-full" />
+        <Skeleton className="mt-3 h-12 w-full" />
+      </GlassCard>
     );
   }
 
@@ -243,82 +239,115 @@ export default function PhoneAuthPage() {
     (startsWithZero ? "024 123 4567" : "90 12 34 56");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Sign in with phone</CardTitle>
-        <CardDescription>
-          We&apos;ll send you a verification code via SMS
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex gap-2">
-            <Select value={selectedCode} onValueChange={setSelectedCode}>
-              <SelectTrigger className="w-32 shrink-0">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {countries.map((c) => (
-                  <SelectItem key={c.iso2} value={`+${c.phoneCode}`}>
-                    {c.emoji ?? ""} +{c.phoneCode}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <GlassCard variant="solid" className="p-8">
+      <header className="mb-7">
+        <h1 className="text-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+          Welcome back.
+        </h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          We&apos;ll text you a 6-digit code to verify your number.
+        </p>
+      </header>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <label
+          htmlFor="phone-input"
+          className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+        >
+          Phone number
+        </label>
+        <div className="flex gap-2">
+          <Select value={selectedCode} onValueChange={setSelectedCode}>
+            <SelectTrigger className="h-12! w-32 shrink-0 rounded-xl border-border bg-background/60 text-sm font-medium">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {countries.map((c) => (
+                <SelectItem key={c.iso2} value={`+${c.phoneCode}`}>
+                  {c.emoji ?? ""} +{c.phoneCode}{" "}
+                  <span className="text-muted-foreground">
+                    {c.iso2}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="relative flex-1">
+            <Phone
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
             <Input
+              id="phone-input"
               type="tel"
               placeholder={placeholder}
               value={phone}
               onChange={(e) => setPhone(formatPhone(e.target.value))}
               maxLength={maxDigits}
               autoFocus
-              className="flex-1"
+              autoComplete="tel"
+              inputMode="numeric"
+              className="h-12 rounded-xl bg-background/60 pl-9 text-base font-medium tabular-nums"
             />
           </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isBusy || !isValidPhone(phone)}
-          >
-            {loading ? "Sending..." : "Send verification code"}
-          </Button>
-        </form>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">
-              or continue with
-            </span>
-          </div>
         </div>
+        <Button
+          type="submit"
+          variant="luxe"
+          size="lg"
+          className="w-full"
+          disabled={isBusy || !isValidPhone(phone)}
+        >
+          {loading ? "Sending..." : "Send verification code"}
+          {!loading && <ArrowRight className="ml-1 h-4 w-4" />}
+        </Button>
+      </form>
 
-        <div className="grid gap-2">
-          <GoogleSignInButton
-            disabled={isBusy}
-            loading={socialLoading}
-            onToken={(token) => handleSocialLogin("google", token)}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            disabled={isBusy}
-            onClick={handleAppleLogin}
+      <ThreadDivider tone="copper" label="OR" className="my-7" />
+
+      <div className="grid gap-2.5">
+        <GoogleSignInButton
+          disabled={isBusy}
+          loading={socialLoading}
+          onToken={(token) => handleSocialLogin("google", token)}
+        />
+        <Button
+          type="button"
+          variant="luxe-outline"
+          size="lg"
+          className="w-full"
+          disabled={isBusy}
+          onClick={handleAppleLogin}
+        >
+          <svg
+            className="mr-2 h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden
           >
-            <svg
-              className="mr-2 h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-            </svg>
-            {socialLoading ? "Signing in..." : "Continue with Apple"}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+          </svg>
+          {socialLoading ? "Signing in..." : "Continue with Apple"}
+        </Button>
+      </div>
+
+      <p className="mt-7 text-center text-xs text-muted-foreground">
+        By continuing you agree to our{" "}
+        <a
+          href="/terms"
+          className="font-medium text-foreground/80 underline-offset-4 hover:underline"
+        >
+          Terms
+        </a>{" "}
+        and{" "}
+        <a
+          href="/privacy"
+          className="font-medium text-foreground/80 underline-offset-4 hover:underline"
+        >
+          Privacy
+        </a>
+        .
+      </p>
+    </GlassCard>
   );
 }

@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type Echo from "laravel-echo";
-import { useApolloClient } from "@apollo/client/react";
+import { useApolloClient, useQuery } from "@apollo/client/react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useMessagesStore } from "@/lib/stores/messages";
@@ -18,12 +18,43 @@ import { useNotificationsStore } from "@/lib/stores/notifications";
 import { getEcho, disconnectEcho } from "@/lib/echo";
 import { useEchoReconnect } from "@/lib/hooks/use-echo-reconnect";
 import { UNREAD_MESSAGES_COUNT } from "@/lib/graphql/queries/message";
-import { UNREAD_NOTIFICATIONS_COUNT } from "@/lib/graphql/queries/notification";
+import {
+  MY_NOTIFICATION_PREFERENCES,
+  UNREAD_NOTIFICATIONS_COUNT,
+} from "@/lib/graphql/queries/notification";
 import { usePushNotifications } from "@/lib/hooks/use-push-notifications";
 import type {
+  GqlNotificationPreferences,
+  MyNotificationPreferencesData,
   UnreadMessagesCountData,
   UnreadNotificationsCountData,
 } from "@/types/graphql";
+
+/**
+ * Convert a notification type slug like `"message_received"` to the
+ * `messageReceived` key on `GqlNotificationPreferences`. Returns null
+ * if the prefs object doesn't expose that category — the caller should
+ * fall through to "show the toast" rather than silently swallow.
+ */
+function shouldToast(
+  prefs: GqlNotificationPreferences | null | undefined,
+  type: string,
+): boolean {
+  if (!prefs) return true;
+  const key = type.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()) as
+    | keyof GqlNotificationPreferences
+    | string;
+  const channels = (prefs as unknown as Record<string, unknown>)[key];
+  if (
+    channels &&
+    typeof channels === "object" &&
+    "push" in channels &&
+    typeof (channels as { push: unknown }).push === "boolean"
+  ) {
+    return (channels as { push: boolean }).push;
+  }
+  return true;
+}
 
 interface RealtimeContextValue {
   echo: Echo<"reverb"> | null;
@@ -47,8 +78,27 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
 
   // Register FCM push notifications
   usePushNotifications(hasHydrated && isAuthenticated);
+
+  // Per-category prefs power the in-app toast gate below. The notification
+  // service already gates FCM by the same `push` flag server-side, so this
+  // closes the in-app side of the same control - no toast shows for
+  // categories the user has muted.
+  const { data: prefsData } = useQuery<MyNotificationPreferencesData>(
+    MY_NOTIFICATION_PREFERENCES,
+    {
+      skip: !hasHydrated || !isAuthenticated,
+      fetchPolicy: "cache-first",
+    },
+  );
+  const prefs = prefsData?.myNotificationPreferences ?? null;
+
   const echoRef = useRef<Echo<"reverb"> | null>(null);
   const [echoState, setEchoState] = useState<Echo<"reverb"> | null>(null);
+  // Bumped each time the socket reconnects so the channel-subscription
+  // effect below re-runs (leaving + re-joining the user's private
+  // channel). Without this, listeners bound to a pre-disconnect socket
+  // are stale and miss events that arrive after reconnect.
+  const [reconnectVersion, setReconnectVersion] = useState(0);
 
   const refreshUnreadCounts = useCallback(() => {
     if (!hasHydrated || !isAuthenticated || !userId) return;
@@ -87,22 +137,31 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     refreshUnreadCounts();
   }, [refreshUnreadCounts]);
 
-  // Re-sync unread counts when the socket reconnects — increments fired
-  // while disconnected would otherwise be lost.
-  useEchoReconnect(echoState, refreshUnreadCounts);
+  // Re-sync unread counts AND re-subscribe to private channels when the
+  // socket reconnects. Increments fired while disconnected are pulled in
+  // by `refreshUnreadCounts`; bumping `reconnectVersion` re-runs the
+  // channel-subscription effect so its listeners aren't bound to the
+  // stale pre-disconnect socket.
+  const handleReconnect = useCallback(() => {
+    refreshUnreadCounts();
+    setReconnectVersion((v) => v + 1);
+  }, [refreshUnreadCounts]);
+  useEchoReconnect(echoState, handleReconnect);
 
   // Set up WebSocket connection and subscriptions
   useEffect(() => {
     if (!hasHydrated || !isAuthenticated || !userId) {
       disconnectEcho();
       echoRef.current = null;
-      setEchoState(null);
+      // Defer state reset to a microtask so the setState happens off the
+      // synchronous effect path (React 19 cascading-render rule).
+      queueMicrotask(() => setEchoState(null));
       return;
     }
 
     const echo = getEcho();
     echoRef.current = echo;
-    setEchoState(echo);
+    queueMicrotask(() => setEchoState(echo));
 
     if (!echo) return;
 
@@ -117,18 +176,29 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       })
       .listen(
         ".notification.created",
-        (data: { title?: string; body?: string }) => {
+        (data: { title?: string; body?: string; type?: string }) => {
+          // Always bump the badge - the user can still see the
+          // notification in /notifications even if they've muted toasts
+          // for this category.
           incrementNotifUnread();
-          if (data.title) {
-            toast(data.title, { description: data.body });
-          }
+          if (!data.title) return;
+          if (data.type && !shouldToast(prefs, data.type)) return;
+          toast(data.title, { description: data.body });
         }
       );
 
     return () => {
       echo.leave(`user.${userId}`);
     };
-  }, [hasHydrated, isAuthenticated, userId, incrementUnread, incrementNotifUnread]);
+  }, [
+    hasHydrated,
+    isAuthenticated,
+    userId,
+    incrementUnread,
+    incrementNotifUnread,
+    prefs,
+    reconnectVersion,
+  ]);
 
   return (
     <RealtimeContext.Provider value={{ echo: echoState }}>

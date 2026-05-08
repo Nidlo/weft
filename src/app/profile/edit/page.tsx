@@ -2,24 +2,20 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "@apollo/client/react";
-import { ArrowLeft, Loader2, Camera, User } from "lucide-react";
-import { toast } from "sonner";
 import Link from "next/link";
+import { useQuery, useMutation } from "@apollo/client/react";
+import { ArrowLeft, Camera, Check, Loader2, MapPin, User } from "lucide-react";
+import { toast } from "sonner";
+
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useAutosave } from "@/lib/hooks/use-autosave";
 import { useAuthStore } from "@/lib/stores/auth";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GlassCard } from "@/components/ui/glass-card";
 import {
   Select,
   SelectContent,
@@ -29,7 +25,10 @@ import {
 } from "@/components/ui/select";
 import { GET_CITIES } from "@/lib/graphql/queries/designer";
 import { CREATE_CITY } from "@/lib/graphql/mutations/lookup";
-import { UPDATE_MY_INFO, UPDATE_AVATAR } from "@/lib/graphql/mutations/profile";
+import {
+  UPDATE_MY_INFO,
+  UPDATE_AVATAR,
+} from "@/lib/graphql/mutations/profile";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import type { CitiesData, CreateCityData } from "@/types/graphql";
 
@@ -44,6 +43,11 @@ export default function ProfileEditPage() {
   const [city, setCity] = useState("");
   const [newCity, setNewCity] = useState("");
   const [showNewCity, setShowNewCity] = useState(false);
+  // Track which user.id we've already seeded the form from. Setting state
+  // during render — guarded by a condition that only fires when the source
+  // changes — is the React 19 idiomatic way to derive form state from a
+  // prop without using an effect (https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes).
+  const [seededFromUserId, setSeededFromUserId] = useState<string | undefined>();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -57,19 +61,20 @@ export default function ProfileEditPage() {
   const [updateMyInfo, { loading: saving }] = useMutation(UPDATE_MY_INFO, {
     refetchQueries: [{ query: ME_QUERY }],
   });
-  const [updateAvatar, { loading: uploadingAvatar }] = useMutation<{ updateAvatar: { id: string; avatarUrl: string | null } }>(UPDATE_AVATAR, {
+  const [updateAvatar, { loading: uploadingAvatar }] = useMutation<{
+    updateAvatar: { id: string; avatarUrl: string | null };
+  }>(UPDATE_AVATAR, {
     refetchQueries: [{ query: ME_QUERY }],
   });
   const [createCity] = useMutation<CreateCityData>(CREATE_CITY);
 
-  useEffect(() => {
-    if (user) {
-      setFirstName(user.firstName ?? "");
-      setLastName(user.lastName ?? "");
-      setOtherNames(user.otherNames ?? "");
-      setCity(user.city ?? "");
-    }
-  }, [user]);
+  if (user && user.id !== seededFromUserId) {
+    setSeededFromUserId(user.id);
+    setFirstName(user.firstName ?? "");
+    setLastName(user.lastName ?? "");
+    setOtherNames(user.otherNames ?? "");
+    setCity(user.city ?? "");
+  }
 
   const personalInfoDirty =
     !!user &&
@@ -119,7 +124,6 @@ export default function ProfileEditPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Preview
     const reader = new FileReader();
     reader.onload = () => setAvatarPreview(reader.result as string);
     reader.readAsDataURL(file);
@@ -140,7 +144,6 @@ export default function ProfileEditPage() {
     try {
       let cityValue = city;
 
-      // Create new city if needed
       if (showNewCity && newCity.trim()) {
         const { data: cityData } = await createCity({
           variables: { name: newCity.trim(), countryCode: "GH" },
@@ -161,7 +164,6 @@ export default function ProfileEditPage() {
         },
       });
 
-      // Update local auth store
       setUser({
         ...user!,
         firstName: firstName.trim() || null,
@@ -183,9 +185,11 @@ export default function ProfileEditPage() {
   if (!isReady || !user) {
     return (
       <AppShell>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
+        <div className="mx-auto max-w-lg space-y-6">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-10 w-56" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
+          <Skeleton className="h-72 w-full rounded-2xl" />
         </div>
       </AppShell>
     );
@@ -196,123 +200,157 @@ export default function ProfileEditPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-lg space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/profile" aria-label="Back to profile">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-bold">Edit Profile</h1>
+      <div className="mx-auto max-w-lg space-y-7">
+        <div>
+          <Link
+            href="/profile"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Back to profile
+          </Link>
+          <header className="mt-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Account
+            </p>
+            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+              Edit profile
+            </h1>
+          </header>
         </div>
 
         {/* Avatar */}
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 pt-6">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingAvatar}
-              aria-label={uploadingAvatar ? "Uploading avatar" : "Change avatar"}
-              className="group relative h-24 w-24 overflow-hidden rounded-full bg-muted disabled:cursor-wait"
-            >
-              {displayAvatar ? (
-                // FileReader data URL preview is unoptimisable by next/image.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={displayAvatar}
-                  alt="Avatar"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <User className="h-10 w-10 text-muted-foreground" />
-                </div>
-              )}
-              {uploadingAvatar ? (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  className="absolute inset-0 flex items-center justify-center bg-black/60"
-                >
-                  <Loader2 className="h-6 w-6 animate-spin text-white" />
-                </div>
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                  <Camera className="h-6 w-6 text-white" />
-                </div>
-              )}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarChange}
-            />
-            <p className="text-xs text-muted-foreground">
-              {uploadingAvatar ? "Uploading..." : "Tap to change photo"}
-            </p>
-          </CardContent>
-        </Card>
+        <GlassCard
+          variant="solid"
+          className="flex flex-col items-center gap-4 p-6"
+        >
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingAvatar}
+            aria-label={
+              uploadingAvatar ? "Uploading avatar" : "Change avatar"
+            }
+            className="group relative size-28 overflow-hidden rounded-full bg-secondary ring-2 ring-background shadow-(--shadow-2) transition-shadow disabled:cursor-wait hover:shadow-(--shadow-glow)"
+          >
+            {displayAvatar ? (
+              // FileReader data URL preview is unoptimisable by next/image.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={displayAvatar}
+                alt="Avatar"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <User className="h-12 w-12 text-muted-foreground" aria-hidden />
+              </div>
+            )}
+            {uploadingAvatar ? (
+              <div
+                role="status"
+                aria-live="polite"
+                className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              >
+                <Loader2 className="h-7 w-7 animate-spin text-white" />
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                <Camera className="h-7 w-7 text-white" aria-hidden />
+              </div>
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            aria-label="Upload avatar image"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+          <p className="text-xs text-muted-foreground">
+            {uploadingAvatar ? "Uploading..." : "Tap photo to change"}
+          </p>
+        </GlassCard>
 
-        {/* Name fields */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Personal Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Enter first name"
-              />
+        {/* Personal info */}
+        <section>
+          <header className="mb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              Identity
+            </p>
+            <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+              Personal information
+            </h2>
+          </header>
+          <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="firstName" className="text-sm">
+                  First name
+                </Label>
+                <Input
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Adwoa"
+                  className="h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName" className="text-sm">
+                  Last name
+                </Label>
+                <Input
+                  id="lastName"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Mensah"
+                  className="h-11"
+                />
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Enter last name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="otherNames">Other Names</Label>
+              <Label htmlFor="otherNames" className="text-sm">
+                Other names <span className="text-muted-foreground">(optional)</span>
+              </Label>
               <Input
                 id="otherNames"
                 value={otherNames}
                 onChange={(e) => setOtherNames(e.target.value)}
-                placeholder="Optional"
+                placeholder="Middle name or other names"
+                className="h-11"
               />
             </div>
 
-            {/* City */}
             <div className="space-y-2">
-              <Label>City</Label>
+              <Label className="text-sm">City</Label>
               {!showNewCity ? (
                 <div className="space-y-2">
-                  <Select value={city} onValueChange={setCity}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cities.map((c) => (
-                        <SelectItem key={c.id} value={c.name}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="relative">
+                    <MapPin
+                      className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-copper"
+                      aria-hidden
+                    />
+                    <Select value={city} onValueChange={setCity}>
+                      <SelectTrigger className="h-11 pl-9">
+                        <SelectValue placeholder="Select your city" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities.map((c) => (
+                          <SelectItem key={c.id} value={c.name}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Button
                     type="button"
                     variant="link"
                     size="sm"
-                    className="h-auto p-0 text-xs"
+                    className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
                     onClick={() => setShowNewCity(true)}
                   >
                     City not listed? Add new
@@ -320,16 +358,23 @@ export default function ProfileEditPage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Input
-                    value={newCity}
-                    onChange={(e) => setNewCity(e.target.value)}
-                    placeholder="Enter city name"
-                  />
+                  <div className="relative">
+                    <MapPin
+                      className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-copper"
+                      aria-hidden
+                    />
+                    <Input
+                      value={newCity}
+                      onChange={(e) => setNewCity(e.target.value)}
+                      placeholder="Enter city name"
+                      className="h-11 pl-9"
+                    />
+                  </div>
                   <Button
                     type="button"
                     variant="link"
                     size="sm"
-                    className="h-auto p-0 text-xs"
+                    className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
                     onClick={() => {
                       setShowNewCity(false);
                       setNewCity("");
@@ -340,17 +385,33 @@ export default function ProfileEditPage() {
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </GlassCard>
+        </section>
 
         {/* Save */}
         <Button
+          variant="luxe"
+          size="xl"
+          className="w-full gap-1.5"
           onClick={handleSave}
           disabled={saving || !personalInfoDirty}
-          className="w-full"
         >
-          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {personalInfoDirty ? "Save Changes" : "Saved"}
+          {saving ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              Saving...
+            </>
+          ) : personalInfoDirty ? (
+            <>
+              Save changes
+              <Check className="h-4 w-4" aria-hidden />
+            </>
+          ) : (
+            <>
+              <Check className="h-4 w-4" aria-hidden />
+              Saved
+            </>
+          )}
         </Button>
       </div>
     </AppShell>

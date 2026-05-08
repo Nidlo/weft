@@ -63,8 +63,10 @@ export type MomoPollingStatus = "idle" | "polling" | "success" | "failed" | "tim
 
 export function useMomoPolling(reference: string | null) {
   const [status, setStatus] = useState<MomoPollingStatus>("idle");
+  const [elapsedMs, setElapsedMs] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(0);
 
   const { refetch } = useQuery<PaymentStatusData>(PAYMENT_STATUS, {
@@ -80,6 +82,10 @@ export function useMomoPolling(reference: string | null) {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
+    }
+    if (tickRef.current) {
+      clearInterval(tickRef.current);
+      tickRef.current = null;
     }
   }, []);
 
@@ -99,12 +105,19 @@ export function useMomoPolling(reference: string | null) {
     stopPolling();
     setStatus("polling");
     startTimeRef.current = Date.now();
+    setElapsedMs(0);
 
     // Set up 5min timeout
     timeoutRef.current = setTimeout(() => {
       stopPolling();
       setStatus("timeout");
     }, MOMO_POLL_TIMEOUT_MS);
+
+    // Tick elapsed every second so consumers can render a progress display
+    // without computing Date.now() during render (React 19 purity rule).
+    tickRef.current = setInterval(() => {
+      setElapsedMs(Date.now() - startTimeRef.current);
+    }, 1000);
 
     // Poll every 3s
     intervalRef.current = setInterval(async () => {
@@ -139,14 +152,12 @@ export function useMomoPolling(reference: string | null) {
     return () => stopPolling();
   }, [stopPolling]);
 
-  const elapsedMs = status === "polling" ? Date.now() - startTimeRef.current : 0;
-
   return {
     status,
     startPolling,
     stopPolling,
     checkNow,
-    elapsedMs,
+    elapsedMs: status === "polling" ? elapsedMs : 0,
   };
 }
 

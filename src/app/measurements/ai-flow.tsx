@@ -193,10 +193,16 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         friendly =
           "We weren't confident enough in the result. Try a photo with fitted clothing and arms slightly away from your body.";
       } else if (
-        raw.includes("network") ||
-        raw.includes("fetch") ||
-        raw.includes("timeout")
+        raw.includes("timeout") ||
+        raw.includes("timed out") ||
+        raw.includes("504")
       ) {
+        // Distinguish "server too slow" from "network unreachable" - a
+        // user with full bars but a heavy photo gets a hint about photo
+        // size, not a misleading "check your connection" message.
+        friendly =
+          "Your photo took too long to analyse. Try a smaller or clearer photo - good lighting and a plain background help most.";
+      } else if (raw.includes("network") || raw.includes("fetch")) {
         friendly =
           "We couldn't reach the measurement service. Check your connection and try again.";
       }
@@ -330,7 +336,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
             onClick={handleExtract}
             disabled={!frontImage || extracting}
           >
-            {extracting ? "Analyzing…" : "Extract measurements"}
+            {extracting ? "Analyzing..." : "Extract measurements"}
             {!extracting && <ArrowRight className="h-4 w-4" aria-hidden />}
           </Button>
           <Button
@@ -352,12 +358,12 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     // the backend is opaque.
     const stage =
       elapsed < 4
-        ? "Detecting body landmarks…"
+        ? "Detecting body landmarks..."
         : elapsed < 10
-          ? "Computing measurements…"
+          ? "Computing measurements..."
           : elapsed < 20
-            ? "Refining results…"
-            : "Almost there…";
+            ? "Refining results..."
+            : "Almost there...";
     return (
       <GlassCard
         variant="solid"
@@ -398,7 +404,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
             Measurements extracted
           </p>
           <p className="mt-0.5 text-sm text-foreground/90">
-            Review and edit the values below. Anything blank wasn&rsquo;t
+            Review and edit the values below. Anything blank wasn&apos;t
             detected — fill it in manually.
           </p>
         </div>

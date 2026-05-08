@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
+import { Check, CheckCheck } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { getImageKitThumbnail } from "@/lib/utils/imagekit";
 import { linkify } from "@/lib/utils/linkify";
 import type { GqlMessage } from "@/types/graphql";
-import { Check, CheckCheck } from "lucide-react";
-import { useState } from "react";
 import { MessageLightbox } from "./message-lightbox";
 
 interface MessageBubbleProps {
@@ -48,18 +49,18 @@ export function MessageBubble({
         <div
           className={cn(
             "relative overflow-hidden",
-            // Rounded corners with tail on last message of group
+            // Rounded corners with subtle tail on the last message of a group
             isGroupTail
               ? isOwn
-                ? "rounded-2xl rounded-br-sm"
-                : "rounded-2xl rounded-bl-sm"
+                ? "rounded-2xl rounded-br-md"
+                : "rounded-2xl rounded-bl-md"
               : "rounded-2xl",
             // Padding varies for media-only vs text
-            isMediaOnly ? "p-1" : "px-3 py-1.5",
-            // Colors
+            isMediaOnly ? "p-1" : "px-3.5 py-2",
+            // Surfaces: own bubble = ink, theirs = soft secondary chip
             isOwn
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-foreground"
+              ? "bg-foreground text-background shadow-(--shadow-1)"
+              : "bg-secondary text-foreground ring-1 ring-border/50"
           )}
         >
           {hasMedia && (
@@ -68,7 +69,7 @@ export function MessageBubble({
               aria-label="View photo full size"
               className={cn(
                 "block overflow-hidden rounded-xl",
-                hasBody && "mb-1"
+                hasBody && "mb-1.5"
               )}
               onClick={() => setLightboxOpen(true)}
             >
@@ -88,10 +89,10 @@ export function MessageBubble({
               {linkify(
                 message.body!,
                 cn(
-                  "underline break-all",
+                  "break-all underline underline-offset-2",
                   isOwn
-                    ? "text-primary-foreground/90 hover:text-primary-foreground"
-                    : "text-foreground/90 hover:text-foreground"
+                    ? "text-background/80 hover:text-background"
+                    : "text-foreground/80 hover:text-foreground decoration-copper"
                 )
               )}
             </p>
@@ -102,15 +103,13 @@ export function MessageBubble({
             className={cn(
               "flex items-center gap-1",
               isOwn ? "justify-end" : "justify-start",
-              hasBody ? "-mb-0.5 mt-0.5" : "mt-1 px-1"
+              hasBody ? "-mb-0.5 mt-1" : "mt-1.5 px-1"
             )}
           >
             <span
               className={cn(
-                "text-[10px] leading-none",
-                isOwn
-                  ? "text-primary-foreground/60"
-                  : "text-muted-foreground"
+                "text-[10px] font-medium tabular-nums leading-none",
+                isOwn ? "text-background/55" : "text-muted-foreground"
               )}
             >
               {formatTime(message.createdAt)}
@@ -118,10 +117,9 @@ export function MessageBubble({
             {isOwn && showReadReceipt && (
               <span
                 className={cn(
-                  message.readAt
-                    ? "text-blue-300"
-                    : "text-primary-foreground/60"
+                  message.readAt ? "text-copper" : "text-background/50"
                 )}
+                aria-label={message.readAt ? "Read" : "Sent"}
               >
                 {message.readAt ? (
                   <CheckCheck className="h-3.5 w-3.5" />

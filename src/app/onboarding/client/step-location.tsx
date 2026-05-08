@@ -1,5 +1,7 @@
 "use client";
 
+import { MapPin } from "lucide-react";
+
 import { LocationPicker } from "@/components/shared/location-picker";
 import { useClientOnboardingStore } from "@/lib/stores/client-onboarding";
 import type { LocationData } from "@/types/location";
@@ -12,13 +14,20 @@ export function StepLocation() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">Where are you located?</h2>
-        <p className="text-sm text-muted-foreground">
-          This helps us find designers near you. You can skip this step and add
-          it later.
-        </p>
+    <div className="space-y-7">
+      <div className="flex items-start gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground">
+          <MapPin className="h-4 w-4" aria-hidden />
+        </span>
+        <div>
+          <h2 className="text-display text-lg font-semibold tracking-tight">
+            Where are you?
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            We&apos;ll surface designers near you and show accurate delivery
+            times. Skip if you&apos;d rather add this later.
+          </p>
+        </div>
       </div>
 
       <LocationPicker

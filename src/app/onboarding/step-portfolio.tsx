@@ -2,10 +2,20 @@
 
 import Image from "next/image";
 import { useState, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import {
+  AlertCircle,
+  Camera,
+  Lightbulb,
+  RefreshCw,
+  Upload,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
-import { AlertCircle, RefreshCw, X } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/ui/glass-card";
 import { useAddPortfolioImage } from "@/lib/hooks/use-profile-mutations";
+import { cn } from "@/lib/utils";
 
 interface UploadedImage {
   url: string;
@@ -27,11 +37,14 @@ export function StepPortfolio() {
   const [uploading, setUploading] = useState(false);
   const [failed, setFailed] = useState<FailedUpload[]>([]);
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { addImage } = useAddPortfolioImage();
 
   const uploadOne = useCallback(
-    async (file: File): Promise<{ ok: true } | { ok: false; reason: string }> => {
+    async (
+      file: File
+    ): Promise<{ ok: true } | { ok: false; reason: string }> => {
       try {
         const result = await addImage(file);
         if (result?.portfolioImages) {
@@ -107,7 +120,6 @@ export function StepPortfolio() {
         }
       } finally {
         setUploading(false);
-        // Reset the input so the same file can be re-selected if it failed.
         if (inputRef.current) inputRef.current.value = "";
       }
     },
@@ -139,52 +151,65 @@ export function StepPortfolio() {
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
+      setDragOver(false);
       handleFiles(e.dataTransfer.files);
     },
     [handleFiles]
   );
 
+  const isFull = images.length >= MAX_IMAGES;
+
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm font-medium">Portfolio Images</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Upload photos of your best work to attract clients ({images.length}/
-          {MAX_IMAGES}).
-        </p>
+    <div className="space-y-7">
+      <div className="flex items-start gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground">
+          <Camera className="h-4 w-4" aria-hidden />
+        </span>
+        <div className="flex-1">
+          <h2 className="text-display text-lg font-semibold tracking-tight">
+            Show your best work.
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            <span className="tabular-nums font-medium text-foreground">
+              {images.length}
+            </span>
+            <span className="text-muted-foreground/70">/{MAX_IMAGES}</span>{" "}
+            uploaded · designers with 3+ photos get 5× more inquiries.
+          </p>
+        </div>
       </div>
 
-      {/* Upload Zone */}
+      {/* Upload zone — copper-tinted dashed border, hover/drag affordance */}
       <div
         onDrop={handleDrop}
-        onDragOver={(e) => e.preventDefault()}
-        className="rounded-lg border-2 border-dashed border-border p-8 text-center transition-colors hover:border-primary/50"
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        className={cn(
+          "relative rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-200",
+          dragOver
+            ? "border-copper bg-copper/5"
+            : "border-border hover:border-foreground/30 hover:bg-card/40",
+          isFull && "pointer-events-none opacity-60"
+        )}
       >
-        <svg
-          className="mx-auto h-10 w-10 text-muted-foreground"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M12 16v-8m0 0l-3 3m3-3l3 3M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-          />
-        </svg>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Drag & drop images here, or
+        <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary text-foreground">
+          <Upload className="h-6 w-6" aria-hidden />
+        </span>
+        <p className="mt-4 text-sm font-medium">
+          Drag & drop images, or pick from your device
         </p>
         <Button
           type="button"
-          variant="outline"
+          variant="luxe-outline"
           size="sm"
-          className="mt-2"
-          disabled={uploading || images.length >= MAX_IMAGES}
+          className="mt-4"
+          disabled={uploading || isFull}
           onClick={() => inputRef.current?.click()}
         >
-          {uploading ? "Uploading..." : "Choose Files"}
+          {uploading ? "Uploading..." : "Choose files"}
         </Button>
         <input
           ref={inputRef}
@@ -195,8 +220,8 @@ export function StepPortfolio() {
           aria-label="Upload portfolio images"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        <p className="mt-1 text-xs text-muted-foreground">
-          JPEG, PNG, or WebP. Max 10MB each.
+        <p className="mt-2 text-xs text-muted-foreground">
+          JPEG, PNG, or WebP · max 10MB each
         </p>
       </div>
 
@@ -210,14 +235,16 @@ export function StepPortfolio() {
             {failed.map((entry) => (
               <li
                 key={entry.id}
-                className="flex items-center gap-3 rounded-lg border border-status-error-soft bg-status-error-soft/40 p-3"
+                className="flex items-center gap-3 rounded-2xl border border-status-error-soft bg-status-error-soft/40 p-3"
               >
                 <AlertCircle className="h-4 w-4 shrink-0 text-status-error" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">
                     {entry.file.name}
                   </p>
-                  <p className="text-xs text-status-error-fg">{entry.reason}</p>
+                  <p className="text-xs text-status-error-fg">
+                    {entry.reason}
+                  </p>
                 </div>
                 <Button
                   type="button"
@@ -227,18 +254,18 @@ export function StepPortfolio() {
                   disabled={retrying === entry.id}
                 >
                   <RefreshCw
-                    className={`mr-1 h-3 w-3 ${
-                      retrying === entry.id ? "animate-spin" : ""
-                    }`}
+                    className={cn(
+                      "mr-1 h-3 w-3",
+                      retrying === entry.id && "animate-spin"
+                    )}
                   />
                   Retry
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
+                  size="icon-sm"
                   aria-label={`Dismiss ${entry.file.name}`}
-                  className="h-8 w-8"
                   onClick={() => handleDismissFailure(entry.id)}
                 >
                   <X className="h-3 w-3" />
@@ -249,41 +276,43 @@ export function StepPortfolio() {
         </div>
       )}
 
-      {/* Image Grid */}
+      {/* Image grid */}
       {images.length > 0 && (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
           {images.map((img, i) => (
             <div
               key={i}
-              className="relative aspect-square overflow-hidden rounded-md"
+              className="relative aspect-square overflow-hidden rounded-xl ring-1 ring-border"
             >
               <Image
                 src={img.thumbnailUrl}
                 alt={`Portfolio ${i + 1}`}
                 fill
                 sizes="(max-width: 640px) 33vw, 200px"
-                className="object-cover"
+                className="object-cover transition-transform duration-300 hover:scale-105"
               />
             </div>
           ))}
         </div>
       )}
 
-      <PortfolioTips />
-    </div>
-  );
-}
-
-function PortfolioTips() {
-  return (
-    <div className="rounded-lg border border-border bg-muted/50 p-4">
-      <p className="text-sm font-medium">Photo tips</p>
-      <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-        <li>Use well-lit photos showing the full garment</li>
-        <li>Include close-ups of detailed work and stitching</li>
-        <li>Show garments being worn when possible</li>
-        <li>Profiles with 3+ photos get 5x more inquiries</li>
-      </ul>
+      <GlassCard variant="ghost" className="p-5">
+        <div className="flex items-start gap-3">
+          <Lightbulb
+            className="mt-0.5 h-4 w-4 shrink-0 text-copper"
+            aria-hidden
+          />
+          <div>
+            <p className="text-sm font-medium">Photo tips</p>
+            <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-muted-foreground marker:text-copper">
+              <li>Well-lit photos showing the full garment</li>
+              <li>Close-ups of detailed work and stitching</li>
+              <li>Garments being worn, when possible</li>
+              <li>Profiles with 3+ photos get 5× more inquiries</li>
+            </ul>
+          </div>
+        </div>
+      </GlassCard>
     </div>
   );
 }

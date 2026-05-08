@@ -1,13 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useMutation } from "@apollo/client/react";
+import { ImagePlus, Loader2, Send, X } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ImagePlus, Loader2, Send, X } from "lucide-react";
-import { useMutation } from "@apollo/client/react";
 import { UPLOAD_REFERENCE_IMAGE } from "@/lib/graphql/mutations/order";
 import type { UploadReferenceImageData } from "@/types/graphql";
-import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -33,8 +35,15 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
   const handleSend = async () => {
     const body = text.trim();
     if (!body) return;
+    // Clear optimistically, but restore + toast on failure so the user
+    // doesn't silently lose a typed message when the network drops.
     setText("");
-    await onSend(body);
+    try {
+      await onSend(body);
+    } catch {
+      setText(body);
+      toast.error("Couldn't send your message. Please try again.");
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -101,68 +110,67 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
   // Image preview mode — Telegram-style preview with caption input
   if (pendingImage) {
     return (
-      <div className="border-t bg-background">
-        <div className="relative mx-3 mt-3 inline-block">
-          {/* Object-URL preview can't be served by next/image's optimiser. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={pendingImage.previewUrl}
-            alt="Preview"
-            className="max-h-48 rounded-lg object-contain"
-          />
-          {uploading && (
-            <div
-              role="status"
-              aria-live="polite"
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-lg bg-black/50 text-white"
-            >
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span className="text-xs font-medium">Uploading...</span>
-            </div>
-          )}
-          {!uploading && (
-            <Button
-              variant="secondary"
-              size="icon"
-              aria-label="Remove attached image"
-              className="absolute -right-2 -top-2 h-7 w-7 rounded-full shadow-md"
-              onClick={handleCancelImage}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+      <div className="border-t border-border/60 bg-background/70 backdrop-blur-xl backdrop-saturate-150 supports-backdrop-filter:bg-background/55">
+        <div className="px-3 pt-3 sm:px-4">
+          <div className="relative inline-block">
+            {/* Object-URL preview can't be served by next/image's optimiser. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={pendingImage.previewUrl}
+              alt="Preview"
+              className="max-h-48 rounded-2xl object-contain ring-1 ring-border"
+            />
+            {uploading && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-black/55 text-white backdrop-blur-sm"
+              >
+                <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em]">
+                  Uploading...
+                </span>
+              </div>
+            )}
+            {!uploading && (
+              <Button
+                variant="secondary"
+                size="icon-sm"
+                aria-label="Remove attached image"
+                className="absolute -right-2 -top-2 size-7 rounded-full shadow-(--shadow-2) ring-2 ring-background"
+                onClick={handleCancelImage}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2 p-3">
+        <div className="flex items-center gap-2 p-3 sm:p-4">
           <Input
             placeholder="Add a caption..."
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={disabled}
-            className="flex-1"
+            className="h-11 flex-1 rounded-full bg-card px-4"
             autoFocus
           />
-          <Button
-            type="button"
-            size="icon"
-            onClick={handleSendImage}
+          <SendButton
             disabled={disabled}
-            title="Send photo"
-            aria-label="Send photo"
-          >
-            {uploading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
-          </Button>
+            loading={uploading}
+            onClick={handleSendImage}
+            ready
+            label="Send photo"
+          />
         </div>
       </div>
     );
   }
 
+  const isReady = text.trim().length > 0 && !disabled;
+
   return (
-    <div className="flex items-center gap-2 border-t bg-background p-3">
+    <div className="flex items-center gap-2 border-t border-border/60 bg-background/70 p-3 backdrop-blur-xl backdrop-saturate-150 supports-backdrop-filter:bg-background/55 sm:p-4">
       <input
         ref={fileRef}
         type="file"
@@ -178,6 +186,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
         disabled={disabled}
         title="Attach photo"
         aria-label="Attach photo"
+        className="shrink-0 text-muted-foreground hover:text-copper"
       >
         <ImagePlus className="h-5 w-5" />
       </Button>
@@ -188,23 +197,60 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        className="flex-1"
+        className="h-11 flex-1 rounded-full bg-card px-4"
       />
 
-      <Button
-        type="button"
-        size="icon"
-        onClick={handleSend}
+      <SendButton
         disabled={disabled || !text.trim()}
-        title="Send message"
-        aria-label="Send message"
-      >
-        {sending ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <Send className="h-5 w-5" />
-        )}
-      </Button>
+        loading={!!sending}
+        onClick={handleSend}
+        ready={isReady}
+        label="Send message"
+      />
     </div>
+  );
+}
+
+interface SendButtonProps {
+  disabled: boolean;
+  loading: boolean;
+  onClick: () => void;
+  ready: boolean;
+  label: string;
+}
+
+/**
+ * The send affordance toggles between a muted `bg-secondary` ghost when
+ * empty/disabled and a solid ink chip with a copper glow when there's
+ * actually something to send. The state change reads as deliberate intent.
+ */
+function SendButton({
+  disabled,
+  loading,
+  onClick,
+  ready,
+  label,
+}: SendButtonProps) {
+  return (
+    <Button
+      type="button"
+      size="icon"
+      onClick={onClick}
+      disabled={disabled}
+      title={label}
+      aria-label={label}
+      className={cn(
+        "shrink-0 rounded-full transition-all duration-200",
+        ready
+          ? "bg-foreground text-background shadow-(--shadow-glow) hover:bg-foreground/90"
+          : "bg-secondary text-muted-foreground hover:bg-secondary"
+      )}
+    >
+      {loading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Send className="h-4 w-4" />
+      )}
+    </Button>
   );
 }

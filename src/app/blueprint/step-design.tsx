@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { BlueprintOption } from "@/types/graphql";
+import { ChipPill, SelectableCard } from "./step-garment";
 
 export function StepDesign() {
   const {
@@ -22,8 +23,7 @@ export function StepDesign() {
   }
 
   // Get applicable field groups for this garment type
-  const fieldGroups: string[] =
-    options.garmentFields[garmentType] ?? [];
+  const fieldGroups: string[] = options.garmentFields[garmentType] ?? [];
 
   const handleSingleSelect = (fieldGroup: string, value: string) => {
     setField("designDetails", { ...designDetails, [fieldGroup]: value });
@@ -38,12 +38,10 @@ export function StepDesign() {
   };
 
   const formatGroupLabel = (group: string): string =>
-    group
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+    group.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {fieldGroups
         .filter((g) => g !== "additional_detail")
         .map((fieldGroup) => {
@@ -56,57 +54,41 @@ export function StepDesign() {
 
           return (
             <div key={fieldGroup}>
-              <Label className="mb-3 block text-base font-semibold">
-                {formatGroupLabel(fieldGroup)}
-              </Label>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <Label className="text-sm">{formatGroupLabel(fieldGroup)}</Label>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {groupOptions.map((opt) => (
-                  <button
+                  <SelectableCard
                     key={opt.value}
-                    type="button"
+                    label={opt.label}
+                    isSelected={selectedValue === opt.value}
                     onClick={() => handleSingleSelect(fieldGroup, opt.value)}
-                    className={`rounded-lg border p-3 text-left text-sm transition-colors ${
-                      selectedValue === opt.value
-                        ? "border-primary bg-primary/5 font-medium"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
           );
         })}
 
-      {/* Additional Details (multi-select) */}
+      {/* Additional details (multi-select) */}
       {fieldGroups.includes("additional_detail") && (
         <div>
-          <Label className="mb-3 block text-base font-semibold">
-            Additional Details
-          </Label>
-          <div className="flex flex-wrap gap-2">
+          <Label className="text-sm">Additional details</Label>
+          <div className="mt-3 flex flex-wrap gap-2">
             {(options.designFields["additional_detail"] ?? []).map((opt) => (
-              <button
+              <ChipPill
                 key={opt.value}
-                type="button"
+                label={opt.label}
+                isActive={additionalDetails.includes(opt.value)}
                 onClick={() => handleMultiSelect(opt.value)}
-                className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
-                  additionalDetails.includes(opt.value)
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                {opt.label}
-              </button>
+              />
             ))}
           </div>
         </div>
       )}
 
-      <div>
-        <Label htmlFor="free-text" className="mb-2 block text-base font-semibold">
-          Additional Notes (optional)
+      <div className="space-y-2">
+        <Label htmlFor="free-text" className="text-sm">
+          Additional notes <span className="text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="free-text"
@@ -115,8 +97,9 @@ export function StepDesign() {
           onChange={(e) => setField("freeText", e.target.value)}
           maxLength={500}
           rows={3}
+          className="resize-none"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground tabular-nums">
           {freeText.length} / 500 characters
         </p>
       </div>

@@ -38,16 +38,17 @@ export function OtpVerification({
   const [otp, setOtp] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(expiresInSeconds);
   // Track the start time so the timer survives re-renders without resetting.
-  const startedAtRef = useRef(Date.now());
+  // Init lazily inside an effect — `Date.now()` during render is impure and
+  // trips React 19's purity rule.
+  const startedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     startedAtRef.current = Date.now();
-    setSecondsLeft(expiresInSeconds);
-  }, [expiresInSeconds]);
-
-  useEffect(() => {
     const id = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
+      if (startedAtRef.current === null) return;
+      const elapsed = Math.floor(
+        (Date.now() - startedAtRef.current) / 1000
+      );
       const remaining = Math.max(0, expiresInSeconds - elapsed);
       setSecondsLeft(remaining);
       if (remaining === 0) clearInterval(id);

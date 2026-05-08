@@ -1245,3 +1245,34 @@ export interface UploadVerificationDocumentData {
 export interface DeleteVerificationDocumentData {
   deleteVerificationDocument: boolean;
 }
+
+// =====================================================================
+// Style classification (Anthropic Fitscan)
+// =====================================================================
+
+export type BodyShape =
+  | "rectangle"
+  | "hourglass"
+  | "pear"
+  | "inverted_triangle"
+  | "oval";
+
+export interface GqlStyleProfile {
+  bodyShape: BodyShape;
+  bodyShapeConfidence: number;
+  flatteringSilhouettes: string[];
+  colorPalette: string[];
+  fabricRecommendations: string[];
+  recommendedSpecializations: string[];
+  summary: string;
+  fromFallback: boolean;
+  generatedAt: string;
+}
+
+export interface MyStyleProfileData {
+  myStyleProfile: GqlStyleProfile | null;
+}
+
+export interface GenerateStyleProfileData {
+  generateStyleProfile: GqlStyleProfile;
+}

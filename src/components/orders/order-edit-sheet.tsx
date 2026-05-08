@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useBlueprintOptions } from "@/lib/hooks/use-blueprint-options";
 import { useUpdateOrder } from "@/lib/hooks/use-orders";
 import { pesewasToGhs } from "@/lib/utils/order";
@@ -52,26 +52,29 @@ export function OrderEditSheet({
   const [measurementId, setMeasurementId] = useState<string | undefined>(
     undefined
   );
+  // Track which (orderId, openCount) snapshot we've seeded the form from.
+  // Setting state during render guarded by a transition flag is the React 19
+  // way to reset form state when a prop changes — no effect required.
+  const [seededFor, setSeededFor] = useState<string | null>(null);
+  const seedKey = open ? `${order.id}` : null;
 
-  // Initialize from order data when sheet opens
-  useEffect(() => {
-    if (open) {
-      const bp = order.blueprint as unknown as Record<string, unknown> | null;
-      setGarmentType(order.blueprint?.garment_type ?? "");
-      setFabricTypes((bp?.fabric_types as string[] | undefined) ?? []);
-      setAdditionalDetails(
-        (bp?.additional_details as string[] | undefined) ?? []
-      );
-      setDescription((bp?.description as string | undefined) ?? "");
-      setReferenceImages(
-        (bp?.reference_images as string[] | undefined) ?? []
-      );
-      setBudgetMinGhs(pesewasToGhs(order.budgetMin));
-      setBudgetMaxGhs(pesewasToGhs(order.budgetMax));
-      setNotes(order.notes ?? "");
-      setMeasurementId(order.measurementId ?? undefined);
-    }
-  }, [open, order]);
+  if (open && seedKey !== seededFor) {
+    setSeededFor(seedKey);
+    const bp = order.blueprint as unknown as Record<string, unknown> | null;
+    setGarmentType(order.blueprint?.garment_type ?? "");
+    setFabricTypes((bp?.fabric_types as string[] | undefined) ?? []);
+    setAdditionalDetails(
+      (bp?.additional_details as string[] | undefined) ?? []
+    );
+    setDescription((bp?.description as string | undefined) ?? "");
+    setReferenceImages((bp?.reference_images as string[] | undefined) ?? []);
+    setBudgetMinGhs(pesewasToGhs(order.budgetMin));
+    setBudgetMaxGhs(pesewasToGhs(order.budgetMax));
+    setNotes(order.notes ?? "");
+    setMeasurementId(order.measurementId ?? undefined);
+  } else if (!open && seededFor !== null) {
+    setSeededFor(null);
+  }
 
   const handleSave = async () => {
     const budgetMin = Math.round(parseFloat(budgetMinGhs) * 100);
@@ -125,7 +128,10 @@ export function OrderEditSheet({
           Edit Order
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
+      <SheetContent
+        side="bottom"
+        className="max-h-[90vh] w-full overflow-y-auto"
+      >
         <SheetHeader>
           <SheetTitle>Edit Order</SheetTitle>
         </SheetHeader>

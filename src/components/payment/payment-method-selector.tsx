@@ -81,6 +81,8 @@ export function PaymentMethodSelector({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             maxLength={15}
+            autoComplete="tel"
+            inputMode="numeric"
           />
           <p className="text-xs text-muted-foreground">
             Your Mobile Money number for this payment.

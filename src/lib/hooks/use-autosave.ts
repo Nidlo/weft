@@ -2,6 +2,22 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+function readInitial<T>(key: string): T | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (raw === null) return null;
+    return JSON.parse(raw) as T;
+  } catch {
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      // Best-effort.
+    }
+    return null;
+  }
+}
+
 /**
  * Persist a form's draft state to `localStorage` so a session-expiry / refresh
  * doesn't make the user retype their work. The Zustand-backed wizard stores
@@ -27,29 +43,10 @@ export function useAutosave<T>(
   options: { debounceMs?: number; enabled?: boolean } = {}
 ): { restored: T | null; clear: () => void } {
   const { debounceMs = 800, enabled = true } = options;
-  const [restored, setRestored] = useState<T | null>(null);
-  const didReadRef = useRef(false);
+  // Lazy-initialize from localStorage so we never sync external state into
+  // React state via an effect (React 19 cascading-render rule).
+  const [restored, setRestored] = useState<T | null>(() => readInitial<T>(key));
   const writeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Read the stored draft once on mount.
-  useEffect(() => {
-    if (didReadRef.current) return;
-    didReadRef.current = true;
-    if (typeof window === "undefined") return;
-    try {
-      const raw = window.localStorage.getItem(key);
-      if (raw === null) return;
-      const parsed = JSON.parse(raw);
-      setRestored(parsed as T);
-    } catch {
-      // Stored draft is unreadable — drop it so we don't keep failing.
-      try {
-        window.localStorage.removeItem(key);
-      } catch {
-        // Best-effort.
-      }
-    }
-  }, [key]);
 
   // Debounced write on value change.
   useEffect(() => {
