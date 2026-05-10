@@ -45,7 +45,9 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          # 22 = current Node LTS. Required by lint-staged@17 (>=22.22.1)
+          # which we pull in for the husky pre-commit auto-format.
+          node-version: "22"
           cache: yarn
           cache-dependency-path: yarn.lock
 
