@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useQuery } from "@apollo/client/react";
 
 import { DesignerScrollSection } from "@/components/shared/designer-scroll-section";
 import { Section } from "@/components/ui/section";
@@ -12,6 +13,8 @@ import {
 } from "@/lib/hooks/use-discovery";
 import { useGeolocation } from "@/lib/hooks/use-geolocation";
 import { useSpecializations } from "@/lib/hooks/use-specializations";
+import { useCities } from "@/lib/hooks/use-cities";
+import { GET_COUNTRIES } from "@/lib/graphql/queries/designer";
 import { cn } from "@/lib/utils";
 
 export function HomeDiscovery() {
@@ -20,6 +23,17 @@ export function HomeDiscovery() {
   const topRated = useTopRated();
   const newest = useNewDesigners();
   const nearby = useNearbyDesigners(lat, lng);
+
+  // Warm the cache for /auth/phone (Countries) and /search + /onboarding
+  // (Cities) while the user dwells on /. cache-first → no network if
+  // already cached. By the time they click "Get started" the country
+  // picker can render synchronously instead of waiting on a slot in the
+  // already-saturated HTTP/1.1 connection pool.
+  useQuery(GET_COUNTRIES, {
+    variables: { activeOnly: true },
+    fetchPolicy: "cache-first",
+  });
+  useCities();
 
   return (
     <div className="space-y-2">
