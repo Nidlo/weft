@@ -20,7 +20,7 @@ const RealtimeProvider = dynamic(
     import("@/providers/realtime-provider").then((m) => ({
       default: m.RealtimeProvider,
     })),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => null }
 );
 
 export function Providers({ children }: { children: React.ReactNode }) {
