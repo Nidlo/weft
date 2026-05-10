@@ -18,6 +18,13 @@ on:
   pull_request:
     branches: [development, staging, production]
 
+# One run per workflow per branch. Cancel an older in-progress run if a
+# new push lands. (Vercel handles deploys, so no production-special-case
+# needed here.)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # Test-time placeholders for the NEXT_PUBLIC_* vars referenced across
   # src/. None of them gate behaviour in the unit-test layer, but Next.js
@@ -30,7 +37,7 @@ env:
   NEXT_PUBLIC_DEFAULT_COUNTRY: GH
   NEXT_PUBLIC_REVERB_APP_KEY: test-key
   NEXT_PUBLIC_REVERB_HOST: localhost
-  NEXT_PUBLIC_REVERB_PORT: '8080'
+  NEXT_PUBLIC_REVERB_PORT: "8080"
   NEXT_PUBLIC_REVERB_SCHEME: http
   NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: https://ik.imagekit.io/snad
   NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: pk_test_xxx
@@ -41,11 +48,13 @@ jobs:
     name: Lint, format, test, build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          # 22 = current Node LTS. Required by lint-staged@17 (>=22.22.1)
+          # which we pull in for the husky pre-commit auto-format.
+          node-version: "22"
           cache: yarn
           cache-dependency-path: yarn.lock
 
