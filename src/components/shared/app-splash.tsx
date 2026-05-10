@@ -3,27 +3,21 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/stores/auth";
 
-// Minimum visible duration so a fast hydration doesn't show a one-frame flash.
-const MIN_VISIBLE_MS = 600;
-
 /**
- * Brand splash that renders for the duration of the Zustand hydration step
- * (and until `MIN_VISIBLE_MS` has elapsed). Without this, PWA cold-starts
- * showed a flash of un-styled / unhydrated content before `AuthProvider`
- * settled. After hydration the splash fades out.
+ * Brand splash that renders for the duration of the Zustand hydration step.
+ * The previous "MIN_VISIBLE_MS = 600" anti-flicker tax meant every cold
+ * load waited 600ms even if hydration was already done — too expensive
+ * for the mobile-first audience. Now the splash unmounts the moment
+ * hydration flips; the CSS fade still smooths the visual transition.
  */
 export function AppSplash() {
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
-  const [mountedAt] = useState(() => Date.now());
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     if (!hasHydrated) return;
-    const elapsed = Date.now() - mountedAt;
-    const remaining = Math.max(0, MIN_VISIBLE_MS - elapsed);
-    const id = setTimeout(() => setVisible(false), remaining);
-    return () => clearTimeout(id);
-  }, [hasHydrated, mountedAt]);
+    setVisible(false);
+  }, [hasHydrated]);
 
   if (!visible) return null;
 

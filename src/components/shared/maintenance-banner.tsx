@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 interface MaintenanceStatus {
   active: boolean;
@@ -9,6 +9,11 @@ interface MaintenanceStatus {
 }
 
 const POLL_INTERVAL_MS = 30_000;
+const OFF_STATE: MaintenanceStatus = {
+  active: false,
+  message: null,
+  since: null,
+};
 
 /**
  * QA-AD-OPS-011 (frontend half) — Sticky red banner shown across all
@@ -18,34 +23,54 @@ const POLL_INTERVAL_MS = 30_000;
  * page refresh on user devices. Renders nothing when the flag is off
  * (the common case), so cost on the happy path is one fetch every
  * 30s + a cheap render-bail.
+ *
+ * Uses a bare interval+fetch instead of TanStack Query because this is
+ * the only consumer of TanStack in the app — pulling in a query client
+ * for one polling endpoint loaded the whole library on every page.
  */
 export function MaintenanceBanner() {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
-  const statusUrl =
-    apiUrl.replace(/\/graphql$/, "") + "/api/system/maintenance";
+  const [data, setData] = useState<MaintenanceStatus>(OFF_STATE);
 
-  const { data } = useQuery<MaintenanceStatus>({
-    queryKey: ["system-maintenance"],
-    queryFn: async () => {
-      const response = await fetch(statusUrl, {
-        credentials: "include",
-        headers: { Accept: "application/json" },
-      });
-      if (!response.ok) {
-        // A failed poll shouldn't shout "maintenance!" — fall through to
-        // off-state so a single network hiccup doesn't strand users on
-        // a banner with no escape.
-        return { active: false, message: null, since: null };
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
+    const statusUrl =
+      apiUrl.replace(/\/graphql$/, "") + "/api/system/maintenance";
+
+    let cancelled = false;
+
+    const fetchStatus = async () => {
+      try {
+        const response = await fetch(statusUrl, {
+          credentials: "include",
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok || cancelled) {
+          // A failed poll shouldn't shout "maintenance!" — keep the
+          // off-state so a single network hiccup doesn't strand users
+          // on a banner with no escape.
+          if (!cancelled) setData(OFF_STATE);
+          return;
+        }
+        const payload = (await response.json()) as MaintenanceStatus;
+        if (!cancelled) setData(payload);
+      } catch {
+        if (!cancelled) setData(OFF_STATE);
       }
-      return (await response.json()) as MaintenanceStatus;
-    },
-    refetchInterval: POLL_INTERVAL_MS,
-    refetchOnWindowFocus: true,
-    retry: 1,
-    staleTime: 0,
-  });
+    };
 
-  if (!data?.active) {
+    fetchStatus();
+    const id = setInterval(fetchStatus, POLL_INTERVAL_MS);
+    const onFocus = () => fetchStatus();
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, []);
+
+  if (!data.active) {
     return null;
   }
 

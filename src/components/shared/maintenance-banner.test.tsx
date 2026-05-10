@@ -1,19 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, waitFor, cleanup } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { MaintenanceBanner } from "./maintenance-banner";
-
-const renderWithQueryClient = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: 0 } },
-  });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <MaintenanceBanner />
-    </QueryClientProvider>
-  );
-};
 
 describe("MaintenanceBanner", () => {
   beforeEach(() => {
@@ -31,7 +19,7 @@ describe("MaintenanceBanner", () => {
       json: async () => ({ active: false, message: null, since: null }),
     });
 
-    const { container } = renderWithQueryClient();
+    const { container } = render(<MaintenanceBanner />);
 
     // Wait for the initial fetch settle, then assert no banner rendered.
     await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledTimes(1));
@@ -50,7 +38,7 @@ describe("MaintenanceBanner", () => {
       }),
     });
 
-    renderWithQueryClient();
+    render(<MaintenanceBanner />);
 
     await waitFor(() =>
       expect(screen.getByTestId("maintenance-banner")).toBeInTheDocument()
@@ -65,7 +53,7 @@ describe("MaintenanceBanner", () => {
       json: async () => ({ active: true, message: null, since: null }),
     });
 
-    renderWithQueryClient();
+    render(<MaintenanceBanner />);
 
     await waitFor(() =>
       expect(screen.getByTestId("maintenance-banner")).toBeInTheDocument()
@@ -81,7 +69,7 @@ describe("MaintenanceBanner", () => {
       },
     });
 
-    const { container } = renderWithQueryClient();
+    const { container } = render(<MaintenanceBanner />);
 
     await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledTimes(1));
     expect(
