@@ -1,14 +1,14 @@
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloLink,
-} from "@apollo/client/core";
+import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client/core";
 import { CombinedGraphQLErrors, ServerError } from "@apollo/client/errors";
 import { ErrorLink } from "@apollo/client/link/error";
 import { RetryLink } from "@apollo/client/link/retry";
 import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 import { useAuthStore } from "@/lib/stores/auth";
-import { ensureCsrfCookie, resetCsrfState, readXsrfCookie } from "@/lib/graphql/csrf";
+import {
+  ensureCsrfCookie,
+  resetCsrfState,
+  readXsrfCookie,
+} from "@/lib/graphql/csrf";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
 
 const uploadLink = new UploadHttpLink({
@@ -133,7 +133,7 @@ interface DesignerPage {
 export function mergeDesignerPage(
   existing: DesignerPage | undefined,
   incoming: DesignerPage,
-  args: Record<string, unknown> | null,
+  args: Record<string, unknown> | null
 ): DesignerPage {
   if (!existing || !args?.after) return incoming;
   const existingData = existing.data ?? [];
@@ -156,7 +156,7 @@ export const apolloClient = new ApolloClient({
               return mergeDesignerPage(
                 existing as DesignerPage | undefined,
                 incoming as DesignerPage,
-                args,
+                args
               );
             },
           },

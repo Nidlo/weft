@@ -63,7 +63,10 @@ export function useUpdateMeasurement() {
     }
   );
 
-  const updateMeasurement = async (id: string, input: UpdateMeasurementInput) => {
+  const updateMeasurement = async (
+    id: string,
+    input: UpdateMeasurementInput
+  ) => {
     const result = await mutate({ variables: { id, input } });
     return result.data?.updateMeasurement ?? null;
   };
@@ -108,13 +111,13 @@ export function useResetMeasurementField() {
     RESET_MEASUREMENT_FIELD,
     {
       refetchQueries: [{ query: MY_MEASUREMENTS }],
-    },
+    }
   );
 
   const resetMeasurementField = async (
     id: string,
     section: string,
-    field: string,
+    field: string
   ) => {
     const result = await mutate({ variables: { id, section, field } });
     return result.data?.resetMeasurementField ?? null;
@@ -129,7 +132,7 @@ export function useMeasurementHistory(measurementId: string | null) {
     {
       variables: { measurementId: measurementId ?? "" },
       skip: !measurementId,
-    },
+    }
   );
 
   return {
@@ -145,7 +148,7 @@ export function useApplyMeasurementRescan() {
     APPLY_MEASUREMENT_RESCAN,
     {
       refetchQueries: [{ query: MY_MEASUREMENTS }],
-    },
+    }
   );
 
   const applyRescan = async (id: string, input: ApplyRescanInput) => {

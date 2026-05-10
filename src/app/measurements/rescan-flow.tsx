@@ -36,7 +36,11 @@ interface RescanFlowProps {
 
 type Step = "upload" | "processing" | "diff" | "applied";
 
-export function RescanFlow({ measurement, onComplete, onCancel }: RescanFlowProps) {
+export function RescanFlow({
+  measurement,
+  onComplete,
+  onCancel,
+}: RescanFlowProps) {
   const preferredUnit = usePreferencesStore((s) => s.measurementUnit);
   const [step, setStep] = useState<Step>("upload");
   const [frontImage, setFrontImage] = useState<File | null>(null);
@@ -100,7 +104,7 @@ export function RescanFlow({ measurement, onComplete, onCancel }: RescanFlowProp
       const proposed = convertMeasurementData(
         result.data as Record<string, Record<string, number | null>>,
         "cm",
-        "mm",
+        "mm"
       );
       setProposedMm(proposed as MeasurementMmData);
       setLandmarks(result.landmarks ?? null);
@@ -108,14 +112,16 @@ export function RescanFlow({ measurement, onComplete, onCancel }: RescanFlowProp
     } catch (err) {
       if (cancelledRef.current) return;
       const msg =
-        err instanceof Error ? err.message : "Couldn't extract from that photo.";
+        err instanceof Error
+          ? err.message
+          : "Couldn't extract from that photo.";
       toast.error(`Re-scan failed: ${msg}`);
       setStep("upload");
     }
   };
 
   const handleApply = async (
-    confirmedFields: Array<{ section: string; field: string }>,
+    confirmedFields: Array<{ section: string; field: string }>
   ) => {
     if (!proposedMm) return;
 
@@ -139,13 +145,17 @@ export function RescanFlow({ measurement, onComplete, onCancel }: RescanFlowProp
       const applied = result.applied.length;
       const rejected = result.rejected.length;
       const messages: string[] = [];
-      if (applied > 0) messages.push(`${applied} field${applied === 1 ? "" : "s"} updated`);
+      if (applied > 0)
+        messages.push(`${applied} field${applied === 1 ? "" : "s"} updated`);
       if (rejected > 0) messages.push(`${rejected} rejected`);
-      toast.success(messages.length > 0 ? messages.join(" · ") : "No changes applied.");
+      toast.success(
+        messages.length > 0 ? messages.join(" · ") : "No changes applied."
+      );
       setStep("applied");
       onComplete();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Couldn't apply re-scan.";
+      const msg =
+        err instanceof Error ? err.message : "Couldn't apply re-scan.";
       toast.error(msg);
     }
   };
@@ -156,21 +166,21 @@ export function RescanFlow({ measurement, onComplete, onCancel }: RescanFlowProp
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Back
         </button>
 
         <header>
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
-            <Sparkles className="h-3 w-3 text-copper" aria-hidden />
+          <p className="text-copper inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.18em] uppercase">
+            <Sparkles className="text-copper h-3 w-3" aria-hidden />
             Re-scan
           </p>
-          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
             Update {measurement.label}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-sm">
             Upload a fresh photo. We&apos;ll diff it against your saved
             measurements and ask you to confirm meaningful changes.
           </p>
@@ -209,7 +219,7 @@ export function RescanFlow({ measurement, onComplete, onCancel }: RescanFlowProp
               placeholder={preferredUnit === "inches" ? "e.g. 67" : "e.g. 170"}
               onChange={(e) => setHeightInput(e.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Providing your height improves accuracy. Enter in{" "}
               {unitLabel(preferredUnit)}; we convert automatically.
             </p>
@@ -254,7 +264,7 @@ export function RescanFlow({ measurement, onComplete, onCancel }: RescanFlowProp
       <div className="flex flex-col items-center justify-center py-16">
         <StitchLoader size={32} tone="copper" label="Analysing photo" />
         <p className="mt-4 text-sm font-medium">{stage}</p>
-        <p className="mt-1 text-xs tabular-nums text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-xs tabular-nums">
           {elapsed}s elapsed · usually 5–15s
         </p>
         <Button

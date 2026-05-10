@@ -13,11 +13,7 @@ interface Props extends React.SVGAttributes<SVGSVGElement> {
  * `var(--copper)` for the eye highlight, so it tints with the surrounding
  * type.
  */
-export function NeedleIcon({
-  className,
-  withThread = false,
-  ...props
-}: Props) {
+export function NeedleIcon({ className, withThread = false, ...props }: Props) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -29,11 +25,7 @@ export function NeedleIcon({
       {...props}
     >
       {/* Needle body — slim, slightly tapered */}
-      <path
-        d="M5 19 L18.2 5.8"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
+      <path d="M5 19 L18.2 5.8" stroke="currentColor" strokeWidth="1.6" />
       {/* Pointed tip */}
       <path
         d="M18.2 5.8 L20 4 L19.2 6.6 Z"

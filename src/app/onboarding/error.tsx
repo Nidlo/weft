@@ -21,13 +21,13 @@ export default function OnboardingError({
   return (
     <div className="bg-thread-mesh flex min-h-dvh flex-col items-center justify-center p-6">
       <GlassCard variant="solid" className="w-full max-w-md p-8 text-center">
-        <span className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-status-error-soft text-status-error">
+        <span className="bg-status-error-soft text-status-error mx-auto flex size-16 items-center justify-center rounded-2xl">
           <AlertTriangle className="h-7 w-7" aria-hidden />
         </span>
         <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
           Something went wrong.
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm">
           We couldn&apos;t load this step. Your progress has been saved — try
           again or pick this up from your dashboard.
         </p>

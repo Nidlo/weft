@@ -29,16 +29,16 @@ export default function TermsPage() {
   return (
     <main className="relative mx-auto max-w-3xl px-4 py-14 sm:py-20">
       <header>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           Legal
         </p>
-        <h1 className="text-display mt-2 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+        <h1 className="text-display mt-2 text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
           Terms of Service
         </h1>
-        <p className="mt-3 text-sm text-muted-foreground tabular-nums">
+        <p className="text-muted-foreground mt-3 text-sm tabular-nums">
           Effective {EFFECTIVE_DATE}
         </p>
-        <p className="mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">
+        <p className="text-muted-foreground mt-4 max-w-xl text-sm sm:text-base">
           Welcome to <strong>Nidlo</strong> (&ldquo;we,&rdquo; &ldquo;us,&rdquo;
           or &ldquo;our&rdquo;). By accessing or using our platform you agree to
           these Terms of Service. Please read them carefully.
@@ -46,7 +46,7 @@ export default function TermsPage() {
       </header>
 
       <GlassCard variant="solid" className="mt-8 p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.18em] uppercase">
           On this page
         </p>
         <ol className="mt-3 grid text-sm sm:grid-cols-2">
@@ -54,9 +54,9 @@ export default function TermsPage() {
             <li key={section.id}>
               <a
                 href={`#${section.id}`}
-                className="group flex min-h-11 items-baseline gap-2 rounded-lg py-2.5 text-foreground/80 transition-colors hover:text-copper"
+                className="group text-foreground/80 hover:text-copper flex min-h-11 items-baseline gap-2 rounded-lg py-2.5 transition-colors"
               >
-                <span className="text-[11px] font-semibold tabular-nums text-copper">
+                <span className="text-copper text-[11px] font-semibold tabular-nums">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span className="truncate">{section.title}</span>
@@ -68,7 +68,7 @@ export default function TermsPage() {
 
       <ThreadDivider className="mt-10" />
 
-      <article className="mt-10 space-y-12 text-sm leading-7 text-foreground/85 sm:text-base">
+      <article className="text-foreground/85 mt-10 space-y-12 text-sm leading-7 sm:text-base">
         <Section id="platform" index={1} title="The platform">
           <p>
             Nidlo is a marketplace that connects clients with independent
@@ -92,7 +92,7 @@ export default function TermsPage() {
             Notify us immediately at{" "}
             <a
               href="mailto:support@nidlo.com"
-              className="font-medium text-copper underline-offset-2 hover:underline"
+              className="text-copper font-medium underline-offset-2 hover:underline"
             >
               support@nidlo.com
             </a>{" "}
@@ -103,12 +103,11 @@ export default function TermsPage() {
         <Section id="orders" index={4} title="Orders & payments">
           <p>
             All prices are displayed in Ghana Cedis (GHS). Payments are
-            processed securely through our payment partners and accept MTN
-            MoMo, Telecel Cash, AT, and major card networks. A platform
-            service fee is deducted before the designer receives their
-            payout. Refunds are subject to the designer&apos;s cancellation
-            policy. The full list of payment partners we work with is in our
-            privacy policy.
+            processed securely through our payment partners and accept MTN MoMo,
+            Telecel Cash, AT, and major card networks. A platform service fee is
+            deducted before the designer receives their payout. Refunds are
+            subject to the designer&apos;s cancellation policy. The full list of
+            payment partners we work with is in our privacy policy.
           </p>
         </Section>
 
@@ -122,13 +121,11 @@ export default function TermsPage() {
 
         <Section id="prohibited" index={6} title="Prohibited conduct">
           <p>You may not use Nidlo to:</p>
-          <ul className="mt-3 list-disc space-y-2 pl-6 marker:text-copper">
+          <ul className="marker:text-copper mt-3 list-disc space-y-2 pl-6">
             <li>Violate any applicable law or regulation</li>
             <li>Post false, misleading, or fraudulent content</li>
             <li>Harass, threaten, or intimidate other users</li>
-            <li>
-              Circumvent platform payments by transacting off-platform
-            </li>
+            <li>Circumvent platform payments by transacting off-platform</li>
             <li>
               Scrape, crawl, or automate access to the platform without our
               written consent
@@ -165,14 +162,14 @@ export default function TermsPage() {
             Questions? Reach us at{" "}
             <a
               href="mailto:legal@nidlo.com"
-              className="font-medium text-copper underline-offset-2 hover:underline"
+              className="text-copper font-medium underline-offset-2 hover:underline"
             >
               legal@nidlo.com
             </a>{" "}
             or via our{" "}
             <Link
               href="/contact"
-              className="font-medium text-copper underline-offset-2 hover:underline"
+              className="text-copper font-medium underline-offset-2 hover:underline"
             >
               contact page
             </Link>
@@ -194,7 +191,7 @@ interface SectionProps {
 function Section({ id, index, title, children }: SectionProps) {
   return (
     <section id={id} className="scroll-mt-24">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper tabular-nums">
+      <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase tabular-nums">
         {String(index).padStart(2, "0")}
       </p>
       <h2 className="text-display mt-1.5 text-2xl font-semibold tracking-tight sm:text-3xl">

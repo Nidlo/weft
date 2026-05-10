@@ -24,11 +24,7 @@ export function HomeDiscovery() {
   return (
     <div className="space-y-2">
       {quickFilters.length > 0 && (
-        <Section
-          density="compact"
-          eyebrow="Discover"
-          title="Browse by craft"
-        >
+        <Section density="compact" eyebrow="Discover" title="Browse by craft">
           <ScrollArea className="-mx-4 w-screen sm:mx-0 sm:w-full">
             <div className="flex gap-2 px-4 pb-3 sm:px-0">
               {quickFilters.map((spec) => (
@@ -36,12 +32,12 @@ export function HomeDiscovery() {
                   key={spec.id}
                   href={`/search?spec=${spec.slug}`}
                   className={cn(
-                    "group inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium",
+                    "group border-border bg-card inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium",
                     "transition-colors duration-150",
                     "hover:border-foreground/30 hover:bg-foreground hover:text-background"
                   )}
                 >
-                  <span className="size-1 rounded-full bg-copper" aria-hidden />
+                  <span className="bg-copper size-1 rounded-full" aria-hidden />
                   {spec.name}
                 </Link>
               ))}

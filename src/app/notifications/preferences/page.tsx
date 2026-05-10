@@ -146,9 +146,7 @@ export default function NotificationPreferencesPage() {
       const start = quietStart || null;
       const end = quietEnd || null;
       await updateQuiet({ variables: { start, end } });
-      toast.success(
-        start ? "Quiet hours updated" : "Quiet hours disabled"
-      );
+      toast.success(start ? "Quiet hours updated" : "Quiet hours disabled");
     } catch {
       toast.error("Failed to update quiet hours");
     }
@@ -173,19 +171,19 @@ export default function NotificationPreferencesPage() {
         <div>
           <Link
             href="/notifications"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to notifications
           </Link>
           <header className="mt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Inbox
             </p>
-            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
               Notification settings
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base">
               Choose how you want to be notified for each event.
             </p>
           </header>
@@ -194,13 +192,13 @@ export default function NotificationPreferencesPage() {
         {/* Channel preferences */}
         <section>
           <header className="mb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Channels
             </p>
             <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
               Per-event preferences
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-sm">
               Toggle push notifications and SMS for each category below.
             </p>
           </header>
@@ -214,7 +212,7 @@ export default function NotificationPreferencesPage() {
               </div>
             ) : (
               <div className="space-y-5">
-                <div className="flex items-center justify-end gap-8 border-b border-border/60 pb-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                <div className="border-border/60 text-muted-foreground flex items-center justify-end gap-8 border-b pb-3 text-[10px] font-semibold tracking-[0.16em] uppercase">
                   <span className="w-12 text-center">Push</span>
                   <span className="w-12 text-center">SMS</span>
                 </div>
@@ -228,7 +226,7 @@ export default function NotificationPreferencesPage() {
                       <Label className="text-display text-sm font-semibold tracking-tight">
                         {cat.label}
                       </Label>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                      <p className="text-muted-foreground mt-0.5 text-xs">
                         {cat.description}
                       </p>
                     </div>
@@ -277,16 +275,16 @@ export default function NotificationPreferencesPage() {
         {/* Quiet hours */}
         <section>
           <header className="mb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Do not disturb
             </p>
             <h2 className="text-display mt-1.5 flex items-center gap-2 text-xl font-semibold tracking-tight sm:text-2xl">
-              <Moon className="h-5 w-5 text-foreground/80" aria-hidden />
+              <Moon className="text-foreground/80 h-5 w-5" aria-hidden />
               Quiet hours
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Pause push and SMS during specific hours. In-app notifications
-              are still saved.
+            <p className="text-muted-foreground mt-1 text-sm">
+              Pause push and SMS during specific hours. In-app notifications are
+              still saved.
             </p>
           </header>
 
@@ -319,9 +317,9 @@ export default function NotificationPreferencesPage() {
                 />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Leave both empty to disable. Supports overnight windows
-              (e.g. 22:00 → 07:00).
+            <p className="text-muted-foreground text-xs">
+              Leave both empty to disable. Supports overnight windows (e.g.
+              22:00 → 07:00).
             </p>
             <div className="flex flex-col gap-2 sm:flex-row-reverse">
               <Button

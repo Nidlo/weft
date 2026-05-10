@@ -81,11 +81,7 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
       title={listening ? "Stop recording" : "Start voice input"}
       aria-label={listening ? "Stop recording" : "Start voice input"}
     >
-      {listening ? (
-        <MicOff className="h-4 w-4" />
-      ) : (
-        <Mic className="h-4 w-4" />
-      )}
+      {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
     </Button>
   );
 }

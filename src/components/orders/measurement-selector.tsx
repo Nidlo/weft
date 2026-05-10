@@ -31,7 +31,7 @@ export function MeasurementSelector({
 
   if (!clientId) {
     return (
-      <div className="rounded-lg border border-dashed p-3 text-center text-sm text-muted-foreground">
+      <div className="text-muted-foreground rounded-lg border border-dashed p-3 text-center text-sm">
         <Ruler className="mx-auto mb-1 h-4 w-4" />
         Link a client to attach their measurements
       </div>
@@ -44,7 +44,7 @@ export function MeasurementSelector({
 
   if (measurements.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed p-3 text-center text-sm text-muted-foreground">
+      <div className="text-muted-foreground rounded-lg border border-dashed p-3 text-center text-sm">
         <Ruler className="mx-auto mb-1 h-4 w-4" />
         This client has no saved measurements
       </div>
@@ -59,15 +59,15 @@ export function MeasurementSelector({
     const parts: string[] = [];
     if (bust)
       parts.push(
-        `Bust: ${formatMeasurement(bust, "mm", displayUnit, { withUnit: false })}`,
+        `Bust: ${formatMeasurement(bust, "mm", displayUnit, { withUnit: false })}`
       );
     if (waist)
       parts.push(
-        `Waist: ${formatMeasurement(waist, "mm", displayUnit, { withUnit: false })}`,
+        `Waist: ${formatMeasurement(waist, "mm", displayUnit, { withUnit: false })}`
       );
     if (hips)
       parts.push(
-        `Hips: ${formatMeasurement(hips, "mm", displayUnit, { withUnit: false })}`,
+        `Hips: ${formatMeasurement(hips, "mm", displayUnit, { withUnit: false })}`
       );
     return parts.length > 0
       ? parts.join(" · ") + ` ${unitLabel(displayUnit)}`
@@ -93,7 +93,7 @@ export function MeasurementSelector({
                   {m.label}
                   {m.isDefault && " (Default)"}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {formatSummary(m)}
                 </span>
               </div>

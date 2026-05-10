@@ -28,16 +28,16 @@ export default function PrivacyPage() {
   return (
     <main className="relative mx-auto max-w-3xl px-4 py-14 sm:py-20">
       <header>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           Privacy
         </p>
-        <h1 className="text-display mt-2 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+        <h1 className="text-display mt-2 text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
           Privacy Policy
         </h1>
-        <p className="mt-3 text-sm text-muted-foreground tabular-nums">
+        <p className="text-muted-foreground mt-3 text-sm tabular-nums">
           Effective {EFFECTIVE_DATE}
         </p>
-        <p className="mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">
+        <p className="text-muted-foreground mt-4 max-w-xl text-sm sm:text-base">
           This Privacy Policy explains how <strong>Nidlo</strong> collects,
           uses, and protects your personal information when you use our
           platform.
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
       </header>
 
       <GlassCard variant="solid" className="mt-8 p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.18em] uppercase">
           On this page
         </p>
         <ol className="mt-3 grid text-sm sm:grid-cols-2">
@@ -53,9 +53,9 @@ export default function PrivacyPage() {
             <li key={section.id}>
               <a
                 href={`#${section.id}`}
-                className="group flex min-h-11 items-baseline gap-2 rounded-lg py-2.5 text-foreground/80 transition-colors hover:text-copper"
+                className="group text-foreground/80 hover:text-copper flex min-h-11 items-baseline gap-2 rounded-lg py-2.5 transition-colors"
               >
-                <span className="text-[11px] font-semibold tabular-nums text-copper">
+                <span className="text-copper text-[11px] font-semibold tabular-nums">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span className="truncate">{section.title}</span>
@@ -67,9 +67,9 @@ export default function PrivacyPage() {
 
       <ThreadDivider className="mt-10" />
 
-      <article className="mt-10 space-y-12 text-sm leading-7 text-foreground/85 sm:text-base">
+      <article className="text-foreground/85 mt-10 space-y-12 text-sm leading-7 sm:text-base">
         <Section id="collect" index={1} title="Information we collect">
-          <ul className="list-disc space-y-2 pl-6 marker:text-copper">
+          <ul className="marker:text-copper list-disc space-y-2 pl-6">
             <li>
               <strong className="text-foreground">Account data:</strong> name,
               phone number, email address, country
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section id="use" index={2} title="How we use your information">
-          <ul className="list-disc space-y-2 pl-6 marker:text-copper">
+          <ul className="marker:text-copper list-disc space-y-2 pl-6">
             <li>Provide, operate, and improve the platform</li>
             <li>Process payments and payouts</li>
             <li>Send order status updates, OTPs, and service notifications</li>
@@ -119,7 +119,7 @@ export default function PrivacyPage() {
 
         <Section id="share" index={4} title="Sharing your information">
           <p>We share data with:</p>
-          <ul className="mt-3 list-disc space-y-2 pl-6 marker:text-copper">
+          <ul className="marker:text-copper mt-3 list-disc space-y-2 pl-6">
             <li>
               <strong className="text-foreground">Designers</strong> — your
               name, measurements, and order details on commissions you place
@@ -147,11 +147,12 @@ export default function PrivacyPage() {
 
         <Section id="rights" index={6} title="Your rights">
           <p>You have the right to:</p>
-          <ul className="mt-3 list-disc space-y-2 pl-6 marker:text-copper">
+          <ul className="marker:text-copper mt-3 list-disc space-y-2 pl-6">
             <li>Access the personal data we hold about you</li>
             <li>Correct inaccurate data</li>
             <li>
-              Request deletion of your data (&ldquo;right to be forgotten&rdquo;)
+              Request deletion of your data (&ldquo;right to be
+              forgotten&rdquo;)
             </li>
             <li>Object to certain processing</li>
           </ul>
@@ -159,7 +160,7 @@ export default function PrivacyPage() {
             To exercise these rights, contact us at{" "}
             <a
               href="mailto:privacy@nidlo.com"
-              className="font-medium text-copper underline-offset-2 hover:underline"
+              className="text-copper font-medium underline-offset-2 hover:underline"
             >
               privacy@nidlo.com
             </a>
@@ -189,14 +190,14 @@ export default function PrivacyPage() {
             Privacy questions:{" "}
             <a
               href="mailto:privacy@nidlo.com"
-              className="font-medium text-copper underline-offset-2 hover:underline"
+              className="text-copper font-medium underline-offset-2 hover:underline"
             >
               privacy@nidlo.com
             </a>{" "}
             or visit our{" "}
             <Link
               href="/contact"
-              className="font-medium text-copper underline-offset-2 hover:underline"
+              className="text-copper font-medium underline-offset-2 hover:underline"
             >
               contact page
             </Link>
@@ -218,7 +219,7 @@ interface SectionProps {
 function Section({ id, index, title, children }: SectionProps) {
   return (
     <section id={id} className="scroll-mt-24">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper tabular-nums">
+      <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase tabular-nums">
         {String(index).padStart(2, "0")}
       </p>
       <h2 className="text-display mt-1.5 text-2xl font-semibold tracking-tight sm:text-3xl">

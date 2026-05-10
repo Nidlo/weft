@@ -119,7 +119,7 @@ export function StepMeasurements() {
               disabled={isDisabled}
               onClick={() => setField("measurementSource", tile.value)}
               className={cn(
-                "rounded-2xl border bg-card p-4 text-left transition-all duration-200",
+                "bg-card rounded-2xl border p-4 text-left transition-all duration-200",
                 "hover:-translate-y-0.5 hover:shadow-(--shadow-2)",
                 isActive
                   ? "border-foreground/30 bg-foreground/5 shadow-(--shadow-glow)"
@@ -140,7 +140,7 @@ export function StepMeasurements() {
               <p className="text-display mt-3 text-sm font-semibold tracking-tight">
                 {tile.label}
               </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5 text-xs">
                 {tile.value === "saved_profile" && measurements.length > 0
                   ? `${measurements.length} profile${measurements.length > 1 ? "s" : ""} saved`
                   : tile.description}
@@ -153,7 +153,7 @@ export function StepMeasurements() {
       {/* Saved-profile selector */}
       {measurementSource === "saved_profile" && measurements.length > 0 && (
         <div className="space-y-2">
-          <Label className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <Label className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
             Pick a profile
           </Label>
           <div className="space-y-2">
@@ -165,7 +165,7 @@ export function StepMeasurements() {
                   type="button"
                   onClick={() => setField("measurementId", m.id)}
                   className={cn(
-                    "block w-full rounded-2xl border bg-card p-4 text-left transition-all duration-200",
+                    "bg-card block w-full rounded-2xl border p-4 text-left transition-all duration-200",
                     "hover:-translate-y-0.5 hover:shadow-(--shadow-1)",
                     isPicked
                       ? "border-foreground/30 bg-foreground/5 shadow-(--shadow-glow)"
@@ -175,7 +175,7 @@ export function StepMeasurements() {
                   <div className="flex flex-wrap items-center gap-2">
                     {isPicked && (
                       <CheckCircle2
-                        className="h-4 w-4 text-copper"
+                        className="text-copper h-4 w-4"
                         aria-hidden
                       />
                     )}
@@ -183,19 +183,16 @@ export function StepMeasurements() {
                       {m.label}
                     </span>
                     {m.isDefault && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-copper/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-copper-soft ring-1 ring-copper/30">
+                      <span className="bg-copper/15 text-copper-soft ring-copper/30 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase ring-1">
                         Default
                       </span>
                     )}
-                    <span className="inline-flex items-center rounded-full border border-border bg-card/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <span className="border-border bg-card/60 text-muted-foreground inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
                       {m.source === "ai_photo" ? "Fitscan AI" : m.source}
                     </span>
                   </div>
                   {isPicked && (
-                    <GlassCard
-                      variant="ghost"
-                      className="mt-3 p-3"
-                    >
+                    <GlassCard variant="ghost" className="mt-3 p-3">
                       <MeasurementSummary
                         dataMm={m.dataMm}
                         manualOverridesMm={m.manualOverridesMm}

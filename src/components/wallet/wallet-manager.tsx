@@ -107,20 +107,20 @@ export function WalletManager() {
       {/* Balance hero card */}
       <GlassCard
         variant="solid"
-        className="relative overflow-hidden bg-thread-mesh p-6 sm:p-8"
+        className="bg-thread-mesh relative overflow-hidden p-6 sm:p-8"
       >
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-copper/40 to-transparent"
+          className="via-copper/40 pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent"
           aria-hidden
         />
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <div className="text-copper flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase">
           <Wallet className="h-3.5 w-3.5" aria-hidden />
           Available balance
         </div>
-        <p className="text-display mt-3 text-4xl font-semibold tabular-nums tracking-tight sm:text-5xl">
+        <p className="text-display mt-3 text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl">
           {formatPesewas(balance)}
         </p>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm">
           Earnings ready to withdraw to your primary MoMo account.
         </p>
       </GlassCard>
@@ -129,7 +129,7 @@ export function WalletManager() {
       <section>
         <header className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Payout
             </p>
             <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
@@ -152,20 +152,20 @@ export function WalletManager() {
         <div className="space-y-3">
           {accountsLoading && accounts.length === 0 ? (
             <GlassCard variant="ghost" className="p-4">
-              <p className="text-sm text-muted-foreground">Loading...</p>
+              <p className="text-muted-foreground text-sm">Loading...</p>
             </GlassCard>
           ) : accounts.length === 0 && !showAdd ? (
             <GlassCard
               variant="solid"
               className="flex flex-col items-center py-12 text-center"
             >
-              <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-foreground">
+              <span className="bg-secondary text-foreground flex size-14 items-center justify-center rounded-2xl">
                 <Phone className="h-6 w-6" aria-hidden />
               </span>
               <h3 className="text-display mt-4 text-xl font-semibold tracking-tight">
                 No payout account yet.
               </h3>
-              <p className="mx-auto mt-1.5 max-w-xs text-sm text-muted-foreground">
+              <p className="text-muted-foreground mx-auto mt-1.5 max-w-xs text-sm">
                 Add your MoMo number so we can deliver your earnings the moment
                 an order is paid.
               </p>
@@ -187,14 +187,14 @@ export function WalletManager() {
                 className="flex items-center justify-between p-4"
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground ring-1 ring-border">
+                  <span className="bg-secondary text-foreground ring-border flex size-10 shrink-0 items-center justify-center rounded-xl ring-1">
                     <Phone className="h-4 w-4" aria-hidden />
                   </span>
                   <div className="min-w-0">
                     <p className="text-display truncate text-sm font-semibold tracking-tight">
                       {account.accountName}
                     </p>
-                    <p className="truncate text-xs text-muted-foreground tabular-nums">
+                    <p className="text-muted-foreground truncate text-xs tabular-nums">
                       {account.accountNumber}
                       <span className="text-muted-foreground/60"> · </span>
                       {account.networkLabel}
@@ -203,7 +203,7 @@ export function WalletManager() {
                 </div>
                 <div className="flex items-center gap-1">
                   {account.isPrimary ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-copper/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-copper-soft ring-1 ring-copper/30">
+                    <span className="bg-copper/15 text-copper-soft ring-copper/30 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase ring-1">
                       <CheckCircle2 className="h-3 w-3" aria-hidden />
                       Primary
                     </span>
@@ -238,7 +238,7 @@ export function WalletManager() {
           {/* Add account form */}
           {showAdd && (
             <GlassCard variant="ghost" className="space-y-4 p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
                 {accounts.length === 0
                   ? "Add your first MoMo account"
                   : "Add another MoMo account"}
@@ -268,7 +268,7 @@ export function WalletManager() {
                 <Label className="text-sm">Phone number</Label>
                 <div className="relative">
                   <Phone
-                    className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                     aria-hidden
                   />
                   <Input
@@ -313,13 +313,13 @@ export function WalletManager() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 rounded-xl border border-status-success-soft bg-status-success-soft/40 p-3">
+                  <div className="border-status-success-soft bg-status-success-soft/40 flex items-center gap-3 rounded-xl border p-3">
                     <CheckCircle2
-                      className="h-5 w-5 shrink-0 text-status-success"
+                      className="text-status-success h-5 w-5 shrink-0"
                       aria-hidden
                     />
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-status-success-fg">
+                      <p className="text-status-success-fg text-[11px] font-semibold tracking-[0.16em] uppercase">
                         Account verified
                       </p>
                       <p className="text-display mt-0.5 text-base font-semibold tracking-tight">

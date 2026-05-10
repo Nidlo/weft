@@ -14,7 +14,10 @@ export function PaymentStatusBadge({ summary }: PaymentStatusBadgeProps) {
 
   if (depositStatus === "success" && balanceStatus === "success") {
     return (
-      <Badge variant="secondary" className="shrink-0 border-0 bg-status-success-soft text-status-success-fg">
+      <Badge
+        variant="secondary"
+        className="bg-status-success-soft text-status-success-fg shrink-0 border-0"
+      >
         Fully Paid
       </Badge>
     );
@@ -22,7 +25,10 @@ export function PaymentStatusBadge({ summary }: PaymentStatusBadgeProps) {
 
   if (depositStatus === "success") {
     return (
-      <Badge variant="secondary" className="shrink-0 border-0 bg-status-info-soft text-status-info-fg">
+      <Badge
+        variant="secondary"
+        className="bg-status-info-soft text-status-info-fg shrink-0 border-0"
+      >
         Deposit Paid
       </Badge>
     );
@@ -30,7 +36,10 @@ export function PaymentStatusBadge({ summary }: PaymentStatusBadgeProps) {
 
   if (depositStatus === "pending") {
     return (
-      <Badge variant="secondary" className="shrink-0 border-0 bg-status-warning-soft text-status-warning-fg">
+      <Badge
+        variant="secondary"
+        className="bg-status-warning-soft text-status-warning-fg shrink-0 border-0"
+      >
         Deposit Pending
       </Badge>
     );
@@ -38,7 +47,10 @@ export function PaymentStatusBadge({ summary }: PaymentStatusBadgeProps) {
 
   if (depositStatus === "refunded") {
     return (
-      <Badge variant="secondary" className="shrink-0 border-0 bg-gray-100 text-gray-700">
+      <Badge
+        variant="secondary"
+        className="shrink-0 border-0 bg-gray-100 text-gray-700"
+      >
         Refunded
       </Badge>
     );

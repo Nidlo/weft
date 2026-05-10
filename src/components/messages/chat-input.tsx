@@ -110,7 +110,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
   // Image preview mode — Telegram-style preview with caption input
   if (pendingImage) {
     return (
-      <div className="border-t border-border/60 bg-background/70 backdrop-blur-xl backdrop-saturate-150 supports-backdrop-filter:bg-background/55">
+      <div className="border-border/60 bg-background/70 supports-backdrop-filter:bg-background/55 border-t backdrop-blur-xl backdrop-saturate-150">
         <div className="px-3 pt-3 sm:px-4">
           <div className="relative inline-block">
             {/* Object-URL preview can't be served by next/image's optimiser. */}
@@ -118,7 +118,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
             <img
               src={pendingImage.previewUrl}
               alt="Preview"
-              className="max-h-48 rounded-2xl object-contain ring-1 ring-border"
+              className="ring-border max-h-48 rounded-2xl object-contain ring-1"
             />
             {uploading && (
               <div
@@ -127,7 +127,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
                 className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-black/55 text-white backdrop-blur-sm"
               >
                 <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.16em]">
+                <span className="text-[11px] font-semibold tracking-[0.16em] uppercase">
                   Uploading...
                 </span>
               </div>
@@ -137,7 +137,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
                 variant="secondary"
                 size="icon-sm"
                 aria-label="Remove attached image"
-                className="absolute -right-2 -top-2 size-7 rounded-full shadow-(--shadow-2) ring-2 ring-background"
+                className="ring-background absolute -top-2 -right-2 size-7 rounded-full shadow-(--shadow-2) ring-2"
                 onClick={handleCancelImage}
               >
                 <X className="h-3.5 w-3.5" />
@@ -152,7 +152,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
             onChange={(e) => setCaption(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={disabled}
-            className="h-11 flex-1 rounded-full bg-card px-4"
+            className="bg-card h-11 flex-1 rounded-full px-4"
             autoFocus
           />
           <SendButton
@@ -170,7 +170,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
   const isReady = text.trim().length > 0 && !disabled;
 
   return (
-    <div className="flex items-center gap-2 border-t border-border/60 bg-background/70 p-3 backdrop-blur-xl backdrop-saturate-150 supports-backdrop-filter:bg-background/55 sm:p-4">
+    <div className="border-border/60 bg-background/70 supports-backdrop-filter:bg-background/55 flex items-center gap-2 border-t p-3 backdrop-blur-xl backdrop-saturate-150 sm:p-4">
       <input
         ref={fileRef}
         type="file"
@@ -186,7 +186,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
         disabled={disabled}
         title="Attach photo"
         aria-label="Attach photo"
-        className="shrink-0 text-muted-foreground hover:text-copper"
+        className="text-muted-foreground hover:text-copper shrink-0"
       >
         <ImagePlus className="h-5 w-5" />
       </Button>
@@ -197,7 +197,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        className="h-11 flex-1 rounded-full bg-card px-4"
+        className="bg-card h-11 flex-1 rounded-full px-4"
       />
 
       <SendButton
@@ -242,7 +242,7 @@ function SendButton({
       className={cn(
         "shrink-0 rounded-full transition-all duration-200",
         ready
-          ? "bg-foreground text-background shadow-(--shadow-glow) hover:bg-foreground/90"
+          ? "bg-foreground text-background hover:bg-foreground/90 shadow-(--shadow-glow)"
           : "bg-secondary text-muted-foreground hover:bg-secondary"
       )}
     >

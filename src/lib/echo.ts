@@ -24,12 +24,13 @@ export function getEcho(): Echo<"reverb"> | null {
     wsHost: process.env.NEXT_PUBLIC_REVERB_HOST ?? "localhost",
     wsPort: Number(process.env.NEXT_PUBLIC_REVERB_PORT ?? 8080),
     wssPort: Number(process.env.NEXT_PUBLIC_REVERB_PORT ?? 443),
-    forceTLS:
-      (process.env.NEXT_PUBLIC_REVERB_SCHEME ?? "http") === "https",
+    forceTLS: (process.env.NEXT_PUBLIC_REVERB_SCHEME ?? "http") === "https",
     enabledTransports: ["ws", "wss"],
     authEndpoint:
-      (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/graphql$/, "") +
-      "/broadcasting/auth",
+      (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(
+        /\/graphql$/,
+        ""
+      ) + "/broadcasting/auth",
     auth: {
       headers: {
         Accept: "application/json",
@@ -37,10 +38,18 @@ export function getEcho(): Echo<"reverb"> | null {
     },
     // Send session cookie with broadcasting auth requests
     authorizer: (channel: { name: string }) => ({
-      authorize: (socketId: string, callback: (error: Error | null, data: ChannelAuthorizationData | null) => void) => {
+      authorize: (
+        socketId: string,
+        callback: (
+          error: Error | null,
+          data: ChannelAuthorizationData | null
+        ) => void
+      ) => {
         const authUrl =
-          (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/graphql$/, "") +
-          "/broadcasting/auth";
+          (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(
+            /\/graphql$/,
+            ""
+          ) + "/broadcasting/auth";
 
         fetch(authUrl, {
           method: "POST",
@@ -56,7 +65,12 @@ export function getEcho(): Echo<"reverb"> | null {
         })
           .then((response) => response.json())
           .then((data) => callback(null, data))
-          .catch((error) => callback(error instanceof Error ? error : new Error(String(error)), null));
+          .catch((error) =>
+            callback(
+              error instanceof Error ? error : new Error(String(error)),
+              null
+            )
+          );
       },
     }),
   });

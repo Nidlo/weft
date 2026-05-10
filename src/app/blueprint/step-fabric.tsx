@@ -92,7 +92,7 @@ export function StepFabric() {
             />
             {validHex && (
               <div
-                className="size-10 shrink-0 rounded-xl ring-1 ring-border"
+                className="ring-border size-10 shrink-0 rounded-xl ring-1"
                 style={{ backgroundColor: fabricColourHex }}
                 aria-label="Colour preview"
               />
@@ -109,7 +109,7 @@ export function StepFabric() {
           <Label htmlFor="providing-fabric" className="cursor-pointer text-sm">
             I will provide the fabric
           </Label>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             The designer won&apos;t source fabric for this order.
           </p>
         </div>
@@ -135,7 +135,7 @@ export function StepFabric() {
           rows={2}
           className="resize-none"
         />
-        <p className="text-xs text-muted-foreground tabular-nums">
+        <p className="text-muted-foreground text-xs tabular-nums">
           {fabricNotes.length} / 200 characters
         </p>
       </div>

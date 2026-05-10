@@ -18,20 +18,19 @@ export function StepPricing() {
 
   const minNum = pricingMin ? parseInt(pricingMin) : null;
   const maxNum = pricingMax ? parseInt(pricingMax) : null;
-  const isInverted =
-    minNum !== null && maxNum !== null && minNum > maxNum;
+  const isInverted = minNum !== null && maxNum !== null && minNum > maxNum;
 
   return (
     <div className="space-y-7">
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground">
+        <span className="bg-secondary text-foreground flex size-9 shrink-0 items-center justify-center rounded-xl">
           <Coins className="h-4 w-4" aria-hidden />
         </span>
         <div>
           <h2 className="text-display text-lg font-semibold tracking-tight">
             What&apos;s your typical price range?
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             Optional. Helps clients filter by budget — you can negotiate per
             order, and update this anytime.
           </p>
@@ -45,7 +44,7 @@ export function StepPricing() {
           </Label>
           <div className="relative">
             <span
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground"
+              className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-sm font-medium"
               aria-hidden
             >
               GHS
@@ -62,14 +61,14 @@ export function StepPricing() {
             />
           </div>
           {pricingMin && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {formatCurrency(pricingMin)}
             </p>
           )}
         </div>
 
         <div
-          className="hidden h-px w-full bg-linear-to-r from-transparent via-copper/60 to-transparent sm:block sm:h-12 sm:w-12 sm:bg-linear-to-b"
+          className="via-copper/60 hidden h-px w-full bg-linear-to-r from-transparent to-transparent sm:block sm:h-12 sm:w-12 sm:bg-linear-to-b"
           aria-hidden
         />
 
@@ -79,7 +78,7 @@ export function StepPricing() {
           </Label>
           <div className="relative">
             <span
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground"
+              className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-sm font-medium"
               aria-hidden
             >
               GHS
@@ -96,7 +95,7 @@ export function StepPricing() {
             />
           </div>
           {pricingMax && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {formatCurrency(pricingMax)}
             </p>
           )}
@@ -104,7 +103,7 @@ export function StepPricing() {
       </div>
 
       {isInverted && (
-        <p className="text-sm text-status-error">
+        <p className="text-status-error text-sm">
           Minimum can&apos;t be higher than maximum.
         </p>
       )}
@@ -112,12 +111,12 @@ export function StepPricing() {
       <GlassCard variant="ghost" className="p-5">
         <div className="flex items-start gap-3">
           <Lightbulb
-            className="mt-0.5 h-4 w-4 shrink-0 text-copper"
+            className="text-copper mt-0.5 h-4 w-4 shrink-0"
             aria-hidden
           />
           <div>
             <p className="text-sm font-medium">Pricing tips</p>
-            <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-muted-foreground marker:text-copper">
+            <ul className="text-muted-foreground marker:text-copper mt-2 list-disc space-y-1 pl-4 text-sm">
               <li>Set ranges based on your experience and material costs</li>
               <li>You can negotiate individual prices with each client</li>
               <li>Designers with public ranges get 2× more inquiries</li>

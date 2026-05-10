@@ -97,7 +97,7 @@ export default function MeasurementsPage() {
     landmarks: Landmarks | null,
     photoUrl: string | null,
     photoPublicId: string | null,
-    photoDisk: string | null,
+    photoDisk: string | null
   ) => {
     try {
       await createMeasurement({
@@ -158,7 +158,7 @@ export default function MeasurementsPage() {
   const handleResetField = async (
     measurementId: string,
     section: string,
-    field: string,
+    field: string
   ) => {
     try {
       await resetMeasurementField(measurementId, section, field);
@@ -184,7 +184,7 @@ export default function MeasurementsPage() {
               setEditingId(null);
               setViewMode("list");
             }}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to Body Vault
@@ -194,19 +194,19 @@ export default function MeasurementsPage() {
         {!inSubFlow && (
           <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
                 Fit
               </p>
-              <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+              <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
                 Body Vault
               </h1>
-              <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base">
                 Save measurement profiles so designers can fit you faster on
                 every order.
               </p>
-              <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                <Ruler className="h-3 w-3 text-copper" aria-hidden />
-                <span className="tabular-nums text-foreground">
+              <p className="border-border bg-card text-muted-foreground mt-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.16em] uppercase">
+                <Ruler className="text-copper h-3 w-3" aria-hidden />
+                <span className="text-foreground tabular-nums">
                   {measurements.length}
                 </span>
                 <span>/ 10 profiles</span>
@@ -265,7 +265,7 @@ export default function MeasurementsPage() {
             const formInitialData = convertMeasurementData(
               editingMeasurement.dataMm,
               "mm",
-              preferredUnit,
+              preferredUnit
             ) as MeasurementData;
             return (
               <ManualForm
@@ -311,13 +311,13 @@ export default function MeasurementsPage() {
                 variant="solid"
                 className="flex flex-col items-center py-16 text-center"
               >
-                <span className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-foreground">
-                  <Sparkles className="h-7 w-7 text-copper" aria-hidden />
+                <span className="bg-secondary text-foreground flex size-16 items-center justify-center rounded-2xl">
+                  <Sparkles className="text-copper h-7 w-7" aria-hidden />
                 </span>
                 <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
                   No measurement profiles yet.
                 </h2>
-                <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+                <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
                   Add your first profile so designers know exactly how to cut
                   your garments.
                 </p>
@@ -357,29 +357,29 @@ export default function MeasurementsPage() {
                         {m.label}
                       </h3>
                       {m.isDefault && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-copper/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-copper-soft ring-1 ring-copper/30">
-                          <Star
-                            className="h-3 w-3 fill-copper"
-                            aria-hidden
-                          />
+                        <span className="bg-copper/15 text-copper-soft ring-copper/30 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase ring-1">
+                          <Star className="fill-copper h-3 w-3" aria-hidden />
                           Default
                         </span>
                       )}
                       <span
                         className={cn(
-                          "inline-flex items-center gap-1 rounded-full border border-border bg-card/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
+                          "border-border bg-card/60 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase",
                           m.source === "ai_photo"
                             ? "text-foreground"
                             : "text-muted-foreground"
                         )}
                       >
                         {m.source === "ai_photo" && (
-                          <Sparkles className="h-3 w-3 text-copper" aria-hidden />
+                          <Sparkles
+                            className="text-copper h-3 w-3"
+                            aria-hidden
+                          />
                         )}
                         {SOURCE_LABEL[m.source] ?? m.source}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground tabular-nums">
+                    <p className="text-muted-foreground mt-1 text-xs tabular-nums">
                       Saved{" "}
                       {new Date(m.createdAt).toLocaleDateString("en-GH", {
                         day: "numeric",
@@ -411,12 +411,12 @@ export default function MeasurementsPage() {
                   />
                 )}
 
-                <div className="flex flex-wrap gap-2 border-t border-border/60 pt-3">
+                <div className="border-border/60 flex flex-wrap gap-2 border-t pt-3">
                   {!m.isDefault && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="gap-1.5 text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground gap-1.5"
                       onClick={() => handleSetDefault(m.id)}
                     >
                       <Star className="h-3.5 w-3.5" aria-hidden />
@@ -426,7 +426,7 @@ export default function MeasurementsPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-1.5 text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground gap-1.5"
                     onClick={() => {
                       setEditingId(m.id);
                       setViewMode("edit");
@@ -439,7 +439,7 @@ export default function MeasurementsPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="gap-1.5 text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground gap-1.5"
                       onClick={() => {
                         setEditingId(m.id);
                         setViewMode("rescan");
@@ -452,7 +452,7 @@ export default function MeasurementsPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-1.5 text-muted-foreground hover:bg-status-error-soft hover:text-status-error-fg"
+                    className="text-muted-foreground hover:bg-status-error-soft hover:text-status-error-fg gap-1.5"
                     onClick={() => handleDelete(m.id)}
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden />

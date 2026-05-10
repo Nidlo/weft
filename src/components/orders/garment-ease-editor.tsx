@@ -25,10 +25,7 @@ import {
   useClearOrderGarmentEase,
 } from "@/lib/hooks/use-orders";
 import { usePreferencesStore } from "@/lib/stores/preferences";
-import {
-  formatMeasurement,
-  unitLabel,
-} from "@/lib/utils/measurement";
+import { formatMeasurement, unitLabel } from "@/lib/utils/measurement";
 import { cn } from "@/lib/utils";
 import type { GqlOrderGarmentEase } from "@/types/graphql";
 
@@ -49,7 +46,8 @@ export function GarmentEaseEditor({
   canEdit,
 }: GarmentEaseEditorProps) {
   const displayUnit = usePreferencesStore((s) => s.measurementUnit);
-  const { setOrderGarmentEase, loading: saving } = useSetOrderGarmentEase(orderId);
+  const { setOrderGarmentEase, loading: saving } =
+    useSetOrderGarmentEase(orderId);
   const { clearOrderGarmentEase, loading: clearing } =
     useClearOrderGarmentEase(orderId);
 
@@ -67,7 +65,7 @@ export function GarmentEaseEditor({
     const labelGroup =
       (FIELD_LABELS as Record<string, Record<string, string>>)[section] ?? {};
     const taken = new Set(
-      eases.filter((e) => e.section === section).map((e) => e.field),
+      eases.filter((e) => e.section === section).map((e) => e.field)
     );
     return Object.entries(labelGroup).filter(([f]) => !taken.has(f));
   }, [eases, section]);
@@ -124,7 +122,7 @@ export function GarmentEaseEditor({
   return (
     <div className="space-y-4">
       {eases.length === 0 && !adding && (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           No eases set yet.{" "}
           {canEdit
             ? "Add the allowance you'd like to give for this garment."
@@ -139,17 +137,17 @@ export function GarmentEaseEditor({
             return (
               <li
                 key={ease.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card/60 px-4 py-3"
+                className="border-border bg-card/60 flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3"
               >
                 <div>
                   <p className="text-sm font-medium">
                     {fieldLabelFor(ease.section, ease.field)}{" "}
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <span className="text-muted-foreground text-[10px] tracking-wider uppercase">
                       {sectionLabelFor(ease.section)}
                     </span>
                   </p>
                   {ease.note && (
-                    <p className="mt-0.5 text-xs text-muted-foreground">
+                    <p className="text-muted-foreground mt-0.5 text-xs">
                       {ease.note}
                     </p>
                   )}
@@ -160,7 +158,7 @@ export function GarmentEaseEditor({
                       "inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold tabular-nums",
                       positive
                         ? "bg-status-success/15 text-status-success-fg"
-                        : "bg-status-danger/15 text-status-danger-fg",
+                        : "bg-status-danger/15 text-status-danger-fg"
                     )}
                   >
                     {positive ? (
@@ -172,9 +170,8 @@ export function GarmentEaseEditor({
                       Math.abs(ease.deltaMm),
                       "mm",
                       displayUnit,
-                      { withUnit: false },
-                    )}
-                    {" "}
+                      { withUnit: false }
+                    )}{" "}
                     {unitLabel(displayUnit)}
                   </span>
                   {canEdit && (

@@ -860,7 +860,11 @@ export interface StartConversationData {
 // --- Sprint 6: Payments ---
 
 export type PaymentTypeValue = "deposit" | "balance" | "refund";
-export type PaymentMethodValue = "card" | "momo_mtn" | "momo_vodafone" | "momo_airteltigo";
+export type PaymentMethodValue =
+  | "card"
+  | "momo_mtn"
+  | "momo_vodafone"
+  | "momo_airteltigo";
 export type PaymentStatusValue = "pending" | "success" | "failed" | "refunded";
 export type PaymentProviderValue = "moolre" | "paystack";
 

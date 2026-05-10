@@ -66,7 +66,7 @@ export function StyleProfileCard() {
         <GlassCard variant="solid" className="mt-4 p-8">
           <div className="flex flex-col items-center gap-3 py-4 text-center">
             <StitchLoader size={24} tone="copper" />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Loading your style profile...
             </p>
           </div>
@@ -85,14 +85,14 @@ export function StyleProfileCard() {
           variant="solid"
           className="mt-4 flex flex-col items-center gap-4 p-8 text-center"
         >
-          <span className="flex size-14 items-center justify-center rounded-2xl bg-copper/15 text-copper-soft ring-1 ring-copper/30">
+          <span className="bg-copper/15 text-copper-soft ring-copper/30 flex size-14 items-center justify-center rounded-2xl ring-1">
             <Sparkles className="h-6 w-6" aria-hidden />
           </span>
           <div className="space-y-1.5">
             <h3 className="text-display text-xl font-semibold tracking-tight">
               Discover your style profile
             </h3>
-            <p className="mx-auto max-w-sm text-sm text-muted-foreground">
+            <p className="text-muted-foreground mx-auto max-w-sm text-sm">
               We&apos;ll use your saved measurements + interests to suggest
               flattering silhouettes, fabrics, and a color palette tailored to
               your shape.
@@ -137,13 +137,13 @@ export function StyleProfileCard() {
         {/* Body shape headline + summary */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Body shape
             </p>
             <h3 className="text-display mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
               {BODY_SHAPE_LABEL[profile.bodyShape] ?? profile.bodyShape}
             </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm">
               {profile.summary}
             </p>
           </div>
@@ -153,7 +153,7 @@ export function StyleProfileCard() {
             size="sm"
             onClick={handleGenerate}
             disabled={generating}
-            className="self-start gap-1.5"
+            className="gap-1.5 self-start"
             aria-label="Refresh style profile"
           >
             {generating ? (
@@ -172,10 +172,10 @@ export function StyleProfileCard() {
               {profile.colorPalette.map((color) => (
                 <span
                   key={color}
-                  className="flex items-center gap-2 rounded-full border border-border/60 bg-card/40 py-1 pl-1 pr-3 text-xs font-medium tabular-nums"
+                  className="border-border/60 bg-card/40 flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 text-xs font-medium tabular-nums"
                 >
                   <span
-                    className="size-5 rounded-full ring-1 ring-border"
+                    className="ring-border size-5 rounded-full ring-1"
                     style={{ backgroundColor: color }}
                     aria-hidden
                   />
@@ -213,7 +213,7 @@ export function StyleProfileCard() {
         )}
 
         {profile.fromFallback && (
-          <p className="rounded-xl bg-secondary px-3 py-2 text-xs text-muted-foreground">
+          <p className="bg-secondary text-muted-foreground rounded-xl px-3 py-2 text-xs">
             We&apos;re showing a default profile while AI analysis is
             unavailable. Try refreshing once your photo consent is granted.
           </p>
@@ -226,7 +226,7 @@ export function StyleProfileCard() {
 function Header() {
   return (
     <header className="mb-1">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+      <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
         Style
       </p>
       <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
@@ -245,8 +245,8 @@ interface FieldProps {
 function Field({ label, icon: Icon, children }: FieldProps) {
   return (
     <div>
-      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-        {Icon ? <Icon className="h-3 w-3 text-copper" /> : null}
+      <p className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.16em] uppercase">
+        {Icon ? <Icon className="text-copper h-3 w-3" /> : null}
         {label}
       </p>
       {children}
@@ -269,8 +269,8 @@ function ChipRow({
           className={cn(
             "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium",
             tone === "copper"
-              ? "bg-copper/15 text-copper-soft ring-1 ring-copper/30"
-              : "bg-secondary text-foreground/80 ring-1 ring-border"
+              ? "bg-copper/15 text-copper-soft ring-copper/30 ring-1"
+              : "bg-secondary text-foreground/80 ring-border ring-1"
           )}
         >
           {chip}

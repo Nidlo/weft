@@ -59,11 +59,12 @@ import { VoiceInput } from "@/components/orders/voice-input";
 
 type ClientMode = "none" | "search" | "external";
 
-const CLIENT_MODES: { value: ClientMode; label: string; icon: typeof User }[] = [
-  { value: "none", label: "No client", icon: UserX },
-  { value: "search", label: "Find existing", icon: Search },
-  { value: "external", label: "External", icon: UserPlus },
-];
+const CLIENT_MODES: { value: ClientMode; label: string; icon: typeof User }[] =
+  [
+    { value: "none", label: "No client", icon: UserX },
+    { value: "search", label: "Find existing", icon: Search },
+    { value: "external", label: "External", icon: UserPlus },
+  ];
 
 export default function NewOrderPage() {
   const router = useRouter();
@@ -73,8 +74,7 @@ export default function NewOrderPage() {
     designerRedirectTo: "/dashboard",
   });
   const { options, loading: optionsLoading } = useBlueprintOptions();
-  const { createInternalOrder, loading: submitting } =
-    useCreateInternalOrder();
+  const { createInternalOrder, loading: submitting } = useCreateInternalOrder();
   const {
     searchClients,
     results: clientResults,
@@ -157,9 +157,7 @@ export default function NewOrderPage() {
 
   const toggleDetail = (value: string) => {
     setSelectedDetails((prev) =>
-      prev.includes(value)
-        ? prev.filter((d) => d !== value)
-        : [...prev, value]
+      prev.includes(value) ? prev.filter((d) => d !== value) : [...prev, value]
     );
   };
 
@@ -206,8 +204,7 @@ export default function NewOrderPage() {
       additionalDetails:
         selectedDetails.length > 0 ? selectedDetails : undefined,
       description: description.trim() || undefined,
-      referenceImages:
-        referenceImages.length > 0 ? referenceImages : undefined,
+      referenceImages: referenceImages.length > 0 ? referenceImages : undefined,
       measurementId: measurementId ?? undefined,
     });
 
@@ -230,19 +227,19 @@ export default function NewOrderPage() {
         <div>
           <Link
             href="/orders"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to orders
           </Link>
           <header className="mt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Studio
             </p>
-            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
               New order
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base">
               Create a new order — for a walk-in client, an external customer,
               or a brief without a client yet.
             </p>
@@ -251,11 +248,7 @@ export default function NewOrderPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Garment Details */}
-          <FormSection
-            eyebrow="Brief"
-            title="Garment details"
-            icon={Scissors}
-          >
+          <FormSection eyebrow="Brief" title="Garment details" icon={Scissors}>
             <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
               <Field label="Garment type" required>
                 {optionsLoading ? (
@@ -290,8 +283,8 @@ export default function NewOrderPage() {
                       <label
                         key={detail.value}
                         className={cn(
-                          "flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-sm",
-                          "transition-colors hover:border-foreground/30 hover:bg-card",
+                          "border-border bg-card/60 flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm",
+                          "hover:border-foreground/30 hover:bg-card transition-colors",
                           selectedDetails.includes(detail.value) &&
                             "border-foreground/40 bg-foreground/5"
                         )}
@@ -322,7 +315,7 @@ export default function NewOrderPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   className="resize-none"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Include any details about materials, style, or fit.
                 </p>
               </div>
@@ -337,11 +330,7 @@ export default function NewOrderPage() {
           </FormSection>
 
           {/* Budget + Timeline */}
-          <FormSection
-            eyebrow="Pricing"
-            title="Budget & timeline"
-            icon={Coins}
-          >
+          <FormSection eyebrow="Pricing" title="Budget & timeline" icon={Coins}>
             <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
               <BudgetInput
                 minGhs={budgetMinGhs}
@@ -365,7 +354,7 @@ export default function NewOrderPage() {
                         )}
                       >
                         <CalendarIcon
-                          className="mr-2 h-4 w-4 shrink-0 text-copper"
+                          className="text-copper mr-2 h-4 w-4 shrink-0"
                           aria-hidden
                         />
                         {deadlineStart
@@ -398,7 +387,7 @@ export default function NewOrderPage() {
                         )}
                       >
                         <CalendarIcon
-                          className="mr-2 h-4 w-4 shrink-0 text-copper"
+                          className="text-copper mr-2 h-4 w-4 shrink-0"
                           aria-hidden
                         />
                         {deadline
@@ -469,7 +458,7 @@ export default function NewOrderPage() {
                         "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5",
                         isActive
                           ? "bg-foreground text-background shadow-(--shadow-2)"
-                          : "border border-border bg-card hover:border-foreground/30"
+                          : "border-border bg-card hover:border-foreground/30 border"
                       )}
                     >
                       <Icon className="h-3.5 w-3.5" aria-hidden />
@@ -486,14 +475,14 @@ export default function NewOrderPage() {
                     <GlassCard variant="ghost" className="p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-foreground ring-1 ring-border">
+                          <div className="bg-secondary text-foreground ring-border flex size-10 items-center justify-center rounded-full ring-1">
                             <User className="h-4 w-4" aria-hidden />
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-semibold tracking-tight">
                               {selectedClient.fullName ?? "Unknown"}
                             </p>
-                            <p className="truncate text-xs text-muted-foreground">
+                            <p className="text-muted-foreground truncate text-xs">
                               {[selectedClient.phone, selectedClient.city]
                                 .filter(Boolean)
                                 .join(" · ")}
@@ -521,10 +510,10 @@ export default function NewOrderPage() {
                           variant="outline"
                           role="combobox"
                           aria-expanded={clientSearchOpen}
-                          className="h-11 w-full justify-start text-muted-foreground"
+                          className="text-muted-foreground h-11 w-full justify-start"
                         >
                           <Search
-                            className="mr-2 h-4 w-4 text-copper"
+                            className="text-copper mr-2 h-4 w-4"
                             aria-hidden
                           />
                           Search by name or phone...
@@ -543,7 +532,7 @@ export default function NewOrderPage() {
                           <CommandList>
                             {searchingClients && (
                               <div className="flex items-center justify-center py-4">
-                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
                               </div>
                             )}
                             {!searchingClients &&
@@ -557,19 +546,17 @@ export default function NewOrderPage() {
                                   <CommandItem
                                     key={client.id}
                                     value={client.id}
-                                    onSelect={() =>
-                                      handleSelectClient(client)
-                                    }
+                                    onSelect={() => handleSelectClient(client)}
                                   >
                                     <div className="flex items-center gap-3">
-                                      <div className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                                      <div className="bg-muted text-muted-foreground flex size-8 items-center justify-center rounded-full">
                                         <User className="h-3.5 w-3.5" />
                                       </div>
                                       <div>
                                         <p className="text-sm font-medium">
                                           {client.fullName ?? "Unknown"}
                                         </p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-muted-foreground text-xs">
                                           {[client.phone, client.city]
                                             .filter(Boolean)
                                             .join(" · ")}
@@ -619,7 +606,7 @@ export default function NewOrderPage() {
               )}
 
               {clientMode === "none" && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   You can add client details later from the order page.
                 </p>
               )}
@@ -676,11 +663,11 @@ function FormSection({
   return (
     <section>
       <header className="mb-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           {eyebrow}
         </p>
         <h2 className="text-display mt-1.5 flex items-center gap-2 text-xl font-semibold tracking-tight sm:text-2xl">
-          {Icon && <Icon className="h-5 w-5 text-foreground/80" aria-hidden />}
+          {Icon && <Icon className="text-foreground/80 h-5 w-5" aria-hidden />}
           {title}
         </h2>
       </header>
@@ -708,7 +695,7 @@ function Field({ label, required, hint, children }: FieldProps) {
         )}
       </Label>
       {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
     </div>
   );
 }

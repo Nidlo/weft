@@ -24,10 +24,12 @@ import type {
 } from "@/types/graphql";
 
 export function useWalletAccounts() {
-  const { data, loading, error, refetch } =
-    useQuery<MyWalletAccountsData>(MY_WALLET_ACCOUNTS, {
+  const { data, loading, error, refetch } = useQuery<MyWalletAccountsData>(
+    MY_WALLET_ACCOUNTS,
+    {
       fetchPolicy: "cache-and-network",
-    });
+    }
+  );
 
   return {
     accounts: data?.myWalletAccounts ?? [],
@@ -38,10 +40,12 @@ export function useWalletAccounts() {
 }
 
 export function useWalletBalance() {
-  const { data, loading, error, refetch } =
-    useQuery<MyWalletBalanceData>(MY_WALLET_BALANCE, {
+  const { data, loading, error, refetch } = useQuery<MyWalletBalanceData>(
+    MY_WALLET_BALANCE,
+    {
       fetchPolicy: "cache-and-network",
-    });
+    }
+  );
 
   return {
     balance: data?.myWalletBalance?.balance ?? 0,
@@ -52,11 +56,13 @@ export function useWalletBalance() {
 }
 
 export function useWalletTransactions(first = 20, page = 1) {
-  const { data, loading, error, refetch } =
-    useQuery<MyWalletTransactionsData>(MY_WALLET_TRANSACTIONS, {
+  const { data, loading, error, refetch } = useQuery<MyWalletTransactionsData>(
+    MY_WALLET_TRANSACTIONS,
+    {
       variables: { first, page },
       fetchPolicy: "cache-and-network",
-    });
+    }
+  );
 
   return {
     transactions: data?.myWalletTransactions ?? [],
@@ -83,7 +89,12 @@ export function useResolveMomoAccount() {
 export function useAddWalletAccount() {
   const [mutate, { loading, error }] = useMutation<AddWalletAccountData>(
     ADD_WALLET_ACCOUNT,
-    { refetchQueries: [{ query: MY_WALLET_ACCOUNTS }, { query: MY_WALLET_BALANCE }] }
+    {
+      refetchQueries: [
+        { query: MY_WALLET_ACCOUNTS },
+        { query: MY_WALLET_BALANCE },
+      ],
+    }
   );
 
   const addAccount = async (
@@ -117,7 +128,12 @@ export function useSetWalletPrimary() {
 export function useRemoveWalletAccount() {
   const [mutate, { loading, error }] = useMutation<RemoveWalletAccountData>(
     REMOVE_WALLET_ACCOUNT,
-    { refetchQueries: [{ query: MY_WALLET_ACCOUNTS }, { query: MY_WALLET_BALANCE }] }
+    {
+      refetchQueries: [
+        { query: MY_WALLET_ACCOUNTS },
+        { query: MY_WALLET_BALANCE },
+      ],
+    }
   );
 
   const removeAccount = async (walletAccountId: string) => {

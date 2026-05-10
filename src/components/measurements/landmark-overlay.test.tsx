@@ -58,7 +58,7 @@ describe("LandmarkOverlay", () => {
       <LandmarkOverlay
         photo="https://example.com/scan.jpg"
         landmarks={SAMPLE_LANDMARKS}
-      />,
+      />
     );
 
     const img = screen.getByAltText("Body scan") as HTMLImageElement;
@@ -66,10 +66,10 @@ describe("LandmarkOverlay", () => {
 
     // Four landmarks → four dots, each with an aria-label
     expect(
-      screen.getByRole("img", { name: /left shoulder/i }),
+      screen.getByRole("img", { name: /left shoulder/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: /right shoulder/i }),
+      screen.getByRole("img", { name: /right shoulder/i })
     ).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /left hip/i })).toBeInTheDocument();
   });
@@ -79,30 +79,25 @@ describe("LandmarkOverlay", () => {
       <LandmarkOverlay
         photo="https://example.com/scan.jpg"
         landmarks={SAMPLE_LANDMARKS}
-      />,
+      />
     );
 
     expect(
       screen.getByRole("img", {
         name: /right hip low vis.*low confidence/i,
-      }),
+      })
     ).toBeInTheDocument();
   });
 
   it("renders no dots and no warning when landmarks is null", () => {
     render(
-      <LandmarkOverlay
-        photo="https://example.com/scan.jpg"
-        landmarks={null}
-      />,
+      <LandmarkOverlay photo="https://example.com/scan.jpg" landmarks={null} />
     );
 
     // Photo still renders
     expect(screen.getByAltText("Body scan")).toBeInTheDocument();
     // No landmark dots
-    expect(
-      screen.queryByRole("img", { name: /shoulder/i }),
-    ).toBeNull();
+    expect(screen.queryByRole("img", { name: /shoulder/i })).toBeNull();
     // No warning banner
     expect(screen.queryByText(/low confidence/i)).toBeNull();
   });
@@ -123,7 +118,7 @@ describe("LandmarkOverlay", () => {
         landmarks={{
           left_shoulder: { x: 0.35, y: 0.21, visibility: 0.92 },
         }}
-      />,
+      />
     );
 
     const dot = screen.getByRole("img", { name: /left shoulder/i });
@@ -143,12 +138,14 @@ describe("LandmarkOverlay", () => {
           }}
           editable
           onLandmarksChange={vi.fn()}
-        />,
+        />
       );
 
       // Editable dots are buttons with a drag-affordance aria-label
       expect(
-        screen.getByRole("button", { name: /drag to reposition.*left shoulder/i }),
+        screen.getByRole("button", {
+          name: /drag to reposition.*left shoulder/i,
+        })
       ).toBeInTheDocument();
       // No role=img dot in editable mode (each dot is a button instead)
       expect(screen.queryByRole("img", { name: /left shoulder/i })).toBeNull();
@@ -165,7 +162,7 @@ describe("LandmarkOverlay", () => {
           }}
           editable
           onLandmarksChange={onChange}
-        />,
+        />
       );
 
       const dot = screen.getByRole("button", {
@@ -196,13 +193,17 @@ describe("LandmarkOverlay", () => {
           landmarks={{ left_shoulder: { x: 0.5, y: 0.5, visibility: 0.9 } }}
           editable
           onLandmarksChange={onChange}
-        />,
+        />
       );
 
       const dot = screen.getByRole("button", { name: /left shoulder/i });
       fireEvent.pointerDown(dot, { pointerId: 1, clientX: 200, clientY: 400 });
       // Way outside the 400x800 box — clamps to (1, 1)
-      fireEvent.pointerMove(dot, { pointerId: 1, clientX: 10000, clientY: 10000 });
+      fireEvent.pointerMove(dot, {
+        pointerId: 1,
+        clientX: 10000,
+        clientY: 10000,
+      });
 
       const lastArg = onChange.mock.calls.at(-1)?.[0];
       expect(lastArg.left_shoulder.x).toBe(1);
@@ -217,7 +218,7 @@ describe("LandmarkOverlay", () => {
           landmarks={{ left_shoulder: { x: 0.5, y: 0.5, visibility: 0.9 } }}
           editable
           onLandmarksChange={onChange}
-        />,
+        />
       );
 
       const dot = screen.getByRole("button", { name: /left shoulder/i });

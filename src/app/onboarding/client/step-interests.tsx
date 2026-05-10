@@ -70,14 +70,14 @@ export function StepInterests() {
   return (
     <div className="space-y-7">
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground">
+        <span className="bg-secondary text-foreground flex size-9 shrink-0 items-center justify-center rounded-xl">
           <Heart className="h-4 w-4" aria-hidden />
         </span>
         <div>
           <h2 className="text-display text-lg font-semibold tracking-tight">
             What styles speak to you?
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             Optional. We use these to recommend designers and tailors who match
             your taste.
           </p>
@@ -94,17 +94,14 @@ export function StepInterests() {
                 key={opt.value}
                 type="button"
                 onClick={() =>
-                  setField(
-                    "genderPreference",
-                    isActive ? "" : opt.value
-                  )
+                  setField("genderPreference", isActive ? "" : opt.value)
                 }
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium",
                   "transition-all duration-200 hover:-translate-y-0.5",
                   isActive
                     ? "bg-foreground text-background shadow-(--shadow-2)"
-                    : "border border-border bg-card hover:border-foreground/30"
+                    : "border-border bg-card hover:border-foreground/30 border"
                 )}
               >
                 {opt.label}
@@ -118,7 +115,7 @@ export function StepInterests() {
         <div className="flex items-center justify-between gap-2">
           <Label className="text-sm">Fashion interests</Label>
           {fashionInterests.length > 0 && (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.16em] uppercase">
               {fashionInterests.length} selected
             </p>
           )}
@@ -126,7 +123,7 @@ export function StepInterests() {
 
         <div className="relative">
           <Search
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
             aria-hidden
           />
           <Input
@@ -147,8 +144,8 @@ export function StepInterests() {
           <div className="space-y-5">
             {Object.entries(grouped).map(([category, items]) => (
               <div key={category}>
-                <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  <Sparkles className="h-3 w-3 text-copper" aria-hidden />
+                <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.16em] uppercase">
+                  <Sparkles className="text-copper h-3 w-3" aria-hidden />
                   {CATEGORY_LABELS[category] ?? category}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -170,7 +167,7 @@ export function StepInterests() {
                           "transition-all duration-200 hover:-translate-y-0.5",
                           selected
                             ? "bg-foreground text-background shadow-(--shadow-1)"
-                            : "border border-border bg-card hover:border-foreground/30"
+                            : "border-border bg-card hover:border-foreground/30 border"
                         )}
                       >
                         {interest.name}

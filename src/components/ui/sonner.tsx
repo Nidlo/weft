@@ -50,17 +50,17 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       icons={{
         success: (
-          <CircleCheckIcon className="size-4 text-status-success" aria-hidden />
+          <CircleCheckIcon className="text-status-success size-4" aria-hidden />
         ),
-        info: <InfoIcon className="size-4 text-copper" aria-hidden />,
+        info: <InfoIcon className="text-copper size-4" aria-hidden />,
         warning: (
           <TriangleAlertIcon
-            className="size-4 text-status-warning"
+            className="text-status-warning size-4"
             aria-hidden
           />
         ),
         error: (
-          <OctagonXIcon className="size-4 text-status-error" aria-hidden />
+          <OctagonXIcon className="text-status-error size-4" aria-hidden />
         ),
         loading: <StitchLoader size={16} tone="copper" aria-hidden />,
       }}

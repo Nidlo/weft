@@ -104,9 +104,7 @@ describe("ProfilePage", () => {
     expect(
       screen.getByRole("link", { name: /designer dashboard/i })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /wallet/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /wallet/i })).toBeInTheDocument();
   });
 
   it("renders the contact info rows (phone always, email + city when present)", () => {

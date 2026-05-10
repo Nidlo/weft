@@ -8,12 +8,7 @@ import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useOrders } from "@/lib/hooks/use-orders";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { OrderCard } from "@/components/order/order-card";
@@ -79,20 +74,25 @@ export default function OrdersPage() {
       <div className="space-y-7">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               {user.isDesigner ? "Studio orders" : "Your orders"}
             </p>
-            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
               My orders
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base">
               {user.isDesigner
                 ? "Manage incoming orders and track production from sketch to delivery."
                 : "Track your garment orders and follow every stitch from cutting to delivery."}
             </p>
           </div>
           {user.isDesigner && (
-            <Button variant="luxe" size="lg" asChild className="gap-1.5 sm:shrink-0">
+            <Button
+              variant="luxe"
+              size="lg"
+              asChild
+              className="gap-1.5 sm:shrink-0"
+            >
               <Link href="/orders/new">
                 <Plus className="h-4 w-4" aria-hidden />
                 New order
@@ -108,12 +108,12 @@ export default function OrdersPage() {
             setPage(1);
           }}
         >
-          <TabsList className="w-full justify-start gap-1 rounded-full border border-border bg-card p-1 sm:w-auto">
+          <TabsList className="border-border bg-card w-full justify-start gap-1 rounded-full border p-1 sm:w-auto">
             {(Object.keys(TAB_LABELS) as TabValue[]).map((key) => (
               <TabsTrigger
                 key={key}
                 value={key}
-                className="rounded-full px-4 py-1.5 text-sm font-medium data-[state=active]:bg-foreground data-[state=active]:text-background"
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background rounded-full px-4 py-1.5 text-sm font-medium"
               >
                 {TAB_LABELS[key]}
               </TabsTrigger>
@@ -129,10 +129,10 @@ export default function OrdersPage() {
               </div>
             ) : error ? (
               <GlassCard variant="solid" className="py-12 text-center">
-                <p className="text-sm font-medium text-status-error-fg">
+                <p className="text-status-error-fg text-sm font-medium">
                   Couldn&apos;t load your orders.
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   Check your connection and try again.
                 </p>
               </GlassCard>
@@ -141,7 +141,7 @@ export default function OrdersPage() {
                 variant="solid"
                 className="flex flex-col items-center py-16 text-center"
               >
-                <span className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-foreground">
+                <span className="bg-secondary text-foreground flex size-16 items-center justify-center rounded-2xl">
                   <ClipboardList className="h-7 w-7" aria-hidden />
                 </span>
                 <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
@@ -150,7 +150,7 @@ export default function OrdersPage() {
                   {tab === "completed" && "No completed orders yet."}
                   {tab === "cancelled" && "No cancelled orders."}
                 </h2>
-                <p className="mx-auto mt-2 max-w-sm text-pretty text-sm text-muted-foreground">
+                <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm text-pretty">
                   {user.isDesigner
                     ? tab === "all"
                       ? "Once clients commission you, their orders will land here."
@@ -160,7 +160,12 @@ export default function OrdersPage() {
                       : "Nothing matching this filter — try a different tab."}
                 </p>
                 {!user.isDesigner && (tab === "all" || tab === "active") && (
-                  <Button variant="luxe" size="lg" className="mt-6 gap-1.5" asChild>
+                  <Button
+                    variant="luxe"
+                    size="lg"
+                    className="mt-6 gap-1.5"
+                    asChild
+                  >
                     <Link href="/search">
                       <Search className="h-4 w-4" aria-hidden />
                       Browse designers

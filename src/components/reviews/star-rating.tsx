@@ -45,7 +45,7 @@ export function StarRating({
             className={cn(
               "transition-colors",
               isInteractive && "cursor-pointer hover:scale-110 active:scale-95",
-              !isInteractive && "cursor-default",
+              !isInteractive && "cursor-default"
             )}
           >
             <Star
@@ -53,14 +53,14 @@ export function StarRating({
                 sizeClasses[size],
                 star <= displayValue
                   ? "fill-yellow-400 text-yellow-400"
-                  : "fill-none text-muted-foreground/30",
+                  : "text-muted-foreground/30 fill-none"
               )}
             />
           </button>
         ))}
       </div>
       {showLabel && displayValue > 0 && (
-        <span className="ml-1 text-sm font-medium text-muted-foreground">
+        <span className="text-muted-foreground ml-1 text-sm font-medium">
           {LABELS[displayValue]}
         </span>
       )}

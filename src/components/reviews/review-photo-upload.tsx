@@ -40,7 +40,7 @@ export function ReviewPhotoUpload({ files, onChange }: ReviewPhotoUploadProps) {
       }
       onChange(combined);
     },
-    [files, onChange],
+    [files, onChange]
   );
 
   const handleRemove = (index: number) => {
@@ -51,7 +51,10 @@ export function ReviewPhotoUpload({ files, onChange }: ReviewPhotoUploadProps) {
     <div className="space-y-2">
       <div className="flex gap-2 overflow-x-auto">
         {files.map((file, i) => (
-          <div key={i} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-lg">
+          <div
+            key={i}
+            className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-lg"
+          >
             {/* Local File preview via createObjectURL — unoptimisable by next/image. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -62,7 +65,7 @@ export function ReviewPhotoUpload({ files, onChange }: ReviewPhotoUploadProps) {
             <button
               type="button"
               onClick={() => handleRemove(i)}
-              className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+              className="absolute top-0.5 right-0.5 rounded-full bg-black/60 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
             >
               <X className="h-3 w-3" />
             </button>
@@ -76,7 +79,7 @@ export function ReviewPhotoUpload({ files, onChange }: ReviewPhotoUploadProps) {
             className="h-20 w-20 shrink-0"
             onClick={() => inputRef.current?.click()}
           >
-            <ImagePlus className="h-5 w-5 text-muted-foreground" />
+            <ImagePlus className="text-muted-foreground h-5 w-5" />
           </Button>
         )}
       </div>
@@ -93,7 +96,7 @@ export function ReviewPhotoUpload({ files, onChange }: ReviewPhotoUploadProps) {
         }}
       />
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         {files.length}/{MAX_PHOTOS} photos (optional)
       </p>
     </div>

@@ -142,8 +142,7 @@ function BlueprintWizard() {
       if (store.fabricColour) blueprint.fabric_colour = store.fabricColour;
       if (store.fabricColourHex)
         blueprint.fabric_colour_hex = store.fabricColourHex;
-      if (store.clientProvidingFabric)
-        blueprint.client_providing_fabric = true;
+      if (store.clientProvidingFabric) blueprint.client_providing_fabric = true;
       if (store.fabricNotes) blueprint.fabric_notes = store.fabricNotes;
 
       // Convert GHS to pesewas

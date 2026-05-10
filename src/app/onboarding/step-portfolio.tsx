@@ -162,15 +162,15 @@ export function StepPortfolio() {
   return (
     <div className="space-y-7">
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground">
+        <span className="bg-secondary text-foreground flex size-9 shrink-0 items-center justify-center rounded-xl">
           <Camera className="h-4 w-4" aria-hidden />
         </span>
         <div className="flex-1">
           <h2 className="text-display text-lg font-semibold tracking-tight">
             Show your best work.
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            <span className="tabular-nums font-medium text-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
+            <span className="text-foreground font-medium tabular-nums">
               {images.length}
             </span>
             <span className="text-muted-foreground/70">/{MAX_IMAGES}</span>{" "}
@@ -195,7 +195,7 @@ export function StepPortfolio() {
           isFull && "pointer-events-none opacity-60"
         )}
       >
-        <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary text-foreground">
+        <span className="bg-secondary text-foreground mx-auto flex size-14 items-center justify-center rounded-2xl">
           <Upload className="h-6 w-6" aria-hidden />
         </span>
         <p className="mt-4 text-sm font-medium">
@@ -220,7 +220,7 @@ export function StepPortfolio() {
           aria-label="Upload portfolio images"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-xs">
           JPEG, PNG, or WebP · max 10MB each
         </p>
       </div>
@@ -228,23 +228,21 @@ export function StepPortfolio() {
       {/* Failed uploads — persistent, with retry */}
       {failed.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm font-medium text-status-error-fg">
+          <p className="text-status-error-fg text-sm font-medium">
             {failed.length} upload{failed.length === 1 ? "" : "s"} failed
           </p>
           <ul className="space-y-2">
             {failed.map((entry) => (
               <li
                 key={entry.id}
-                className="flex items-center gap-3 rounded-2xl border border-status-error-soft bg-status-error-soft/40 p-3"
+                className="border-status-error-soft bg-status-error-soft/40 flex items-center gap-3 rounded-2xl border p-3"
               >
-                <AlertCircle className="h-4 w-4 shrink-0 text-status-error" />
+                <AlertCircle className="text-status-error h-4 w-4 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">
                     {entry.file.name}
                   </p>
-                  <p className="text-xs text-status-error-fg">
-                    {entry.reason}
-                  </p>
+                  <p className="text-status-error-fg text-xs">{entry.reason}</p>
                 </div>
                 <Button
                   type="button"
@@ -282,7 +280,7 @@ export function StepPortfolio() {
           {images.map((img, i) => (
             <div
               key={i}
-              className="relative aspect-square overflow-hidden rounded-xl ring-1 ring-border"
+              className="ring-border relative aspect-square overflow-hidden rounded-xl ring-1"
             >
               <Image
                 src={img.thumbnailUrl}
@@ -299,12 +297,12 @@ export function StepPortfolio() {
       <GlassCard variant="ghost" className="p-5">
         <div className="flex items-start gap-3">
           <Lightbulb
-            className="mt-0.5 h-4 w-4 shrink-0 text-copper"
+            className="text-copper mt-0.5 h-4 w-4 shrink-0"
             aria-hidden
           />
           <div>
             <p className="text-sm font-medium">Photo tips</p>
-            <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-muted-foreground marker:text-copper">
+            <ul className="text-muted-foreground marker:text-copper mt-2 list-disc space-y-1 pl-4 text-sm">
               <li>Well-lit photos showing the full garment</li>
               <li>Close-ups of detailed work and stitching</li>
               <li>Garments being worn, when possible</li>

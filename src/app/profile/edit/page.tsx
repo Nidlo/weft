@@ -25,10 +25,7 @@ import {
 } from "@/components/ui/select";
 import { GET_CITIES } from "@/lib/graphql/queries/designer";
 import { CREATE_CITY } from "@/lib/graphql/mutations/lookup";
-import {
-  UPDATE_MY_INFO,
-  UPDATE_AVATAR,
-} from "@/lib/graphql/mutations/profile";
+import { UPDATE_MY_INFO, UPDATE_AVATAR } from "@/lib/graphql/mutations/profile";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import type { CitiesData, CreateCityData } from "@/types/graphql";
 
@@ -47,7 +44,9 @@ export default function ProfileEditPage() {
   // during render — guarded by a condition that only fires when the source
   // changes — is the React 19 idiomatic way to derive form state from a
   // prop without using an effect (https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes).
-  const [seededFromUserId, setSeededFromUserId] = useState<string | undefined>();
+  const [seededFromUserId, setSeededFromUserId] = useState<
+    string | undefined
+  >();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -100,8 +99,9 @@ export default function ProfileEditPage() {
       draftRestored.firstName !== (user.firstName ?? "") ||
       draftRestored.lastName !== (user.lastName ?? "") ||
       draftRestored.otherNames !== (user.otherNames ?? "") ||
-      (draftRestored.showNewCity ? draftRestored.newCity : draftRestored.city) !==
-        (user.city ?? "");
+      (draftRestored.showNewCity
+        ? draftRestored.newCity
+        : draftRestored.city) !== (user.city ?? "");
     if (!draftDiffersFromUser) return;
     toast("Resume editing?", {
       description: "We saved your unsaved changes from last time.",
@@ -204,16 +204,16 @@ export default function ProfileEditPage() {
         <div>
           <Link
             href="/profile"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to profile
           </Link>
           <header className="mt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Account
             </p>
-            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
               Edit profile
             </h1>
           </header>
@@ -228,10 +228,8 @@ export default function ProfileEditPage() {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingAvatar}
-            aria-label={
-              uploadingAvatar ? "Uploading avatar" : "Change avatar"
-            }
-            className="group relative size-28 overflow-hidden rounded-full bg-secondary ring-2 ring-background shadow-(--shadow-2) transition-shadow disabled:cursor-wait hover:shadow-(--shadow-glow)"
+            aria-label={uploadingAvatar ? "Uploading avatar" : "Change avatar"}
+            className="group bg-secondary ring-background relative size-28 overflow-hidden rounded-full shadow-(--shadow-2) ring-2 transition-shadow hover:shadow-(--shadow-glow) disabled:cursor-wait"
           >
             {displayAvatar ? (
               // FileReader data URL preview is unoptimisable by next/image.
@@ -243,7 +241,7 @@ export default function ProfileEditPage() {
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
-                <User className="h-12 w-12 text-muted-foreground" aria-hidden />
+                <User className="text-muted-foreground h-12 w-12" aria-hidden />
               </div>
             )}
             {uploadingAvatar ? (
@@ -268,7 +266,7 @@ export default function ProfileEditPage() {
             className="hidden"
             onChange={handleAvatarChange}
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {uploadingAvatar ? "Uploading..." : "Tap photo to change"}
           </p>
         </GlassCard>
@@ -276,7 +274,7 @@ export default function ProfileEditPage() {
         {/* Personal info */}
         <section>
           <header className="mb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Identity
             </p>
             <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
@@ -313,7 +311,8 @@ export default function ProfileEditPage() {
 
             <div className="space-y-2">
               <Label htmlFor="otherNames" className="text-sm">
-                Other names <span className="text-muted-foreground">(optional)</span>
+                Other names{" "}
+                <span className="text-muted-foreground">(optional)</span>
               </Label>
               <Input
                 id="otherNames"
@@ -330,7 +329,7 @@ export default function ProfileEditPage() {
                 <div className="space-y-2">
                   <div className="relative">
                     <MapPin
-                      className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-copper"
+                      className="text-copper pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2"
                       aria-hidden
                     />
                     <Select value={city} onValueChange={setCity}>
@@ -350,7 +349,7 @@ export default function ProfileEditPage() {
                     type="button"
                     variant="link"
                     size="sm"
-                    className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground h-auto p-0 text-xs"
                     onClick={() => setShowNewCity(true)}
                   >
                     City not listed? Add new
@@ -360,7 +359,7 @@ export default function ProfileEditPage() {
                 <div className="space-y-2">
                   <div className="relative">
                     <MapPin
-                      className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-copper"
+                      className="text-copper absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                       aria-hidden
                     />
                     <Input
@@ -374,7 +373,7 @@ export default function ProfileEditPage() {
                     type="button"
                     variant="link"
                     size="sm"
-                    className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground h-auto p-0 text-xs"
                     onClick={() => {
                       setShowNewCity(false);
                       setNewCity("");

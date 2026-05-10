@@ -8,10 +8,7 @@ import { ArrowLeft, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 
 import { VERIFY_OTP, REQUEST_OTP } from "@/lib/graphql/mutations/auth";
-import type {
-  VerifyOtpData,
-  RequestOtpData,
-} from "@/types/graphql";
+import type { VerifyOtpData, RequestOtpData } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
 import { maskPhone } from "@/lib/utils/phone";
@@ -224,18 +221,21 @@ function VerifyOtpContent() {
   return (
     <GlassCard variant="solid" className="p-8">
       <header className="mb-7">
-        <h1 className="text-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+        <h1 className="text-display text-2xl leading-tight font-semibold tracking-tight sm:text-3xl">
           Check your phone.
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1.5 text-sm">
           We sent a 6-digit code to{" "}
-          <span className="font-medium text-foreground tabular-nums">
+          <span className="text-foreground font-medium tabular-nums">
             {maskedPhone}
           </span>
         </p>
       </header>
 
-      <div className="flex justify-center gap-2 sm:gap-3" aria-label="One-time code">
+      <div
+        className="flex justify-center gap-2 sm:gap-3"
+        aria-label="One-time code"
+      >
         {digits.map((digit, index) => (
           <motion.div
             key={index}
@@ -259,8 +259,8 @@ function VerifyOtpContent() {
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               className={cn(
-                "h-14 w-11 rounded-xl border-2 bg-background/60 text-center text-xl font-semibold tabular-nums transition-all duration-200",
-                "outline-none focus:scale-105 focus:border-copper focus:shadow-(--shadow-glow)",
+                "bg-background/60 h-14 w-11 rounded-xl border-2 text-center text-xl font-semibold tabular-nums transition-all duration-200",
+                "focus:border-copper outline-none focus:scale-105 focus:shadow-(--shadow-glow)",
                 digit
                   ? "border-foreground/40 text-foreground"
                   : "border-border text-muted-foreground",
@@ -285,18 +285,18 @@ function VerifyOtpContent() {
       <div className="mt-7 text-center">
         {cooldown > 0 ? (
           <div className="space-y-2.5">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Resend code in{" "}
-              <span className="font-semibold tabular-nums text-foreground">
+              <span className="text-foreground font-semibold tabular-nums">
                 {cooldown}s
               </span>
             </p>
             <div
-              className="mx-auto h-0.5 w-32 overflow-hidden rounded-full bg-border"
+              className="bg-border mx-auto h-0.5 w-32 overflow-hidden rounded-full"
               aria-hidden
             >
               <div
-                className="h-full bg-copper transition-[width] duration-1000 ease-linear"
+                className="bg-copper h-full transition-[width] duration-1000 ease-linear"
                 style={{ width: `${cooldownPct}%` }}
               />
             </div>
@@ -310,10 +310,7 @@ function VerifyOtpContent() {
             className="gap-1.5"
           >
             <RotateCw
-              className={cn(
-                "h-3.5 w-3.5",
-                resending && "animate-spin"
-              )}
+              className={cn("h-3.5 w-3.5", resending && "animate-spin")}
               aria-hidden
             />
             {resending ? "Sending..." : "Resend code"}
@@ -323,7 +320,7 @@ function VerifyOtpContent() {
 
       <Button
         variant="ghost"
-        className="mt-3 w-full gap-1.5 text-muted-foreground"
+        className="text-muted-foreground mt-3 w-full gap-1.5"
         onClick={() => router.back()}
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />

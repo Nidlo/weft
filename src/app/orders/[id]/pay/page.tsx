@@ -40,15 +40,13 @@ export default function PaymentPage({
   );
 }
 
-function PaymentPageContent({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+function PaymentPageContent({ params }: { params: Promise<{ id: string }> }) {
   const { id: orderId } = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const paymentType = (searchParams.get("type") ?? "deposit") as "deposit" | "balance";
+  const paymentType = (searchParams.get("type") ?? "deposit") as
+    | "deposit"
+    | "balance";
 
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
   const { order, loading: orderLoading } = useOrder(orderId);
@@ -56,8 +54,12 @@ function PaymentPageContent({
 
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<PayStep>("method");
-  const [pendingMethod, setPendingMethod] = useState<PaymentMethodValue | null>(null);
-  const [pendingPhone, setPendingPhone] = useState<string | undefined>(undefined);
+  const [pendingMethod, setPendingMethod] = useState<PaymentMethodValue | null>(
+    null
+  );
+  const [pendingPhone, setPendingPhone] = useState<string | undefined>(
+    undefined
+  );
   const [otpSessionId, setOtpSessionId] = useState<string | null>(null);
   const [paymentReference, setPaymentReference] = useState<string | null>(null);
 
@@ -73,7 +75,13 @@ function PaymentPageContent({
   const callbackPath = `/orders/${orderId}/pay/callback`;
 
   const handleInitiationResult = (
-    result: { authorizationUrl: string | null; requiresOtp: boolean; sessionId: string | null; isMomo: boolean; payment: { reference: string } } | null
+    result: {
+      authorizationUrl: string | null;
+      requiresOtp: boolean;
+      sessionId: string | null;
+      isMomo: boolean;
+      payment: { reference: string };
+    } | null
   ) => {
     if (!result) return;
 
@@ -97,7 +105,10 @@ function PaymentPageContent({
     setError("Payment couldn't be started. Please try a different method.");
   };
 
-  const handleMethodSelect = async (method: PaymentMethodValue, phoneNumber?: string) => {
+  const handleMethodSelect = async (
+    method: PaymentMethodValue,
+    phoneNumber?: string
+  ) => {
     setError(null);
     setPendingMethod(method);
     setPendingPhone(phoneNumber);
@@ -115,7 +126,10 @@ function PaymentPageContent({
 
       handleInitiationResult(result);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Payment initiation failed. Please try again.";
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Payment initiation failed. Please try again.";
       setError(message);
     }
   };
@@ -139,7 +153,10 @@ function PaymentPageContent({
 
       handleInitiationResult(result);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "OTP verification failed. Please try again.";
+      const message =
+        err instanceof Error
+          ? err.message
+          : "OTP verification failed. Please try again.";
       setError(message);
     }
   };
@@ -160,7 +177,9 @@ function PaymentPageContent({
     return (
       <AppShell>
         <div className="py-12 text-center">
-          <p className="text-muted-foreground">Order not found or price not confirmed.</p>
+          <p className="text-muted-foreground">
+            Order not found or price not confirmed.
+          </p>
           <Button variant="link" asChild className="mt-2">
             <Link href="/orders">Back to Orders</Link>
           </Button>
@@ -188,7 +207,7 @@ function PaymentPageContent({
         <div className="mx-auto max-w-md space-y-6">
           <Link
             href={`/orders/${orderId}`}
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Order
@@ -197,7 +216,7 @@ function PaymentPageContent({
             <p className="text-lg font-semibold">
               {paymentType === "deposit" ? "Deposit" : "Balance"} Already Paid
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-sm">
               This payment phase has been fully covered.
             </p>
             <Button variant="link" asChild className="mt-4">
@@ -214,7 +233,7 @@ function PaymentPageContent({
       <div className="mx-auto max-w-md space-y-6">
         <Link
           href={`/orders/${orderId}`}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Order
@@ -224,7 +243,7 @@ function PaymentPageContent({
           <h1 className="text-xl font-bold">
             Pay {paymentType === "deposit" ? "Deposit" : "Balance"}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             Amount: <strong>{formatPesewas(amount)}</strong>
             {paymentType === "deposit" && (
               <> (50% of {formatPesewas(confirmedPrice)})</>
@@ -233,7 +252,7 @@ function PaymentPageContent({
         </div>
 
         {error && (
-          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
+          <div className="border-destructive/20 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm">
             {error}
           </div>
         )}
@@ -267,14 +286,18 @@ function PaymentPageContent({
             method={pendingMethod}
             amount={amount}
             phone={pendingPhone}
-            onSuccess={() => router.replace(`${callbackPath}?reference=${paymentReference}`)}
+            onSuccess={() =>
+              router.replace(`${callbackPath}?reference=${paymentReference}`)
+            }
             onFailed={() => {
               setError("Payment failed or was declined. Please try again.");
               setStep("method");
               setPaymentReference(null);
             }}
             onTimeout={() => {
-              setError("Payment timed out. Please try again or use a different method.");
+              setError(
+                "Payment timed out. Please try again or use a different method."
+              );
               setStep("method");
               setPaymentReference(null);
             }}

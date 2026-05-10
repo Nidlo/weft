@@ -9,7 +9,11 @@ interface MessageLightboxProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function MessageLightbox({ src, open, onOpenChange }: MessageLightboxProps) {
+export function MessageLightbox({
+  src,
+  open,
+  onOpenChange,
+}: MessageLightboxProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent

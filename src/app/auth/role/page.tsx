@@ -3,7 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import { ArrowRight, Building2, Scissors, Shirt, type LucideIcon } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  Scissors,
+  Shirt,
+  type LucideIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { BECOME_DESIGNER } from "@/lib/graphql/mutations/auth";
@@ -33,8 +39,7 @@ const ROLES: RoleOption[] = [
   {
     key: "DESIGNER",
     title: "I'm a designer",
-    description:
-      "Get clients, manage orders, and grow your fashion business.",
+    description: "Get clients, manage orders, and grow your fashion business.",
     icon: Scissors,
   },
   {
@@ -121,10 +126,10 @@ export default function RoleSelectionPage() {
   return (
     <GlassCard variant="solid" className="p-8">
       <header className="mb-7">
-        <h1 className="text-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+        <h1 className="text-display text-2xl leading-tight font-semibold tracking-tight sm:text-3xl">
           How will you use Nidlo?
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1.5 text-sm">
           Pick one to get started — you can switch later.
         </p>
       </header>
@@ -144,14 +149,12 @@ export default function RoleSelectionPage() {
               variants={itemVariants}
               onClick={() => handleSelect(option.key)}
               disabled={isDisabled}
-              whileHover={
-                !isDisabled && !reduced ? { y: -2 } : undefined
-              }
+              whileHover={!isDisabled && !reduced ? { y: -2 } : undefined}
               whileTap={!isDisabled ? { scale: 0.98 } : undefined}
               className={cn(
-                "group relative flex w-full items-center gap-4 rounded-2xl border border-border bg-background/60 p-5 text-left",
+                "group border-border bg-background/60 relative flex w-full items-center gap-4 rounded-2xl border p-5 text-left",
                 "transition-[border-color,box-shadow,background-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                "focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
                 !isDisabled &&
                   "hover:border-foreground/30 hover:bg-background hover:shadow-(--shadow-glow)",
                 option.disabled && "cursor-not-allowed opacity-60",
@@ -160,8 +163,9 @@ export default function RoleSelectionPage() {
             >
               <span
                 className={cn(
-                  "flex size-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground transition-all",
-                  !isDisabled && "group-hover:bg-foreground group-hover:text-background"
+                  "bg-secondary text-foreground flex size-12 shrink-0 items-center justify-center rounded-xl transition-all",
+                  !isDisabled &&
+                    "group-hover:bg-foreground group-hover:text-background"
                 )}
               >
                 <Icon className="h-5 w-5" aria-hidden />
@@ -174,21 +178,21 @@ export default function RoleSelectionPage() {
                   {option.disabled && (
                     <Badge
                       variant="outline"
-                      className="rounded-full border-copper/40 bg-copper/10 text-[10px] font-medium uppercase tracking-wider text-copper-soft"
+                      className="border-copper/40 bg-copper/10 text-copper-soft rounded-full text-[10px] font-medium tracking-wider uppercase"
                     >
                       Soon
                     </Badge>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   {option.description}
                 </p>
               </div>
               {!option.disabled && (
                 <ArrowRight
                   className={cn(
-                    "h-4 w-4 shrink-0 text-muted-foreground transition-all duration-200",
-                    "group-hover:translate-x-0.5 group-hover:text-copper"
+                    "text-muted-foreground h-4 w-4 shrink-0 transition-all duration-200",
+                    "group-hover:text-copper group-hover:translate-x-0.5"
                   )}
                   aria-hidden
                 />
@@ -198,7 +202,7 @@ export default function RoleSelectionPage() {
         })}
       </motion.div>
 
-      <p className="mt-7 text-center text-xs text-muted-foreground">
+      <p className="text-muted-foreground mt-7 text-center text-xs">
         Designers and clients can both browse and place orders.
       </p>
     </GlassCard>

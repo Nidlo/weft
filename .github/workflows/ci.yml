@@ -1,0 +1,57 @@
+# =============================================================================
+# Nidlo Frontend (weft) — CI Pipeline
+# =============================================================================
+# Lint + format + Vitest + Next.js build (build doubles as the typecheck
+# pass — Next.js runs tsc as part of `next build`).
+#
+# Vercel handles deploys via its own GitHub integration, so there's no
+# deploy job here. The branch promotion flow (dev-snad → development →
+# staging → production) gates merges on this CI; Vercel reads the
+# resulting commit on the appropriate branch.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [dev-snad, development, staging, production]
+  pull_request:
+    branches: [development, staging, production]
+
+env:
+  # Test-time placeholders for the NEXT_PUBLIC_* vars referenced across
+  # src/. None of them gate behaviour in the unit-test layer, but Next.js
+  # bakes them into the bundle at build time so they need to be set or
+  # `yarn build` emits a warning per missing var.
+  NEXT_PUBLIC_API_URL: http://localhost:8000/graphql
+  NEXT_PUBLIC_APP_URL: http://localhost:3000
+  NEXT_PUBLIC_APP_NAME: Nidlo
+  NEXT_PUBLIC_DEFAULT_CURRENCY: GHS
+  NEXT_PUBLIC_DEFAULT_COUNTRY: GH
+  NEXT_PUBLIC_REVERB_APP_KEY: test-key
+  NEXT_PUBLIC_REVERB_HOST: localhost
+  NEXT_PUBLIC_REVERB_PORT: '8080'
+  NEXT_PUBLIC_REVERB_SCHEME: http
+  NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: https://ik.imagekit.io/snad
+  NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: pk_test_xxx
+  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: test-key
+
+jobs:
+  quality:
+    name: Lint, format, test, build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn lint
+      - run: yarn format:check
+      - run: yarn test
+      - run: yarn build

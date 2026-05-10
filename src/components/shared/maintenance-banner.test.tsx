@@ -11,7 +11,7 @@ const renderWithQueryClient = () => {
   return render(
     <QueryClientProvider client={queryClient}>
       <MaintenanceBanner />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 };
 
@@ -34,10 +34,10 @@ describe("MaintenanceBanner", () => {
     const { container } = renderWithQueryClient();
 
     // Wait for the initial fetch settle, then assert no banner rendered.
-    await waitFor(() =>
-      expect(globalThis.fetch).toHaveBeenCalledTimes(1),
-    );
-    expect(container.querySelector('[data-testid="maintenance-banner"]')).toBeNull();
+    await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledTimes(1));
+    expect(
+      container.querySelector('[data-testid="maintenance-banner"]')
+    ).toBeNull();
   });
 
   it("renders the banner with the operator message when active=true", async () => {
@@ -53,7 +53,7 @@ describe("MaintenanceBanner", () => {
     renderWithQueryClient();
 
     await waitFor(() =>
-      expect(screen.getByTestId("maintenance-banner")).toBeInTheDocument(),
+      expect(screen.getByTestId("maintenance-banner")).toBeInTheDocument()
     );
     expect(screen.getByText(/Maintenance:/)).toBeInTheDocument();
     expect(screen.getByText(/Brief deploy in progress\./)).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe("MaintenanceBanner", () => {
     renderWithQueryClient();
 
     await waitFor(() =>
-      expect(screen.getByTestId("maintenance-banner")).toBeInTheDocument(),
+      expect(screen.getByTestId("maintenance-banner")).toBeInTheDocument()
     );
     expect(screen.getByText(/Nidlo is briefly offline\./)).toBeInTheDocument();
   });
@@ -83,9 +83,9 @@ describe("MaintenanceBanner", () => {
 
     const { container } = renderWithQueryClient();
 
-    await waitFor(() =>
-      expect(globalThis.fetch).toHaveBeenCalledTimes(1),
-    );
-    expect(container.querySelector('[data-testid="maintenance-banner"]')).toBeNull();
+    await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledTimes(1));
+    expect(
+      container.querySelector('[data-testid="maintenance-banner"]')
+    ).toBeNull();
   });
 });

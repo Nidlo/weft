@@ -22,8 +22,9 @@ export function StepReferenceImages() {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [uploadReferenceImage] =
-    useMutation<UploadReferenceImageData>(UPLOAD_REFERENCE_IMAGE);
+  const [uploadReferenceImage] = useMutation<UploadReferenceImageData>(
+    UPLOAD_REFERENCE_IMAGE
+  );
 
   const handleFiles = useCallback(
     async (files: FileList | null) => {
@@ -107,7 +108,7 @@ export function StepReferenceImages() {
           Reference images{" "}
           <span className="text-muted-foreground">(optional)</span>
         </Label>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Upload up to {MAX_IMAGES} images so the designer can see what you have
           in mind.
         </p>
@@ -130,12 +131,12 @@ export function StepReferenceImages() {
         )}
       >
         {uploading ? (
-          <p className="text-sm font-medium text-muted-foreground">
+          <p className="text-muted-foreground text-sm font-medium">
             Uploading...
           </p>
         ) : (
           <>
-            <span className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-foreground">
+            <span className="bg-secondary text-foreground flex size-12 items-center justify-center rounded-2xl">
               <Upload className="h-5 w-5" aria-hidden />
             </span>
             <p className="mt-3 text-sm font-medium">
@@ -160,7 +161,7 @@ export function StepReferenceImages() {
               className="hidden"
               onChange={(e) => handleFiles(e.target.files)}
             />
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-xs">
               JPEG, PNG, WebP · max {MAX_SIZE_MB}MB each
             </p>
           </>
@@ -173,7 +174,7 @@ export function StepReferenceImages() {
           {referenceImages.map((img, i) => (
             <div
               key={i}
-              className="group relative aspect-square overflow-hidden rounded-xl ring-1 ring-border"
+              className="group ring-border relative aspect-square overflow-hidden rounded-xl ring-1"
             >
               <Image
                 src={img.url}
@@ -187,7 +188,7 @@ export function StepReferenceImages() {
                 variant="secondary"
                 size="icon-sm"
                 aria-label={`Remove ${img.name}`}
-                className="absolute right-1.5 top-1.5 size-7 rounded-full bg-background/80 opacity-0 shadow-(--shadow-2) backdrop-blur transition-opacity group-hover:opacity-100"
+                className="bg-background/80 absolute top-1.5 right-1.5 size-7 rounded-full opacity-0 shadow-(--shadow-2) backdrop-blur transition-opacity group-hover:opacity-100"
                 onClick={() => handleRemove(i)}
               >
                 <X className="h-3.5 w-3.5" />
@@ -197,9 +198,9 @@ export function StepReferenceImages() {
         </div>
       )}
 
-      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-        <ImageIcon className="h-3 w-3 text-copper" aria-hidden />
-        <span className="tabular-nums text-foreground">
+      <p className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.16em] uppercase">
+        <ImageIcon className="text-copper h-3 w-3" aria-hidden />
+        <span className="text-foreground tabular-nums">
           {referenceImages.length}
         </span>
         <span>/ {MAX_IMAGES} images</span>

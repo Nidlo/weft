@@ -127,26 +127,26 @@ export default function SettingsPage() {
         <div>
           <Link
             href="/profile"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to profile
           </Link>
           <header className="mt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Account
             </p>
-            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
               Settings
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base">
               Manage your preferences, privacy, and account access.
             </p>
           </header>
         </div>
 
         {/* Available tiles */}
-        <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+        <GlassCard variant="solid" className="divide-border/60 divide-y p-2">
           {tiles.map((tile) => (
             <SettingsTile key={`${tile.href}-${tile.label}`} tile={tile} />
           ))}
@@ -154,12 +154,12 @@ export default function SettingsPage() {
 
         {/* Coming soon */}
         <section>
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.18em] uppercase">
             Coming soon
           </p>
           <GlassCard
             variant="solid"
-            className="divide-y divide-border/60 p-2 opacity-70"
+            className="divide-border/60 divide-y p-2 opacity-70"
           >
             {COMING_SOON.map((tile) => {
               const Icon = tile.icon;
@@ -168,17 +168,17 @@ export default function SettingsPage() {
                   key={tile.label}
                   className="flex items-center gap-3 px-3 py-3"
                 >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground ring-1 ring-border">
+                  <span className="bg-muted text-muted-foreground ring-border flex size-10 shrink-0 items-center justify-center rounded-xl ring-1">
                     <Icon className="h-4 w-4" aria-hidden />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 text-display text-sm font-semibold tracking-tight">
+                    <p className="text-display flex items-center gap-2 text-sm font-semibold tracking-tight">
                       {tile.label}
-                      <span className="rounded-full border border-copper/40 bg-copper/10 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wider text-copper-soft">
+                      <span className="border-copper/40 bg-copper/10 text-copper-soft rounded-full border px-1.5 py-0 text-[9px] font-semibold tracking-wider uppercase">
                         Soon
                       </span>
                     </p>
-                    <p className="truncate text-xs text-muted-foreground">
+                    <p className="text-muted-foreground truncate text-xs">
                       {tile.description}
                     </p>
                   </div>
@@ -208,7 +208,7 @@ export default function SettingsPage() {
           <Button
             variant="ghost"
             size="lg"
-            className="w-full gap-1.5 text-status-error hover:bg-status-error-soft hover:text-status-error-fg"
+            className="text-status-error hover:bg-status-error-soft hover:text-status-error-fg w-full gap-1.5"
             onClick={() => setConfirmAllOpen(true)}
             disabled={loggingOut || signingOutAll}
           >
@@ -217,7 +217,7 @@ export default function SettingsPage() {
           </Button>
         </div>
 
-        <p className="pt-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <p className="text-muted-foreground pt-2 text-center text-[11px] font-semibold tracking-[0.16em] uppercase">
           Nidlo · v{APP_VERSION}
         </p>
       </div>
@@ -230,8 +230,8 @@ export default function SettingsPage() {
             </DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
               This signs you out of every browser and tab where you&apos;re
-              currently logged in — phone, laptop, tablet, anywhere.
-              You&apos;ll need to log in again on each device.
+              currently logged in — phone, laptop, tablet, anywhere. You&apos;ll
+              need to log in again on each device.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
@@ -271,21 +271,21 @@ function SettingsTile({ tile }: { tile: Tile }) {
   return (
     <Link
       href={tile.href}
-      className="group flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 hover:bg-card focus-visible:bg-card focus-visible:outline-none"
+      className="group hover:bg-card focus-visible:bg-card flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 focus-visible:outline-none"
     >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground ring-1 ring-border transition-colors group-hover:bg-foreground group-hover:text-background">
+      <span className="bg-secondary text-foreground ring-border group-hover:bg-foreground group-hover:text-background flex size-10 shrink-0 items-center justify-center rounded-xl ring-1 transition-colors">
         <Icon className="h-4 w-4" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-display text-sm font-semibold tracking-tight">
           {tile.label}
         </p>
-        <p className="truncate text-xs text-muted-foreground">
+        <p className="text-muted-foreground truncate text-xs">
           {tile.description}
         </p>
       </div>
       <ChevronRight
-        className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-copper"
+        className="text-muted-foreground group-hover:text-copper h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5"
         aria-hidden
       />
     </Link>

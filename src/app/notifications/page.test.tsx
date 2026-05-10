@@ -20,10 +20,7 @@ vi.mock("@/lib/hooks/use-push-notifications", () => ({
 
 vi.mock("@/lib/stores/notifications", () => ({
   useNotificationsStore: <T,>(
-    selector: (s: {
-      setUnreadCount: () => void;
-      resetUnread: () => void;
-    }) => T
+    selector: (s: { setUnreadCount: () => void; resetUnread: () => void }) => T
   ) => selector({ setUnreadCount: vi.fn(), resetUnread: vi.fn() }),
 }));
 
@@ -58,7 +55,11 @@ beforeEach(() => {
 describe("NotificationsPage", () => {
   it("renders the loading skeleton until the auth guard resolves", () => {
     useAuthGuardSpy.mockReturnValue({ user: null, isReady: false });
-    useQuerySpy.mockReturnValue({ data: undefined, loading: true, fetchMore: vi.fn() });
+    useQuerySpy.mockReturnValue({
+      data: undefined,
+      loading: true,
+      fetchMore: vi.fn(),
+    });
     const { container } = render(<NotificationsPage />);
     expect(
       container.querySelectorAll("[data-slot=skeleton]").length

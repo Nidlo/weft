@@ -22,10 +22,12 @@ import type {
 } from "@/types/graphql";
 
 export function useConversations() {
-  const { data, loading, error, refetch } =
-    useQuery<MyConversationsData>(MY_CONVERSATIONS, {
+  const { data, loading, error, refetch } = useQuery<MyConversationsData>(
+    MY_CONVERSATIONS,
+    {
       fetchPolicy: "cache-and-network",
-    });
+    }
+  );
 
   return {
     conversations: data?.myConversations ?? [],

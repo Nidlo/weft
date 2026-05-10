@@ -61,7 +61,11 @@ export function StepBasicInfo() {
         </Field>
       </div>
 
-      <Field htmlFor="otherNames" label="Other names" hint="Middle name or other names (optional)">
+      <Field
+        htmlFor="otherNames"
+        label="Other names"
+        hint="Middle name or other names (optional)"
+      >
         <Input
           id="otherNames"
           placeholder="Add a middle name"
@@ -156,7 +160,7 @@ function SectionHeading({
   return (
     <div className={compact ? "flex items-center gap-3" : "space-y-2"}>
       <div className="flex items-center gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground">
+        <span className="bg-secondary text-foreground flex size-9 shrink-0 items-center justify-center rounded-xl">
           <Icon className="h-4 w-4" aria-hidden />
         </span>
         <div>
@@ -164,12 +168,12 @@ function SectionHeading({
             {title}
           </h2>
           {subtitle && !compact && (
-            <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+            <p className="text-muted-foreground mt-1 text-sm">{subtitle}</p>
           )}
         </div>
       </div>
       {subtitle && compact && (
-        <p className="text-xs text-muted-foreground sm:ml-auto sm:max-w-xs sm:text-right">
+        <p className="text-muted-foreground text-xs sm:ml-auto sm:max-w-xs sm:text-right">
           {subtitle}
         </p>
       )}
@@ -190,10 +194,14 @@ function Field({ htmlFor, label, hint, required, children }: FieldProps) {
     <div className="space-y-2">
       <Label htmlFor={htmlFor} className="flex items-center gap-1 text-sm">
         {label}
-        {required && <span className="text-copper" aria-label="required">*</span>}
+        {required && (
+          <span className="text-copper" aria-label="required">
+            *
+          </span>
+        )}
       </Label>
       {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
     </div>
   );
 }

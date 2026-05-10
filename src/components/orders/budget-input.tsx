@@ -18,7 +18,8 @@ export function BudgetInput({
 }: BudgetInputProps) {
   const minVal = parseFloat(minGhs);
   const maxVal = parseFloat(maxGhs);
-  const hasError = minGhs && maxGhs && !isNaN(minVal) && !isNaN(maxVal) && minVal > maxVal;
+  const hasError =
+    minGhs && maxGhs && !isNaN(minVal) && !isNaN(maxVal) && minVal > maxVal;
 
   return (
     <div className="space-y-2">
@@ -49,7 +50,7 @@ export function BudgetInput({
         </div>
       </div>
       {hasError && (
-        <p className="text-xs text-destructive">
+        <p className="text-destructive text-xs">
           Minimum cannot exceed maximum
         </p>
       )}

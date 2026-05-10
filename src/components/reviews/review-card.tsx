@@ -16,7 +16,12 @@ interface ReviewCardProps {
 
 function getInitials(name: string | null): string {
   if (!name) return "?";
-  return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function timeAgo(dateStr: string): string {
@@ -33,7 +38,11 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(months / 12)}y ago`;
 }
 
-export function ReviewCard({ review, isDesigner, onResponseSubmitted }: ReviewCardProps) {
+export function ReviewCard({
+  review,
+  isDesigner,
+  onResponseSubmitted,
+}: ReviewCardProps) {
   const [showResponseForm, setShowResponseForm] = useState(false);
 
   return (
@@ -48,8 +57,12 @@ export function ReviewCard({ review, isDesigner, onResponseSubmitted }: ReviewCa
         </Avatar>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium">{review.reviewer.fullName ?? "Client"}</p>
-            <span className="text-xs text-muted-foreground">{timeAgo(review.createdAt)}</span>
+            <p className="text-sm font-medium">
+              {review.reviewer.fullName ?? "Client"}
+            </p>
+            <span className="text-muted-foreground text-xs">
+              {timeAgo(review.createdAt)}
+            </span>
           </div>
           <StarRating value={review.rating} size="sm" />
         </div>
@@ -57,7 +70,7 @@ export function ReviewCard({ review, isDesigner, onResponseSubmitted }: ReviewCa
 
       {/* Comment */}
       {review.comment && (
-        <p className="text-sm text-foreground/90">{review.comment}</p>
+        <p className="text-foreground/90 text-sm">{review.comment}</p>
       )}
 
       {/* Photos */}
@@ -86,15 +99,21 @@ export function ReviewCard({ review, isDesigner, onResponseSubmitted }: ReviewCa
 
       {/* Designer response */}
       {review.designerResponse && (
-        <div className="border-l-2 border-muted pl-3">
-          <p className="text-xs font-medium text-muted-foreground">Designer Response</p>
+        <div className="border-muted border-l-2 pl-3">
+          <p className="text-muted-foreground text-xs font-medium">
+            Designer Response
+          </p>
           <p className="mt-0.5 text-sm">{review.designerResponse}</p>
         </div>
       )}
 
       {/* Reply button — designer only, no existing response */}
       {isDesigner && !review.designerResponse && !showResponseForm && (
-        <Button variant="ghost" size="sm" onClick={() => setShowResponseForm(true)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowResponseForm(true)}
+        >
           Reply
         </Button>
       )}

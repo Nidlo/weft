@@ -21,7 +21,7 @@ export default function PaymentCallbackPage({
         <AppShell>
           <div className="flex flex-col items-center space-y-4 py-16 text-center">
             <StitchLoader size={32} tone="copper" />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Verifying your payment...
             </p>
           </div>
@@ -51,7 +51,7 @@ function PaymentCallbackContent({
       <AppShell>
         <div className="flex flex-col items-center space-y-4 py-16 text-center">
           <StitchLoader size={32} tone="copper" />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Verifying your payment&hellip;
           </p>
         </div>
@@ -72,14 +72,16 @@ function PaymentCallbackContent({
       <AppShell>
         <div className="mx-auto max-w-md">
           <div className="flex flex-col items-center space-y-6 py-8 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-error-soft">
-              <XCircle className="h-10 w-10 text-status-error" />
+            <div className="bg-status-error-soft flex h-20 w-20 items-center justify-center rounded-full">
+              <XCircle className="text-status-error h-10 w-10" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-xl font-bold">We couldn&apos;t verify that payment</h2>
-              <p className="text-sm text-muted-foreground">
-                This confirmation link doesn&apos;t match this order. Open the order to
-                check its current payment status.
+              <h2 className="text-xl font-bold">
+                We couldn&apos;t verify that payment
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                This confirmation link doesn&apos;t match this order. Open the
+                order to check its current payment status.
               </p>
             </div>
             <Button onClick={() => router.push(`/orders/${orderId}`)}>
@@ -97,26 +99,27 @@ function PaymentCallbackContent({
         <div className="flex flex-col items-center space-y-6 py-8 text-center">
           {isSuccess ? (
             <>
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-success-soft">
-                <CheckCircle2 className="h-10 w-10 text-status-success" />
+              <div className="bg-status-success-soft flex h-20 w-20 items-center justify-center rounded-full">
+                <CheckCircle2 className="text-status-success h-10 w-10" />
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-bold">Payment Successful</h2>
                 {payment && (
-                  <p className="text-sm text-muted-foreground">
-                    <strong>{formatPesewas(payment.amount)}</strong> has been received.
+                  <p className="text-muted-foreground text-sm">
+                    <strong>{formatPesewas(payment.amount)}</strong> has been
+                    received.
                   </p>
                 )}
               </div>
             </>
           ) : (
             <>
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-error-soft">
-                <XCircle className="h-10 w-10 text-status-error" />
+              <div className="bg-status-error-soft flex h-20 w-20 items-center justify-center rounded-full">
+                <XCircle className="text-status-error h-10 w-10" />
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-bold">Payment Failed</h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Your payment could not be processed. Please try again.
                 </p>
               </div>
@@ -125,7 +128,11 @@ function PaymentCallbackContent({
 
           <div className="flex gap-3">
             {!isSuccess && (
-              <Button onClick={() => router.push(`/orders/${orderId}/pay?type=deposit`)}>
+              <Button
+                onClick={() =>
+                  router.push(`/orders/${orderId}/pay?type=deposit`)
+                }
+              >
                 Try Again
               </Button>
             )}

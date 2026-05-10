@@ -113,7 +113,11 @@ export function CostBookPanel({
                 />
               </div>
             </div>
-            <Button size="sm" onClick={handleAdd} disabled={adding || !name || !unitCostGhs}>
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              disabled={adding || !name || !unitCostGhs}
+            >
               {adding ? "Adding..." : "Add"}
             </Button>
           </div>
@@ -121,7 +125,7 @@ export function CostBookPanel({
 
         {/* Materials list */}
         {materials.length === 0 ? (
-          <p className="py-2 text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground py-2 text-center text-sm">
             No materials added yet.
           </p>
         ) : (
@@ -137,18 +141,21 @@ export function CostBookPanel({
                   aria-label={`Mark ${m.name} as purchased`}
                 />
                 <div className="min-w-0 flex-1">
-                  <p className={`text-sm font-medium ${m.isPurchased ? "line-through text-muted-foreground" : ""}`}>
+                  <p
+                    className={`text-sm font-medium ${m.isPurchased ? "text-muted-foreground line-through" : ""}`}
+                  >
                     {m.name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatPesewas(m.unitCost)} x {m.quantity} = {formatPesewas(m.totalCost)}
+                  <p className="text-muted-foreground text-xs">
+                    {formatPesewas(m.unitCost)} x {m.quantity} ={" "}
+                    {formatPesewas(m.totalCost)}
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   aria-label={`Remove ${m.name}`}
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                  className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
                   onClick={() => handleRemove(m.id)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -174,12 +181,17 @@ export function CostBookPanel({
               <Separator />
               <div className="flex justify-between font-medium">
                 <span>Profit</span>
-                <span className={summary.profit >= 0 ? "text-green-600" : "text-red-600"}>
+                <span
+                  className={
+                    summary.profit >= 0 ? "text-green-600" : "text-red-600"
+                  }
+                >
                   {formatPesewas(summary.profit)} ({summary.marginPercent}%)
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {summary.purchasedCount}/{summary.materialCount} materials purchased
+              <p className="text-muted-foreground text-xs">
+                {summary.purchasedCount}/{summary.materialCount} materials
+                purchased
               </p>
             </div>
           </>

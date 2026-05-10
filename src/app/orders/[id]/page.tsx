@@ -110,14 +110,22 @@ export default function OrderDetailPage({
   if (!order) {
     return (
       <AppShell>
-        <GlassCard variant="solid" className="mx-auto max-w-md py-12 text-center">
+        <GlassCard
+          variant="solid"
+          className="mx-auto max-w-md py-12 text-center"
+        >
           <h2 className="text-display text-2xl font-semibold tracking-tight">
             Order not found.
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-sm">
             It may have been removed, or the link could be wrong.
           </p>
-          <Button variant="luxe-outline" size="lg" asChild className="mt-6 gap-1.5">
+          <Button
+            variant="luxe-outline"
+            size="lg"
+            asChild
+            className="mt-6 gap-1.5"
+          >
             <Link href="/orders">
               <ArrowLeft className="h-4 w-4" aria-hidden />
               Back to orders
@@ -132,14 +140,18 @@ export default function OrderDetailPage({
   const isDesigner = order.designerId === user.id;
   const statusConfig = getStatusConfig(order.status);
   const garmentType = order.blueprint?.garment_type ?? "Garment";
-  const isActive = !["delivered", "cancelled", "declined"].includes(order.status);
+  const isActive = !["delivered", "cancelled", "declined"].includes(
+    order.status
+  );
 
   // Extract enhanced blueprint fields (stored as JSONB, not typed in BlueprintData)
   const bp = order.blueprint as unknown as Record<string, unknown> | null;
   const bpFabricTypes = (bp?.fabric_types as string[] | undefined) ?? [];
-  const bpAdditionalDetails = (bp?.additional_details as string[] | undefined) ?? [];
+  const bpAdditionalDetails =
+    (bp?.additional_details as string[] | undefined) ?? [];
   const bpDescription = (bp?.description as string | undefined) ?? "";
-  const bpReferenceImages = (bp?.reference_images as string[] | undefined) ?? [];
+  const bpReferenceImages =
+    (bp?.reference_images as string[] | undefined) ?? [];
 
   // Determine next production stage for designer
   const currentStageIndex = PRODUCTION_STAGES.indexOf(
@@ -189,14 +201,14 @@ export default function OrderDetailPage({
 
   const otherPartyName = isClient
     ? order.designer.fullName
-    : order.client?.fullName ?? order.clientDisplayName ?? "Walk-in client";
+    : (order.client?.fullName ?? order.clientDisplayName ?? "Walk-in client");
 
   return (
     <AppShell>
       <div className="space-y-8">
         <Link
           href="/orders"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Back to orders
@@ -204,16 +216,16 @@ export default function OrderDetailPage({
 
         {/* Editorial header */}
         <header>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
             Order · {order.id.slice(0, 8)}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h1 className="text-display text-balance text-3xl font-semibold capitalize leading-tight tracking-tight sm:text-4xl">
+            <h1 className="text-display text-3xl leading-tight font-semibold tracking-tight text-balance capitalize sm:text-4xl">
               {garmentType.replace(/_/g, " ")}
             </h1>
             <span
               className={cn(
-                "shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider",
+                "shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase",
                 statusConfig.bgColor,
                 statusConfig.color
               )}
@@ -221,19 +233,19 @@ export default function OrderDetailPage({
               {statusConfig.label}
             </span>
           </div>
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+          <div className="text-muted-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm">
             <span className="flex items-center gap-1">
               <User className="h-3.5 w-3.5" aria-hidden />
               <span>
                 {isClient ? "Designer" : "Client"} ·{" "}
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                   {otherPartyName}
                 </span>
               </span>
               {order.isInternal && (
                 <Badge
                   variant="outline"
-                  className="ml-2 rounded-full border-border bg-card/60 text-[10px] font-medium uppercase tracking-wider"
+                  className="border-border bg-card/60 ml-2 rounded-full text-[10px] font-medium tracking-wider uppercase"
                 >
                   Internal
                 </Badge>
@@ -241,7 +253,9 @@ export default function OrderDetailPage({
             </span>
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" aria-hidden />
-              <span className={cn("font-medium", getDeadlineColor(order.deadline))}>
+              <span
+                className={cn("font-medium", getDeadlineColor(order.deadline))}
+              >
                 {getDaysUntilDeadline(order.deadline)}
               </span>
             </span>
@@ -282,10 +296,10 @@ export default function OrderDetailPage({
             )}
             {order.isRush && (
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
                   Priority
                 </p>
-                <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-copper/15 px-3 py-1 text-xs font-semibold text-copper-soft ring-1 ring-copper/30">
+                <span className="bg-copper/15 text-copper-soft ring-copper/30 mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ring-1">
                   Rush order
                 </span>
               </div>
@@ -298,7 +312,7 @@ export default function OrderDetailPage({
           isDesigner &&
           (order.clientName || order.clientPhone) && (
             <GlassCard variant="ghost" className="p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
                 Walk-in client
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
@@ -313,7 +327,7 @@ export default function OrderDetailPage({
                 {order.hasLinkedClient && (
                   <Badge
                     variant="outline"
-                    className="rounded-full border-status-success-soft bg-status-success-soft/40 text-[10px] uppercase tracking-wider text-status-success-fg"
+                    className="border-status-success-soft bg-status-success-soft/40 text-status-success-fg rounded-full text-[10px] tracking-wider uppercase"
                   >
                     Account linked
                   </Badge>
@@ -328,11 +342,11 @@ export default function OrderDetailPage({
             variant="solid"
             className="border-status-warning-soft bg-status-warning-soft/40 p-5"
           >
-            <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-status-warning-fg">
+            <p className="text-status-warning-fg flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.16em] uppercase">
               <AlertTriangle className="h-3 w-3" aria-hidden />
               Counter offer message
             </p>
-            <p className="mt-2 text-sm text-status-warning-fg">
+            <p className="text-status-warning-fg mt-2 text-sm">
               {order.counterMessage}
             </p>
           </GlassCard>
@@ -472,16 +486,16 @@ export default function OrderDetailPage({
                 ) : (
                   <GlassCard
                     variant="solid"
-                    className="w-full border-status-error-soft p-5"
+                    className="border-status-error-soft w-full p-5"
                   >
-                    <div className="flex items-center gap-2 text-sm font-semibold text-status-error-fg">
+                    <div className="text-status-error-fg flex items-center gap-2 text-sm font-semibold">
                       <AlertTriangle className="h-4 w-4" aria-hidden />
                       Cancel this order?
                     </div>
-                    <p className="mt-1.5 text-xs text-muted-foreground">
+                    <p className="text-muted-foreground mt-1.5 text-xs">
                       If a deposit was paid, refund timing depends on the
-                      production stage. The designer keeps fabric &amp;
-                      material costs already incurred.
+                      production stage. The designer keeps fabric &amp; material
+                      costs already incurred.
                     </p>
                     <Select
                       value={cancelReasonCategory}
@@ -567,7 +581,7 @@ export default function OrderDetailPage({
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Open review photo ${i + 1} full size`}
-                      className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-1 ring-border"
+                      className="ring-border relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-1"
                     >
                       <Image
                         src={photo.thumbnail_url}
@@ -581,8 +595,8 @@ export default function OrderDetailPage({
                 </div>
               )}
               {order.review.designerResponse && (
-                <div className="rounded-xl border border-border/60 bg-card/40 p-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper">
+                <div className="border-border/60 bg-card/40 rounded-xl border p-3">
+                  <p className="text-copper text-[11px] font-semibold tracking-[0.16em] uppercase">
                     Designer response
                   </p>
                   <p className="mt-1 text-sm">
@@ -603,14 +617,14 @@ export default function OrderDetailPage({
               onClick={() => setShowReviewPrompt(true)}
               className="gap-1.5"
             >
-              <Star className="h-4 w-4 text-copper" aria-hidden />
+              <Star className="text-copper h-4 w-4" aria-hidden />
               Leave a review
             </Button>
             {(() => {
               const label = getReviewDeadlineLabel(order.deliveredAt);
               return label ? (
                 <span
-                  className="text-xs text-muted-foreground"
+                  className="text-muted-foreground text-xs"
                   role="status"
                   aria-live="polite"
                 >
@@ -668,11 +682,7 @@ export default function OrderDetailPage({
 
         {/* Cost Book — designer only, confirmed+ orders */}
         {isDesigner && currentStageIndex >= 0 && (
-          <SectionBlock
-            eyebrow="Margins"
-            title="Cost book"
-            icon={Coins}
-          >
+          <SectionBlock eyebrow="Margins" title="Cost book" icon={Coins}>
             <CostBookPanel
               orderId={order.id}
               materials={order.materials}
@@ -683,18 +693,14 @@ export default function OrderDetailPage({
 
         {/* Measurement attached */}
         {order.measurement && (
-          <SectionBlock
-            eyebrow="Fit"
-            title="Measurement profile"
-            icon={Ruler}
-          >
+          <SectionBlock eyebrow="Fit" title="Measurement profile" icon={Ruler}>
             <GlassCard variant="solid" className="p-5 sm:p-6">
               <p className="flex items-center gap-2 text-sm font-medium">
                 {order.measurement.label}
                 {order.measurement.isDefault && (
                   <Badge
                     variant="outline"
-                    className="rounded-full border-copper/40 bg-copper/10 text-[10px] uppercase tracking-wider text-copper-soft"
+                    className="border-copper/40 bg-copper/10 text-copper-soft rounded-full text-[10px] tracking-wider uppercase"
                   >
                     Default
                   </Badge>
@@ -716,11 +722,7 @@ export default function OrderDetailPage({
             transparency; only the assigned designer can mutate it. */}
         {(isDesigner ||
           (order.garmentEases && order.garmentEases.length > 0)) && (
-          <SectionBlock
-            eyebrow="Allowance"
-            title="Garment ease"
-            icon={Ruler}
-          >
+          <SectionBlock eyebrow="Allowance" title="Garment ease" icon={Ruler}>
             <GlassCard variant="solid" className="p-5 sm:p-6">
               <GarmentEaseEditor
                 orderId={order.id}
@@ -776,14 +778,14 @@ export default function OrderDetailPage({
 
               {bpFabricTypes.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
                     Fabrics
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {bpFabricTypes.map((f) => (
                       <span
                         key={f}
-                        className="inline-flex items-center rounded-full bg-secondary px-3 py-0.5 text-xs font-medium capitalize"
+                        className="bg-secondary inline-flex items-center rounded-full px-3 py-0.5 text-xs font-medium capitalize"
                       >
                         {f.replace(/_/g, " ")}
                       </span>
@@ -794,14 +796,14 @@ export default function OrderDetailPage({
 
               {bpAdditionalDetails.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
                     Additional details
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {bpAdditionalDetails.map((d) => (
                       <span
                         key={d}
-                        className="inline-flex items-center rounded-full border border-border bg-card/60 px-3 py-0.5 text-xs font-medium capitalize"
+                        className="border-border bg-card/60 inline-flex items-center rounded-full border px-3 py-0.5 text-xs font-medium capitalize"
                       >
                         {d.replace(/_/g, " ")}
                       </span>
@@ -812,7 +814,7 @@ export default function OrderDetailPage({
 
               {bpDescription && (
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
                     Description
                   </p>
                   <p className="mt-1.5 text-sm leading-relaxed">
@@ -823,7 +825,7 @@ export default function OrderDetailPage({
 
               {bpReferenceImages.length > 0 && (
                 <div>
-                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  <p className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.14em] uppercase">
                     <ImageIcon className="h-3 w-3" aria-hidden />
                     Reference images
                   </p>
@@ -835,7 +837,7 @@ export default function OrderDetailPage({
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Open reference image ${i + 1} full size`}
-                        className="group relative aspect-square overflow-hidden rounded-xl ring-1 ring-border"
+                        className="group ring-border relative aspect-square overflow-hidden rounded-xl ring-1"
                       >
                         <Image
                           src={url}
@@ -852,10 +854,12 @@ export default function OrderDetailPage({
 
               {order.notes && (
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
                     Notes
                   </p>
-                  <p className="mt-1.5 text-sm leading-relaxed">{order.notes}</p>
+                  <p className="mt-1.5 text-sm leading-relaxed">
+                    {order.notes}
+                  </p>
                 </div>
               )}
             </GlassCard>
@@ -882,11 +886,11 @@ function SectionBlock({
   return (
     <section>
       <header className="mb-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           {eyebrow}
         </p>
         <h2 className="text-display mt-1.5 flex items-center gap-2 text-xl font-semibold tracking-tight sm:text-2xl">
-          {Icon && <Icon className="h-5 w-5 text-foreground/80" aria-hidden />}
+          {Icon && <Icon className="text-foreground/80 h-5 w-5" aria-hidden />}
           {title}
         </h2>
       </header>
@@ -910,12 +914,12 @@ function PriceCell({
 }: PriceCellProps) {
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
         {label}
       </p>
       <p
         className={cn(
-          "mt-1.5 text-display font-semibold tabular-nums tracking-tight",
+          "text-display mt-1.5 font-semibold tracking-tight tabular-nums",
           emphasized ? "text-2xl sm:text-3xl" : "text-base sm:text-lg",
           tone === "warning" && "text-status-warning-fg"
         )}
@@ -926,16 +930,10 @@ function PriceCell({
   );
 }
 
-function BlueprintField({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function BlueprintField({ label, value }: { label: string; value: string }) {
   return (
     <>
-      <span className="block text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+      <span className="text-muted-foreground block text-[11px] font-medium tracking-[0.14em] uppercase">
         {label}
       </span>
       <span className="mt-0.5 mb-2 block text-sm font-medium capitalize last:mb-0">

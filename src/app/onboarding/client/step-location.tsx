@@ -16,14 +16,14 @@ export function StepLocation() {
   return (
     <div className="space-y-7">
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground">
+        <span className="bg-secondary text-foreground flex size-9 shrink-0 items-center justify-center rounded-xl">
           <MapPin className="h-4 w-4" aria-hidden />
         </span>
         <div>
           <h2 className="text-display text-lg font-semibold tracking-tight">
             Where are you?
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             We&apos;ll surface designers near you and show accurate delivery
             times. Skip if you&apos;d rather add this later.
           </p>

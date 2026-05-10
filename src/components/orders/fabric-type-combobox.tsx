@@ -87,14 +87,17 @@ export function FabricTypeCombobox({
           <Button
             variant="outline"
             role="combobox"
-            className="w-full justify-start font-normal text-muted-foreground"
+            className="text-muted-foreground w-full justify-start font-normal"
           >
             {selected.length > 0
               ? `${selected.length} fabric${selected.length !== 1 ? "s" : ""} selected`
               : "Select fabric types..."}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
+        <PopoverContent
+          className="w-(--radix-popover-trigger-width) p-0"
+          align="start"
+        >
           <Command shouldFilter={false}>
             <CommandInput
               placeholder="Search or type new..."

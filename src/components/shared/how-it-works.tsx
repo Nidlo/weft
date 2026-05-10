@@ -46,17 +46,17 @@ export function HowItWorks() {
               className="flex flex-col gap-4 p-6"
             >
               <div className="flex items-center justify-between">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-secondary text-foreground">
+                <span className="bg-secondary text-foreground flex size-11 items-center justify-center rounded-xl">
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="text-display text-2xl font-semibold text-muted-foreground/70 tabular-nums">
+                <span className="text-display text-muted-foreground/70 text-2xl font-semibold tabular-nums">
                   {step.eyebrow}
                 </span>
               </div>
               <h3 className="text-display text-2xl font-semibold tracking-tight">
                 {step.title}
               </h3>
-              <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
+              <p className="text-muted-foreground text-sm leading-relaxed text-pretty">
                 {step.body}
               </p>
             </GlassCard>

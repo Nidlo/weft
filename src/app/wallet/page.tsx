@@ -30,13 +30,13 @@ export default function WalletPage() {
     <AppShell>
       <div className="space-y-7">
         <header>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
             Earnings
           </p>
-          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
             Wallet
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+          <p className="text-muted-foreground mt-2 max-w-2xl text-sm sm:text-base">
             Manage your MoMo payout accounts and review every transaction —
             order earnings in, withdrawals out.
           </p>

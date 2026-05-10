@@ -10,8 +10,7 @@ interface Props {
 
 export function DesignerJsonLd({ designer }: Props) {
   const profile = designer.designerProfile;
-  const displayName =
-    profile?.displayName ?? designer.fullName ?? "Designer";
+  const displayName = profile?.displayName ?? designer.fullName ?? "Designer";
   const specs = parseStringList(profile?.specializations);
   const appUrl = APP_URL;
 
@@ -32,7 +31,9 @@ export function DesignerJsonLd({ designer }: Props) {
     url: `${appUrl}/designer/${profile?.slug ?? ""}`,
     ...(designer.avatarUrl ? { image: designer.avatarUrl } : {}),
     ...(designer.city
-      ? { address: { "@type": "PostalAddress", addressLocality: designer.city } }
+      ? {
+          address: { "@type": "PostalAddress", addressLocality: designer.city },
+        }
       : {}),
     ...(designer.countryCode
       ? { areaServed: { "@type": "Country", name: designer.countryCode } }

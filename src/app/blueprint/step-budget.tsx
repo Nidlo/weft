@@ -31,9 +31,7 @@ export function StepBudget() {
   const isRush =
     deadline && daysFromNow > 0 && daysFromNow < RUSH_THRESHOLD_DAYS;
   const isInverted =
-    budgetMin &&
-    budgetMax &&
-    Number(budgetMax) < Number(budgetMin);
+    budgetMin && budgetMax && Number(budgetMax) < Number(budgetMin);
 
   return (
     <div className="space-y-7">
@@ -46,12 +44,15 @@ export function StepBudget() {
         </Label>
         <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
           <div className="space-y-2">
-            <Label htmlFor="budget-min" className="text-xs text-muted-foreground">
+            <Label
+              htmlFor="budget-min"
+              className="text-muted-foreground text-xs"
+            >
               Minimum
             </Label>
             <div className="relative">
               <span
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+                className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold"
                 aria-hidden
               >
                 GHS
@@ -70,16 +71,19 @@ export function StepBudget() {
             </div>
           </div>
           <div
-            className="hidden h-px w-full bg-linear-to-r from-transparent via-copper/60 to-transparent sm:block sm:h-11 sm:w-12 sm:bg-linear-to-b"
+            className="via-copper/60 hidden h-px w-full bg-linear-to-r from-transparent to-transparent sm:block sm:h-11 sm:w-12 sm:bg-linear-to-b"
             aria-hidden
           />
           <div className="space-y-2">
-            <Label htmlFor="budget-max" className="text-xs text-muted-foreground">
+            <Label
+              htmlFor="budget-max"
+              className="text-muted-foreground text-xs"
+            >
               Maximum
             </Label>
             <div className="relative">
               <span
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+                className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold"
                 aria-hidden
               >
                 GHS
@@ -99,7 +103,7 @@ export function StepBudget() {
           </div>
         </div>
         {isInverted && (
-          <p className="mt-2 text-sm text-status-error-fg">
+          <p className="text-status-error-fg mt-2 text-sm">
             Maximum budget must be at least the minimum.
           </p>
         )}
@@ -114,7 +118,7 @@ export function StepBudget() {
         </Label>
         <div className="relative">
           <CalendarIcon
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-copper"
+            className="text-copper pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
             aria-hidden
           />
           <Input
@@ -128,25 +132,27 @@ export function StepBudget() {
         </div>
         {deadline && daysFromNow > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-sm text-muted-foreground tabular-nums">
-              <span className="font-semibold text-foreground">
+            <span className="text-muted-foreground text-sm tabular-nums">
+              <span className="text-foreground font-semibold">
                 {daysFromNow}
               </span>{" "}
               day{daysFromNow !== 1 ? "s" : ""} from now
             </span>
             {isRush && (
-              <span className={cn(
-                "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5",
-                "text-[10px] font-semibold uppercase tracking-wider",
-                "bg-copper/15 text-copper-soft ring-1 ring-copper/30"
-              )}>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5",
+                  "text-[10px] font-semibold tracking-wider uppercase",
+                  "bg-copper/15 text-copper-soft ring-copper/30 ring-1"
+                )}
+              >
                 <Flame className="h-3 w-3" aria-hidden />
                 Rush order
               </span>
             )}
           </div>
         )}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Minimum {MIN_DEADLINE_DAYS} days from today. Orders under{" "}
           {RUSH_THRESHOLD_DAYS} days are marked as rush.
         </p>
@@ -154,7 +160,8 @@ export function StepBudget() {
 
       <div className="space-y-2">
         <Label htmlFor="notes" className="text-sm">
-          Additional notes <span className="text-muted-foreground">(optional)</span>
+          Additional notes{" "}
+          <span className="text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="notes"
@@ -165,7 +172,7 @@ export function StepBudget() {
           rows={3}
           className="resize-none"
         />
-        <p className="text-xs text-muted-foreground tabular-nums">
+        <p className="text-muted-foreground text-xs tabular-nums">
           {notes.length} / 500 characters
         </p>
       </div>

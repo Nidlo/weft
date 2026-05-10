@@ -23,7 +23,7 @@ describe("MeasurementSummary", () => {
         dataMm={dataMm}
         manualOverridesMm={{}}
         aiBaselineMm={null}
-      />,
+      />
     );
 
     // 914mm → 36.0 in
@@ -36,7 +36,7 @@ describe("MeasurementSummary", () => {
         dataMm={{ upper_body: { bust: 940 } }}
         manualOverridesMm={{ upper_body: { bust: 940 } }}
         aiBaselineMm={{ upper_body: { bust: 914 } }}
-      />,
+      />
     );
 
     // Badge present, but it's a span not a button
@@ -51,7 +51,7 @@ describe("MeasurementSummary", () => {
         manualOverridesMm={{ upper_body: { bust: 940 } }}
         aiBaselineMm={{ upper_body: { bust: 914 } }}
         onResetField={onReset}
-      />,
+      />
     );
 
     const button = screen.getByRole("button", {
@@ -69,7 +69,7 @@ describe("MeasurementSummary", () => {
         manualOverridesMm={{}}
         aiBaselineMm={{ upper_body: { bust: 914 } }}
         onResetField={onReset}
-      />,
+      />
     );
 
     expect(screen.queryByRole("button")).toBeNull();

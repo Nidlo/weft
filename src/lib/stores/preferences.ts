@@ -17,8 +17,7 @@ export const usePreferencesStore = create<PreferencesState>()(
       setMeasurementUnit: (unit) => set({ measurementUnit: unit }),
       toggleMeasurementUnit: () =>
         set({
-          measurementUnit:
-            get().measurementUnit === "inches" ? "cm" : "inches",
+          measurementUnit: get().measurementUnit === "inches" ? "cm" : "inches",
         }),
     }),
     {
@@ -28,8 +27,8 @@ export const usePreferencesStore = create<PreferencesState>()(
       // by the merge step. Use skipHydration + onFinishHydration so the
       // _hasHydrated flag survives. (W-NEXT-12)
       skipHydration: true,
-    },
-  ),
+    }
+  )
 );
 
 if (typeof window !== "undefined") {

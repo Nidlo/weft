@@ -82,7 +82,7 @@ describe("ImpersonationBanner", () => {
 
     render(<ImpersonationBanner />);
     expect(
-      screen.getByText(/Return to your admin session\.$/),
+      screen.getByText(/Return to your admin session\.$/)
     ).toBeInTheDocument();
   });
 

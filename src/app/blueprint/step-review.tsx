@@ -19,9 +19,7 @@ function formatLabel(
   value: string,
   list: { value: string; label: string }[]
 ): string {
-  return (
-    list.find((o) => o.value === value)?.label ?? value.replace(/_/g, " ")
-  );
+  return list.find((o) => o.value === value)?.label ?? value.replace(/_/g, " ");
 }
 
 export function StepReview({ onEditStep }: StepReviewProps) {
@@ -38,10 +36,7 @@ export function StepReview({ onEditStep }: StepReviewProps) {
       ? store.garmentTypeOther
       : formatLabel(store.garmentType, options?.garmentTypes ?? []);
 
-  const occasionLabel = formatLabel(
-    store.occasion,
-    options?.occasions ?? []
-  );
+  const occasionLabel = formatLabel(store.occasion, options?.occasions ?? []);
 
   const fabricLabel =
     store.fabricType === "other"
@@ -54,15 +49,14 @@ export function StepReview({ onEditStep }: StepReviewProps) {
   const [nowMs] = useState<number>(() => Date.now());
   const daysFromNow = store.deadline
     ? Math.ceil(
-        (new Date(store.deadline).getTime() - nowMs) /
-          (1000 * 60 * 60 * 24)
+        (new Date(store.deadline).getTime() - nowMs) / (1000 * 60 * 60 * 24)
       )
     : 0;
   const isRush = daysFromNow > 0 && daysFromNow < 7;
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Review your blueprint details before submitting. Tap any section to
         edit.
       </p>
@@ -79,11 +73,7 @@ export function StepReview({ onEditStep }: StepReviewProps) {
             ? value.map((v) => formatLabel(v, designOptions)).join(", ")
             : formatLabel(value, designOptions);
           return (
-            <KeyValue
-              key={key}
-              label={key.replace(/_/g, " ")}
-              value={label}
-            />
+            <KeyValue key={key} label={key.replace(/_/g, " ")} value={label} />
           );
         })}
         {store.additionalDetails.length > 0 && (
@@ -91,10 +81,7 @@ export function StepReview({ onEditStep }: StepReviewProps) {
             label="Additional"
             value={store.additionalDetails
               .map((v) =>
-                formatLabel(
-                  v,
-                  options?.designFields["additional_detail"] ?? []
-                )
+                formatLabel(v, options?.designFields["additional_detail"] ?? [])
               )
               .join(", ")}
           />
@@ -108,7 +95,7 @@ export function StepReview({ onEditStep }: StepReviewProps) {
             {store.referenceImages.map((img, i) => (
               <div
                 key={i}
-                className="relative aspect-square overflow-hidden rounded-xl ring-1 ring-border"
+                className="ring-border relative aspect-square overflow-hidden rounded-xl ring-1"
               >
                 <Image
                   src={img.url}
@@ -127,14 +114,14 @@ export function StepReview({ onEditStep }: StepReviewProps) {
         <KeyValue label="Type" value={fabricLabel} />
         {store.fabricColour && (
           <div className="flex items-center justify-between gap-3">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <span className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
               Colour
             </span>
             <span className="flex items-center gap-2 text-sm font-medium">
               {store.fabricColour}
               {store.fabricColourHex && (
                 <span
-                  className="size-4 rounded-full ring-1 ring-border"
+                  className="ring-border size-4 rounded-full ring-1"
                   style={{ backgroundColor: store.fabricColourHex }}
                   aria-hidden
                 />
@@ -143,7 +130,7 @@ export function StepReview({ onEditStep }: StepReviewProps) {
           </div>
         )}
         {store.clientProvidingFabric && (
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-copper">
+          <p className="text-copper text-xs font-medium tracking-[0.14em] uppercase">
             Client providing fabric
           </p>
         )}
@@ -159,7 +146,7 @@ export function StepReview({ onEditStep }: StepReviewProps) {
               <span className="text-display text-sm font-semibold tracking-tight">
                 {selectedMeasurement.label}
               </span>
-              <span className="inline-flex items-center rounded-full border border-border bg-card/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              <span className="border-border bg-card/60 text-muted-foreground inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
                 {selectedMeasurement.source === "ai_photo"
                   ? "Fitscan AI"
                   : selectedMeasurement.source}
@@ -173,7 +160,7 @@ export function StepReview({ onEditStep }: StepReviewProps) {
             />
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             No measurement selected
           </p>
         )}
@@ -185,13 +172,13 @@ export function StepReview({ onEditStep }: StepReviewProps) {
           value={`GHS ${Number(store.budgetMin).toLocaleString()} – GHS ${Number(store.budgetMax).toLocaleString()}`}
         />
         <div className="flex items-center justify-between gap-3">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <span className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
             Deadline
           </span>
           <span className="flex items-center gap-2 text-sm font-medium tabular-nums">
             {new Date(store.deadline).toLocaleDateString()}
             {isRush && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-copper/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-copper-soft ring-1 ring-copper/30">
+              <span className="bg-copper/15 text-copper-soft ring-copper/30 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase ring-1">
                 <Flame className="h-3 w-3" aria-hidden />
                 Rush
               </span>
@@ -220,7 +207,7 @@ function ReviewSection({ title, onEdit, children }: ReviewSectionProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="gap-1.5 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground gap-1.5"
           onClick={onEdit}
         >
           <Pencil className="h-3 w-3" aria-hidden />
@@ -235,7 +222,7 @@ function ReviewSection({ title, onEdit, children }: ReviewSectionProps) {
 function KeyValue({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-3">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground capitalize">
+      <span className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] capitalize uppercase">
         {label}
       </span>
       <span className="text-right font-medium">{value}</span>

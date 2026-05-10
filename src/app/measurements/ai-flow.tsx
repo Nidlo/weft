@@ -44,7 +44,7 @@ interface AiFlowProps {
     landmarks: Landmarks | null,
     photoUrl: string | null,
     photoPublicId: string | null,
-    photoDisk: string | null,
+    photoDisk: string | null
   ) => Promise<void>;
   saving?: boolean;
   onCancel?: () => void;
@@ -98,7 +98,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     return convertMeasurementData(
       extractedData as Record<string, Record<string, number | null>>,
       "cm",
-      "mm",
+      "mm"
     );
   }, [extractedData]);
 
@@ -215,31 +215,31 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     return (
       <div className="space-y-6">
         <header>
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
-            <Sparkles className="h-3 w-3 text-copper" aria-hidden />
+          <p className="text-copper inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.18em] uppercase">
+            <Sparkles className="text-copper h-3 w-3" aria-hidden />
             Fitscan AI
           </p>
-          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
             Measure with a photo.
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-sm">
             Snap two photos, get measurements in seconds. For best accuracy,
             follow these guidelines.
           </p>
         </header>
 
         <GlassCard variant="solid" className="space-y-4 p-5 sm:p-6">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-copper">
+          <div className="text-copper flex items-center gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase">
             <Lightbulb className="h-3.5 w-3.5" aria-hidden />
             Photo guidelines
           </div>
           <ol className="space-y-3">
             {TIPS.map((tip, i) => (
               <li key={i} className="flex items-start gap-3 text-sm">
-                <span className="text-display mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold tabular-nums text-foreground/80">
+                <span className="text-display bg-secondary text-foreground/80 mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums">
                   {i + 1}
                 </span>
-                <span className="leading-relaxed text-foreground/85">
+                <span className="text-foreground/85 leading-relaxed">
                   {tip}
                 </span>
               </li>
@@ -276,14 +276,14 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     return (
       <div className="space-y-6">
         <header>
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
-            <Sparkles className="h-3 w-3 text-copper" aria-hidden />
+          <p className="text-copper inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.18em] uppercase">
+            <Sparkles className="text-copper h-3 w-3" aria-hidden />
             Fitscan AI · Step 2
           </p>
-          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
             Upload your photos.
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-sm">
             A front photo is required. A side photo improves accuracy.
           </p>
         </header>
@@ -314,14 +314,12 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
               step={preferredUnit === "inches" ? "0.25" : "0.1"}
               min={preferredUnit === "inches" ? "39" : "100"}
               max={preferredUnit === "inches" ? "98" : "250"}
-              placeholder={
-                preferredUnit === "inches" ? "e.g. 67" : "e.g. 170"
-              }
+              placeholder={preferredUnit === "inches" ? "e.g. 67" : "e.g. 170"}
               value={heightInput}
               onChange={(e) => setHeightInput(e.target.value)}
               className="h-11 tabular-nums"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Providing your height improves accuracy. Enter in{" "}
               {unitLabel(preferredUnit)} — we convert automatically.
             </p>
@@ -342,7 +340,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
           <Button
             variant="ghost"
             size="xl"
-            className="gap-1.5 text-muted-foreground"
+            className="text-muted-foreground gap-1.5"
             onClick={() => setAiStep("instructions")}
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -373,14 +371,14 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         <p className="text-display mt-6 text-xl font-semibold tracking-tight">
           {stage}
         </p>
-        <p className="mt-2 text-xs text-muted-foreground tabular-nums">
-          <span className="font-semibold text-foreground">{elapsed}s</span>{" "}
+        <p className="text-muted-foreground mt-2 text-xs tabular-nums">
+          <span className="text-foreground font-semibold">{elapsed}s</span>{" "}
           elapsed · usually takes 5–15 seconds
         </p>
         <Button
           variant="ghost"
           size="sm"
-          className="mt-6 text-muted-foreground"
+          className="text-muted-foreground mt-6"
           onClick={handleCancelProcessing}
         >
           Cancel
@@ -394,16 +392,16 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     <div className="space-y-6">
       <GlassCard
         variant="solid"
-        className="flex items-start gap-3 border-status-success-soft bg-status-success-soft/40 p-4"
+        className="border-status-success-soft bg-status-success-soft/40 flex items-start gap-3 p-4"
       >
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-status-success/15 text-status-success">
+        <span className="bg-status-success/15 text-status-success flex size-9 shrink-0 items-center justify-center rounded-xl">
           <CheckCircle2 className="h-5 w-5" aria-hidden />
         </span>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-status-success-fg">
+          <p className="text-status-success-fg text-[11px] font-semibold tracking-[0.16em] uppercase">
             Measurements extracted
           </p>
-          <p className="mt-0.5 text-sm text-foreground/90">
+          <p className="text-foreground/90 mt-0.5 text-sm">
             Review and edit the values below. Anything blank wasn&apos;t
             detected — fill it in manually.
           </p>
@@ -417,16 +415,16 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       {degradedModes.length > 0 && (
         <GlassCard
           variant="solid"
-          className="flex items-start gap-3 border-status-warning-soft bg-status-warning-soft/40 p-4"
+          className="border-status-warning-soft bg-status-warning-soft/40 flex items-start gap-3 p-4"
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-status-warning/15 text-status-warning">
+          <span className="bg-status-warning/15 text-status-warning flex size-9 shrink-0 items-center justify-center rounded-xl">
             <Lightbulb className="h-5 w-5" aria-hidden />
           </span>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-status-warning-fg">
+            <p className="text-status-warning-fg text-[11px] font-semibold tracking-[0.16em] uppercase">
               Manual review recommended
             </p>
-            <p className="mt-0.5 text-sm text-foreground/90">
+            <p className="text-foreground/90 mt-0.5 text-sm">
               {degradedModes.includes("validators_disagree")
                 ? "Our rule check and the AI vision check disagreed about whether this scan is reliable. Look at the values below carefully — adjust anything that doesn't match your body before saving."
                 : "The AI flagged something unusual about this scan. Review the values carefully before saving."}
@@ -467,7 +465,15 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         initialLabel="Fitscan AI"
         initialData={extractedData ?? undefined}
         onSave={(label, unit, data) =>
-          onComplete(label, unit, data, extractedLandmarks, photoUrl, photoPublicId, photoDisk)
+          onComplete(
+            label,
+            unit,
+            data,
+            extractedLandmarks,
+            photoUrl,
+            photoPublicId,
+            photoDisk
+          )
         }
         saving={saving}
         onCancel={onCancel}
@@ -486,8 +492,13 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
  */
 function diffRecompute(
   recomputed: Record<string, Record<string, number>>,
-  baselineMm: Record<string, Record<string, number | null>> | null,
-): Array<{ section: string; field: string; cm: number; baselineCm: number | null }> {
+  baselineMm: Record<string, Record<string, number | null>> | null
+): Array<{
+  section: string;
+  field: string;
+  cm: number;
+  baselineCm: number | null;
+}> {
   const out: Array<{
     section: string;
     field: string;
@@ -499,10 +510,7 @@ function diffRecompute(
       const baselineMmValue = baselineMm?.[section]?.[field] ?? null;
       // Skip fields where the recompute lands within ~1mm of the baseline —
       // those drags didn't move that field meaningfully.
-      if (
-        baselineMmValue !== null &&
-        Math.abs(mm - baselineMmValue) < 5
-      ) {
+      if (baselineMmValue !== null && Math.abs(mm - baselineMmValue) < 5) {
         continue;
       }
       out.push({
@@ -510,7 +518,9 @@ function diffRecompute(
         field,
         cm: Math.round((mm / 10) * 10) / 10,
         baselineCm:
-          baselineMmValue === null ? null : Math.round((baselineMmValue / 10) * 10) / 10,
+          baselineMmValue === null
+            ? null
+            : Math.round((baselineMmValue / 10) * 10) / 10,
       });
     }
   }
@@ -523,9 +533,11 @@ function diffRecompute(
  */
 function mergeRecomputedIntoForm(
   prev: MeasurementData | null,
-  updates: Array<{ section: string; field: string; cm: number }>,
+  updates: Array<{ section: string; field: string; cm: number }>
 ): MeasurementData {
-  const next: MeasurementData = JSON.parse(JSON.stringify(prev ?? {})) as MeasurementData;
+  const next: MeasurementData = JSON.parse(
+    JSON.stringify(prev ?? {})
+  ) as MeasurementData;
   for (const u of updates) {
     const sec = next[u.section as keyof MeasurementData] ?? {};
     (next as Record<string, Record<string, number | null>>)[u.section] = {
@@ -540,7 +552,9 @@ interface RecomputeBannerProps {
   baseline: MeasurementData | null;
   baselineMm: Record<string, Record<string, number | null>> | null;
   landmarks: Landmarks | null;
-  onApply: (updates: Array<{ section: string; field: string; cm: number }>) => void;
+  onApply: (
+    updates: Array<{ section: string; field: string; cm: number }>
+  ) => void;
 }
 
 function RecomputeBanner({
@@ -554,11 +568,11 @@ function RecomputeBanner({
 
   const recomputed = useMemo(
     () => recomputeFromLandmarks(landmarks ?? null, baselineMm),
-    [landmarks, baselineMm],
+    [landmarks, baselineMm]
   );
   const deltas = useMemo(
     () => diffRecompute(recomputed, baselineMm),
-    [recomputed, baselineMm],
+    [recomputed, baselineMm]
   );
 
   // Reset the success indicator when the diff changes (user dragged again
@@ -572,11 +586,11 @@ function RecomputeBanner({
   if (!baseline || !landmarks || deltas.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-copper/40 bg-copper/5 px-4 py-3 text-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper">
+    <div className="border-copper/40 bg-copper/5 rounded-2xl border px-4 py-3 text-sm">
+      <p className="text-copper text-[11px] font-semibold tracking-[0.16em] uppercase">
         Landmark edits ready
       </p>
-      <p className="mt-1 text-foreground/85">
+      <p className="text-foreground/85 mt-1">
         {deltas.length} measurement{deltas.length === 1 ? "" : "s"} will update
         from your drag corrections:{" "}
         <span className="font-medium">
@@ -594,7 +608,7 @@ function RecomputeBanner({
           onApply(deltas);
           setAppliedCount(deltas.length);
         }}
-        className="text-display mt-2 inline-flex items-center gap-1.5 rounded-full bg-copper px-3 py-1 text-xs font-semibold text-background hover:bg-copper-soft"
+        className="text-display bg-copper text-background hover:bg-copper-soft mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
       >
         Apply {appliedCount > 0 ? "again" : "to form"}
       </button>
@@ -624,8 +638,8 @@ function PhotoField({ id, label, required, file, onChange }: PhotoFieldProps) {
       <label
         htmlFor={id}
         className={cn(
-          "flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-border bg-card/40 p-4",
-          "transition-colors hover:border-copper/50 hover:bg-card",
+          "border-border bg-card/40 flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed p-4",
+          "hover:border-copper/50 hover:bg-card transition-colors",
           file && "border-foreground/30 bg-card"
         )}
       >
@@ -647,14 +661,14 @@ function PhotoField({ id, label, required, file, onChange }: PhotoFieldProps) {
           <p className="text-sm font-medium">
             {file ? file.name : "Tap to choose a photo"}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {file
               ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
               : "JPEG, PNG, or WebP"}
           </p>
         </div>
         <Upload
-          className="h-4 w-4 shrink-0 text-muted-foreground"
+          className="text-muted-foreground h-4 w-4 shrink-0"
           aria-hidden
         />
       </label>

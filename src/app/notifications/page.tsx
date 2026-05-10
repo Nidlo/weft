@@ -54,9 +54,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 function timeAgo(dateStr: string): string {
-  const seconds = Math.floor(
-    (Date.now() - new Date(dateStr).getTime()) / 1000
-  );
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
   if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -88,8 +86,9 @@ export default function NotificationsPage() {
     }
   );
 
-  const [markRead] =
-    useMutation<MarkNotificationReadData>(MARK_NOTIFICATION_READ);
+  const [markRead] = useMutation<MarkNotificationReadData>(
+    MARK_NOTIFICATION_READ
+  );
 
   const [markAllRead, { loading: markingAll }] =
     useMutation<MarkAllNotificationsReadData>(MARK_ALL_NOTIFICATIONS_READ);
@@ -181,13 +180,13 @@ export default function NotificationsPage() {
       <div className="space-y-7">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Inbox
             </p>
-            <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
               Notifications
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base">
               Stay updated on orders, messages, and payments.
             </p>
           </div>
@@ -223,16 +222,16 @@ export default function NotificationsPage() {
         {shouldPromptPush && (
           <GlassCard
             variant="solid"
-            className="flex flex-col items-start gap-3 border-copper/30 bg-copper/5 p-4 sm:flex-row sm:items-center sm:gap-4"
+            className="border-copper/30 bg-copper/5 flex flex-col items-start gap-3 p-4 sm:flex-row sm:items-center sm:gap-4"
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-copper/15 text-copper">
+            <span className="bg-copper/15 text-copper flex size-10 shrink-0 items-center justify-center rounded-xl">
               <BellRing className="h-5 w-5" aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-display text-sm font-semibold tracking-tight">
                 Enable push notifications
               </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5 text-xs">
                 Get instant alerts for orders, messages, and payments — even
                 when Nidlo isn&apos;t open.
               </p>
@@ -260,19 +259,19 @@ export default function NotificationsPage() {
             variant="solid"
             className="flex flex-col items-center py-16 text-center"
           >
-            <span className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-foreground">
+            <span className="bg-secondary text-foreground flex size-16 items-center justify-center rounded-2xl">
               <BellOff className="h-7 w-7" aria-hidden />
             </span>
             <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
               No notifications yet.
             </h2>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+            <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
               When you get order updates, messages, or payments, they&apos;ll
               show up here.
             </p>
           </GlassCard>
         ) : (
-          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+          <GlassCard variant="solid" className="divide-border/60 divide-y p-2">
             {notifications.map((notification) => {
               const IconComponent = ICON_MAP[notification.typeIcon] ?? Bell;
               const isUnread = !notification.readAt;
@@ -284,7 +283,7 @@ export default function NotificationsPage() {
                   onClick={() => handleNotificationClick(notification)}
                   className={cn(
                     "group flex w-full items-start gap-3 rounded-xl px-3 py-3.5 text-left",
-                    "transition-colors duration-200 hover:bg-card focus-visible:bg-card focus-visible:outline-none"
+                    "hover:bg-card focus-visible:bg-card transition-colors duration-200 focus-visible:outline-none"
                   )}
                 >
                   <span
@@ -303,20 +302,20 @@ export default function NotificationsPage() {
                         className={cn(
                           "text-display text-sm tracking-tight",
                           isUnread
-                            ? "font-semibold text-foreground"
-                            : "font-medium text-foreground/80"
+                            ? "text-foreground font-semibold"
+                            : "text-foreground/80 font-medium"
                         )}
                       >
                         {notification.title}
                       </span>
                       {isUnread && (
                         <span
-                          className="mt-1.5 size-1.5 shrink-0 rounded-full bg-copper"
+                          className="bg-copper mt-1.5 size-1.5 shrink-0 rounded-full"
                           aria-hidden
                         />
                       )}
                     </div>
-                    <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+                    <p className="text-muted-foreground mt-0.5 line-clamp-2 text-sm">
                       {notification.body}
                     </p>
                     <span
@@ -337,11 +336,7 @@ export default function NotificationsPage() {
         {/* Load more */}
         {hasMore && (
           <div className="flex justify-center pt-2">
-            <Button
-              variant="luxe-outline"
-              size="sm"
-              onClick={loadMore}
-            >
+            <Button variant="luxe-outline" size="sm" onClick={loadMore}>
               Load more
             </Button>
           </div>

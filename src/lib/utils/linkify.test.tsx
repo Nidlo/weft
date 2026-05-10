@@ -26,12 +26,16 @@ describe("linkify", () => {
 
   it("wraps a single URL in an <a> with matching href", () => {
     const result = linkify("Visit https://nidlo.com today");
-    expect(joinTexts(result)).toBe("Visit [https://nidlo.com|https://nidlo.com] today");
+    expect(joinTexts(result)).toBe(
+      "Visit [https://nidlo.com|https://nidlo.com] today"
+    );
   });
 
   it("strips a trailing period from the matched URL", () => {
     const result = linkify("Visit https://nidlo.com.");
-    expect(joinTexts(result)).toBe("Visit [https://nidlo.com|https://nidlo.com].");
+    expect(joinTexts(result)).toBe(
+      "Visit [https://nidlo.com|https://nidlo.com]."
+    );
   });
 
   it("strips a trailing comma from the matched URL", () => {
@@ -43,7 +47,9 @@ describe("linkify", () => {
 
   it("strips multiple trailing punctuation chars", () => {
     const result = linkify("Wow https://nidlo.com!!!");
-    expect(joinTexts(result)).toBe("Wow [https://nidlo.com|https://nidlo.com]!!!");
+    expect(joinTexts(result)).toBe(
+      "Wow [https://nidlo.com|https://nidlo.com]!!!"
+    );
   });
 
   it("preserves a parenthesised path inside the URL but trims a closing paren after it", () => {

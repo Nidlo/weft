@@ -12,64 +12,62 @@ export const contentType = "image/png";
  */
 export default async function OgImage() {
   return new ImageResponse(
-    (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        // Brand purple → softer accent gradient.
+        background:
+          "linear-gradient(135deg, #6b21a8 0%, #4c1d95 50%, #1e1b4b 100%)",
+        color: "white",
+        fontFamily: "system-ui, sans-serif",
+        padding: 64,
+        textAlign: "center",
+      }}
+    >
+      {/* Tagline above wordmark, the way the home hero composes it. */}
       <div
         style={{
-          width: "100%",
-          height: "100%",
+          fontSize: 28,
+          fontWeight: 600,
+          letterSpacing: 6,
+          textTransform: "uppercase",
+          opacity: 0.85,
+          marginBottom: 24,
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          // Brand purple → softer accent gradient.
-          background:
-            "linear-gradient(135deg, #6b21a8 0%, #4c1d95 50%, #1e1b4b 100%)",
-          color: "white",
-          fontFamily: "system-ui, sans-serif",
-          padding: 64,
-          textAlign: "center",
         }}
       >
-        {/* Tagline above wordmark, the way the home hero composes it. */}
-        <div
-          style={{
-            fontSize: 28,
-            fontWeight: 600,
-            letterSpacing: 6,
-            textTransform: "uppercase",
-            opacity: 0.85,
-            marginBottom: 24,
-            display: "flex",
-          }}
-        >
-          Where every stitch begins
-        </div>
-        <div
-          style={{
-            fontSize: 156,
-            fontWeight: 800,
-            lineHeight: 1,
-            letterSpacing: -2,
-            display: "flex",
-          }}
-        >
-          NIDLO
-        </div>
-        <div
-          style={{
-            marginTop: 32,
-            fontSize: 30,
-            opacity: 0.92,
-            maxWidth: 800,
-            lineHeight: 1.3,
-            display: "flex",
-          }}
-        >
-          Custom fashion. Connecting you with seamstresses, tailors, and
-          designers anywhere.
-        </div>
+        Where every stitch begins
       </div>
-    ),
-    { ...size },
+      <div
+        style={{
+          fontSize: 156,
+          fontWeight: 800,
+          lineHeight: 1,
+          letterSpacing: -2,
+          display: "flex",
+        }}
+      >
+        NIDLO
+      </div>
+      <div
+        style={{
+          marginTop: 32,
+          fontSize: 30,
+          opacity: 0.92,
+          maxWidth: 800,
+          lineHeight: 1.3,
+          display: "flex",
+        }}
+      >
+        Custom fashion. Connecting you with seamstresses, tailors, and designers
+        anywhere.
+      </div>
+    </div>,
+    { ...size }
   );
 }

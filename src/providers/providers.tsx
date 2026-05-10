@@ -48,9 +48,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   active session is an admin impersonation. No-op for
                   normal sessions; does not affect layout flow. */}
               <ImpersonationBanner />
-              <RealtimeProvider>
-                {children}
-              </RealtimeProvider>
+              <RealtimeProvider>{children}</RealtimeProvider>
               <Toaster richColors position="top-right" />
             </AuthProvider>
           </GoogleAuthProvider>

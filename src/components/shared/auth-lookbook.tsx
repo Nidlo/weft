@@ -130,9 +130,18 @@ const LOOKBOOK: Tile[] = [
 ];
 
 const ACCENT_COLORS: Record<Tile["accent"], { fg: string; ring: string }> = {
-  ink: { fg: "text-[oklch(0.16_0.012_50)]", ring: "ring-[oklch(0.16_0.012_50)]/15" },
-  bone: { fg: "text-[oklch(0.97_0.008_75)]", ring: "ring-[oklch(0.97_0.008_75)]/20" },
-  copper: { fg: "text-[oklch(0.78_0.13_65)]", ring: "ring-[oklch(0.78_0.13_65)]/30" },
+  ink: {
+    fg: "text-[oklch(0.16_0.012_50)]",
+    ring: "ring-[oklch(0.16_0.012_50)]/15",
+  },
+  bone: {
+    fg: "text-[oklch(0.97_0.008_75)]",
+    ring: "ring-[oklch(0.97_0.008_75)]/20",
+  },
+  copper: {
+    fg: "text-[oklch(0.78_0.13_65)]",
+    ring: "ring-[oklch(0.78_0.13_65)]/30",
+  },
 };
 
 interface AuthLookbookProps {
@@ -211,10 +220,7 @@ function LookbookTile({ tile }: { tile: Tile }) {
 
       {/* Embossed icon — sits in the upper-right, bigger than the caption */}
       <Icon
-        className={cn(
-          "absolute right-3 top-3 h-7 w-7 opacity-50",
-          accent.fg
-        )}
+        className={cn("absolute top-3 right-3 h-7 w-7 opacity-50", accent.fg)}
         aria-hidden
       />
 
@@ -227,7 +233,7 @@ function LookbookTile({ tile }: { tile: Tile }) {
       >
         <p
           className={cn(
-            "text-[10px] font-semibold uppercase tracking-[0.16em] opacity-75"
+            "text-[10px] font-semibold tracking-[0.16em] uppercase opacity-75"
           )}
         >
           {tile.craft}
@@ -339,11 +345,11 @@ export function AuthTagMarquee({
           <span
             key={`${tag}-${idx}`}
             className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-background/60 px-4 py-1.5",
-              "text-xs font-medium text-foreground/80 backdrop-blur"
+              "border-border bg-background/60 inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-1.5",
+              "text-foreground/80 text-xs font-medium backdrop-blur"
             )}
           >
-            <span className="size-1 rounded-full bg-copper" aria-hidden />
+            <span className="bg-copper size-1 rounded-full" aria-hidden />
             {tag}
           </span>
         ))}

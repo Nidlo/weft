@@ -12,10 +12,14 @@ import type {
   OrderPaymentsData,
   PaymentStatusValue,
 } from "@/types/graphql";
-import { MOMO_POLL_INTERVAL_MS, MOMO_POLL_TIMEOUT_MS } from "@/lib/utils/payment";
+import {
+  MOMO_POLL_INTERVAL_MS,
+  MOMO_POLL_TIMEOUT_MS,
+} from "@/lib/utils/payment";
 
 export function useInitiatePayment() {
-  const [mutate, { loading, error }] = useMutation<InitiatePaymentData>(INITIATE_PAYMENT);
+  const [mutate, { loading, error }] =
+    useMutation<InitiatePaymentData>(INITIATE_PAYMENT);
 
   const initiatePayment = async (input: InitiatePaymentInput) => {
     const withKey: InitiatePaymentInput = {
@@ -30,11 +34,14 @@ export function useInitiatePayment() {
 }
 
 export function usePaymentStatus(reference: string | null) {
-  const { data, loading, error, refetch } = useQuery<PaymentStatusData>(PAYMENT_STATUS, {
-    variables: { reference },
-    skip: !reference,
-    fetchPolicy: "network-only",
-  });
+  const { data, loading, error, refetch } = useQuery<PaymentStatusData>(
+    PAYMENT_STATUS,
+    {
+      variables: { reference },
+      skip: !reference,
+      fetchPolicy: "network-only",
+    }
+  );
 
   return {
     payment: data?.paymentStatus ?? null,
@@ -45,11 +52,14 @@ export function usePaymentStatus(reference: string | null) {
 }
 
 export function useOrderPayments(orderId: string) {
-  const { data, loading, error, refetch } = useQuery<OrderPaymentsData>(ORDER_PAYMENTS, {
-    variables: { orderId },
-    skip: !orderId,
-    fetchPolicy: "cache-and-network",
-  });
+  const { data, loading, error, refetch } = useQuery<OrderPaymentsData>(
+    ORDER_PAYMENTS,
+    {
+      variables: { orderId },
+      skip: !orderId,
+      fetchPolicy: "cache-and-network",
+    }
+  );
 
   return {
     payments: data?.orderPayments ?? [],
@@ -59,7 +69,12 @@ export function useOrderPayments(orderId: string) {
   };
 }
 
-export type MomoPollingStatus = "idle" | "polling" | "success" | "failed" | "timeout";
+export type MomoPollingStatus =
+  | "idle"
+  | "polling"
+  | "success"
+  | "failed"
+  | "timeout";
 
 export function useMomoPolling(reference: string | null) {
   const [status, setStatus] = useState<MomoPollingStatus>("idle");

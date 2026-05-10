@@ -63,8 +63,7 @@ export function DesignerProfileView({ designer }: Props) {
   const profile = designer.designerProfile;
   const images = parseImages(profile?.portfolioImages);
   const specs = parseStringList(profile?.specializations);
-  const displayName =
-    profile?.displayName ?? designer.fullName ?? "Designer";
+  const displayName = profile?.displayName ?? designer.fullName ?? "Designer";
 
   // Fire-and-forget profile view tracking. Silent-swallow is intentional:
   // a failed view-count increment must not surface as an error to the
@@ -89,16 +88,16 @@ export function DesignerProfileView({ designer }: Props) {
       {/* Editorial hero band — bg-thread-mesh ties it visually to the home + auth */}
       <section className="bg-thread-mesh relative overflow-hidden">
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-copper/40 to-transparent"
+          className="via-copper/40 pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent"
           aria-hidden
         />
-        <div className="mx-auto max-w-5xl px-4 pb-8 pt-12 sm:px-6 sm:pb-12 sm:pt-16">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <div className="mx-auto max-w-5xl px-4 pt-12 pb-8 sm:px-6 sm:pt-16 sm:pb-12">
+          <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
             Nidlo · Designer
           </p>
 
           <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-end sm:gap-8">
-            <Avatar className="size-24 shrink-0 ring-2 ring-background sm:size-28">
+            <Avatar className="ring-background size-24 shrink-0 ring-2 sm:size-28">
               <AvatarImage
                 src={designer.avatarUrl ?? undefined}
                 alt={displayName}
@@ -110,11 +109,11 @@ export function DesignerProfileView({ designer }: Props) {
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-display text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
+                <h1 className="text-display text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl">
                   {displayName}
                 </h1>
                 {designer.isVerified && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-foreground px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-background">
+                  <span className="bg-foreground text-background inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider uppercase">
                     <CheckCircle2 className="h-3 w-3" aria-hidden />
                     Verified
                   </span>
@@ -122,7 +121,7 @@ export function DesignerProfileView({ designer }: Props) {
                 {profile?.isAcceptingOrders === false && (
                   <Badge
                     variant="outline"
-                    className="rounded-full border-border bg-background/60 text-[11px] uppercase tracking-wider"
+                    className="border-border bg-background/60 rounded-full text-[11px] tracking-wider uppercase"
                   >
                     Not accepting orders
                   </Badge>
@@ -130,7 +129,7 @@ export function DesignerProfileView({ designer }: Props) {
               </div>
 
               {designer.city && (
-                <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-2 flex items-center gap-1.5 text-sm">
                   <MapPin className="h-3.5 w-3.5" aria-hidden />
                   <span>{designer.city}</span>
                 </p>
@@ -139,7 +138,7 @@ export function DesignerProfileView({ designer }: Props) {
               <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                 <span className="flex items-center gap-1.5">
                   <Star
-                    className="h-4 w-4 fill-copper text-copper"
+                    className="fill-copper text-copper h-4 w-4"
                     aria-hidden
                   />
                   <span className="text-display text-base font-semibold tabular-nums">
@@ -150,9 +149,9 @@ export function DesignerProfileView({ designer }: Props) {
                   </span>
                 </span>
                 <span className="text-muted-foreground">·</span>
-                <span className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="text-muted-foreground flex items-center gap-1.5">
                   <Package className="h-4 w-4" aria-hidden />
-                  <span className="font-medium tabular-nums text-foreground">
+                  <span className="text-foreground font-medium tabular-nums">
                     {profile?.ordersCompleted ?? 0}
                   </span>{" "}
                   orders completed
@@ -201,10 +200,10 @@ export function DesignerProfileView({ designer }: Props) {
       </section>
 
       {/* Body — editorial-spaced sections */}
-      <div className="mx-auto max-w-5xl space-y-12 px-4 pb-16 pt-12 sm:px-6">
+      <div className="mx-auto max-w-5xl space-y-12 px-4 pt-12 pb-16 sm:px-6">
         {profile?.bio && (
           <SectionBlock eyebrow="About" title={`Meet ${displayName}.`}>
-            <p className="whitespace-pre-line text-pretty text-base leading-relaxed text-foreground/85">
+            <p className="text-foreground/85 text-base leading-relaxed text-pretty whitespace-pre-line">
               {profile.bio}
             </p>
           </SectionBlock>
@@ -216,12 +215,9 @@ export function DesignerProfileView({ designer }: Props) {
               {specs.map((s) => (
                 <span
                   key={s}
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium capitalize"
+                  className="border-border bg-card inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium capitalize"
                 >
-                  <span
-                    className="size-1 rounded-full bg-copper"
-                    aria-hidden
-                  />
+                  <span className="bg-copper size-1 rounded-full" aria-hidden />
                   {s.replace(/-/g, " ")}
                 </span>
               ))}
@@ -234,10 +230,10 @@ export function DesignerProfileView({ designer }: Props) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:gap-6">
               <span className="text-display text-4xl font-semibold tabular-nums sm:text-5xl">
                 {formatPesewasShort(profile.pricingMin)}
-                <span className="mx-3 text-muted-foreground/50">–</span>
+                <span className="text-muted-foreground/50 mx-3">–</span>
                 {formatPesewasShort(profile.pricingMax)}
               </span>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Final price varies by design complexity and materials.
               </p>
             </div>
@@ -278,8 +274,8 @@ export function DesignerProfileView({ designer }: Props) {
                   onClick={() => setLightboxIndex(i)}
                   aria-label={img.caption || `View portfolio image ${i + 1}`}
                   className={cn(
-                    "group relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-border",
-                    "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-(--shadow-glow) hover:ring-copper/40"
+                    "group bg-muted ring-border relative aspect-square overflow-hidden rounded-2xl ring-1",
+                    "hover:ring-copper/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-(--shadow-glow)"
                   )}
                 >
                   <Image
@@ -331,20 +327,18 @@ export function DesignerProfileView({ designer }: Props) {
                 className="h-auto w-full"
               />
               {images[lightboxIndex].caption && (
-                <p className="border-t border-border/60 px-5 pt-4 text-sm text-foreground/80">
+                <p className="border-border/60 text-foreground/80 border-t px-5 pt-4 text-sm">
                   {images[lightboxIndex].caption}
                 </p>
               )}
-              <div className="flex items-center justify-between gap-3 border-t border-border/60 p-4">
+              <div className="border-border/60 flex items-center justify-between gap-3 border-t p-4">
                 <Button
                   type="button"
                   variant="luxe-outline"
                   size="sm"
                   onClick={() =>
                     setLightboxIndex(
-                      lightboxIndex > 0
-                        ? lightboxIndex - 1
-                        : images.length - 1
+                      lightboxIndex > 0 ? lightboxIndex - 1 : images.length - 1
                     )
                   }
                   aria-label="Previous portfolio image"
@@ -353,9 +347,9 @@ export function DesignerProfileView({ designer }: Props) {
                   <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
                   Previous
                 </Button>
-                <span className="text-xs font-medium tabular-nums text-muted-foreground">
-                  <span className="text-foreground">{lightboxIndex + 1}</span>{" "}
-                  / {images.length}
+                <span className="text-muted-foreground text-xs font-medium tabular-nums">
+                  <span className="text-foreground">{lightboxIndex + 1}</span> /{" "}
+                  {images.length}
                 </span>
                 <Button
                   type="button"
@@ -363,9 +357,7 @@ export function DesignerProfileView({ designer }: Props) {
                   size="sm"
                   onClick={() =>
                     setLightboxIndex(
-                      lightboxIndex < images.length - 1
-                        ? lightboxIndex + 1
-                        : 0
+                      lightboxIndex < images.length - 1 ? lightboxIndex + 1 : 0
                     )
                   }
                   aria-label="Next portfolio image"
@@ -393,7 +385,7 @@ function SectionBlock({ eyebrow, title, children }: SectionBlockProps) {
   return (
     <section>
       <header className="mb-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           {eyebrow}
         </p>
         <h2 className="text-display mt-1.5 text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -411,21 +403,14 @@ interface PerformanceStatProps {
   label: string;
 }
 
-function PerformanceStat({
-  icon: Icon,
-  value,
-  label,
-}: PerformanceStatProps) {
+function PerformanceStat({ icon: Icon, value, label }: PerformanceStatProps) {
   return (
     <GlassCard variant="solid" className="p-5 text-center sm:p-6">
-      <Icon
-        className="mx-auto h-5 w-5 text-copper"
-        aria-hidden
-      />
+      <Icon className="text-copper mx-auto h-5 w-5" aria-hidden />
       <p className="text-display mt-3 text-3xl font-semibold tabular-nums sm:text-4xl">
         {value}
       </p>
-      <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="text-muted-foreground mt-1 text-[11px] font-semibold tracking-[0.16em] uppercase">
         {label}
       </p>
     </GlassCard>

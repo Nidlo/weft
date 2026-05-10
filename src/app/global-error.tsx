@@ -20,14 +20,14 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
 
   return (
     <html lang="en">
-      <body className="bg-background font-sans text-foreground antialiased">
-        <main className="flex min-h-dvh flex-col items-center justify-center bg-thread-mesh px-4 py-16">
-          <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border/60 bg-card p-8 text-center shadow-xl sm:p-10">
+      <body className="bg-background text-foreground font-sans antialiased">
+        <main className="bg-thread-mesh flex min-h-dvh flex-col items-center justify-center px-4 py-16">
+          <div className="border-border/60 bg-card relative w-full max-w-md overflow-hidden rounded-2xl border p-8 text-center shadow-xl sm:p-10">
             <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-copper/40 to-transparent"
+              className="via-copper/40 pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent"
               aria-hidden
             />
-            <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-status-error-soft text-status-error ring-1 ring-status-error/20">
+            <div className="bg-status-error-soft text-status-error ring-status-error/20 mx-auto flex size-16 items-center justify-center rounded-2xl ring-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -44,20 +44,20 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 <path d="M12 17h.01" />
               </svg>
             </div>
-            <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-status-error">
+            <p className="text-status-error mt-6 text-[11px] font-semibold tracking-[0.18em] uppercase">
               Critical error
             </p>
             <h1 className="text-display mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
               Nidlo couldn&apos;t recover.
             </h1>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               We hit an unrecoverable error. Reload the page to start fresh —
               your data is safe on the server.
             </p>
             <button
               type="button"
               onClick={reset}
-              className="mt-8 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-foreground px-6 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
+              className="bg-foreground text-background hover:bg-foreground/90 mt-8 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold transition-colors"
             >
               Reload
             </button>

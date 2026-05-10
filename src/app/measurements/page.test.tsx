@@ -94,7 +94,10 @@ describe("MeasurementsPage", () => {
     });
     render(<MeasurementsPage />);
     expect(
-      screen.getByRole("heading", { level: 2, name: /no measurement profiles/i })
+      screen.getByRole("heading", {
+        level: 2,
+        name: /no measurement profiles/i,
+      })
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("button", { name: /fitscan ai/i }).length

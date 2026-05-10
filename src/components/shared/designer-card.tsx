@@ -36,11 +36,11 @@ export function DesignerCard({ designer }: Props) {
   return (
     <Link
       href={`/designer/${designer.slug}`}
-      className="group block outline-none rounded-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="group focus-visible:ring-ring focus-visible:ring-offset-background block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
     >
       <GlassCard variant="solid" interactive glow="copper" className="p-5">
         <div className="flex items-start gap-4">
-          <Avatar className="h-14 w-14 ring-1 ring-border">
+          <Avatar className="ring-border h-14 w-14 ring-1">
             <AvatarImage src={designer.avatarUrl ?? undefined} alt={name} />
             <AvatarFallback className="bg-secondary font-medium">
               {getInitials(designer.displayName ?? designer.fullName)}
@@ -53,13 +53,16 @@ export function DesignerCard({ designer }: Props) {
                 {name}
               </h3>
               {!designer.isAcceptingOrders && (
-                <Badge variant="secondary" className="shrink-0 text-[10px] uppercase tracking-wider">
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 text-[10px] tracking-wider uppercase"
+                >
                   Unavailable
                 </Badge>
               )}
             </div>
             {designer.city && (
-              <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5 flex items-center gap-1 text-sm">
                 <MapPin className="h-3 w-3" aria-hidden />
                 <span className="truncate">
                   {designer.city}
@@ -81,7 +84,7 @@ export function DesignerCard({ designer }: Props) {
               <Badge
                 key={s}
                 variant="outline"
-                className="rounded-full border-border bg-background/50 text-[11px] font-medium capitalize"
+                className="border-border bg-background/50 rounded-full text-[11px] font-medium capitalize"
               >
                 {s.replace(/-/g, " ")}
               </Badge>
@@ -89,7 +92,7 @@ export function DesignerCard({ designer }: Props) {
             {specs.length > 3 && (
               <Badge
                 variant="outline"
-                className="rounded-full border-border bg-background/50 text-[11px] font-medium"
+                className="border-border bg-background/50 rounded-full text-[11px] font-medium"
               >
                 +{specs.length - 3}
               </Badge>
@@ -97,11 +100,11 @@ export function DesignerCard({ designer }: Props) {
           </div>
         )}
 
-        <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-sm">
+        <div className="border-border/60 mt-4 flex items-center justify-between border-t pt-3 text-sm">
           <div className="flex items-center gap-1.5">
             <Star
               className={cn(
-                "h-4 w-4 fill-copper text-copper transition-transform duration-300",
+                "fill-copper text-copper h-4 w-4 transition-transform duration-300",
                 "group-hover:scale-110 group-hover:rotate-12"
               )}
               aria-hidden
@@ -114,7 +117,7 @@ export function DesignerCard({ designer }: Props) {
             </span>
           </div>
           {designer.pricingMin != null && designer.pricingMax != null && (
-            <span className="font-medium tabular-nums text-foreground/80">
+            <span className="text-foreground/80 font-medium tabular-nums">
               {formatPesewasShort(designer.pricingMin)} –{" "}
               {formatPesewasShort(designer.pricingMax)}
             </span>

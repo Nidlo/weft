@@ -109,7 +109,7 @@ export function ReferenceImageUpload({
                 variant="destructive"
                 size="icon"
                 aria-label={`Remove image ${i + 1}`}
-                className="absolute right-1 top-1 h-5 w-5 opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute top-1 right-1 h-5 w-5 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={() => handleRemove(i)}
               >
                 <X className="h-3 w-3" />
@@ -124,18 +124,18 @@ export function ReferenceImageUpload({
         <div
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          className="flex min-h-[80px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-4 text-center transition-colors hover:border-primary/50"
+          className="border-border hover:border-primary/50 flex min-h-[80px] flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 text-center transition-colors"
         >
           {uploading ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Loader2 className="h-4 w-4 animate-spin" />
               Uploading...
             </div>
           ) : (
             <>
-              <ImagePlus className="mb-1 h-5 w-5 text-muted-foreground" />
+              <ImagePlus className="text-muted-foreground mb-1 h-5 w-5" />
               <label className="cursor-pointer">
-                <span className="text-sm font-medium text-primary underline">
+                <span className="text-primary text-sm font-medium underline">
                   Upload reference images
                 </span>
                 <input
@@ -146,7 +146,7 @@ export function ReferenceImageUpload({
                   onChange={(e) => handleFiles(e.target.files)}
                 />
               </label>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-xs">
                 {images.length}/{MAX_IMAGES} — JPEG, PNG, WebP up to{" "}
                 {MAX_SIZE_MB}MB
               </p>

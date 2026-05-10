@@ -154,7 +154,7 @@ export default function SearchPage() {
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           <div className="relative">
             <span
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+              className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold"
               aria-hidden
             >
               GHS
@@ -172,7 +172,7 @@ export default function SearchPage() {
           <span className="text-muted-foreground">to</span>
           <div className="relative">
             <span
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground"
+              className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold"
               aria-hidden
             >
               GHS
@@ -228,7 +228,7 @@ export default function SearchPage() {
           variant="ghost"
           size="sm"
           onClick={clearFilters}
-          className="w-full gap-1.5 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground w-full gap-1.5"
         >
           <X className="h-3.5 w-3.5" aria-hidden />
           Clear all filters
@@ -241,13 +241,13 @@ export default function SearchPage() {
     <AppShell>
       <div className="space-y-7">
         <header>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
             Discover
           </p>
-          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
             Find your designer
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+          <p className="text-muted-foreground mt-2 max-w-2xl text-sm sm:text-base">
             Search tailors, seamstresses, and fashion designers by craft,
             location, price, or rating.
           </p>
@@ -257,7 +257,7 @@ export default function SearchPage() {
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search
-              className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-copper"
+              className="text-copper absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2"
               aria-hidden
             />
             <Input
@@ -283,7 +283,7 @@ export default function SearchPage() {
                 <SlidersHorizontal className="h-4 w-4" aria-hidden />
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className="ml-0.5 inline-flex size-5 items-center justify-center rounded-full bg-copper text-[10px] font-bold tabular-nums text-foreground">
+                  <span className="bg-copper text-foreground ml-0.5 inline-flex size-5 items-center justify-center rounded-full text-[10px] font-bold tabular-nums">
                     {activeFilterCount}
                   </span>
                 )}
@@ -322,15 +322,13 @@ export default function SearchPage() {
                       "transition-all duration-200 hover:-translate-y-0.5",
                       isActive
                         ? "bg-foreground text-background shadow-(--shadow-2)"
-                        : "border border-border bg-card hover:border-foreground/30"
+                        : "border-border bg-card hover:border-foreground/30 border"
                     )}
                   >
                     <span
                       className={cn(
                         "size-1 rounded-full transition-transform",
-                        isActive
-                          ? "bg-copper scale-150"
-                          : "bg-copper"
+                        isActive ? "bg-copper scale-150" : "bg-copper"
                       )}
                       aria-hidden
                     />
@@ -345,7 +343,7 @@ export default function SearchPage() {
 
         {/* Sort options pill bar */}
         <ScrollArea className="-mx-4 w-screen sm:mx-0 sm:w-full">
-          <div className="flex gap-1 rounded-full border border-border bg-card p-1 sm:w-fit mx-4 sm:mx-0">
+          <div className="border-border bg-card mx-4 flex gap-1 rounded-full border p-1 sm:mx-0 sm:w-fit">
             {sortOptions.map((option) => (
               <button
                 key={option.value}
@@ -414,7 +412,7 @@ export default function SearchPage() {
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-border bg-card p-5"
+                  className="border-border bg-card rounded-2xl border p-5"
                 >
                   <div className="flex gap-4">
                     <Skeleton className="h-14 w-14 rounded-full" />
@@ -439,13 +437,13 @@ export default function SearchPage() {
               variant="solid"
               className="flex flex-col items-center py-16 text-center"
             >
-              <span className="flex size-16 items-center justify-center rounded-2xl bg-status-error-soft text-status-error">
+              <span className="bg-status-error-soft text-status-error flex size-16 items-center justify-center rounded-2xl">
                 <SearchX className="h-7 w-7" aria-hidden />
               </span>
               <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
                 Something went wrong.
               </h2>
-              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+              <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
                 We couldn&apos;t load designers. Check your connection and try
                 again.
               </p>
@@ -458,13 +456,13 @@ export default function SearchPage() {
               variant="solid"
               className="flex flex-col items-center py-16 text-center"
             >
-              <span className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-foreground">
+              <span className="bg-secondary text-foreground flex size-16 items-center justify-center rounded-2xl">
                 <Sparkles className="h-7 w-7" aria-hidden />
               </span>
               <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
                 No designers found.
               </h2>
-              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+              <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
                 Try adjusting your search or clearing some filters.
               </p>
               {activeFilterCount > 0 && (
@@ -501,8 +499,11 @@ export default function SearchPage() {
 
           {/* End of results */}
           {!hasMore && designers.length > 0 && (
-            <p className="py-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              All <span className="tabular-nums text-foreground">{designers.length}</span>{" "}
+            <p className="text-muted-foreground py-4 text-center text-xs font-semibold tracking-[0.16em] uppercase">
+              All{" "}
+              <span className="text-foreground tabular-nums">
+                {designers.length}
+              </span>{" "}
               designers shown
             </p>
           )}
@@ -520,14 +521,14 @@ interface FilterTagProps {
 
 function FilterTag({ label, onRemove, ariaLabel }: FilterTagProps) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium">
-      <span className="size-1 rounded-full bg-copper" aria-hidden />
+    <span className="border-border bg-card inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium">
+      <span className="bg-copper size-1 rounded-full" aria-hidden />
       {label}
       <button
         type="button"
         aria-label={ariaLabel}
         onClick={onRemove}
-        className="ml-0.5 rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring ml-0.5 rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         <X className="h-3 w-3" aria-hidden />
       </button>

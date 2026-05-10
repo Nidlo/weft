@@ -36,7 +36,7 @@ export function linkify(text: string, className?: string): ReactNode[] {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className={className ?? "underline break-all"}
+        className={className ?? "break-all underline"}
         onClick={(e) => e.stopPropagation()}
       >
         {url}

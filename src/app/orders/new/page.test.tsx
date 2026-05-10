@@ -11,8 +11,7 @@ vi.mock("@/lib/hooks/use-auth-guard", () => ({
 }));
 
 vi.mock("@/lib/hooks/use-blueprint-options", () => ({
-  useBlueprintOptions: (...args: unknown[]) =>
-    useBlueprintOptionsSpy(...args),
+  useBlueprintOptions: (...args: unknown[]) => useBlueprintOptionsSpy(...args),
 }));
 
 vi.mock("@/lib/hooks/use-orders", () => ({
@@ -126,9 +125,7 @@ describe("NewOrderPage", () => {
     fireEvent.click(externalPill);
     expect(screen.getByText(/client name/i)).toBeInTheDocument();
     expect(screen.getByText(/client phone/i)).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText(/kwame mensah/i)
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/kwame mensah/i)).toBeInTheDocument();
   });
 
   it("disables Create order until required fields are present", () => {

@@ -89,13 +89,13 @@ describe("formatMeasurement", () => {
 
   it("omits the unit when withUnit is false", () => {
     expect(formatMeasurement(91.44, "cm", "inches", { withUnit: false })).toBe(
-      "36.0",
+      "36.0"
     );
   });
 
   it("respects an explicit digits override", () => {
     expect(formatMeasurement(91.44, "cm", "inches", { digits: 2 })).toBe(
-      "36.00 in",
+      "36.00 in"
     );
   });
 
@@ -171,30 +171,30 @@ describe("classifyRescanDelta", () => {
 
   it("returns auto for |delta| < auto threshold", () => {
     expect(classifyRescanDelta(914, 914 + RESCAN_AUTO_THRESHOLD_MM - 1)).toBe(
-      "auto",
+      "auto"
     );
     expect(classifyRescanDelta(914, 914)).toBe("auto");
   });
 
   it("returns prompt for auto <= |delta| < reject threshold", () => {
     expect(classifyRescanDelta(914, 914 + RESCAN_AUTO_THRESHOLD_MM)).toBe(
-      "prompt",
+      "prompt"
     );
     expect(classifyRescanDelta(914, 914 + RESCAN_REJECT_THRESHOLD_MM - 1)).toBe(
-      "prompt",
+      "prompt"
     );
   });
 
   it("returns reject for |delta| >= reject threshold", () => {
     expect(classifyRescanDelta(914, 914 + RESCAN_REJECT_THRESHOLD_MM)).toBe(
-      "reject",
+      "reject"
     );
     expect(classifyRescanDelta(914, 914 + 200)).toBe("reject");
   });
 
   it("treats negative deltas the same way (absolute value)", () => {
     expect(classifyRescanDelta(914, 914 - RESCAN_REJECT_THRESHOLD_MM)).toBe(
-      "reject",
+      "reject"
     );
     expect(classifyRescanDelta(914, 914 - 5)).toBe("auto");
   });
@@ -238,7 +238,7 @@ describe("recomputeFromLandmarks", () => {
 
   it("returns an empty object when baseline lacks full_height", () => {
     expect(
-      recomputeFromLandmarks(fullPose, { upper_body: { bust: 900 } }),
+      recomputeFromLandmarks(fullPose, { upper_body: { bust: 900 } })
     ).toEqual({});
   });
 

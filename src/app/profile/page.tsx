@@ -97,25 +97,28 @@ export default function ProfilePage() {
     <AppShell>
       <div className="space-y-7">
         <header>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
             Account
           </p>
-          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
             My profile
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">
             Manage your account, contact info, and notifications.
           </p>
         </header>
 
         {/* Profile hero */}
-        <GlassCard variant="solid" className="relative overflow-hidden bg-thread-mesh p-6 sm:p-7">
+        <GlassCard
+          variant="solid"
+          className="bg-thread-mesh relative overflow-hidden p-6 sm:p-7"
+        >
           <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-copper/40 to-transparent"
+            className="via-copper/40 pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent"
             aria-hidden
           />
           <div className="flex items-center gap-4">
-            <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary ring-2 ring-background sm:size-24">
+            <div className="bg-secondary ring-background flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 sm:size-24">
               {user.avatarUrl ? (
                 <Image
                   src={user.avatarUrl}
@@ -126,7 +129,7 @@ export default function ProfilePage() {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <User className="h-10 w-10 text-muted-foreground" aria-hidden />
+                <User className="text-muted-foreground h-10 w-10" aria-hidden />
               )}
             </div>
             <div className="min-w-0 flex-1">
@@ -136,9 +139,9 @@ export default function ProfilePage() {
               <div className="mt-2 flex items-center gap-2">
                 <span
                   className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase",
                     user.isDesigner
-                      ? "bg-copper/15 text-copper-soft ring-1 ring-copper/30"
+                      ? "bg-copper/15 text-copper-soft ring-copper/30 ring-1"
                       : "bg-secondary text-foreground/80"
                   )}
                 >
@@ -169,14 +172,14 @@ export default function ProfilePage() {
         {/* Contact info */}
         <section>
           <header className="mb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Contact
             </p>
             <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
               How to reach you
             </h2>
           </header>
-          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+          <GlassCard variant="solid" className="divide-border/60 divide-y p-2">
             <ContactRow icon={Phone} label="Phone" value={user.phone} />
             {user.email && (
               <ContactRow icon={Mail} label="Email" value={user.email} />
@@ -193,14 +196,14 @@ export default function ProfilePage() {
         {/* Quick links */}
         <section>
           <header className="mb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Shortcuts
             </p>
             <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
               Quick links
             </h2>
           </header>
-          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+          <GlassCard variant="solid" className="divide-border/60 divide-y p-2">
             {visibleLinks.map((link) => (
               <QuickLinkRow key={link.href} link={link} />
             ))}
@@ -211,7 +214,7 @@ export default function ProfilePage() {
         <Button
           variant="luxe-outline"
           size="lg"
-          className="w-full gap-1.5 text-status-error hover:bg-status-error-soft hover:text-status-error-fg"
+          className="text-status-error hover:bg-status-error-soft hover:text-status-error-fg w-full gap-1.5"
           onClick={handleLogout}
           disabled={loggingOut}
         >
@@ -232,11 +235,11 @@ interface ContactRowProps {
 function ContactRow({ icon: Icon, label, value }: ContactRowProps) {
   return (
     <div className="flex items-center gap-3 px-3 py-3">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground ring-1 ring-border">
+      <span className="bg-secondary text-foreground ring-border flex size-9 shrink-0 items-center justify-center rounded-xl ring-1">
         <Icon className="h-4 w-4" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
           {label}
         </p>
         <p className="truncate text-sm font-medium tabular-nums">{value}</p>
@@ -250,21 +253,21 @@ function QuickLinkRow({ link }: { link: QuickLink }) {
   return (
     <Link
       href={link.href}
-      className="group flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 hover:bg-card focus-visible:bg-card focus-visible:outline-none"
+      className="group hover:bg-card focus-visible:bg-card flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 focus-visible:outline-none"
     >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground ring-1 ring-border transition-colors group-hover:bg-foreground group-hover:text-background">
+      <span className="bg-secondary text-foreground ring-border group-hover:bg-foreground group-hover:text-background flex size-10 shrink-0 items-center justify-center rounded-xl ring-1 transition-colors">
         <Icon className="h-4 w-4" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-display text-sm font-semibold tracking-tight">
           {link.label}
         </p>
-        <p className="truncate text-xs text-muted-foreground">
+        <p className="text-muted-foreground truncate text-xs">
           {link.description}
         </p>
       </div>
       <ChevronRight
-        className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-copper"
+        className="text-muted-foreground group-hover:text-copper h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5"
         aria-hidden
       />
     </Link>

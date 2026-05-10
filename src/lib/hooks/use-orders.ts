@@ -1,7 +1,13 @@
 "use client";
 
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
-import { MY_ORDERS, GET_ORDER, ORDER_PROFIT_SUMMARY, SEARCH_CLIENTS, CLIENT_MEASUREMENTS } from "@/lib/graphql/queries/order";
+import {
+  MY_ORDERS,
+  GET_ORDER,
+  ORDER_PROFIT_SUMMARY,
+  SEARCH_CLIENTS,
+  CLIENT_MEASUREMENTS,
+} from "@/lib/graphql/queries/order";
 import {
   CREATE_INTERNAL_ORDER,
   UPDATE_ORDER,
@@ -60,10 +66,13 @@ export function useOrders(status?: string, first = 20, page = 1) {
 }
 
 export function useOrder(id: string) {
-  const { data, loading, error, refetch } = useQuery<OrderDetailData>(GET_ORDER, {
-    variables: { id },
-    skip: !id,
-  });
+  const { data, loading, error, refetch } = useQuery<OrderDetailData>(
+    GET_ORDER,
+    {
+      variables: { id },
+      skip: !id,
+    }
+  );
 
   return {
     order: data?.order ?? null,
@@ -91,9 +100,12 @@ export function useOrderProfitSummary(orderId: string) {
 }
 
 export function useRespondToOrder() {
-  const [mutate, { loading, error }] = useMutation<RespondToOrderData>(RESPOND_TO_ORDER, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<RespondToOrderData>(
+    RESPOND_TO_ORDER,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const respondToOrder = async (input: RespondToOrderInput) => {
     const result = await mutate({ variables: { input } });
@@ -104,9 +116,12 @@ export function useRespondToOrder() {
 }
 
 export function useConfirmOrder() {
-  const [mutate, { loading, error }] = useMutation<ConfirmOrderData>(CONFIRM_ORDER, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<ConfirmOrderData>(
+    CONFIRM_ORDER,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const confirmOrder = async (orderId: string) => {
     const result = await mutate({ variables: { orderId } });
@@ -117,9 +132,12 @@ export function useConfirmOrder() {
 }
 
 export function useUpdateOrderStatus() {
-  const [mutate, { loading, error }] = useMutation<UpdateOrderStatusData>(UPDATE_ORDER_STATUS, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<UpdateOrderStatusData>(
+    UPDATE_ORDER_STATUS,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const updateOrderStatus = async (input: UpdateOrderStatusInput) => {
     const result = await mutate({ variables: { input } });
@@ -130,9 +148,12 @@ export function useUpdateOrderStatus() {
 }
 
 export function useCancelOrder() {
-  const [mutate, { loading, error }] = useMutation<CancelOrderData>(CANCEL_ORDER, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<CancelOrderData>(
+    CANCEL_ORDER,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const cancelOrder = async (orderId: string, reason?: string) => {
     const result = await mutate({ variables: { orderId, reason } });
@@ -143,9 +164,12 @@ export function useCancelOrder() {
 }
 
 export function useConfirmDelivery() {
-  const [mutate, { loading, error }] = useMutation<ConfirmDeliveryData>(CONFIRM_DELIVERY, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<ConfirmDeliveryData>(
+    CONFIRM_DELIVERY,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const confirmDelivery = async (orderId: string) => {
     const result = await mutate({ variables: { orderId } });
@@ -156,7 +180,8 @@ export function useConfirmDelivery() {
 }
 
 export function useAddMaterial() {
-  const [mutate, { loading, error }] = useMutation<AddMaterialData>(ADD_MATERIAL);
+  const [mutate, { loading, error }] =
+    useMutation<AddMaterialData>(ADD_MATERIAL);
 
   const addMaterial = async (input: AddMaterialInput) => {
     const result = await mutate({ variables: { input } });
@@ -167,7 +192,8 @@ export function useAddMaterial() {
 }
 
 export function useTogglePurchased() {
-  const [mutate, { loading, error }] = useMutation<TogglePurchasedData>(TOGGLE_PURCHASED);
+  const [mutate, { loading, error }] =
+    useMutation<TogglePurchasedData>(TOGGLE_PURCHASED);
 
   const togglePurchased = async (materialId: string) => {
     const result = await mutate({ variables: { materialId } });
@@ -178,7 +204,8 @@ export function useTogglePurchased() {
 }
 
 export function useRemoveMaterial() {
-  const [mutate, { loading, error }] = useMutation<RemoveMaterialData>(REMOVE_MATERIAL);
+  const [mutate, { loading, error }] =
+    useMutation<RemoveMaterialData>(REMOVE_MATERIAL);
 
   const removeMaterial = async (materialId: string) => {
     const result = await mutate({ variables: { materialId } });
@@ -212,10 +239,7 @@ export function useClearOrderGarmentEase(orderId: string) {
     }
   );
 
-  const clearOrderGarmentEase = async (
-    section: string,
-    field: string
-  ) => {
+  const clearOrderGarmentEase = async (section: string, field: string) => {
     const result = await mutate({
       variables: { orderId, section, field },
     });
@@ -240,9 +264,12 @@ export function useCreateInternalOrder() {
 }
 
 export function useUpdateOrder() {
-  const [mutate, { loading, error }] = useMutation<UpdateOrderData>(UPDATE_ORDER, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<UpdateOrderData>(
+    UPDATE_ORDER,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const updateOrder = async (input: UpdateOrderInput) => {
     const result = await mutate({ variables: { input } });
@@ -257,7 +284,11 @@ export function useCreateBlueprintOption() {
     CREATE_BLUEPRINT_OPTION
   );
 
-  const createBlueprintOption = async (category: string, value: string, label: string) => {
+  const createBlueprintOption = async (
+    category: string,
+    value: string,
+    label: string
+  ) => {
     const result = await mutate({ variables: { category, value, label } });
     return result.data?.createBlueprintOption ?? null;
   };

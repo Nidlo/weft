@@ -65,9 +65,7 @@ describe("SettingsPage", () => {
   it("hides the Wallet tile from clients", () => {
     useAuthGuardSpy.mockReturnValue({ user: CLIENT_USER, isReady: true });
     render(<SettingsPage />);
-    expect(
-      screen.getByRole("link", { name: /^account/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^account/i })).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: /^wallet/i })
     ).not.toBeInTheDocument();
@@ -76,18 +74,14 @@ describe("SettingsPage", () => {
   it("shows the Wallet tile for designers", () => {
     useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
     render(<SettingsPage />);
-    expect(
-      screen.getByRole("link", { name: /^wallet/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^wallet/i })).toBeInTheDocument();
   });
 
   it("renders the coming-soon section with Soon badges", () => {
     useAuthGuardSpy.mockReturnValue({ user: CLIENT_USER, isReady: true });
     render(<SettingsPage />);
     expect(screen.getByText(/^coming soon$/i)).toBeInTheDocument();
-    expect(
-      screen.getAllByText(/^soon$/i).length
-    ).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText(/^soon$/i).length).toBeGreaterThanOrEqual(2);
   });
 
   it("renders the version footer + sign-out actions", () => {

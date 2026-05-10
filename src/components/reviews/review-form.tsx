@@ -34,7 +34,7 @@ export function ReviewForm({ orderId, onSuccess, onSkip }: ReviewFormProps) {
         orderId,
         rating,
         comment.trim() || undefined,
-        photos.length > 0 ? photos : undefined,
+        photos.length > 0 ? photos : undefined
       );
       toast.success("Review submitted! Thank you for your feedback.");
       onSuccess();
@@ -59,7 +59,7 @@ export function ReviewForm({ orderId, onSuccess, onSkip }: ReviewFormProps) {
           onChange={(e) => setComment(e.target.value.slice(0, MAX_COMMENT))}
           rows={3}
         />
-        <p className="text-right text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-right text-xs">
           {comment.length}/{MAX_COMMENT}
         </p>
       </div>

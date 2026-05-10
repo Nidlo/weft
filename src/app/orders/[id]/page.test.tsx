@@ -153,7 +153,9 @@ function makePromise<T>(value: T): Promise<T> {
 }
 
 function renderWithSuspense(ui: React.ReactElement) {
-  return render(<Suspense fallback={<div data-testid="suspense" />}>{ui}</Suspense>);
+  return render(
+    <Suspense fallback={<div data-testid="suspense" />}>{ui}</Suspense>
+  );
 }
 
 beforeEach(() => {

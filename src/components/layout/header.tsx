@@ -25,7 +25,7 @@ export function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b border-border/50",
+        "border-border/50 sticky top-0 z-50 w-full border-b",
         "bg-background/70 backdrop-blur-xl backdrop-saturate-150",
         "supports-backdrop-filter:bg-background/55"
       )}
@@ -33,7 +33,7 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link
           href={isAuthenticated ? "/dashboard" : "/"}
-          className="flex min-h-11 items-center gap-1 outline-none transition-opacity hover:opacity-80 focus-visible:opacity-80"
+          className="flex min-h-11 items-center gap-1 transition-opacity outline-none hover:opacity-80 focus-visible:opacity-80"
           aria-label="Nidlo home"
         >
           <NidloMark variant="wordmark" size={30} />
@@ -59,9 +59,7 @@ export function Header() {
                 }
               >
                 <MessageSquare className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <Pip count={unreadCount} />
-                )}
+                {unreadCount > 0 && <Pip count={unreadCount} />}
               </Link>
             </Button>
             <Button
@@ -128,7 +126,7 @@ export function Header() {
 
 function Pip({ count }: { count: number }) {
   return (
-    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-copper px-1 text-[10px] font-semibold text-foreground ring-2 ring-background">
+    <span className="bg-copper text-foreground ring-background absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold ring-2">
       {count > 99 ? "99+" : count}
     </span>
   );

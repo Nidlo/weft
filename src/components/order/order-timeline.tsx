@@ -12,7 +12,7 @@ interface OrderTimelineProps {
 export function OrderTimeline({ updates }: OrderTimelineProps) {
   if (updates.length === 0) {
     return (
-      <p className="py-4 text-center text-sm text-muted-foreground">
+      <p className="text-muted-foreground py-4 text-center text-sm">
         No updates yet.
       </p>
     );
@@ -32,9 +32,9 @@ export function OrderTimeline({ updates }: OrderTimelineProps) {
             {/* Timeline connector */}
             <div className="flex flex-col items-center">
               <div
-                className={`h-3 w-3 shrink-0 rounded-full ${toConfig.bgColor} ring-2 ring-background`}
+                className={`h-3 w-3 shrink-0 rounded-full ${toConfig.bgColor} ring-background ring-2`}
               />
-              {!isLast && <div className="w-px flex-1 bg-border" />}
+              {!isLast && <div className="bg-border w-px flex-1" />}
             </div>
 
             {/* Content */}
@@ -43,7 +43,7 @@ export function OrderTimeline({ updates }: OrderTimelineProps) {
                 <span className={`text-sm font-medium ${toConfig.color}`}>
                   {toConfig.label}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {new Date(update.createdAt).toLocaleDateString("en-GH", {
                     month: "short",
                     day: "numeric",
@@ -54,7 +54,7 @@ export function OrderTimeline({ updates }: OrderTimelineProps) {
               </div>
 
               {update.notes && (
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   {update.notes}
                 </p>
               )}
@@ -84,7 +84,7 @@ export function OrderTimeline({ updates }: OrderTimelineProps) {
                     {update.updatedBy.fullName?.charAt(0) ?? "?"}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {update.updatedBy.fullName}
                 </span>
               </div>

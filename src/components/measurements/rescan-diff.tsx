@@ -28,7 +28,7 @@ interface RescanDiffProps {
   proposedMm: MeasurementMmData;
   /** Called with the section/field pairs the user has confirmed. Auto-tier rows always apply, reject-tier never. */
   onApply: (
-    confirmedFields: Array<{ section: string; field: string }>,
+    confirmedFields: Array<{ section: string; field: string }>
   ) => Promise<void> | void;
   applying?: boolean;
   onCancel?: () => void;
@@ -45,7 +45,7 @@ interface FieldRow {
 function readField(
   payload: MeasurementMmData | null | undefined,
   section: string,
-  field: string,
+  field: string
 ): number | null {
   if (!payload) return null;
   const sec = (payload as Record<string, Record<string, number | null>>)[
@@ -57,7 +57,7 @@ function readField(
 
 function buildRows(
   baselineMm: MeasurementMmData,
-  proposedMm: MeasurementMmData,
+  proposedMm: MeasurementMmData
 ): FieldRow[] {
   const rows: FieldRow[] = [];
   for (const [section, fields] of Object.entries(FIELD_LABELS)) {
@@ -81,21 +81,21 @@ function tierBadge(tier: RescanTier, displayUnit: MeasurementUnit) {
   switch (tier) {
     case "auto":
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-status-success/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-status-success-fg">
+        <span className="bg-status-success/15 text-status-success-fg inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
           <Check className="h-3 w-3" aria-hidden />
           Auto-applied
         </span>
       );
     case "prompt":
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-copper/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-copper-soft">
+        <span className="bg-copper/15 text-copper-soft inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase">
           Confirm
         </span>
       );
     case "reject":
       return (
         <span
-          className="inline-flex items-center gap-1 rounded-full bg-status-danger/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-status-danger-fg"
+          className="bg-status-danger/15 text-status-danger-fg inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase"
           title={`Change is too large to trust automatically — likely an AI error. Re-scan or edit manually. (>= 2 ${unitLabel(displayUnit)})`}
         >
           <X className="h-3 w-3" aria-hidden />
@@ -107,8 +107,10 @@ function tierBadge(tier: RescanTier, displayUnit: MeasurementUnit) {
 
 function deltaIcon(delta: number | null) {
   if (delta === null) return null;
-  if (delta > 0) return <Plus className="h-3 w-3 text-status-success-fg" aria-hidden />;
-  if (delta < 0) return <Minus className="h-3 w-3 text-status-danger-fg" aria-hidden />;
+  if (delta > 0)
+    return <Plus className="text-status-success-fg h-3 w-3" aria-hidden />;
+  if (delta < 0)
+    return <Minus className="text-status-danger-fg h-3 w-3" aria-hidden />;
   return null;
 }
 
@@ -122,7 +124,7 @@ export function RescanDiff({
   const displayUnit = usePreferencesStore((s) => s.measurementUnit);
   const rows = useMemo(
     () => buildRows(baselineMm, proposedMm),
-    [baselineMm, proposedMm],
+    [baselineMm, proposedMm]
   );
 
   // Confirmed prompt-tier fields keyed by `${section}.${field}`.
@@ -149,11 +151,11 @@ export function RescanDiff({
   if (noChanges) {
     return (
       <div className="space-y-4">
-        <div className="rounded-2xl border border-border bg-card p-6 text-center">
+        <div className="border-border bg-card rounded-2xl border p-6 text-center">
           <p className="text-display text-base font-semibold tracking-tight">
             No changes detected.
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             The new scan matches your saved measurements within tolerance.
           </p>
         </div>
@@ -171,13 +173,13 @@ export function RescanDiff({
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           Re-scan diff
         </p>
-        <h2 className="text-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+        <h2 className="text-display text-2xl leading-tight font-semibold tracking-tight sm:text-3xl">
           Review your changes
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {autoRows.length > 0 && `${autoRows.length} auto-applied · `}
           {promptRows.length > 0 && `${promptRows.length} need confirm · `}
           {rejectRows.length > 0 && `${rejectRows.length} rejected · `}
@@ -185,10 +187,10 @@ export function RescanDiff({
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="border-border bg-card overflow-hidden rounded-2xl border">
         <table className="w-full text-sm">
-          <thead className="border-b border-border bg-card/80">
-            <tr className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <thead className="border-border bg-card/80 border-b">
+            <tr className="text-muted-foreground text-[10px] font-semibold tracking-[0.14em] uppercase">
               <th className="px-4 py-2.5 text-left">Field</th>
               <th className="px-4 py-2.5 text-right">Baseline</th>
               <th className="px-4 py-2.5"></th>
@@ -198,12 +200,13 @@ export function RescanDiff({
               <th className="px-4 py-2.5 text-center">Confirm</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-border divide-y">
             {rows.map((row) => {
               const labelGroup =
                 FIELD_LABELS[row.section as keyof typeof FIELD_LABELS];
               const fieldLabel =
-                (labelGroup as Record<string, string>)?.[row.field] ?? row.field;
+                (labelGroup as Record<string, string>)?.[row.field] ??
+                row.field;
               const sectionLabel =
                 (SECTION_LABELS as Record<string, string>)[row.section] ??
                 row.section;
@@ -217,19 +220,19 @@ export function RescanDiff({
                   key={key}
                   className={cn(
                     "transition-colors",
-                    row.tier === "reject" && "bg-status-danger/5",
+                    row.tier === "reject" && "bg-status-danger/5"
                   )}
                 >
                   <td className="px-4 py-2.5">
                     <div className="font-medium">{fieldLabel}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <div className="text-muted-foreground text-[10px] tracking-wider uppercase">
                       {sectionLabel}
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">
+                  <td className="text-muted-foreground px-4 py-2.5 text-right tabular-nums">
                     {formatMeasurement(row.baselineMm, "mm", displayUnit)}
                   </td>
-                  <td className="px-4 py-2.5 text-center text-muted-foreground">
+                  <td className="text-muted-foreground px-4 py-2.5 text-center">
                     <ArrowRight className="mx-auto h-3 w-3" aria-hidden />
                   </td>
                   <td className="px-4 py-2.5 text-right font-semibold tabular-nums">
@@ -241,17 +244,13 @@ export function RescanDiff({
                         className={cn(
                           "inline-flex items-center gap-0.5",
                           delta > 0 && "text-status-success-fg",
-                          delta < 0 && "text-status-danger-fg",
+                          delta < 0 && "text-status-danger-fg"
                         )}
                       >
                         {deltaIcon(delta)}
-                        {formatMeasurement(
-                          Math.abs(delta),
-                          "mm",
-                          displayUnit,
-                          { withUnit: false },
-                        )}
-                        {" "}
+                        {formatMeasurement(Math.abs(delta), "mm", displayUnit, {
+                          withUnit: false,
+                        })}{" "}
                         {unitLabel(displayUnit)}
                       </span>
                     )}
@@ -280,9 +279,9 @@ export function RescanDiff({
       </div>
 
       {rejectRows.length > 0 && (
-        <p className="text-xs text-status-danger-fg">
-          Rejected fields will not apply — the change is too large for the AI
-          to be trustworthy. Try a clearer photo or edit those fields manually.
+        <p className="text-status-danger-fg text-xs">
+          Rejected fields will not apply — the change is too large for the AI to
+          be trustworthy. Try a clearer photo or edit those fields manually.
         </p>
       )}
 
@@ -303,9 +302,9 @@ export function RescanDiff({
 
       {/* Hidden helper for screen readers in case the visual badges aren't read */}
       <Label className="sr-only" id="rescan-help">
-        Tier badges in this table indicate which changes apply
-        automatically, which need your confirmation, and which the system
-        refuses because the change exceeds the trust threshold.
+        Tier badges in this table indicate which changes apply automatically,
+        which need your confirmation, and which the system refuses because the
+        change exceeds the trust threshold.
       </Label>
     </div>
   );

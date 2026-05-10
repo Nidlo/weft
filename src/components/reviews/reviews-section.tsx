@@ -3,7 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { useDesignerReviews, useRatingBreakdown } from "@/lib/hooks/use-reviews";
+import {
+  useDesignerReviews,
+  useRatingBreakdown,
+} from "@/lib/hooks/use-reviews";
 import { RatingBreakdown } from "./rating-breakdown";
 import { ReviewCard } from "./review-card";
 
@@ -20,14 +23,18 @@ export function ReviewsSection({
   totalReviews,
   isDesigner,
 }: ReviewsSectionProps) {
-  const { breakdown, loading: breakdownLoading } = useRatingBreakdown(designerId);
-  const { reviews, loading, hasMorePages, loadMore } = useDesignerReviews(designerId, 5);
+  const { breakdown, loading: breakdownLoading } =
+    useRatingBreakdown(designerId);
+  const { reviews, loading, hasMorePages, loadMore } = useDesignerReviews(
+    designerId,
+    5
+  );
 
   if (totalReviews === 0) {
     return (
       <div>
         <h2 className="mb-3 text-lg font-semibold">Reviews</h2>
-        <p className="text-sm text-muted-foreground">No reviews yet.</p>
+        <p className="text-muted-foreground text-sm">No reviews yet.</p>
       </div>
     );
   }
@@ -52,25 +59,26 @@ export function ReviewsSection({
       {/* Review List */}
       <div className="divide-y">
         {reviews.map((review) => (
-          <ReviewCard
-            key={review.id}
-            review={review}
-            isDesigner={isDesigner}
-          />
+          <ReviewCard key={review.id} review={review} isDesigner={isDesigner} />
         ))}
       </div>
 
       {/* Loading state */}
       {loading && reviews.length === 0 && (
         <div className="flex justify-center py-8">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-5 w-5 animate-spin" />
         </div>
       )}
 
       {/* Load More */}
       {hasMorePages && (
         <div className="mt-4 text-center">
-          <Button variant="outline" size="sm" onClick={loadMore} disabled={loading}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadMore}
+            disabled={loading}
+          >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-3 w-3 animate-spin" />

@@ -32,17 +32,17 @@ export function AppSplash() {
       role="status"
       aria-live="polite"
       aria-label="Loading Nidlo"
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-background transition-opacity duration-300"
+      className="bg-background fixed inset-0 z-[200] flex flex-col items-center justify-center transition-opacity duration-300"
       style={{ opacity: hasHydrated ? 0 : 1 }}
     >
-      <div className="text-3xl font-bold tracking-tight text-foreground">
+      <div className="text-foreground text-3xl font-bold tracking-tight">
         Nidlo
       </div>
-      <p className="mt-2 text-sm uppercase tracking-widest text-primary">
+      <p className="text-primary mt-2 text-sm tracking-widest uppercase">
         Where every stitch begins
       </p>
-      <div className="mt-8 h-1 w-32 overflow-hidden rounded-full bg-muted">
-        <div className="h-full w-1/3 animate-[splash-bar_1.2s_ease-in-out_infinite] rounded-full bg-primary" />
+      <div className="bg-muted mt-8 h-1 w-32 overflow-hidden rounded-full">
+        <div className="bg-primary h-full w-1/3 animate-[splash-bar_1.2s_ease-in-out_infinite] rounded-full" />
       </div>
     </div>
   );

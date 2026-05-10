@@ -68,8 +68,7 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
   ]);
 
   const meetsDesignerRequirement = !requireDesigner || !!user?.isDesigner;
-  const meetsOnboardedRequirement =
-    !redirectOnboardedTo || !user?.isOnboarded;
+  const meetsOnboardedRequirement = !redirectOnboardedTo || !user?.isOnboarded;
 
   return {
     user,

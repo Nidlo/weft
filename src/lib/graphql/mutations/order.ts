@@ -79,7 +79,11 @@ export const UPDATE_ORDER = gql`
 `;
 
 export const CREATE_BLUEPRINT_OPTION = gql`
-  mutation CreateBlueprintOption($category: String!, $value: String!, $label: String!) {
+  mutation CreateBlueprintOption(
+    $category: String!
+    $value: String!
+    $label: String!
+  ) {
     createBlueprintOption(category: $category, value: $value, label: $label) {
       value
       label

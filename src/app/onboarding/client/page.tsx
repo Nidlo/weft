@@ -122,10 +122,8 @@ export default function ClientOnboardingPage() {
           ...user!,
           firstName:
             result.completeClientOnboarding.firstName ?? user!.firstName,
-          lastName:
-            result.completeClientOnboarding.lastName ?? user!.lastName,
-          fullName:
-            result.completeClientOnboarding.fullName ?? user!.fullName,
+          lastName: result.completeClientOnboarding.lastName ?? user!.lastName,
+          fullName: result.completeClientOnboarding.fullName ?? user!.fullName,
           email: result.completeClientOnboarding.email ?? user!.email,
           city: result.completeClientOnboarding.city ?? user!.city,
           isOnboarded: true,

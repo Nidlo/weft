@@ -138,7 +138,8 @@ export function ManualForm({
 
   const [label, setLabel] = useState(initialLabel);
   const [unit, setUnit] = useState<MeasurementUnit>(startingUnit);
-  const [template, setTemplate] = useState<MeasurementTemplate>(initialTemplate);
+  const [template, setTemplate] =
+    useState<MeasurementTemplate>(initialTemplate);
   const [data, setData] = useState<MeasurementData>(
     initialData ?? { upper_body: {}, lower_body: {}, vertical: {} }
   );
@@ -169,13 +170,13 @@ export function ManualForm({
   return (
     <div className="space-y-7">
       <header>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           Measurements
         </p>
-        <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+        <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
           {initialLabel ? "Edit profile" : "New profile"}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm">
           Fill in the fields you know. Leave anything blank — designers can ask
           for the rest at fitting.
         </p>
@@ -197,12 +198,12 @@ export function ManualForm({
           />
         </div>
 
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card/60 px-4 py-3">
+        <div className="border-border bg-card/60 flex items-center justify-between gap-4 rounded-xl border px-4 py-3">
           <div>
             <Label htmlFor="unit-toggle" className="text-sm">
               Input unit
             </Label>
-            <p className="text-xs text-muted-foreground tabular-nums">
+            <p className="text-muted-foreground text-xs tabular-nums">
               {unitName(unit)} · {unitLabel(unit)}
             </p>
           </div>
@@ -235,9 +236,10 @@ export function ManualForm({
               )}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Pick a template to focus on the fields that matter for that garment.
-            Switch to &ldquo;All measurements&rdquo; any time to enter the full set.
+            Switch to &ldquo;All measurements&rdquo; any time to enter the full
+            set.
           </p>
         </div>
       </GlassCard>
@@ -256,7 +258,7 @@ export function ManualForm({
         return (
           <section key={section}>
             <header className="mb-3 flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-secondary text-foreground">
+              <span className="bg-secondary text-foreground flex size-7 items-center justify-center rounded-lg">
                 <Ruler className="h-3.5 w-3.5" aria-hidden />
               </span>
               <h2 className="text-display text-lg font-semibold tracking-tight">
@@ -278,7 +280,7 @@ export function ManualForm({
                     <div key={field} className="space-y-1.5">
                       <Label
                         htmlFor={`${section}-${field}`}
-                        className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+                        className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase"
                       >
                         {fieldLabel}
                       </Label>
@@ -299,7 +301,7 @@ export function ManualForm({
                         )}
                       />
                       {warning && (
-                        <p className="text-[10px] leading-tight text-status-warning-fg">
+                        <p className="text-status-warning-fg text-[10px] leading-tight">
                           {warning}
                         </p>
                       )}

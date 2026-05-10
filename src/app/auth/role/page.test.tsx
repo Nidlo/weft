@@ -93,9 +93,7 @@ describe("RoleSelectionPage", () => {
 
     render(<RoleSelectionPage />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /I'm a designer/i })
-    );
+    fireEvent.click(screen.getByRole("button", { name: /I'm a designer/i }));
 
     await waitFor(() => {
       expect(becomeDesignerSpy).toHaveBeenCalledTimes(1);

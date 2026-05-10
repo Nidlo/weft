@@ -44,7 +44,7 @@ export default function MessagesPage() {
             <Skeleton className="mt-3 h-10 w-56" />
             <Skeleton className="mt-3 h-5 w-72" />
           </div>
-          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+          <GlassCard variant="solid" className="divide-border/60 divide-y p-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 p-3">
                 <Skeleton className="h-12 w-12 rounded-full" />
@@ -64,21 +64,20 @@ export default function MessagesPage() {
     <AppShell>
       <div className="space-y-7">
         <header>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+          <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
             Conversations
           </p>
-          <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
             Messages
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-            Chat with{" "}
-            {user.isDesigner ? "your clients" : "your designers"} about
-            orders, fittings, and updates.
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">
+            Chat with {user.isDesigner ? "your clients" : "your designers"}{" "}
+            about orders, fittings, and updates.
           </p>
         </header>
 
         {loading && conversations.length === 0 ? (
-          <GlassCard variant="solid" className="divide-y divide-border/60 p-2">
+          <GlassCard variant="solid" className="divide-border/60 divide-y p-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 p-3">
                 <Skeleton className="h-12 w-12 rounded-full" />
@@ -94,24 +93,24 @@ export default function MessagesPage() {
             variant="solid"
             className="flex flex-col items-center justify-center py-16 text-center"
           >
-            <span className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-foreground">
+            <span className="bg-secondary text-foreground flex size-16 items-center justify-center rounded-2xl">
               <MessageSquare className="h-7 w-7" aria-hidden />
             </span>
             <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
               No conversations yet.
             </h2>
-            <p className="mx-auto mt-2 max-w-sm text-pretty text-sm text-muted-foreground">
+            <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm text-pretty">
               {user.isDesigner ? (
                 "Conversations will appear here when clients message you about orders."
               ) : (
                 <>
                   Start one from any{" "}
                   <Sparkles
-                    className="inline h-3.5 w-3.5 text-copper"
+                    className="text-copper inline h-3.5 w-3.5"
                     aria-hidden
                   />{" "}
-                  designer&apos;s order page — they&apos;ll reach out the
-                  moment they have an update.
+                  designer&apos;s order page — they&apos;ll reach out the moment
+                  they have an update.
                 </>
               )}
             </p>
@@ -119,7 +118,7 @@ export default function MessagesPage() {
         ) : (
           <GlassCard
             variant="solid"
-            className="divide-y divide-border/60 overflow-hidden p-0"
+            className="divide-border/60 divide-y overflow-hidden p-0"
           >
             {conversations.map((conv) => (
               <ConversationListItem key={conv.id} conversation={conv} />

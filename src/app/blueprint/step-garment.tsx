@@ -96,7 +96,7 @@ export function SelectableCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-xl border bg-card p-3 text-left text-sm font-medium transition-all duration-200",
+        "bg-card rounded-xl border p-3 text-left text-sm font-medium transition-all duration-200",
         "hover:-translate-y-0.5 hover:shadow-(--shadow-1)",
         isSelected
           ? "border-foreground/30 bg-foreground/5 shadow-(--shadow-glow)"
@@ -104,7 +104,7 @@ export function SelectableCard({
       )}
     >
       {isSelected && (
-        <Sparkles className="mb-1.5 h-3 w-3 text-copper" aria-hidden />
+        <Sparkles className="text-copper mb-1.5 h-3 w-3" aria-hidden />
       )}
       {label}
     </button>
@@ -127,7 +127,7 @@ export function ChipPill({ label, isActive, onClick }: ChipPillProps) {
         "transition-all duration-200 hover:-translate-y-0.5",
         isActive
           ? "bg-foreground text-background shadow-(--shadow-2)"
-          : "border border-border bg-card hover:border-foreground/30"
+          : "border-border bg-card hover:border-foreground/30 border"
       )}
     >
       {label}

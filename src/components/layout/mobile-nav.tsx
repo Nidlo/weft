@@ -43,7 +43,7 @@ export function MobileNav() {
   return (
     <nav
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 border-t border-border/50 md:hidden",
+        "border-border/50 fixed inset-x-0 bottom-0 z-50 border-t md:hidden",
         "bg-background/75 backdrop-blur-xl backdrop-saturate-150",
         "supports-backdrop-filter:bg-background/55",
         "pb-[env(safe-area-inset-bottom)]"
@@ -76,7 +76,7 @@ export function MobileNav() {
                       ? { duration: 0 }
                       : { type: "spring", stiffness: 380, damping: 32 }
                   }
-                  className="absolute inset-x-3 top-1.5 z-0 h-1 rounded-full bg-copper"
+                  className="bg-copper absolute inset-x-3 top-1.5 z-0 h-1 rounded-full"
                 />
               )}
               <span className="relative">
@@ -88,7 +88,7 @@ export function MobileNav() {
                   strokeWidth={isActive ? 2.4 : 1.8}
                 />
                 {showBadge && (
-                  <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-copper px-1 text-[10px] font-semibold text-foreground ring-2 ring-background">
+                  <span className="bg-copper text-foreground ring-background absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold ring-2">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}

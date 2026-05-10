@@ -92,16 +92,16 @@ export function PwaInstallPrompt() {
 
   return (
     <div
-      className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-md items-center gap-3 rounded-xl border bg-background p-3 shadow-lg sm:bottom-4"
+      className="bg-background fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-md items-center gap-3 rounded-xl border p-3 shadow-lg sm:bottom-4"
       role="region"
       aria-label="Install Nidlo"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-        <Download className="h-5 w-5 text-primary" />
+      <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+        <Download className="text-primary h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium">Install Nidlo</p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Faster launch and push notifications.
         </p>
       </div>

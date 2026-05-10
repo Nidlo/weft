@@ -35,7 +35,7 @@ function readPermissionState(): PushPermissionState {
 }
 
 async function registerForPushImpl(
-  registerToken: (vars: { variables: { token: string } }) => Promise<unknown>,
+  registerToken: (vars: { variables: { token: string } }) => Promise<unknown>
 ): Promise<void> {
   if (typeof window === "undefined") return;
   if (!VAPID_KEY) {
@@ -44,7 +44,7 @@ async function registerForPushImpl(
     // Without a Sentry SDK on the frontend this is the loudest signal
     // we can give without breaking the user's session.
     console.warn(
-      "[nidlo:push] NEXT_PUBLIC_FIREBASE_VAPID_KEY is not set; push notifications will not register on this device.",
+      "[nidlo:push] NEXT_PUBLIC_FIREBASE_VAPID_KEY is not set; push notifications will not register on this device."
     );
     return;
   }
@@ -58,7 +58,7 @@ async function registerForPushImpl(
     });
     if (!token) {
       console.warn(
-        "[nidlo:push] FCM getToken returned null; permission may be revoked or the SW may have failed to register.",
+        "[nidlo:push] FCM getToken returned null; permission may be revoked or the SW may have failed to register."
       );
       return;
     }
@@ -78,26 +78,28 @@ export function usePushPermission() {
   const [permission, setPermission] =
     useState<PushPermissionState>(readPermissionState);
 
-  const requestPermission = useCallback(async (): Promise<PushPermissionState> => {
-    if (typeof window === "undefined" || !("Notification" in window)) {
-      return "unsupported";
-    }
-    try {
-      const result = (await Notification.requestPermission()) as PushPermissionState;
-      setPermission(result);
+  const requestPermission =
+    useCallback(async (): Promise<PushPermissionState> => {
+      if (typeof window === "undefined" || !("Notification" in window)) {
+        return "unsupported";
+      }
       try {
-        localStorage.setItem(PROMPT_FLAG, "1");
+        const result =
+          (await Notification.requestPermission()) as PushPermissionState;
+        setPermission(result);
+        try {
+          localStorage.setItem(PROMPT_FLAG, "1");
+        } catch {
+          // Storage may be unavailable in private mode — non-fatal.
+        }
+        if (result === "granted") {
+          await registerForPushImpl(registerToken);
+        }
+        return result;
       } catch {
-        // Storage may be unavailable in private mode — non-fatal.
+        return readPermissionState();
       }
-      if (result === "granted") {
-        await registerForPushImpl(registerToken);
-      }
-      return result;
-    } catch {
-      return readPermissionState();
-    }
-  }, [registerToken]);
+    }, [registerToken]);
 
   const shouldPromptUi =
     permission === "default" &&
@@ -114,7 +116,9 @@ export function usePushPermission() {
   return { permission, shouldPromptUi, requestPermission };
 }
 
-async function registerServiceWorker(): Promise<ServiceWorkerRegistration | undefined> {
+async function registerServiceWorker(): Promise<
+  ServiceWorkerRegistration | undefined
+> {
   if (!("serviceWorker" in navigator)) return undefined;
 
   // Pass the Firebase config as query params so the SW can initialize
@@ -127,7 +131,7 @@ async function registerServiceWorker(): Promise<ServiceWorkerRegistration | unde
   });
 
   return navigator.serviceWorker.register(
-    `/firebase-messaging-sw.js?${params.toString()}`,
+    `/firebase-messaging-sw.js?${params.toString()}`
   );
 }
 
@@ -147,7 +151,7 @@ export function usePushNotifications(enabled: boolean) {
   // mutation refetches the query.
   const { data: prefsData } = useQuery<MyNotificationPreferencesData>(
     MY_NOTIFICATION_PREFERENCES,
-    { skip: !enabled, fetchPolicy: "cache-first" },
+    { skip: !enabled, fetchPolicy: "cache-first" }
   );
   const quietHoursStart =
     prefsData?.myNotificationPreferences?.quietHoursStart ?? null;

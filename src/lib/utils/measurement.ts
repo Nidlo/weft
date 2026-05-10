@@ -43,11 +43,16 @@ export function inchesToMm(inches: number): number {
 export function convertMeasurement(
   value: number,
   from: StorageUnit,
-  to: StorageUnit,
+  to: StorageUnit
 ): number {
   if (from === to) return value;
   // Canonicalise via cm so we don't proliferate pairwise branches.
-  const cm = from === "cm" ? value : from === "inches" ? inchesToCm(value) : mmToCm(value);
+  const cm =
+    from === "cm"
+      ? value
+      : from === "inches"
+        ? inchesToCm(value)
+        : mmToCm(value);
   return to === "cm" ? cm : to === "inches" ? cmToInches(cm) : cmToMm(cm);
 }
 
@@ -68,7 +73,7 @@ export function formatMeasurement(
   value: number | null | undefined,
   storedUnit: StorageUnit,
   displayUnit: MeasurementUnit,
-  { digits, withUnit = true }: FormatOptions = {},
+  { digits, withUnit = true }: FormatOptions = {}
 ): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "—";
   const converted = convertMeasurement(value, storedUnit, displayUnit);
@@ -85,11 +90,14 @@ export function formatMeasurement(
  * re-display measurement payloads in a chosen unit.
  */
 export function convertMeasurementData<
-  T extends Record<string, Record<string, number | null | undefined> | undefined>,
+  T extends Record<
+    string,
+    Record<string, number | null | undefined> | undefined
+  >,
 >(
   payload: T | null | undefined,
   from: StorageUnit,
-  to: StorageUnit,
+  to: StorageUnit
 ): Record<string, Record<string, number | null>> {
   if (!payload) return {};
   if (from === to) {
@@ -116,7 +124,8 @@ export function convertMeasurementData<
         // Round inches/cm conversions to 1 decimal so users entering values
         // back into a cm/inch input field don't see "91.4400000004".
         const converted = convertMeasurement(value, from, to);
-        out[field] = to === "mm" ? Math.round(converted) : Math.round(converted * 10) / 10;
+        out[field] =
+          to === "mm" ? Math.round(converted) : Math.round(converted * 10) / 10;
       }
     }
     result[section] = out;
@@ -164,7 +173,7 @@ export type RescanTier = "auto" | "prompt" | "reject";
 
 export function classifyRescanDelta(
   baselineMm: number | null,
-  proposedMm: number | null,
+  proposedMm: number | null
 ): RescanTier {
   if (baselineMm === null || proposedMm === null) return "prompt";
   const abs = Math.abs(proposedMm - baselineMm);
@@ -220,7 +229,7 @@ export function recomputeFromLandmarks(
   baselineDataMm:
     | Record<string, Record<string, number | null | undefined> | undefined>
     | null
-    | undefined,
+    | undefined
 ): Record<string, Record<string, number>> {
   if (!landmarks || !baselineDataMm) return {};
 
@@ -263,7 +272,10 @@ export function recomputeFromLandmarks(
   // ── shoulder ─────────────────────────────────────────────────────
   if (landmarks.left_shoulder && landmarks.right_shoulder) {
     const px = pointDistance(landmarks.left_shoulder, landmarks.right_shoulder);
-    result.upper_body = { ...(result.upper_body ?? {}), shoulder: Math.round(px * mmPerPx) };
+    result.upper_body = {
+      ...(result.upper_body ?? {}),
+      shoulder: Math.round(px * mmPerPx),
+    };
   }
 
   // ── arm_length (left, fall back to right) ────────────────────────
@@ -276,7 +288,10 @@ export function recomputeFromLandmarks(
       : null);
   if (armSrc) {
     const px = pointDistance(armSrc[0], armSrc[1]);
-    result.upper_body = { ...(result.upper_body ?? {}), arm_length: Math.round(px * mmPerPx) };
+    result.upper_body = {
+      ...(result.upper_body ?? {}),
+      arm_length: Math.round(px * mmPerPx),
+    };
   }
 
   // ── inseam (left hip → left ankle, fall back right) ─────────────
@@ -289,7 +304,10 @@ export function recomputeFromLandmarks(
       : null);
   if (inseamSrc) {
     const px = pointDistance(inseamSrc[0], inseamSrc[1]);
-    result.lower_body = { ...(result.lower_body ?? {}), inseam: Math.round(px * mmPerPx) };
+    result.lower_body = {
+      ...(result.lower_body ?? {}),
+      inseam: Math.round(px * mmPerPx),
+    };
   }
 
   // ── shoulder_to_waist (vertical: shoulder-mid → hip-mid) ────────
@@ -299,10 +317,16 @@ export function recomputeFromLandmarks(
     landmarks.left_hip &&
     landmarks.right_hip
   ) {
-    const shoulderMid = midpoint(landmarks.left_shoulder, landmarks.right_shoulder);
+    const shoulderMid = midpoint(
+      landmarks.left_shoulder,
+      landmarks.right_shoulder
+    );
     const hipMid = midpoint(landmarks.left_hip, landmarks.right_hip);
     const px = verticalDistance(shoulderMid, hipMid);
-    result.vertical = { ...result.vertical, shoulder_to_waist: Math.round(px * mmPerPx) };
+    result.vertical = {
+      ...result.vertical,
+      shoulder_to_waist: Math.round(px * mmPerPx),
+    };
   }
 
   // ── waist_to_knee (vertical: hip-mid → knee-mid) ────────────────
@@ -315,7 +339,10 @@ export function recomputeFromLandmarks(
     const hipMid = midpoint(landmarks.left_hip, landmarks.right_hip);
     const kneeMid = midpoint(landmarks.left_knee, landmarks.right_knee);
     const px = verticalDistance(hipMid, kneeMid);
-    result.vertical = { ...result.vertical, waist_to_knee: Math.round(px * mmPerPx) };
+    result.vertical = {
+      ...result.vertical,
+      waist_to_knee: Math.round(px * mmPerPx),
+    };
   }
 
   return result;
@@ -324,7 +351,7 @@ export function recomputeFromLandmarks(
 export function checkBounds(
   field: string,
   value: number,
-  unit: MeasurementUnit,
+  unit: MeasurementUnit
 ): string | null {
   const bound = ADULT_BOUNDS_CM[field];
   if (!bound) return null;

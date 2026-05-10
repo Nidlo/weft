@@ -77,21 +77,21 @@
   --radius: 0.875rem;
 
   /* Surfaces */
-  --background: oklch(0.985 0.005 75);   /* warm bone */
-  --foreground: oklch(0.16 0.012 50);    /* deep ink */
-  --card: oklch(1 0 0);                  /* pure white lift */
+  --background: oklch(0.985 0.005 75); /* warm bone */
+  --foreground: oklch(0.16 0.012 50); /* deep ink */
+  --card: oklch(1 0 0); /* pure white lift */
   --card-foreground: oklch(0.16 0.012 50);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.16 0.012 50);
 
   /* Brand */
-  --primary: oklch(0.18 0.018 50);       /* charcoal-ink with warmth */
+  --primary: oklch(0.18 0.018 50); /* charcoal-ink with warmth */
   --primary-foreground: oklch(0.985 0.005 75);
-  --secondary: oklch(0.94 0.012 75);     /* soft bone */
+  --secondary: oklch(0.94 0.012 75); /* soft bone */
   --secondary-foreground: oklch(0.22 0.018 50);
   --muted: oklch(0.95 0.008 75);
   --muted-foreground: oklch(0.45 0.015 50);
-  --accent: oklch(0.74 0.11 60);         /* champagne copper */
+  --accent: oklch(0.74 0.11 60); /* champagne copper */
   --accent-foreground: oklch(0.18 0.018 50);
 
   --destructive: oklch(0.55 0.22 25);
@@ -124,16 +124,16 @@
 
   /* Status — kept harmonized with the warm band */
   --status-success: oklch(0.55 0.16 150);
-  --status-success-fg: oklch(0.40 0.13 150);
+  --status-success-fg: oklch(0.4 0.13 150);
   --status-success-soft: oklch(0.94 0.04 150);
   --status-warning: oklch(0.74 0.13 75);
-  --status-warning-fg: oklch(0.50 0.13 75);
+  --status-warning-fg: oklch(0.5 0.13 75);
   --status-warning-soft: oklch(0.96 0.04 75);
   --status-error: oklch(0.55 0.22 25);
   --status-error-fg: oklch(0.42 0.18 25);
   --status-error-soft: oklch(0.95 0.05 25);
   --status-info: oklch(0.55 0.12 230);
-  --status-info-fg: oklch(0.40 0.10 230);
+  --status-info-fg: oklch(0.4 0.1 230);
   --status-info-soft: oklch(0.94 0.04 230);
 
   /* Glass surfaces — use behind backdrop-blur for the iOS-26 frost effect.
@@ -145,10 +145,16 @@
   --glass-shadow: oklch(0.16 0.012 50 / 0.06);
 
   /* Elevation stack — short shadow + long shadow combo for modern depth */
-  --shadow-1: 0 1px 2px oklch(0.16 0.012 50 / 0.04), 0 1px 1px oklch(0.16 0.012 50 / 0.02);
-  --shadow-2: 0 4px 12px oklch(0.16 0.012 50 / 0.06), 0 1px 3px oklch(0.16 0.012 50 / 0.04);
-  --shadow-3: 0 12px 32px oklch(0.16 0.012 50 / 0.08), 0 4px 8px oklch(0.16 0.012 50 / 0.04);
-  --shadow-glow: 0 0 0 1px oklch(0.74 0.11 60 / 0.25), 0 8px 24px oklch(0.74 0.11 60 / 0.15);
+  --shadow-1:
+    0 1px 2px oklch(0.16 0.012 50 / 0.04), 0 1px 1px oklch(0.16 0.012 50 / 0.02);
+  --shadow-2:
+    0 4px 12px oklch(0.16 0.012 50 / 0.06),
+    0 1px 3px oklch(0.16 0.012 50 / 0.04);
+  --shadow-3:
+    0 12px 32px oklch(0.16 0.012 50 / 0.08),
+    0 4px 8px oklch(0.16 0.012 50 / 0.04);
+  --shadow-glow:
+    0 0 0 1px oklch(0.74 0.11 60 / 0.25), 0 8px 24px oklch(0.74 0.11 60 / 0.15);
 
   /* Motion — easing curves used across the system. Stitch is the brand's
    * signature: a soft snap that mimics the moment a needle pulls thread
@@ -194,7 +200,7 @@
 
   --chart-1: oklch(0.97 0.008 75);
   --chart-2: oklch(0.78 0.13 65);
-  --chart-3: oklch(0.65 0.10 230);
+  --chart-3: oklch(0.65 0.1 230);
   --chart-4: oklch(0.72 0.15 145);
   --chart-5: oklch(0.66 0.22 25);
 
@@ -208,28 +214,29 @@
   --sidebar-ring: oklch(0.78 0.13 65);
 
   --status-success: oklch(0.68 0.18 150);
-  --status-success-fg: oklch(0.80 0.14 150);
+  --status-success-fg: oklch(0.8 0.14 150);
   --status-success-soft: oklch(0.25 0.07 150);
   --status-warning: oklch(0.78 0.13 75);
-  --status-warning-fg: oklch(0.85 0.10 75);
+  --status-warning-fg: oklch(0.85 0.1 75);
   --status-warning-soft: oklch(0.25 0.06 75);
   --status-error: oklch(0.66 0.22 25);
-  --status-error-fg: oklch(0.80 0.16 25);
+  --status-error-fg: oklch(0.8 0.16 25);
   --status-error-soft: oklch(0.25 0.08 25);
   --status-info: oklch(0.66 0.13 230);
-  --status-info-fg: oklch(0.80 0.10 230);
+  --status-info-fg: oklch(0.8 0.1 230);
   --status-info-soft: oklch(0.25 0.07 230);
 
   /* Glass — darker base, lower opacity, brighter highlight */
   --glass: oklch(0.18 0.015 50 / 0.55);
   --glass-strong: oklch(0.18 0.015 50 / 0.82);
-  --glass-border: oklch(1 0 0 / 0.10);
+  --glass-border: oklch(1 0 0 / 0.1);
   --glass-shadow: oklch(0 0 0 / 0.5);
 
   --shadow-1: 0 1px 2px oklch(0 0 0 / 0.3), 0 1px 1px oklch(0 0 0 / 0.2);
   --shadow-2: 0 4px 12px oklch(0 0 0 / 0.4), 0 1px 3px oklch(0 0 0 / 0.3);
   --shadow-3: 0 12px 32px oklch(0 0 0 / 0.5), 0 4px 8px oklch(0 0 0 / 0.3);
-  --shadow-glow: 0 0 0 1px oklch(0.78 0.13 65 / 0.3), 0 8px 24px oklch(0.78 0.13 65 / 0.18);
+  --shadow-glow:
+    0 0 0 1px oklch(0.78 0.13 65 / 0.3), 0 8px 24px oklch(0.78 0.13 65 / 0.18);
 }
 
 @layer base {
@@ -260,12 +267,16 @@
   .surface-glass {
     background: var(--glass);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 1px 0 0 var(--glass-border) inset, var(--shadow-2);
+    box-shadow:
+      0 1px 0 0 var(--glass-border) inset,
+      var(--shadow-2);
   }
   .surface-glass-strong {
     background: var(--glass-strong);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 1px 0 0 var(--glass-border) inset, var(--shadow-3);
+    box-shadow:
+      0 1px 0 0 var(--glass-border) inset,
+      var(--shadow-3);
   }
 
   /* Subtle copper-thread underline that "stitches" on hover */
@@ -285,7 +296,10 @@
    * headlines. Use sparingly; pairs with Geist sans for body. */
   .text-display {
     font-family: var(--font-display, var(--font-geist-sans));
-    font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 0;
+    font-variation-settings:
+      "opsz" 144,
+      "SOFT" 30,
+      "WONK" 0;
     letter-spacing: -0.02em;
   }
 
@@ -312,7 +326,7 @@
     background-image:
       radial-gradient(
         ellipse 60% 40% at 12% 0%,
-        oklch(0.78 0.13 65 / 0.10) 0%,
+        oklch(0.78 0.13 65 / 0.1) 0%,
         transparent 60%
       ),
       radial-gradient(
@@ -363,38 +377,61 @@
  * overkill.
  * ========================================================================= */
 @keyframes splash-bar {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(300%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
 }
 
 /* The signature: a needle stitching across — used for ThreadDivider and
  * any decorative dashed line. */
 @keyframes thread-stitch {
-  0% { stroke-dashoffset: var(--stitch-length, 200); }
-  100% { stroke-dashoffset: 0; }
+  0% {
+    stroke-dashoffset: var(--stitch-length, 200);
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* A slow shimmer that traverses an element (skeletons, copper accents) */
 @keyframes copper-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
-
 
 /* Soft floating idle (logo idle, hero medallion) */
 @keyframes float-soft {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
 /* Needle wiggle — a tiny rotational jitter for the pin icon */
 @keyframes needle-wiggle {
-  0%, 100% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

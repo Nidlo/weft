@@ -69,8 +69,7 @@ export default function PhoneAuthPage() {
 
   const selectedCountry = useMemo(
     () =>
-      countries.find((c) => `+${c.phoneCode}` === selectedCode) ??
-      countries[0],
+      countries.find((c) => `+${c.phoneCode}` === selectedCode) ?? countries[0],
     [countries, selectedCode]
   );
 
@@ -155,8 +154,7 @@ export default function PhoneAuthPage() {
           script.src =
             "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js";
           script.onload = () => resolve();
-          script.onerror = () =>
-            reject(new Error("Failed to load Apple SDK"));
+          script.onerror = () => reject(new Error("Failed to load Apple SDK"));
           document.head.appendChild(script);
         });
       }
@@ -171,10 +169,7 @@ export default function PhoneAuthPage() {
       const response = await window.AppleID!.auth.signIn();
       await handleSocialLogin("apple", response.authorization.id_token);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message !== "popup_closed_by_user"
-      ) {
+      if (error instanceof Error && error.message !== "popup_closed_by_user") {
         toast.error("Apple sign-in failed. Please try again.");
       }
     }
@@ -241,10 +236,10 @@ export default function PhoneAuthPage() {
   return (
     <GlassCard variant="solid" className="p-8">
       <header className="mb-7">
-        <h1 className="text-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+        <h1 className="text-display text-2xl leading-tight font-semibold tracking-tight sm:text-3xl">
           Welcome back.
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1.5 text-sm">
           We&apos;ll text you a 6-digit code to verify your number.
         </p>
       </header>
@@ -252,29 +247,27 @@ export default function PhoneAuthPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <label
           htmlFor="phone-input"
-          className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+          className="text-muted-foreground block text-[11px] font-semibold tracking-[0.16em] uppercase"
         >
           Phone number
         </label>
         <div className="flex gap-2">
           <Select value={selectedCode} onValueChange={setSelectedCode}>
-            <SelectTrigger className="h-12! w-32 shrink-0 rounded-xl border-border bg-background/60 text-sm font-medium">
+            <SelectTrigger className="border-border bg-background/60 h-12! w-32 shrink-0 rounded-xl text-sm font-medium">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {countries.map((c) => (
                 <SelectItem key={c.iso2} value={`+${c.phoneCode}`}>
                   {c.emoji ?? ""} +{c.phoneCode}{" "}
-                  <span className="text-muted-foreground">
-                    {c.iso2}
-                  </span>
+                  <span className="text-muted-foreground">{c.iso2}</span>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <div className="relative flex-1">
             <Phone
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
               aria-hidden
             />
             <Input
@@ -287,7 +280,7 @@ export default function PhoneAuthPage() {
               autoFocus
               autoComplete="tel"
               inputMode="numeric"
-              className="h-12 rounded-xl bg-background/60 pl-9 text-base font-medium tabular-nums"
+              className="bg-background/60 h-12 rounded-xl pl-9 text-base font-medium tabular-nums"
             />
           </div>
         </div>
@@ -331,18 +324,18 @@ export default function PhoneAuthPage() {
         </Button>
       </div>
 
-      <p className="mt-7 text-center text-xs text-muted-foreground">
+      <p className="text-muted-foreground mt-7 text-center text-xs">
         By continuing you agree to our{" "}
         <a
           href="/terms"
-          className="font-medium text-foreground/80 underline-offset-4 hover:underline"
+          className="text-foreground/80 font-medium underline-offset-4 hover:underline"
         >
           Terms
         </a>{" "}
         and{" "}
         <a
           href="/privacy"
-          className="font-medium text-foreground/80 underline-offset-4 hover:underline"
+          className="text-foreground/80 font-medium underline-offset-4 hover:underline"
         >
           Privacy
         </a>

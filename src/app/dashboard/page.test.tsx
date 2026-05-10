@@ -64,7 +64,9 @@ describe("DashboardPage", () => {
   it("shows the loading skeleton when the auth guard isn't ready", () => {
     useAuthGuardSpy.mockReturnValue({ user: null, isReady: false });
     const { container } = render(<DashboardPage />);
-    expect(container.querySelectorAll("[data-slot=skeleton]").length).toBeGreaterThan(0);
+    expect(
+      container.querySelectorAll("[data-slot=skeleton]").length
+    ).toBeGreaterThan(0);
   });
 
   it("renders the client dashboard for non-designer users", () => {
@@ -76,7 +78,9 @@ describe("DashboardPage", () => {
     expect(
       screen.getByRole("link", { name: /find a designer/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/three steps from idea to wardrobe/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/three steps from idea to wardrobe/i)
+    ).toBeInTheDocument();
   });
 
   it("renders the designer dashboard for designer users", () => {
@@ -97,8 +101,6 @@ describe("DashboardPage", () => {
     useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
     render(<DashboardPage />);
     // The host is whatever jsdom produces — assert the slug is rendered.
-    expect(
-      screen.getByText(/\/designer\/kojo-atelier/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/\/designer\/kojo-atelier/)).toBeInTheDocument();
   });
 });

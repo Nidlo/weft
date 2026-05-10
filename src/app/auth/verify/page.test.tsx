@@ -4,7 +4,9 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 // Mock Apollo's react bindings BEFORE importing the component so each test
 // can drive useMutation behavior independently.
 const verifyOtpMutationSpy =
-  vi.fn<(args: { variables: { phone: string; code: string } }) => Promise<unknown>>();
+  vi.fn<
+    (args: { variables: { phone: string; code: string } }) => Promise<unknown>
+  >();
 const requestOtpMutationSpy =
   vi.fn<(args: { variables: { phone: string } }) => Promise<unknown>>();
 let verifyLoading = false;
@@ -13,9 +15,13 @@ vi.mock("@apollo/client/react", () => ({
   useMutation: (doc: unknown) => {
     // Distinguish by the operation source string — VERIFY_OTP and REQUEST_OTP
     // are the only two mutations the verify page uses.
-    const text = typeof doc === "object" && doc !== null && "loc" in doc
-      ? String((doc as { loc?: { source?: { body?: string } } }).loc?.source?.body ?? "")
-      : "";
+    const text =
+      typeof doc === "object" && doc !== null && "loc" in doc
+        ? String(
+            (doc as { loc?: { source?: { body?: string } } }).loc?.source
+              ?.body ?? ""
+          )
+        : "";
     if (text.includes("verifyOtp")) {
       return [verifyOtpMutationSpy, { loading: verifyLoading }];
     }
@@ -28,7 +34,11 @@ const routerPushSpy = vi.fn<(href: string) => void>();
 const routerReplaceSpy = vi.fn<(href: string) => void>();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: routerPushSpy, replace: routerReplaceSpy, back: vi.fn() }),
+  useRouter: () => ({
+    push: routerPushSpy,
+    replace: routerReplaceSpy,
+    back: vi.fn(),
+  }),
 }));
 
 const setUserSpy = vi.fn<(...args: unknown[]) => void>();
@@ -165,7 +175,9 @@ describe("VerifyOtpPage", () => {
   it("clears the digits and stays on the page after a wrong attempt, allowing a retry", async () => {
     // Bug B: a wrong attempt must NOT lock the user out of submitting again
     // — they should be able to enter the correct code without resending SMS.
-    verifyOtpMutationSpy.mockRejectedValueOnce(new Error("Invalid code. 2 attempt(s) remaining."));
+    verifyOtpMutationSpy.mockRejectedValueOnce(
+      new Error("Invalid code. 2 attempt(s) remaining.")
+    );
     verifyOtpMutationSpy.mockResolvedValueOnce({
       data: {
         verifyOtp: {
@@ -226,7 +238,7 @@ describe("VerifyOtpPage", () => {
       () =>
         new Promise((resolve) => {
           deferred.resolve = resolve;
-        }),
+        })
     );
 
     render(<VerifyOtpPage />);

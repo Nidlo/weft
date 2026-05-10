@@ -1,11 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  afterAll,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import {
   formatPesewas,
   formatPesewasShort,
@@ -126,42 +119,48 @@ describe("getResponseTimeLeft / getResponseTimeColor", () => {
     new Date(NOW.getTime() - 24 * 60 * 60 * 1000 + msFromNow).toISOString();
 
   it("formats hours-remaining when more than 1h is left", () => {
-    expect(getResponseTimeLeft(createdAtCutoff(5 * 60 * 60 * 1000), 24, NOW))
-      .toBe("Designer has 5h left");
+    expect(
+      getResponseTimeLeft(createdAtCutoff(5 * 60 * 60 * 1000), 24, NOW)
+    ).toBe("Designer has 5h left");
   });
 
   it("formats minutes-remaining when less than 1h is left", () => {
-    expect(getResponseTimeLeft(createdAtCutoff(45 * 60 * 1000), 24, NOW))
-      .toBe("Designer has 45m left");
+    expect(getResponseTimeLeft(createdAtCutoff(45 * 60 * 1000), 24, NOW)).toBe(
+      "Designer has 45m left"
+    );
   });
 
   it("returns expired text when the cutoff has passed", () => {
-    expect(getResponseTimeLeft(createdAtCutoff(-60 * 1000), 24, NOW))
-      .toBe("Response window expired");
+    expect(getResponseTimeLeft(createdAtCutoff(-60 * 1000), 24, NOW)).toBe(
+      "Response window expired"
+    );
   });
 
   it("expired exactly at cutoff (boundary)", () => {
-    expect(getResponseTimeLeft(createdAtCutoff(0), 24, NOW))
-      .toBe("Response window expired");
+    expect(getResponseTimeLeft(createdAtCutoff(0), 24, NOW)).toBe(
+      "Response window expired"
+    );
   });
 
   it("uses a custom window length when supplied", () => {
     // 12-hour window, 6 hours remaining
     const created = new Date(NOW.getTime() - 6 * 60 * 60 * 1000).toISOString();
-    expect(getResponseTimeLeft(created, 12, NOW))
-      .toBe("Designer has 6h left");
+    expect(getResponseTimeLeft(created, 12, NOW)).toBe("Designer has 6h left");
   });
 
   it("color escalates as the window narrows", () => {
     // > 1h: muted
-    expect(getResponseTimeColor(createdAtCutoff(5 * 60 * 60 * 1000), 24, NOW))
-      .toBe("text-muted-foreground");
+    expect(
+      getResponseTimeColor(createdAtCutoff(5 * 60 * 60 * 1000), 24, NOW)
+    ).toBe("text-muted-foreground");
     // <= 1h, > 0: warning
-    expect(getResponseTimeColor(createdAtCutoff(30 * 60 * 1000), 24, NOW))
-      .toBe("text-status-warning-fg");
+    expect(getResponseTimeColor(createdAtCutoff(30 * 60 * 1000), 24, NOW)).toBe(
+      "text-status-warning-fg"
+    );
     // <= 0: error
-    expect(getResponseTimeColor(createdAtCutoff(-60 * 1000), 24, NOW))
-      .toBe("text-status-error-fg");
+    expect(getResponseTimeColor(createdAtCutoff(-60 * 1000), 24, NOW)).toBe(
+      "text-status-error-fg"
+    );
   });
 });
 
@@ -221,27 +220,41 @@ describe("getReviewDeadlineLabel", () => {
 
   it("formats the deadline as `Review by Tue 12 May` mid-window", () => {
     // Delivered 2 days ago, 7-day window → cutoff 5 days from now (Fri 8 May).
-    const delivered = new Date(NOW.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
+    const delivered = new Date(
+      NOW.getTime() - 2 * 24 * 60 * 60 * 1000
+    ).toISOString();
     expect(getReviewDeadlineLabel(delivered, 7, NOW)).toMatch(/^Review by /);
   });
 
   it("returns the closed sentinel past the cutoff", () => {
     // Delivered 8 days ago — window of 7 days has elapsed.
-    const delivered = new Date(NOW.getTime() - 8 * 24 * 60 * 60 * 1000).toISOString();
-    expect(getReviewDeadlineLabel(delivered, 7, NOW)).toBe("Review window closed");
+    const delivered = new Date(
+      NOW.getTime() - 8 * 24 * 60 * 60 * 1000
+    ).toISOString();
+    expect(getReviewDeadlineLabel(delivered, 7, NOW)).toBe(
+      "Review window closed"
+    );
   });
 
   it("respects a custom window length", () => {
     // 3-day window, delivered 4 days ago → closed.
-    const delivered = new Date(NOW.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString();
-    expect(getReviewDeadlineLabel(delivered, 3, NOW)).toBe("Review window closed");
+    const delivered = new Date(
+      NOW.getTime() - 4 * 24 * 60 * 60 * 1000
+    ).toISOString();
+    expect(getReviewDeadlineLabel(delivered, 3, NOW)).toBe(
+      "Review window closed"
+    );
 
     // 14-day window, same delivery → still open.
     expect(getReviewDeadlineLabel(delivered, 14, NOW)).toMatch(/^Review by /);
   });
 
   it("at the boundary — equal to cutoff is closed (exclusive)", () => {
-    const delivered = new Date(NOW.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    expect(getReviewDeadlineLabel(delivered, 7, NOW)).toBe("Review window closed");
+    const delivered = new Date(
+      NOW.getTime() - 7 * 24 * 60 * 60 * 1000
+    ).toISOString();
+    expect(getReviewDeadlineLabel(delivered, 7, NOW)).toBe(
+      "Review window closed"
+    );
   });
 });

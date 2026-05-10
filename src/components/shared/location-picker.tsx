@@ -63,9 +63,7 @@ export function LocationPicker({
   const markerRef = useRef<google.maps.Marker | null>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
-  const [searchValue, setSearchValue] = useState(
-    value?.formattedAddress ?? ""
-  );
+  const [searchValue, setSearchValue] = useState(value?.formattedAddress ?? "");
   const [detecting, setDetecting] = useState(false);
 
   const defaultCenter = {

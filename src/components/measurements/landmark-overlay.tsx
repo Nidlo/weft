@@ -110,12 +110,12 @@ export function LandmarkOverlay({
         y: Math.min(Math.max(y, 0), 1),
       };
     },
-    [],
+    []
   );
 
   const handleDotPointerDown = (
     e: ReactPointerEvent<HTMLButtonElement>,
-    name: string,
+    name: string
   ) => {
     if (!editable || !onLandmarksChange) return;
     e.preventDefault();
@@ -157,8 +157,8 @@ export function LandmarkOverlay({
     return (
       <div
         className={cn(
-          "aspect-[3/4] w-full animate-pulse rounded-2xl bg-muted",
-          className,
+          "bg-muted aspect-[3/4] w-full animate-pulse rounded-2xl",
+          className
         )}
         aria-hidden
       />
@@ -173,9 +173,9 @@ export function LandmarkOverlay({
       // 0-1 coords against the container box, which matches MediaPipe's
       // normalised output relative to the full image frame.
       className={cn(
-        "relative aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-card",
+        "border-border bg-card relative aspect-[3/4] overflow-hidden rounded-2xl border",
         editable && "touch-none select-none",
-        className,
+        className
       )}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -205,12 +205,12 @@ export function LandmarkOverlay({
                   onPointerUp={handleDotPointerUp}
                   onPointerCancel={handleDotPointerUp}
                   className={cn(
-                    "absolute -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background transition-transform",
-                    "cursor-grab focus:outline-none focus-visible:ring-foreground active:cursor-grabbing",
+                    "ring-background absolute -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 transition-transform",
+                    "focus-visible:ring-foreground cursor-grab focus:outline-none active:cursor-grabbing",
                     isDragging && "scale-150",
                     dot.occluded
-                      ? "h-3.5 w-3.5 border-2 border-status-warning bg-background"
-                      : "h-3 w-3 bg-copper",
+                      ? "border-status-warning bg-background h-3.5 w-3.5 border-2"
+                      : "bg-copper h-3 w-3"
                   )}
                   style={commonStyle}
                   aria-label={`Drag to reposition ${dotLabel}`}
@@ -222,10 +222,10 @@ export function LandmarkOverlay({
               <span
                 key={dot.name}
                 className={cn(
-                  "absolute -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background",
+                  "ring-background absolute -translate-x-1/2 -translate-y-1/2 rounded-full ring-2",
                   dot.occluded
-                    ? "h-3 w-3 border-2 border-status-warning bg-transparent"
-                    : "h-2.5 w-2.5 bg-copper",
+                    ? "border-status-warning h-3 w-3 border-2 bg-transparent"
+                    : "bg-copper h-2.5 w-2.5"
                 )}
                 style={commonStyle}
                 role="img"
@@ -238,7 +238,7 @@ export function LandmarkOverlay({
       )}
 
       {(editable || dots.some((d) => d.occluded)) && (
-        <div className="absolute bottom-2 left-2 right-2 rounded-lg bg-background/85 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground backdrop-blur">
+        <div className="bg-background/85 text-muted-foreground absolute right-2 bottom-2 left-2 rounded-lg px-3 py-1.5 text-[10px] tracking-[0.14em] uppercase backdrop-blur">
           {editable
             ? "Drag any dot to reposition it. Measurements stay editable below — recompute coming in a follow-up."
             : "Hollow rings = AI saw the landmark at low confidence."}

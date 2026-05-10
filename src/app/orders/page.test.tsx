@@ -55,7 +55,9 @@ describe("OrdersPage", () => {
   it("renders the loading skeleton while the auth guard isn't ready", () => {
     useAuthGuardSpy.mockReturnValue({ user: null, isReady: false });
     const { container } = render(<OrdersPage />);
-    expect(container.querySelectorAll("[data-slot=skeleton]").length).toBeGreaterThan(0);
+    expect(
+      container.querySelectorAll("[data-slot=skeleton]").length
+    ).toBeGreaterThan(0);
   });
 
   it("renders the editorial header for clients without a 'New order' button", () => {

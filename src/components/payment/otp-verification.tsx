@@ -20,7 +20,9 @@ interface OtpVerificationProps {
 }
 
 function formatTime(seconds: number): string {
-  const mm = Math.floor(seconds / 60).toString().padStart(2, "0");
+  const mm = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, "0");
   const ss = (seconds % 60).toString().padStart(2, "0");
   return `${mm}:${ss}`;
 }
@@ -46,9 +48,7 @@ export function OtpVerification({
     startedAtRef.current = Date.now();
     const id = setInterval(() => {
       if (startedAtRef.current === null) return;
-      const elapsed = Math.floor(
-        (Date.now() - startedAtRef.current) / 1000
-      );
+      const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
       const remaining = Math.max(0, expiresInSeconds - elapsed);
       setSecondsLeft(remaining);
       if (remaining === 0) clearInterval(id);
@@ -76,14 +76,14 @@ export function OtpVerification({
   return (
     <Card>
       <CardHeader className="text-center">
-        <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-status-info-soft">
-          <ShieldCheck className="h-8 w-8 text-status-info" />
+        <div className="bg-status-info-soft mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full">
+          <ShieldCheck className="text-status-info h-8 w-8" />
         </div>
         <CardTitle className="text-lg">Verify Your Number</CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           An OTP code has been sent to{" "}
-          {phone ? <strong>{phone}</strong> : "your phone"}.
-          Enter it below to proceed with payment.
+          {phone ? <strong>{phone}</strong> : "your phone"}. Enter it below to
+          proceed with payment.
         </p>
       </CardHeader>
       <CardContent>
@@ -109,8 +109,8 @@ export function OtpVerification({
             <span
               className={
                 expired
-                  ? "flex items-center gap-1 text-destructive"
-                  : "flex items-center gap-1 text-muted-foreground"
+                  ? "text-destructive flex items-center gap-1"
+                  : "text-muted-foreground flex items-center gap-1"
               }
             >
               <Clock className="h-3 w-3" />
@@ -127,7 +127,7 @@ export function OtpVerification({
           </div>
 
           {error && (
-            <p className="text-sm text-destructive" role="alert">
+            <p className="text-destructive text-sm" role="alert">
               {error}
             </p>
           )}
@@ -150,7 +150,12 @@ export function OtpVerification({
                 )}
               </Button>
             ) : (
-              <Button type="button" variant="outline" className="w-full" disabled>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled
+              >
                 Code expired — restart the payment
               </Button>
             )
@@ -176,7 +181,7 @@ export function OtpVerification({
               type="button"
               onClick={handleResend}
               disabled={resending || secondsLeft > expiresInSeconds - 30}
-              className="block w-full text-center text-xs text-muted-foreground underline disabled:no-underline disabled:opacity-50"
+              className="text-muted-foreground block w-full text-center text-xs underline disabled:no-underline disabled:opacity-50"
             >
               {resending
                 ? "Sending..."
@@ -186,7 +191,7 @@ export function OtpVerification({
             </button>
           )}
 
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-center text-xs">
             This is a one-time verification for first-time payments.
           </p>
         </form>

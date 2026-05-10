@@ -117,17 +117,17 @@ function ClientDashboard({ firstName }: { firstName: string | null }) {
                 className="flex flex-col gap-3 p-5"
               >
                 <div className="flex items-center justify-between">
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-secondary text-foreground">
+                  <span className="bg-secondary text-foreground flex size-10 items-center justify-center rounded-xl">
                     <Icon className="h-4.5 w-4.5" aria-hidden />
                   </span>
-                  <span className="text-display text-2xl font-semibold tabular-nums text-muted-foreground/70">
+                  <span className="text-display text-muted-foreground/70 text-2xl font-semibold tabular-nums">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
                 <h3 className="text-display text-lg font-semibold tracking-tight">
                   {step.title}
                 </h3>
-                <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
+                <p className="text-muted-foreground text-sm leading-relaxed text-pretty">
                   {step.body}
                 </p>
               </GlassCard>
@@ -190,7 +190,7 @@ function DesignerDashboard({ user }: { user: AuthUser }) {
             pendingOrders.length > 0 ? (
               <Badge
                 variant="outline"
-                className="rounded-full border-copper/40 bg-copper/10 text-[10px] font-semibold uppercase tracking-wider text-copper-soft"
+                className="border-copper/40 bg-copper/10 text-copper-soft rounded-full text-[10px] font-semibold tracking-wider uppercase"
               >
                 {pendingOrders.length} pending
               </Badge>
@@ -202,7 +202,7 @@ function DesignerDashboard({ user }: { user: AuthUser }) {
           label="Rating"
           value="—"
           accent={
-            <span className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="text-muted-foreground text-[11px] tracking-[0.16em] uppercase">
               No reviews yet
             </span>
           }
@@ -212,8 +212,8 @@ function DesignerDashboard({ user }: { user: AuthUser }) {
           label="Profile views"
           value={`${viewsTotal}`}
           accent={
-            <span className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-              <span className="font-semibold tabular-nums text-foreground">
+            <span className="text-muted-foreground text-[11px] tracking-[0.16em] uppercase">
+              <span className="text-foreground font-semibold tabular-nums">
                 {viewsThisWeek}
               </span>{" "}
               this week
@@ -224,21 +224,18 @@ function DesignerDashboard({ user }: { user: AuthUser }) {
 
       {/* Profile completeness */}
       <section>
-        <SectionHeader
-          eyebrow="Reputation"
-          title="Complete your profile."
-        />
+        <SectionHeader eyebrow="Reputation" title="Complete your profile." />
         <GlassCard variant="solid" className="p-6">
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-muted-foreground text-sm leading-relaxed">
             A complete profile helps clients find and trust you. Update your
             bio, specializations, pricing, and portfolio to stand out.
           </p>
           <div
-            className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-border"
+            className="bg-border mt-4 h-1.5 w-full overflow-hidden rounded-full"
             aria-hidden
           >
             <div
-              className="h-full bg-copper transition-[width] duration-500 ease-out"
+              className="bg-copper h-full transition-[width] duration-500 ease-out"
               style={{ width: "0%" }}
             />
           </div>
@@ -263,27 +260,22 @@ function DesignerDashboard({ user }: { user: AuthUser }) {
           <SectionHeader
             eyebrow="Reach"
             title="Share your profile."
-            action={
-              <Share2
-                className="h-4 w-4 text-copper"
-                aria-hidden
-              />
-            }
+            action={<Share2 className="text-copper h-4 w-4" aria-hidden />}
           />
           <GlassCard variant="solid" className="space-y-4 p-6">
-            <div className="flex items-center gap-2 rounded-xl border border-border bg-background/60 px-3 py-2.5">
+            <div className="border-border bg-background/60 flex items-center gap-2 rounded-xl border px-3 py-2.5">
               <Eye
-                className="h-4 w-4 shrink-0 text-muted-foreground"
+                className="text-muted-foreground h-4 w-4 shrink-0"
                 aria-hidden
               />
-              <span className="truncate font-mono text-sm text-foreground/80">
+              <span className="text-foreground/80 truncate font-mono text-sm">
                 {profileUrl.replace(/^https?:\/\//, "")}
               </span>
             </div>
             {viewsThisWeek > 0 && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Viewed{" "}
-                <span className="font-semibold tabular-nums text-foreground">
+                <span className="text-foreground font-semibold tabular-nums">
                   {viewsThisWeek}
                 </span>{" "}
                 time{viewsThisWeek !== 1 ? "s" : ""} this week
@@ -293,7 +285,7 @@ function DesignerDashboard({ user }: { user: AuthUser }) {
               url={profileUrl}
               title={user.fullName ?? "My Profile"}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Share your profile to attract more clients.
             </p>
           </GlassCard>
@@ -309,7 +301,7 @@ function DesignerDashboard({ user }: { user: AuthUser }) {
             action={
               <Link
                 href="/orders"
-                className="inline-flex items-center gap-1 text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+                className="text-foreground/80 hover:text-foreground inline-flex items-center gap-1 text-sm font-medium transition-colors"
               >
                 View all
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -350,13 +342,13 @@ interface GreetingProps {
 function Greeting({ eyebrow, title, subtitle }: GreetingProps) {
   return (
     <header>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+      <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
         {eyebrow}
       </p>
-      <h1 className="text-display mt-2 text-balance text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+      <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl">
         {title}
       </h1>
-      <p className="mt-2 max-w-2xl text-pretty text-sm text-muted-foreground sm:text-base">
+      <p className="text-muted-foreground mt-2 max-w-2xl text-sm text-pretty sm:text-base">
         {subtitle}
       </p>
     </header>
@@ -373,7 +365,7 @@ function SectionHeader({ eyebrow, title, action }: SectionHeaderProps) {
   return (
     <header className="mb-5 flex items-end justify-between gap-3">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           {eyebrow}
         </p>
         <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
@@ -390,7 +382,7 @@ function QuickActionCard({ action }: { action: QuickAction }) {
   return (
     <Link
       href={action.href}
-      className="group block outline-none rounded-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="group focus-visible:ring-ring focus-visible:ring-offset-background block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
     >
       <GlassCard
         variant="solid"
@@ -400,8 +392,8 @@ function QuickActionCard({ action }: { action: QuickAction }) {
       >
         <span
           className={cn(
-            "flex size-11 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground",
-            "transition-all duration-200 group-hover:bg-foreground group-hover:text-background"
+            "bg-secondary text-foreground flex size-11 shrink-0 items-center justify-center rounded-xl",
+            "group-hover:bg-foreground group-hover:text-background transition-all duration-200"
           )}
         >
           <Icon className="h-5 w-5" aria-hidden />
@@ -410,12 +402,12 @@ function QuickActionCard({ action }: { action: QuickAction }) {
           <h3 className="text-display text-base font-semibold tracking-tight">
             {action.title}
           </h3>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
             {action.description}
           </p>
         </div>
         <ArrowRight
-          className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-copper"
+          className="text-muted-foreground group-hover:text-copper mt-1 h-4 w-4 shrink-0 transition-all duration-200 group-hover:translate-x-0.5"
           aria-hidden
         />
       </GlassCard>
@@ -430,17 +422,12 @@ interface DesignerStatProps {
   accent?: React.ReactNode;
 }
 
-function DesignerStat({
-  icon: Icon,
-  label,
-  value,
-  accent,
-}: DesignerStatProps) {
+function DesignerStat({ icon: Icon, label, value, accent }: DesignerStatProps) {
   return (
     <GlassCard variant="solid" className="p-5 sm:p-6">
       <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-copper" aria-hidden />
-        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <Icon className="text-copper h-4 w-4" aria-hidden />
+        <span className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
           {label}
         </span>
       </div>

@@ -78,8 +78,7 @@ export function VerificationDocuments() {
       toast.success("Document uploaded. It will be reviewed shortly.");
       refetch();
     } catch (error) {
-      const msg =
-        error instanceof Error ? error.message : "Upload failed";
+      const msg = error instanceof Error ? error.message : "Upload failed";
       toast.error(msg);
     } finally {
       setUploading(false);
@@ -95,8 +94,7 @@ export function VerificationDocuments() {
       toast.success("Document removed.");
       refetch();
     } catch (error) {
-      const msg =
-        error instanceof Error ? error.message : "Failed to delete";
+      const msg = error instanceof Error ? error.message : "Failed to delete";
       toast.error(msg);
     }
   };
@@ -108,7 +106,7 @@ export function VerificationDocuments() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold">Verification Documents</h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Upload documents to verify your identity and build trust with clients.
         </p>
       </div>
@@ -157,7 +155,7 @@ export function VerificationDocuments() {
           ))}
         </div>
       ) : documents.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           No documents uploaded yet. Upload a document to get verified.
         </p>
       ) : (
@@ -180,11 +178,11 @@ export function VerificationDocuments() {
                   </Badge>
                 </div>
                 {doc.rejectionReason && (
-                  <p className="mt-1 text-xs text-destructive">
+                  <p className="text-destructive mt-1 text-xs">
                     Reason: {doc.rejectionReason}
                   </p>
                 )}
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   Uploaded {new Date(doc.createdAt).toLocaleDateString()}
                 </p>
               </div>
@@ -194,7 +192,7 @@ export function VerificationDocuments() {
                   href={doc.documentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary underline"
+                  className="text-primary text-xs underline"
                 >
                   View
                 </a>

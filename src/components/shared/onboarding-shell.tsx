@@ -61,15 +61,15 @@ export function OnboardingShell({
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
       <header className="mb-8 text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           {eyebrow}
         </p>
-        <h1 className="text-display mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+        <h1 className="text-display mt-2 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
           {title}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm">
           Step {step + 1} of {steps.length} ·{" "}
-          <span className="font-medium text-foreground">{steps[step]}</span>
+          <span className="text-foreground font-medium">{steps[step]}</span>
         </p>
       </header>
 
@@ -90,14 +90,14 @@ export function OnboardingShell({
           </AnimatePresence>
         </div>
 
-        <div className="mt-8 flex items-center justify-between gap-3 border-t border-border/60 pt-6">
+        <div className="border-border/60 mt-8 flex items-center justify-between gap-3 border-t pt-6">
           <Button
             type="button"
             variant="ghost"
             size="lg"
             onClick={onBack}
             disabled={isFirstStep || saving}
-            className="gap-1.5 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground gap-1.5"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back
@@ -159,19 +159,21 @@ interface StepIndicatorProps {
  */
 function StepIndicator({ steps, step }: StepIndicatorProps) {
   const reduced = useReducedMotion();
-  const fillPct =
-    steps.length > 1 ? (step / (steps.length - 1)) * 100 : 0;
+  const fillPct = steps.length > 1 ? (step / (steps.length - 1)) * 100 : 0;
 
   return (
-    <div className="relative" aria-label={`Progress: step ${step + 1} of ${steps.length}`}>
+    <div
+      className="relative"
+      aria-label={`Progress: step ${step + 1} of ${steps.length}`}
+    >
       {/* Background thread */}
       <div
-        className="absolute left-0 right-0 top-4 h-px bg-border"
+        className="bg-border absolute top-4 right-0 left-0 h-px"
         aria-hidden
       />
       {/* Animated copper thread that grows with progress */}
       <motion.div
-        className="absolute left-0 top-4 h-px bg-copper"
+        className="bg-copper absolute top-4 left-0 h-px"
         initial={false}
         animate={{ width: `${fillPct}%` }}
         transition={
@@ -184,8 +186,7 @@ function StepIndicator({ steps, step }: StepIndicatorProps) {
 
       <ol className="relative flex items-start justify-between">
         {steps.map((label, i) => {
-          const state =
-            i < step ? "done" : i === step ? "active" : "upcoming";
+          const state = i < step ? "done" : i === step ? "active" : "upcoming";
           return (
             <li
               key={label}
@@ -194,13 +195,12 @@ function StepIndicator({ steps, step }: StepIndicatorProps) {
             >
               <motion.span
                 className={cn(
-                  "flex size-8 items-center justify-center rounded-full text-xs font-semibold tabular-nums ring-2 ring-background",
-                  state === "done" &&
-                    "bg-copper text-background",
+                  "ring-background flex size-8 items-center justify-center rounded-full text-xs font-semibold tabular-nums ring-2",
+                  state === "done" && "bg-copper text-background",
                   state === "active" &&
                     "bg-foreground text-background shadow-(--shadow-glow)",
                   state === "upcoming" &&
-                    "bg-card text-muted-foreground border border-border"
+                    "bg-card text-muted-foreground border-border border"
                 )}
                 initial={false}
                 animate={
@@ -218,7 +218,7 @@ function StepIndicator({ steps, step }: StepIndicatorProps) {
               </motion.span>
               <span
                 className={cn(
-                  "max-w-20 truncate text-center text-[11px] font-medium uppercase tracking-[0.12em]",
+                  "max-w-20 truncate text-center text-[11px] font-medium tracking-[0.12em] uppercase",
                   state === "active"
                     ? "text-foreground"
                     : "text-muted-foreground"

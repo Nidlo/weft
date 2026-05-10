@@ -15,18 +15,54 @@ export const ORDER_STATUS_CONFIG: Record<
   { label: string; color: string; bgColor: string }
 > = {
   // Semantic statuses — mapped to brand status tokens.
-  pending: { label: "Pending", color: "text-status-warning-fg", bgColor: "bg-status-warning-soft" },
-  confirmed: { label: "Confirmed", color: "text-status-info-fg", bgColor: "bg-status-info-soft" },
-  ready: { label: "Ready", color: "text-status-success-fg", bgColor: "bg-status-success-soft" },
-  delivered: { label: "Delivered", color: "text-status-success-fg", bgColor: "bg-status-success-soft" },
-  cancelled: { label: "Cancelled", color: "text-status-error-fg", bgColor: "bg-status-error-soft" },
-  declined: { label: "Declined", color: "text-muted-foreground", bgColor: "bg-muted" },
+  pending: {
+    label: "Pending",
+    color: "text-status-warning-fg",
+    bgColor: "bg-status-warning-soft",
+  },
+  confirmed: {
+    label: "Confirmed",
+    color: "text-status-info-fg",
+    bgColor: "bg-status-info-soft",
+  },
+  ready: {
+    label: "Ready",
+    color: "text-status-success-fg",
+    bgColor: "bg-status-success-soft",
+  },
+  delivered: {
+    label: "Delivered",
+    color: "text-status-success-fg",
+    bgColor: "bg-status-success-soft",
+  },
+  cancelled: {
+    label: "Cancelled",
+    color: "text-status-error-fg",
+    bgColor: "bg-status-error-soft",
+  },
+  declined: {
+    label: "Declined",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted",
+  },
   // Production-stage hues — intentionally distinct so the order timeline
   // shows visual progression (indigo → purple → pink → orange).
-  fabric_ready: { label: "Fabric Ready", color: "text-indigo-700", bgColor: "bg-indigo-100" },
-  cutting: { label: "Cutting", color: "text-purple-700", bgColor: "bg-purple-100" },
+  fabric_ready: {
+    label: "Fabric Ready",
+    color: "text-indigo-700",
+    bgColor: "bg-indigo-100",
+  },
+  cutting: {
+    label: "Cutting",
+    color: "text-purple-700",
+    bgColor: "bg-purple-100",
+  },
   sewing: { label: "Sewing", color: "text-pink-700", bgColor: "bg-pink-100" },
-  finishing: { label: "Finishing", color: "text-orange-700", bgColor: "bg-orange-100" },
+  finishing: {
+    label: "Finishing",
+    color: "text-orange-700",
+    bgColor: "bg-orange-100",
+  },
 };
 
 export const PRODUCTION_STAGES: OrderStatusKey[] = [
@@ -124,7 +160,7 @@ export const ORDER_RESPONSE_WINDOW_HOURS = 24;
 export function getResponseTimeLeft(
   createdAt: string,
   windowHours: number = ORDER_RESPONSE_WINDOW_HOURS,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): string {
   const created = new Date(createdAt).getTime();
   const cutoff = created + windowHours * 60 * 60 * 1000;
@@ -148,7 +184,7 @@ export function getResponseTimeLeft(
 export function getResponseTimeColor(
   createdAt: string,
   windowHours: number = ORDER_RESPONSE_WINDOW_HOURS,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): string {
   const created = new Date(createdAt).getTime();
   const cutoff = created + windowHours * 60 * 60 * 1000;
@@ -177,7 +213,7 @@ export const REVIEW_WINDOW_DAYS = 7;
 export function getReviewDeadlineLabel(
   deliveredAt: string | null,
   windowDays: number = REVIEW_WINDOW_DAYS,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): string | null {
   if (!deliveredAt) return null;
 

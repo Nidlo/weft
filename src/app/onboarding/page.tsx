@@ -79,13 +79,10 @@ export default function OnboardingPage() {
         displayName: store.displayName || undefined,
         bio: store.bio || undefined,
         specializations:
-          store.specializations.length > 0
-            ? store.specializations
-            : undefined,
+          store.specializations.length > 0 ? store.specializations : undefined,
         pricingMin: minPesewas,
         pricingMax: maxPesewas,
-        equipment:
-          store.equipment.length > 0 ? store.equipment : undefined,
+        equipment: store.equipment.length > 0 ? store.equipment : undefined,
       };
 
       // Use LocationPicker data if available
@@ -193,13 +190,13 @@ export default function OnboardingPage() {
             />
             <label
               htmlFor="designer-terms"
-              className="cursor-pointer text-sm leading-relaxed text-foreground/90"
+              className="text-foreground/90 cursor-pointer text-sm leading-relaxed"
             >
               I agree to the{" "}
               <a
                 href="/terms"
                 target="_blank"
-                className="font-medium text-foreground underline-offset-4 hover:underline"
+                className="text-foreground font-medium underline-offset-4 hover:underline"
               >
                 Terms of Service
               </a>{" "}
@@ -207,7 +204,7 @@ export default function OnboardingPage() {
               <a
                 href="/privacy"
                 target="_blank"
-                className="font-medium text-foreground underline-offset-4 hover:underline"
+                className="text-foreground font-medium underline-offset-4 hover:underline"
               >
                 Privacy Policy
               </a>

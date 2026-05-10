@@ -56,7 +56,7 @@ interface MeasurementSummaryProps {
 function readField(
   payload: MeasurementMmData | null | undefined,
   section: string,
-  field: string,
+  field: string
 ): number | null {
   if (!payload) return null;
   const sec = (payload as Record<string, Record<string, number | null>>)[
@@ -69,7 +69,7 @@ function readField(
 function fieldIsOverridden(
   overrides: MeasurementMmData | null | undefined,
   section: string,
-  field: string,
+  field: string
 ): boolean {
   if (!overrides) return false;
   const sec = (overrides as Record<string, Record<string, number | null>>)[
@@ -92,7 +92,7 @@ export function MeasurementSummary({
     <div className={compact ? "space-y-2" : "space-y-4"}>
       {sections.map(([section, fields]) => {
         const hasValues = Object.entries(fields).some(
-          ([field]) => readField(dataMm, section, field) !== null,
+          ([field]) => readField(dataMm, section, field) !== null
         );
 
         if (!hasValues && compact) return null;
@@ -100,28 +100,32 @@ export function MeasurementSummary({
         return (
           <div key={section}>
             <h4
-              className={`font-medium ${compact ? "text-xs text-muted-foreground" : "text-sm mb-2"}`}
+              className={`font-medium ${compact ? "text-muted-foreground text-xs" : "mb-2 text-sm"}`}
             >
               {SECTION_LABELS[section]}
             </h4>
             <div
-              className={`grid gap-x-4 gap-y-1 ${compact ? "grid-cols-2 text-xs" : "grid-cols-2 sm:grid-cols-3 text-sm"}`}
+              className={`grid gap-x-4 gap-y-1 ${compact ? "grid-cols-2 text-xs" : "grid-cols-2 text-sm sm:grid-cols-3"}`}
             >
               {Object.entries(fields).map(([field, label]) => {
                 const value = readField(dataMm, section, field);
                 const overridden = fieldIsOverridden(
                   manualOverridesMm,
                   section,
-                  field,
+                  field
                 );
-                const baseline = readField(aiBaselineMm ?? null, section, field);
+                const baseline = readField(
+                  aiBaselineMm ?? null,
+                  section,
+                  field
+                );
 
                 if (value === null) {
                   if (compact) return null;
                   return (
                     <div
                       key={field}
-                      className="flex justify-between text-muted-foreground"
+                      className="text-muted-foreground flex justify-between"
                     >
                       <span>{label}</span>
                       <span>—</span>
@@ -148,7 +152,7 @@ export function MeasurementSummary({
                                 ? `AI baseline: ${formatMeasurement(baseline, "mm", displayUnit)} (click to reset)`
                                 : "Click to reset to AI baseline"
                             }
-                            className="cursor-pointer text-[10px] leading-none text-copper hover:text-foreground"
+                            className="text-copper hover:text-foreground cursor-pointer text-[10px] leading-none"
                           >
                             ✏
                           </button>
@@ -164,7 +168,7 @@ export function MeasurementSummary({
                                 ? `AI baseline: ${formatMeasurement(baseline, "mm", displayUnit)}`
                                 : "Manually corrected"
                             }
-                            className="text-[10px] leading-none text-copper"
+                            className="text-copper text-[10px] leading-none"
                           >
                             ✏
                           </span>

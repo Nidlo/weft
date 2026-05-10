@@ -26,14 +26,14 @@ export function StepFinish() {
   return (
     <div className="space-y-7">
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground">
+        <span className="bg-secondary text-foreground flex size-9 shrink-0 items-center justify-center rounded-xl">
           <PartyPopper className="h-4 w-4" aria-hidden />
         </span>
         <div>
           <h2 className="text-display text-lg font-semibold tracking-tight">
             Almost there.
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             One last thing — help us understand how you discovered Nidlo, and
             agree to our terms.
           </p>
@@ -50,17 +50,14 @@ export function StepFinish() {
                 key={opt.value}
                 type="button"
                 onClick={() =>
-                  setField(
-                    "referralSource",
-                    isActive ? "" : opt.value
-                  )
+                  setField("referralSource", isActive ? "" : opt.value)
                 }
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium",
                   "transition-all duration-200 hover:-translate-y-0.5",
                   isActive
                     ? "bg-foreground text-background shadow-(--shadow-2)"
-                    : "border border-border bg-card hover:border-foreground/30"
+                    : "border-border bg-card hover:border-foreground/30 border"
                 )}
               >
                 {isActive && <Check className="h-3 w-3" aria-hidden />}
@@ -82,13 +79,13 @@ export function StepFinish() {
         />
         <label
           htmlFor="terms"
-          className="cursor-pointer text-sm leading-relaxed text-foreground/90"
+          className="text-foreground/90 cursor-pointer text-sm leading-relaxed"
         >
           I agree to the{" "}
           <a
             href="/terms"
             target="_blank"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
+            className="text-foreground font-medium underline-offset-4 hover:underline"
           >
             Terms of Service
           </a>{" "}
@@ -96,7 +93,7 @@ export function StepFinish() {
           <a
             href="/privacy"
             target="_blank"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
+            className="text-foreground font-medium underline-offset-4 hover:underline"
           >
             Privacy Policy
           </a>

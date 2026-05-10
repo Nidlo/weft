@@ -13,7 +13,7 @@ export function WalletTransactions() {
   return (
     <section>
       <header className="mb-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           Activity
         </p>
         <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
@@ -23,22 +23,22 @@ export function WalletTransactions() {
 
       {loading && transactions.length === 0 ? (
         <GlassCard variant="ghost" className="p-4">
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground text-sm">Loading...</p>
         </GlassCard>
       ) : transactions.length === 0 ? (
         <GlassCard
           variant="solid"
           className="flex flex-col items-center py-12 text-center"
         >
-          <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-foreground">
+          <span className="bg-secondary text-foreground flex size-14 items-center justify-center rounded-2xl">
             <Receipt className="h-6 w-6" aria-hidden />
           </span>
           <h3 className="text-display mt-4 text-xl font-semibold tracking-tight">
             No transactions yet.
           </h3>
-          <p className="mx-auto mt-1.5 max-w-xs text-sm text-muted-foreground">
-            Your earnings and withdrawals will appear here as soon as your
-            first order is paid.
+          <p className="text-muted-foreground mx-auto mt-1.5 max-w-xs text-sm">
+            Your earnings and withdrawals will appear here as soon as your first
+            order is paid.
           </p>
         </GlassCard>
       ) : (
@@ -73,7 +73,7 @@ export function WalletTransactions() {
                     <p className="text-display truncate text-sm font-semibold tracking-tight">
                       {label}
                     </p>
-                    <p className="text-xs text-muted-foreground tabular-nums">
+                    <p className="text-muted-foreground text-xs tabular-nums">
                       {new Date(tx.createdAt).toLocaleDateString("en-GH", {
                         day: "numeric",
                         month: "short",

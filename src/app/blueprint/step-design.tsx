@@ -9,13 +9,8 @@ import type { BlueprintOption } from "@/types/graphql";
 import { ChipPill, SelectableCard } from "./step-garment";
 
 export function StepDesign() {
-  const {
-    garmentType,
-    designDetails,
-    additionalDetails,
-    freeText,
-    setField,
-  } = useBlueprintStore();
+  const { garmentType, designDetails, additionalDetails, freeText, setField } =
+    useBlueprintStore();
   const { options, loading } = useBlueprintOptions();
 
   if (loading || !options) {
@@ -88,7 +83,8 @@ export function StepDesign() {
 
       <div className="space-y-2">
         <Label htmlFor="free-text" className="text-sm">
-          Additional notes <span className="text-muted-foreground">(optional)</span>
+          Additional notes{" "}
+          <span className="text-muted-foreground">(optional)</span>
         </Label>
         <Textarea
           id="free-text"
@@ -99,7 +95,7 @@ export function StepDesign() {
           rows={3}
           className="resize-none"
         />
-        <p className="text-xs text-muted-foreground tabular-nums">
+        <p className="text-muted-foreground text-xs tabular-nums">
           {freeText.length} / 500 characters
         </p>
       </div>

@@ -188,7 +188,7 @@ export default function ChatPage({
     <AppShell>
       <div className="-mx-4 flex h-[calc(100dvh-4rem-4rem)] flex-col sm:-mx-6 md:mx-0 md:h-[calc(100dvh-4rem-1rem)]">
         {/* Chat header — glass surface, sticky to the top of the chat */}
-        <header className="flex items-center gap-3 border-b border-border/60 bg-background/70 px-3 py-3 backdrop-blur-xl backdrop-saturate-150 sm:px-4">
+        <header className="border-border/60 bg-background/70 flex items-center gap-3 border-b px-3 py-3 backdrop-blur-xl backdrop-saturate-150 sm:px-4">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -200,7 +200,7 @@ export default function ChatPage({
           </Button>
           {other ? (
             <>
-              <Avatar className="size-10 shrink-0 ring-1 ring-border">
+              <Avatar className="ring-border size-10 shrink-0 ring-1">
                 {other.avatarUrl && (
                   <AvatarImage
                     src={getImageKitThumbnail(other.avatarUrl, 80)}
@@ -218,7 +218,7 @@ export default function ChatPage({
                 {conversation?.order && (
                   <Link
                     href={`/orders/${conversation.order.id}`}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs font-medium transition-colors"
                   >
                     View order
                     <ArrowUpRight className="h-3 w-3" aria-hidden />
@@ -281,7 +281,7 @@ export default function ChatPage({
               <p className="text-display text-2xl font-semibold tracking-tight">
                 Say hello.
               </p>
-              <p className="mt-2 max-w-xs text-pretty text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-2 max-w-xs text-sm text-pretty">
                 This is the start of your conversation. Share details, ask
                 questions, send photos.
               </p>

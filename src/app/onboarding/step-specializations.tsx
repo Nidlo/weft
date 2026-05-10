@@ -74,14 +74,14 @@ export function StepSpecializations() {
   return (
     <div className="space-y-7">
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground">
+        <span className="bg-secondary text-foreground flex size-9 shrink-0 items-center justify-center rounded-xl">
           <Sparkles className="h-4 w-4" aria-hidden />
         </span>
         <div>
           <h2 className="text-display text-lg font-semibold tracking-tight">
             What do you specialize in?
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             Pick at least one. Clients filter designers by these — the more
             relevant tags, the more inquiries.
           </p>
@@ -90,7 +90,7 @@ export function StepSpecializations() {
 
       <div className="relative">
         <Search
-          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+          className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
           aria-hidden
         />
         <Input
@@ -111,7 +111,7 @@ export function StepSpecializations() {
         <>
           {selected.length > 0 && (
             <div>
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <p className="text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.16em] uppercase">
                 {selected.length} selected
               </p>
               <div className="flex flex-wrap gap-2">
@@ -124,8 +124,8 @@ export function StepSpecializations() {
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1.5 text-sm font-medium text-background",
-                      "transition-all duration-200 hover:bg-foreground/85"
+                      "bg-foreground text-background inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium",
+                      "hover:bg-foreground/85 transition-all duration-200"
                     )}
                   >
                     {getSpecName(slug)}
@@ -138,7 +138,7 @@ export function StepSpecializations() {
 
           <div>
             {selected.length > 0 && (
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <p className="text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.16em] uppercase">
                 Add more
               </p>
             )}
@@ -158,11 +158,11 @@ export function StepSpecializations() {
                       delay: reduced ? 0 : Math.min(i, 12) * 0.02,
                     }}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium",
-                      "transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-(--shadow-1)"
+                      "border-border bg-card inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium",
+                      "hover:border-foreground/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-(--shadow-1)"
                     )}
                   >
-                    <Plus className="h-3 w-3 text-copper" aria-hidden />
+                    <Plus className="text-copper h-3 w-3" aria-hidden />
                     {spec.name}
                   </motion.button>
                 );
@@ -172,9 +172,9 @@ export function StepSpecializations() {
 
           {filtered.length === 0 && search.trim().length > 0 && (
             <GlassCard variant="ghost" className="p-4 text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 No matches for{" "}
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                   &ldquo;{search}&rdquo;
                 </span>
               </p>
