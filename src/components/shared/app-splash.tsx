@@ -1,25 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/stores/auth";
 
 /**
  * Brand splash that renders for the duration of the Zustand hydration step.
  * The previous "MIN_VISIBLE_MS = 600" anti-flicker tax meant every cold
  * load waited 600ms even if hydration was already done — too expensive
- * for the mobile-first audience. Now the splash unmounts the moment
- * hydration flips; the CSS fade still smooths the visual transition.
+ * for the mobile-first audience. Now opacity flips with `hasHydrated` and
+ * the CSS fade smooths the transition; we keep the node in the DOM but
+ * gate pointer-events so it stops blocking clicks once hidden. (Pure
+ * derived state — avoids the React "setState in effect" anti-pattern.)
  */
 export function AppSplash() {
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    if (!hasHydrated) return;
-    setVisible(false);
-  }, [hasHydrated]);
-
-  if (!visible) return null;
 
   return (
     <div
@@ -27,7 +20,11 @@ export function AppSplash() {
       aria-live="polite"
       aria-label="Loading Nidlo"
       className="bg-background fixed inset-0 z-[200] flex flex-col items-center justify-center transition-opacity duration-300"
-      style={{ opacity: hasHydrated ? 0 : 1 }}
+      style={{
+        opacity: hasHydrated ? 0 : 1,
+        pointerEvents: hasHydrated ? "none" : "auto",
+      }}
+      aria-hidden={hasHydrated ? "true" : "false"}
     >
       <div className="text-foreground text-3xl font-bold tracking-tight">
         Nidlo
