@@ -26,6 +26,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  # Force JS actions (e.g. actions/github-script in x-check) onto Node 24.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   # Test-time placeholders for the NEXT_PUBLIC_* vars referenced across
   # src/. None of them gate behaviour in the unit-test layer, but Next.js
   # bakes them into the bundle at build time so they need to be set or
