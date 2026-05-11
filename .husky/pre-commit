@@ -1,0 +1,9 @@
+# 1) Auto-fix prettier + eslint on staged files (fast — touches only what's staged).
+npx --no-install lint-staged
+
+# 2) Then run the project's critical-rule scan (S-02 .env files, etc.).
+#    Source of truth: /Users/mac/Projects/mine/stitchub/.claude/scripts/x-precommit.sh
+#    The local copy is at .github/scripts/x-precommit.sh.
+if [ -f .github/scripts/x-precommit.sh ]; then
+  bash .github/scripts/x-precommit.sh
+fi
