@@ -343,6 +343,49 @@ if [ "$MODE" = "precommit" ]; then
 fi
 
 # ============================================================
+# Auto-format (precommit mode only — best-effort, language-aware)
+# ============================================================
+# Skip silently if the relevant tool isn't installed in this repo —
+# the rule scan still runs. JS/TS auto-format is handled by husky +
+# lint-staged in repos that use them (weft); this block covers PHP +
+# Python so warp + fitscan get the same "fix-on-commit" UX.
+
+if [ "$MODE" = "precommit" ]; then
+    PHP_FILES=$(printf "%s\n" "$CODE_FILES" | grep -E '\.php$' 2>/dev/null || true)
+    PY_FILES=$(printf "%s\n" "$CODE_FILES" | grep -E '\.py$' 2>/dev/null || true)
+
+    if [ -n "$PHP_FILES" ] && [ -x "vendor/bin/pint" ]; then
+        printf "${BLUE}auto-format: pint on %s PHP file(s)${NC}\n" "$(printf "%s\n" "$PHP_FILES" | grep -c .)"
+        printf "%s\n" "$PHP_FILES" | xargs vendor/bin/pint --format agent >/dev/null 2>&1 || true
+        printf "%s\n" "$PHP_FILES" | xargs git add 2>/dev/null || true
+    fi
+
+    if [ -n "$PY_FILES" ]; then
+        BLACK="" ; RUFF=""
+        for cand in venv/bin/black .venv/bin/black; do
+            [ -x "$cand" ] && BLACK="$cand" && break
+        done
+        for cand in venv/bin/ruff .venv/bin/ruff; do
+            [ -x "$cand" ] && RUFF="$cand" && break
+        done
+        [ -z "$BLACK" ] && command -v black >/dev/null 2>&1 && BLACK="black"
+        [ -z "$RUFF" ] && command -v ruff >/dev/null 2>&1 && RUFF="ruff"
+
+        if [ -n "$BLACK" ]; then
+            printf "${BLUE}auto-format: black on %s Python file(s)${NC}\n" "$(printf "%s\n" "$PY_FILES" | grep -c .)"
+            printf "%s\n" "$PY_FILES" | xargs "$BLACK" --quiet 2>/dev/null || true
+        fi
+        if [ -n "$RUFF" ]; then
+            printf "${BLUE}auto-format: ruff --fix on %s Python file(s)${NC}\n" "$(printf "%s\n" "$PY_FILES" | grep -c .)"
+            printf "%s\n" "$PY_FILES" | xargs "$RUFF" check --fix --quiet 2>/dev/null || true
+        fi
+        if [ -n "$BLACK" ] || [ -n "$RUFF" ]; then
+            printf "%s\n" "$PY_FILES" | xargs git add 2>/dev/null || true
+        fi
+    fi
+fi
+
+# ============================================================
 # CRITICAL RULES (block commit)
 # ============================================================
 
