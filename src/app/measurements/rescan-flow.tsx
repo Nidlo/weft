@@ -355,11 +355,12 @@ export function RescanFlow({
   if (step === "diff" && proposedMm) {
     return (
       <div className="space-y-6">
-        {/* S2.5b — editable landmark overlay so the user can drag-correct
-            occluded points before approving the diff. Corrections are
-            captured in local `landmarks` state but not yet persisted on
-            re-scan apply (S2.5c will wire that through applyRescan). */}
-        {frontImage && landmarks && (
+        {/* S2.5b / 32a — editable landmark overlay so the user can drag-correct
+            occluded points before approving the diff. Photo always renders
+            when the File is in state — landmarks may be null on a degraded
+            Fitscan run, but the user still needs the captured image for
+            visual context against the diff. */}
+        {frontImage && (
           <LandmarkOverlay
             photo={frontImage}
             landmarks={landmarks}

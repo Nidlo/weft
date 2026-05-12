@@ -512,11 +512,14 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         </GlassCard>
       )}
 
-      {/* S2.5b — editable photo overlay. Drag dots to reposition them;
+      {/* S2.5b / 32a — editable photo overlay. Drag dots to reposition them;
           the corrected positions persist on save via `landmarks_normalized`.
-          Only renders when both the upstream service returned coords AND
-          the local File is still in state. */}
-      {frontImage && extractedLandmarks && (
+          Renders the captured photo from the local File (no backend round-trip
+          for the in-flight preview — see `LandmarkOverlay`'s URL.createObjectURL
+          path). When the upstream service didn't return landmarks (degraded
+          pipeline path), the photo still shows so users have visual context
+          for the values below. */}
+      {frontImage && (
         <LandmarkOverlay
           photo={frontImage}
           landmarks={extractedLandmarks}
