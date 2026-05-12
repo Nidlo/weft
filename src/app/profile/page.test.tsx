@@ -84,11 +84,20 @@ describe("ProfilePage", () => {
     expect(screen.getByText(/^designer$/i)).toBeInTheDocument();
   });
 
-  it("hides designer-only quick links from clients", () => {
+  it("shows the trimmed quick-links surface (no bottom-nav duplicates)", () => {
+    // Quick Links was cleaned up so it stops duplicating the bottom nav.
+    // Designer dashboard / My orders / Wallet & payouts live there; Quick
+    // Links keeps the surfaces that DON'T appear in the nav.
     useAuthGuardSpy.mockReturnValue({ user: CLIENT_USER, isReady: true });
     render(<ProfilePage />);
     expect(
+      screen.getByRole("link", { name: /name, contact, location/i })
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("link", { name: /body vault/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /notifications/i })
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: /designer dashboard/i })
@@ -98,13 +107,21 @@ describe("ProfilePage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows designer-only links to designers", () => {
+  it("shows the same quick-links surface for designers (no extra entries)", () => {
     useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
     render(<ProfilePage />);
     expect(
-      screen.getByRole("link", { name: /designer dashboard/i })
+      screen.getByRole("link", { name: /name, contact, location/i })
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /wallet/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /body vault/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /designer dashboard/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /^wallet/i })
+    ).not.toBeInTheDocument();
   });
 
   it("renders the contact info rows (phone always, email + city when present)", () => {

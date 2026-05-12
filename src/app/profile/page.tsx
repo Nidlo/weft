@@ -12,9 +12,7 @@ import {
   Phone,
   Ruler,
   Scissors,
-  ShoppingBag,
   User,
-  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,30 +35,16 @@ interface QuickLink {
 
 const QUICK_LINKS: QuickLink[] = [
   {
+    href: "/profile/edit",
+    icon: Pencil,
+    label: "Edit profile",
+    description: "Name, contact, location, shop details",
+  },
+  {
     href: "/measurements",
     icon: Ruler,
     label: "Body Vault",
     description: "Saved measurements + Fitscan AI",
-  },
-  {
-    href: "/dashboard",
-    icon: Scissors,
-    label: "Designer dashboard",
-    description: "Stats + active orders",
-    designerOnly: true,
-  },
-  {
-    href: "/orders",
-    icon: ShoppingBag,
-    label: "My orders",
-    description: "Track every garment",
-  },
-  {
-    href: "/wallet",
-    icon: Wallet,
-    label: "Wallet & payouts",
-    description: "Balance + MoMo accounts",
-    designerOnly: true,
   },
   {
     href: "/notifications/preferences",

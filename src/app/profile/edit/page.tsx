@@ -4,105 +4,207 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { ArrowLeft, Camera, Check, Loader2, MapPin, User } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  Check,
+  Loader2,
+  Plus,
+  Scissors,
+  User,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useAutosave } from "@/lib/hooks/use-autosave";
 import { useAuthStore } from "@/lib/stores/auth";
+import { useSpecializations } from "@/lib/hooks/use-specializations";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { GlassCard } from "@/components/ui/glass-card";
+import { LocationPicker } from "@/components/shared/location-picker";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { GET_CITIES } from "@/lib/graphql/queries/designer";
-import { CREATE_CITY } from "@/lib/graphql/mutations/lookup";
-import { UPDATE_MY_INFO, UPDATE_AVATAR } from "@/lib/graphql/mutations/profile";
+  UPDATE_MY_INFO,
+  UPDATE_AVATAR,
+  UPDATE_PROFILE,
+} from "@/lib/graphql/mutations/profile";
+import { GET_DESIGNER } from "@/lib/graphql/queries/designer";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
-import type { CitiesData, CreateCityData } from "@/types/graphql";
+import type { DesignerData } from "@/types/graphql";
+import type { LocationData } from "@/types/location";
+import { cn } from "@/lib/utils";
+
+interface DesignerFormState {
+  displayName: string;
+  bio: string;
+  specializations: string[];
+  pricingMin: string;
+  pricingMax: string;
+  isAcceptingOrders: boolean;
+}
+
+const emptyDesigner: DesignerFormState = {
+  displayName: "",
+  bio: "",
+  specializations: [],
+  pricingMin: "",
+  pricingMax: "",
+  isAcceptingOrders: true,
+};
 
 export default function ProfileEditPage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
   const setUser = useAuthStore((s) => s.setUser);
   const router = useRouter();
 
+  // Account basics
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [otherNames, setOtherNames] = useState("");
-  const [city, setCity] = useState("");
-  const [newCity, setNewCity] = useState("");
-  const [showNewCity, setShowNewCity] = useState(false);
-  // Track which user.id we've already seeded the form from. Setting state
-  // during render — guarded by a condition that only fires when the source
-  // changes — is the React 19 idiomatic way to derive form state from a
-  // prop without using an effect (https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes).
+  const [email, setEmail] = useState("");
+  const [location, setLocation] = useState<LocationData | null>(null);
+
+  // Designer-only fields
+  const [designer, setDesigner] = useState<DesignerFormState>(emptyDesigner);
+  // Snapshot of the designer state at hydration — used for dirty-detection.
+  const [designerSnapshot, setDesignerSnapshot] =
+    useState<DesignerFormState>(emptyDesigner);
+
+  // Track which user.id we've already seeded the form from (React 19 idiom:
+  // derive state from props by setting state during render when the source
+  // changes).
   const [seededFromUserId, setSeededFromUserId] = useState<
     string | undefined
   >();
+  const [designerHydrated, setDesignerHydrated] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-  const { data: citiesData } = useQuery<CitiesData>(GET_CITIES, {
-    variables: { countryCode: "GH" },
-    skip: !isReady,
-    fetchPolicy: "cache-first",
-  });
+  const designerSlug = user?.designerProfile?.slug ?? null;
+  const { data: designerData, loading: designerLoading } =
+    useQuery<DesignerData>(GET_DESIGNER, {
+      variables: { slug: designerSlug ?? "" },
+      skip: !user?.isDesigner || !designerSlug,
+      fetchPolicy: "cache-and-network",
+    });
+  const { specializations: allSpecs, loading: specsLoading } =
+    useSpecializations();
 
-  const [updateMyInfo, { loading: saving }] = useMutation(UPDATE_MY_INFO, {
+  const [updateMyInfo, { loading: savingInfo }] = useMutation(UPDATE_MY_INFO, {
     refetchQueries: [{ query: ME_QUERY }],
   });
+  const [updateProfile, { loading: savingProfile }] = useMutation(
+    UPDATE_PROFILE,
+    {
+      refetchQueries: [{ query: ME_QUERY }],
+    }
+  );
   const [updateAvatar, { loading: uploadingAvatar }] = useMutation<{
     updateAvatar: { id: string; avatarUrl: string | null };
   }>(UPDATE_AVATAR, {
     refetchQueries: [{ query: ME_QUERY }],
   });
-  const [createCity] = useMutation<CreateCityData>(CREATE_CITY);
 
   if (user && user.id !== seededFromUserId) {
     setSeededFromUserId(user.id);
     setFirstName(user.firstName ?? "");
     setLastName(user.lastName ?? "");
     setOtherNames(user.otherNames ?? "");
-    setCity(user.city ?? "");
+    setEmail(user.email ?? "");
+    setLocation(
+      user.city
+        ? {
+            lat: 0,
+            lng: 0,
+            formattedAddress: user.city,
+            city: user.city,
+            region: null,
+            country: null,
+            countryCode: null,
+            postalCode: null,
+            addressLine: null,
+          }
+        : null
+    );
   }
 
-  const personalInfoDirty =
+  // Hydrate designer fields the same way as `seededFromUserId` above —
+  // setState during render (guarded by a one-shot flag) is the React 19
+  // idiom for deriving state from props/queries without an effect.
+  if (!designerHydrated && designerData?.designer?.designerProfile) {
+    const profile = designerData.designer.designerProfile;
+    const seed: DesignerFormState = {
+      displayName: profile.displayName ?? "",
+      bio: profile.bio ?? "",
+      specializations: profile.specializations ?? [],
+      pricingMin:
+        profile.pricingMin !== null && profile.pricingMin !== undefined
+          ? String(Math.round(profile.pricingMin / 100))
+          : "",
+      pricingMax:
+        profile.pricingMax !== null && profile.pricingMax !== undefined
+          ? String(Math.round(profile.pricingMax / 100))
+          : "",
+      isAcceptingOrders: profile.isAcceptingOrders,
+    };
+    setDesigner(seed);
+    setDesignerSnapshot(seed);
+    setDesignerHydrated(true);
+  }
+
+  // Dirty detection
+  const accountDirty =
     !!user &&
     ((firstName.trim() || null) !== (user.firstName ?? null) ||
       (lastName.trim() || null) !== (user.lastName ?? null) ||
       (otherNames.trim() || null) !== (user.otherNames ?? null) ||
-      ((showNewCity ? newCity.trim() : city) || null) !== (user.city ?? null));
+      (email.trim() || null) !== (user.email ?? null) ||
+      (location?.city ?? null) !== (user.city ?? null) ||
+      // Treat a fresh map pick (non-zero lat/lng) as dirty even if city
+      // happens to be the same — region/lat/lng/country may have changed.
+      !!(location && location.lat !== 0 && location.lng !== 0));
 
-  // Persist a draft so a session-expiry mid-edit doesn't lose unsaved name +
-  // city changes (per docs/journeys/05-failure-modes.md §1.1). We only enable
-  // autosave once the user has actually modified something — otherwise the
-  // initial sync from `user` would write a redundant draft on every mount.
+  const designerDirty =
+    designerHydrated &&
+    (designer.displayName !== designerSnapshot.displayName ||
+      designer.bio !== designerSnapshot.bio ||
+      designer.pricingMin !== designerSnapshot.pricingMin ||
+      designer.pricingMax !== designerSnapshot.pricingMax ||
+      designer.isAcceptingOrders !== designerSnapshot.isAcceptingOrders ||
+      designer.specializations.length !==
+        designerSnapshot.specializations.length ||
+      designer.specializations.some(
+        (s) => !designerSnapshot.specializations.includes(s)
+      ));
+
+  const isDirty = accountDirty || designerDirty;
+  const saving = savingInfo || savingProfile;
+
+  // Autosave draft so a refresh / session expiry doesn't lose work
+  // (per docs/journeys/05-failure-modes.md §1.1).
   const { restored: draftRestored, clear: clearDraft } = useAutosave(
     `nidlo:draft:profile:${user?.id ?? "anon"}`,
-    { firstName, lastName, otherNames, city, newCity, showNewCity },
-    { enabled: personalInfoDirty }
+    { firstName, lastName, otherNames, email, location, designer },
+    { enabled: isDirty }
   );
 
-  // One-shot toast prompt if a draft is found that differs from server state.
+  // One-shot toast prompt if a draft was saved from a prior session.
   useEffect(() => {
     if (!draftRestored || !user) return;
-    const draftDiffersFromUser =
-      draftRestored.firstName !== (user.firstName ?? "") ||
-      draftRestored.lastName !== (user.lastName ?? "") ||
-      draftRestored.otherNames !== (user.otherNames ?? "") ||
-      (draftRestored.showNewCity
-        ? draftRestored.newCity
-        : draftRestored.city) !== (user.city ?? "");
-    if (!draftDiffersFromUser) return;
+    const sameAccount =
+      draftRestored.firstName === (user.firstName ?? "") &&
+      draftRestored.lastName === (user.lastName ?? "") &&
+      draftRestored.otherNames === (user.otherNames ?? "") &&
+      draftRestored.email === (user.email ?? "") &&
+      (draftRestored.location?.city ?? null) === (user.city ?? null);
+    if (sameAccount) return;
     toast("Resume editing?", {
       description: "We saved your unsaved changes from last time.",
       action: {
@@ -111,9 +213,11 @@ export default function ProfileEditPage() {
           setFirstName(draftRestored.firstName);
           setLastName(draftRestored.lastName);
           setOtherNames(draftRestored.otherNames);
-          setCity(draftRestored.city);
-          setNewCity(draftRestored.newCity);
-          setShowNewCity(draftRestored.showNewCity);
+          setEmail(draftRestored.email ?? "");
+          setLocation(draftRestored.location ?? null);
+          if (draftRestored.designer) {
+            setDesigner(draftRestored.designer);
+          }
         },
       },
       duration: 10_000,
@@ -140,41 +244,75 @@ export default function ProfileEditPage() {
     }
   };
 
-  const handleSave = async () => {
-    try {
-      let cityValue = city;
+  const toggleSpec = (slug: string) => {
+    setDesigner((d) =>
+      d.specializations.includes(slug)
+        ? { ...d, specializations: d.specializations.filter((s) => s !== slug) }
+        : { ...d, specializations: [...d.specializations, slug] }
+    );
+  };
 
-      if (showNewCity && newCity.trim()) {
-        const { data: cityData } = await createCity({
-          variables: { name: newCity.trim(), countryCode: "GH" },
-        });
-        if (cityData?.createCity) {
-          cityValue = cityData.createCity.name;
+  const handleSave = async () => {
+    if (!user) return;
+    try {
+      // Account basics (UpdateMyInfoInput). Only send fields that actually
+      // changed so we don't accidentally null something on the backend.
+      if (accountDirty) {
+        const input: Record<string, unknown> = {
+          firstName: firstName.trim() || null,
+          lastName: lastName.trim() || null,
+          otherNames: otherNames.trim() || null,
+          email: email.trim() || null,
+        };
+        if (location) {
+          input.city = location.city;
+          input.region = location.region;
+          input.postalCode = location.postalCode;
+          input.formattedAddress = location.formattedAddress;
+          input.countryCode = location.countryCode;
+          input.addressLine = location.addressLine;
+          // Only forward lat/lng for fresh map picks (lat 0/0 means we
+          // synthesised the LocationData from the stored city string).
+          if (location.lat !== 0 || location.lng !== 0) {
+            input.locationLat = location.lat;
+            input.locationLng = location.lng;
+          }
         }
+        await updateMyInfo({ variables: { input } });
+        setUser({
+          ...user,
+          firstName: firstName.trim() || null,
+          lastName: lastName.trim() || null,
+          otherNames: otherNames.trim() || null,
+          email: email.trim() || null,
+          city: location?.city ?? user.city,
+        });
       }
 
-      await updateMyInfo({
-        variables: {
-          input: {
-            firstName: firstName.trim() || null,
-            lastName: lastName.trim() || null,
-            otherNames: otherNames.trim() || null,
-            city: cityValue || null,
+      // Designer profile (UpdateProfileInput).
+      if (designerDirty && user.isDesigner) {
+        const min = parsePricing(designer.pricingMin);
+        const max = parsePricing(designer.pricingMax);
+        if (min !== null && max !== null && min > max) {
+          toast.error("Minimum price must be less than or equal to maximum");
+          return;
+        }
+        await updateProfile({
+          variables: {
+            input: {
+              displayName: designer.displayName.trim() || null,
+              bio: designer.bio.trim() || null,
+              specializations: designer.specializations,
+              pricingMin: min,
+              pricingMax: max,
+              isAcceptingOrders: designer.isAcceptingOrders,
+            },
           },
-        },
-      });
+        });
+        setDesignerSnapshot(designer);
+      }
 
-      setUser({
-        ...user!,
-        firstName: firstName.trim() || null,
-        lastName: lastName.trim() || null,
-        otherNames: otherNames.trim() || null,
-        city: cityValue || null,
-      });
-
-      // Submitted successfully — drop the draft so we don't keep prompting.
       clearDraft();
-
       toast.success("Profile updated");
       router.push("/profile");
     } catch {
@@ -196,7 +334,6 @@ export default function ProfileEditPage() {
   }
 
   const displayAvatar = avatarPreview ?? user.avatarUrl;
-  const cities = citiesData?.cities ?? [];
 
   return (
     <AppShell>
@@ -271,7 +408,7 @@ export default function ProfileEditPage() {
           </p>
         </GlassCard>
 
-        {/* Personal info */}
+        {/* Account basics */}
         <section>
           <header className="mb-4">
             <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
@@ -324,68 +461,218 @@ export default function ProfileEditPage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm">City</Label>
-              {!showNewCity ? (
-                <div className="space-y-2">
-                  <div className="relative">
-                    <MapPin
-                      className="text-copper pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2"
-                      aria-hidden
-                    />
-                    <Select value={city} onValueChange={setCity}>
-                      <SelectTrigger className="h-11 pl-9">
-                        <SelectValue placeholder="Select your city" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cities.map((c) => (
-                          <SelectItem key={c.id} value={c.name}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    className="text-muted-foreground hover:text-foreground h-auto p-0 text-xs"
-                    onClick={() => setShowNewCity(true)}
-                  >
-                    City not listed? Add new
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="relative">
-                    <MapPin
-                      className="text-copper absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                      aria-hidden
-                    />
-                    <Input
-                      value={newCity}
-                      onChange={(e) => setNewCity(e.target.value)}
-                      placeholder="Enter city name"
-                      className="h-11 pl-9"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    className="text-muted-foreground hover:text-foreground h-auto p-0 text-xs"
-                    onClick={() => {
-                      setShowNewCity(false);
-                      setNewCity("");
-                    }}
-                  >
-                    Select from list instead
-                  </Button>
-                </div>
-              )}
+              <Label htmlFor="email" className="text-sm">
+                Email{" "}
+                <span className="text-muted-foreground">
+                  (for receipts &amp; order updates)
+                </span>
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
+                className="h-11"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <LocationPicker
+                value={location}
+                onChange={setLocation}
+                label="Location"
+                placeholder="Search your area, neighbourhood, or city"
+                showMap
+                mapHeight="220px"
+              />
             </div>
           </GlassCard>
         </section>
+
+        {/* Designer profile */}
+        {user.isDesigner && (
+          <section>
+            <header className="mb-4">
+              <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
+                Shop
+              </p>
+              <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+                <span className="inline-flex items-center gap-2">
+                  <Scissors className="text-copper h-5 w-5" aria-hidden />
+                  Designer profile
+                </span>
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                What clients see on your public profile.
+              </p>
+            </header>
+            <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
+              {designerLoading && !designerHydrated ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-11 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="displayName" className="text-sm">
+                      Shop name
+                    </Label>
+                    <Input
+                      id="displayName"
+                      value={designer.displayName}
+                      onChange={(e) =>
+                        setDesigner((d) => ({
+                          ...d,
+                          displayName: e.target.value,
+                        }))
+                      }
+                      placeholder="Adwoa Couture"
+                      className="h-11"
+                    />
+                    <p className="text-muted-foreground text-xs">
+                      Public business name. Used in your shareable profile link.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="bio" className="text-sm">
+                      Bio
+                    </Label>
+                    <Textarea
+                      id="bio"
+                      value={designer.bio}
+                      onChange={(e) =>
+                        setDesigner((d) => ({ ...d, bio: e.target.value }))
+                      }
+                      placeholder="Tell clients about your craft, signature styles, turnaround times..."
+                      maxLength={500}
+                      rows={4}
+                      className="min-h-24"
+                    />
+                    <p className="text-muted-foreground text-right text-xs">
+                      {designer.bio.length}/500
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm">Specializations</Label>
+                    <p className="text-muted-foreground text-xs">
+                      Clients filter by these. Pick everything you actively
+                      make.
+                    </p>
+                    {specsLoading ? (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <Skeleton key={i} className="h-9 w-24 rounded-full" />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {allSpecs.map((spec) => {
+                          const selected = designer.specializations.includes(
+                            spec.slug
+                          );
+                          return (
+                            <button
+                              key={spec.id}
+                              type="button"
+                              onClick={() => toggleSpec(spec.slug)}
+                              className={cn(
+                                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200",
+                                selected
+                                  ? "bg-foreground text-background hover:bg-foreground/85"
+                                  : "border-border bg-card hover:border-foreground/30 border hover:-translate-y-0.5 hover:shadow-(--shadow-1)"
+                              )}
+                              aria-pressed={selected ? "true" : "false"}
+                            >
+                              {selected ? (
+                                <X className="h-3 w-3" aria-hidden />
+                              ) : (
+                                <Plus
+                                  className="text-copper h-3 w-3"
+                                  aria-hidden
+                                />
+                              )}
+                              {spec.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm">Typical price range (GHS)</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        placeholder="Min"
+                        value={designer.pricingMin}
+                        onChange={(e) =>
+                          setDesigner((d) => ({
+                            ...d,
+                            pricingMin: e.target.value,
+                          }))
+                        }
+                        className="h-11"
+                        aria-label="Minimum price in GHS"
+                      />
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        placeholder="Max"
+                        value={designer.pricingMax}
+                        onChange={(e) =>
+                          setDesigner((d) => ({
+                            ...d,
+                            pricingMax: e.target.value,
+                          }))
+                        }
+                        className="h-11"
+                        aria-label="Maximum price in GHS"
+                      />
+                    </div>
+                    <p className="text-muted-foreground text-xs">
+                      A rough guide. Final quotes are still per-order.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 rounded-xl border border-dashed p-3.5">
+                    <div className="min-w-0 flex-1">
+                      <Label
+                        htmlFor="isAcceptingOrders"
+                        className="cursor-pointer text-sm font-medium"
+                      >
+                        Accepting new orders
+                      </Label>
+                      <p className="text-muted-foreground mt-0.5 text-xs">
+                        Switch off when you&apos;re fully booked. Your profile
+                        stays visible.
+                      </p>
+                    </div>
+                    <Switch
+                      id="isAcceptingOrders"
+                      checked={designer.isAcceptingOrders}
+                      onCheckedChange={(checked) =>
+                        setDesigner((d) => ({
+                          ...d,
+                          isAcceptingOrders: checked,
+                        }))
+                      }
+                    />
+                  </div>
+                </>
+              )}
+            </GlassCard>
+          </section>
+        )}
 
         {/* Save */}
         <Button
@@ -393,14 +680,14 @@ export default function ProfileEditPage() {
           size="xl"
           className="w-full gap-1.5"
           onClick={handleSave}
-          disabled={saving || !personalInfoDirty}
+          disabled={saving || !isDirty}
         >
           {saving ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
               Saving...
             </>
-          ) : personalInfoDirty ? (
+          ) : isDirty ? (
             <>
               Save changes
               <Check className="h-4 w-4" aria-hidden />
@@ -415,4 +702,16 @@ export default function ProfileEditPage() {
       </div>
     </AppShell>
   );
+}
+
+/**
+ * GHS-decimal input → pesewas integer for the API. Empty input becomes
+ * null so the backend can clear the field; non-numeric stays null.
+ */
+function parsePricing(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  return Math.round(parsed * 100);
 }

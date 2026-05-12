@@ -8,6 +8,7 @@ export const UPDATE_MY_INFO = gql`
       lastName
       otherNames
       fullName
+      email
       city
       avatarUrl
     }

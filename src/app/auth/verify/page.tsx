@@ -60,13 +60,27 @@ function VerifyOtpContent() {
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  // Synchronous in-flight guard. `useMutation`'s `verifying` flag flips
-  // a tick AFTER the mutation is fired — long enough for a second
-  // auto-submit (e.g. fast paste + onChange duplication) to slip
-  // through and double-submit the same code. Once the first call wins
-  // and clears the OTP key, the second response says "expired" and
-  // the user thinks the correct code was rejected.
+  // Two layered defenses against double-submitting the same OTP:
+  //   1. `submitting` — a synchronous in-flight flag. useMutation's
+  //      `verifying` state flips a tick AFTER the mutation fires,
+  //      long enough for a second auto-submit (fast paste + onChange
+  //      duplication, focus-fire-after-blur, React 19 transition
+  //      reschedule, etc.) to slip through.
+  //   2. `lastSubmittedCode` + `lastSubmittedAt` — once the in-flight
+  //      flag resets (after a thrown error), the user could re-submit
+  //      the IDENTICAL stale code (same paste, same closure, no
+  //      change in state). The code+timestamp dedupe blocks any
+  //      same-code resubmit within 5s. Different codes (the wrong→
+  //      right retry path) sail through untouched.
+  // Together these guarantee: at most one verifyOtp call per unique
+  // code within the rapid-fire window. Crucial because every double
+  // call inflates the failed-attempts counter and risks tripping
+  // lockout, after which the otpKey is dropped and the next real
+  // attempt returns "Verification code expired".
   const submitting = useRef(false);
+  const lastSubmittedCode = useRef<string | null>(null);
+  const lastSubmittedAt = useRef(0);
+  const DEDUPE_WINDOW_MS = 5000;
 
   const [verifyOtp, { loading: verifying }] = useMutation(VERIFY_OTP);
   const [requestOtp, { loading: resending }] = useMutation(REQUEST_OTP);
@@ -91,7 +105,16 @@ function VerifyOtpContent() {
   const handleVerify = useCallback(
     async (code: string) => {
       if (submitting.current) return;
+      if (
+        lastSubmittedCode.current === code &&
+        Date.now() - lastSubmittedAt.current < DEDUPE_WINDOW_MS
+      ) {
+        return;
+      }
       submitting.current = true;
+      lastSubmittedCode.current = code;
+      lastSubmittedAt.current = Date.now();
+      let navigated = false;
       try {
         const { data } = await verifyOtp({
           variables: { phone, code },
@@ -115,6 +138,7 @@ function VerifyOtpContent() {
 
           toast.success("Phone verified!");
           sessionStorage.removeItem("nidlo:auth:pendingPhone");
+          navigated = true;
 
           if (isNew || !user.isOnboarded) {
             router.push("/auth/role");
@@ -128,7 +152,19 @@ function VerifyOtpContent() {
         toast.error(message);
         setDigits(Array(OTP_LENGTH).fill(""));
         inputRefs.current[0]?.focus();
-        submitting.current = false;
+        // Deliberately do NOT reset `lastSubmittedCode` here. The catch
+        // block runs from an error response, but the auto-submit-on-6-
+        // digits handler can still re-fire moments later with the same
+        // stale code from a captured closure. Keeping the dedupe armed
+        // for 5s blocks that. The user's real retry path is to type a
+        // *different* code (the correct one), which sails through.
+      } finally {
+        // Reset unless we successfully navigated — keeping it true past
+        // navigation is harmless (component unmounts) and prevents a
+        // double-fire if router.push hasn't unmounted us yet.
+        if (!navigated) {
+          submitting.current = false;
+        }
       }
     },
     [phone, verifyOtp, setUser, router]

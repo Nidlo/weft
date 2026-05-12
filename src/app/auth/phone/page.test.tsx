@@ -86,13 +86,18 @@ describe("PhoneAuthPage", () => {
     expect(submit).not.toBeDisabled();
   });
 
-  it("offers a Continue with Apple option alongside Google", () => {
+  it("hides Google + Apple sign-in while SOCIAL_LOGIN_ENABLED is off", () => {
+    // The auth/phone page module-local flag `SOCIAL_LOGIN_ENABLED` is
+    // currently `false` because the social backends are being unblocked.
+    // When the flag flips back to `true`, this test will fail and should
+    // be replaced with the original
+    // "offers a Continue with Apple option alongside Google" assertion.
     render(<PhoneAuthPage />);
     expect(
-      screen.getByRole("button", { name: /continue with apple/i })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: /continue with apple/i })
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /continue with google/i })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: /continue with google/i })
+    ).not.toBeInTheDocument();
   });
 });

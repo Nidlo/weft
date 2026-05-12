@@ -132,11 +132,11 @@ export function OrderEditSheet({
         side="bottom"
         className="max-h-[90vh] w-full overflow-y-auto"
       >
-        <SheetHeader>
+        <SheetHeader className="px-4 sm:px-6">
           <SheetTitle>Edit Order</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-6 space-y-6 px-4 pb-6 sm:px-6">
           {/* Designer-only fields */}
           {isDesigner && (
             <>

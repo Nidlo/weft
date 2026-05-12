@@ -105,10 +105,35 @@ const errorLink = new ErrorLink(({ error, operation }) => {
         `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(locations)}, Path: ${path}, Operation: ${operation.operationName}`
       );
     });
+  } else if (isAbortError(error)) {
+    // Routine cleanup: a component unmounted (or React 19 strict-mode
+    // double-invoked) while the query was in flight, so Apollo aborted
+    // the underlying fetch. Not an error — silence it so the console
+    // isn't polluted with spurious "Network error" lines during fast
+    // navigation.
   } else {
     console.error(`[Network error]: ${error}`);
   }
 });
+
+/**
+ * Detect the AbortError that fetch / Apollo emits when a request signal
+ * is cancelled. Matches both the DOMException form (`name === "AbortError"`)
+ * and the bare-Error fallback some runtimes use.
+ */
+function isAbortError(err: unknown): boolean {
+  if (err == null) return false;
+  if (typeof err !== "object") return false;
+  const e = err as { name?: unknown; message?: unknown };
+  if (e.name === "AbortError") return true;
+  if (
+    typeof e.message === "string" &&
+    /aborted|signal is aborted/i.test(e.message)
+  ) {
+    return true;
+  }
+  return false;
+}
 
 /**
  * Shape of a paginated `designers` page in the Apollo cache. The runtime
