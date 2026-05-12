@@ -14,6 +14,8 @@ import {
 import { toast } from "sonner";
 
 import { EXTRACT_AI_MEASUREMENTS } from "@/lib/graphql/mutations/ai-measurement";
+import { ME_QUERY } from "@/lib/graphql/queries/auth";
+import { useAuthStore } from "@/lib/stores/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +28,9 @@ import type {
 } from "@/types/graphql";
 import { ManualForm } from "./manual-form";
 import { usePreferencesStore } from "@/lib/stores/preferences";
+import type { MeasurementUnit } from "@/lib/utils/measurement";
 import {
+  cmToInches,
   convertMeasurementData,
   inchesToCm,
   recomputeFromLandmarks,
@@ -62,13 +66,35 @@ const TIPS = [
 
 export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   const preferredUnit = usePreferencesStore((s) => s.measurementUnit);
+  const storedHeightCm = useAuthStore((s) => s.user?.heightCm ?? null);
   const [aiStep, setAiStep] = useState<AiStep>("instructions");
   const [frontImage, setFrontImage] = useState<File | null>(null);
   const [sideImage, setSideImage] = useState<File | null>(null);
-  // Stored as a free-text string in the user's preferred unit; only
-  // converted to cm at the moment we send to the AI service (which
-  // standardises on cm).
-  const [heightInput, setHeightInput] = useState("");
+  // The height-input unit is deliberately INDEPENDENT of the global
+  // `preferredUnit` (which governs how measurement results are displayed).
+  // People typically know their height in cm even when they prefer to view
+  // garment measurements in inches — defaulting to cm here removes the
+  // most common "I typed 170 in an inches field" trap. The toggle next to
+  // the label lets users switch on the fly.
+  const [heightInputUnit, setHeightInputUnit] = useState<MeasurementUnit>("cm");
+  // Stored as a free-text string in `heightInputUnit`; converted to cm
+  // only at submit time. Seeds from the user's saved height (always in cm
+  // on the server) — the backend persists the value on first capture and
+  // falls back to it whenever the arg is omitted.
+  const [heightInput, setHeightInput] = useState(() =>
+    storedHeightCm === null ? "" : storedHeightCm.toString()
+  );
+
+  const handleHeightUnitChange = (next: MeasurementUnit) => {
+    if (next === heightInputUnit) return;
+    const parsed = parseFloat(heightInput);
+    if (!Number.isNaN(parsed)) {
+      const converted =
+        next === "inches" ? cmToInches(parsed) : inchesToCm(parsed);
+      setHeightInput(converted.toFixed(next === "inches" ? 1 : 0));
+    }
+    setHeightInputUnit(next);
+  };
   const [extractedData, setExtractedData] = useState<MeasurementData | null>(
     null
   );
@@ -103,7 +129,13 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   }, [extractedData]);
 
   const [extractMeasurements, { loading: extracting }] =
-    useMutation<ExtractAiMeasurementsData>(EXTRACT_AI_MEASUREMENTS);
+    useMutation<ExtractAiMeasurementsData>(EXTRACT_AI_MEASUREMENTS, {
+      // The resolver persists `heightCm` to the user on first capture (or
+      // any later correction). Refetch Me so AuthProvider sees the new
+      // value — the next scan in this session can then read it without
+      // a page reload.
+      refetchQueries: [{ query: ME_QUERY }],
+    });
 
   const cancelledRef = useRef(false);
   const [elapsed, setElapsed] = useState(0);
@@ -133,18 +165,34 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       return;
     }
 
+    // Pre-validate the height range client-side. The server enforces 50–250 cm;
+    // bouncing a clearly-bad value here saves the round-trip and gives a
+    // unit-aware hint via `heightInputUnit` (which is independent of the
+    // global preferredUnit — see the heightInputUnit declaration above).
+    let heightCmForRequest: number | null = null;
+    if (heightInput) {
+      const parsed = parseFloat(heightInput);
+      if (!Number.isNaN(parsed)) {
+        const cm = heightInputUnit === "inches" ? inchesToCm(parsed) : parsed;
+        if (cm < 50 || cm > 250) {
+          const unit = unitName(heightInputUnit).toLowerCase();
+          toast.error(
+            `Height looks off — please enter a realistic value in ${unit}, or switch units above.`
+          );
+          return;
+        }
+        heightCmForRequest = cm;
+      }
+    }
+
     cancelledRef.current = false;
     setAiStep("processing");
 
     try {
       const variables: Record<string, unknown> = { frontImage };
       if (sideImage) variables.sideImage = sideImage;
-      if (heightInput) {
-        const parsed = parseFloat(heightInput);
-        if (!Number.isNaN(parsed)) {
-          variables.heightCm =
-            preferredUnit === "inches" ? inchesToCm(parsed) : parsed;
-        }
+      if (heightCmForRequest !== null) {
+        variables.heightCm = heightCmForRequest;
       }
 
       const { data } = await extractMeasurements({ variables });
@@ -304,17 +352,46 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
           />
 
           <div className="space-y-2">
-            <Label htmlFor="height" className="text-sm">
-              Your height in {unitName(preferredUnit).toLowerCase()}{" "}
-              <span className="text-muted-foreground">(optional)</span>
-            </Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="height" className="text-sm">
+                Your height{" "}
+                <span className="text-muted-foreground">(optional)</span>
+              </Label>
+              <div
+                role="group"
+                aria-label="Height unit"
+                className="border-border bg-muted/40 inline-flex overflow-hidden rounded-md border text-xs"
+              >
+                {(["cm", "inches"] as const).map((u) => {
+                  const active = heightInputUnit === u;
+                  return (
+                    <button
+                      key={u}
+                      type="button"
+                      aria-pressed={active ? "true" : "false"}
+                      onClick={() => handleHeightUnitChange(u)}
+                      className={
+                        "px-2.5 py-1 font-medium tracking-wide uppercase transition-colors " +
+                        (active
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground hover:text-foreground")
+                      }
+                    >
+                      {u === "cm" ? "cm" : "in"}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <Input
               id="height"
               type="number"
-              step={preferredUnit === "inches" ? "0.25" : "0.1"}
-              min={preferredUnit === "inches" ? "39" : "100"}
-              max={preferredUnit === "inches" ? "98" : "250"}
-              placeholder={preferredUnit === "inches" ? "e.g. 67" : "e.g. 170"}
+              step={heightInputUnit === "inches" ? "0.25" : "0.1"}
+              min={heightInputUnit === "inches" ? "39" : "100"}
+              max={heightInputUnit === "inches" ? "98" : "250"}
+              placeholder={
+                heightInputUnit === "inches" ? "e.g. 67" : "e.g. 170"
+              }
               value={heightInput}
               onChange={(e) => setHeightInput(e.target.value)}
               className="h-11 tabular-nums"
@@ -332,10 +409,12 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
             size="xl"
             className="gap-1.5 sm:flex-1"
             onClick={handleExtract}
-            disabled={!frontImage || extracting}
+            disabled={!frontImage}
+            loading={extracting}
+            loadingLabel="Analyzing..."
           >
-            {extracting ? "Analyzing..." : "Extract measurements"}
-            {!extracting && <ArrowRight className="h-4 w-4" aria-hidden />}
+            Extract measurements
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </Button>
           <Button
             variant="ghost"

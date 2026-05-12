@@ -10,6 +10,7 @@ export interface GqlUser {
   lastName: string | null;
   otherNames: string | null;
   fullName: string | null;
+  heightCm: number | null;
   phone: string | null;
   email: string | null;
   avatarUrl: string | null;
@@ -541,7 +542,9 @@ export interface GqlOrderDetail extends GqlOrder {
   designer: GqlUser;
   measurement: GqlMeasurement | null;
   updates: GqlOrderUpdate[];
-  materials: GqlOrderMaterial[];
+  items: GqlOrderItem[];
+  /** @deprecated alias for items — kept for one release. */
+  materials: GqlOrderItem[];
   garmentEases: GqlOrderGarmentEase[];
   payments: GqlPayment[];
   payouts: GqlPayout[];
@@ -595,10 +598,18 @@ export interface GqlOrderUpdate {
   createdAt: string;
 }
 
-export interface GqlOrderMaterial {
+export interface GqlOrderItemMetadata {
+  label: string;
+  value: string;
+}
+
+export interface GqlOrderItem {
   id: string;
   orderId: string;
+  itemType: string;
   name: string;
+  description: string | null;
+  metadata: GqlOrderItemMetadata[] | null;
   unitCost: number;
   quantity: number;
   totalCost: number;
@@ -606,11 +617,23 @@ export interface GqlOrderMaterial {
   createdAt: string;
 }
 
+/**
+ * @deprecated — schema rename; alias kept so any in-flight imports compile
+ * during the one-release back-compat window. New code should import GqlOrderItem.
+ */
+export type GqlOrderMaterial = GqlOrderItem;
+
 export interface GqlProfitSummary {
+  /** Canonical name post-rename. */
+  totalItemCost: number;
+  /** @deprecated alias for totalItemCost — kept for one release. */
   totalMaterialCost: number;
   confirmedPrice: number;
   profit: number;
   marginPercent: number;
+  /** Canonical name post-rename. */
+  itemCount: number;
+  /** @deprecated alias for itemCount — kept for one release. */
   materialCount: number;
   purchasedCount: number;
 }
@@ -675,6 +698,13 @@ export interface UpdateOrderStatusInput {
   orderId: string;
   status: string;
   notes?: string;
+  /**
+   * Set by the FE after the designer confirms a "deposit not recorded"
+   * dialog. Tells the backend to bypass the deposit gate and record the
+   * override on the order_updates audit row. Default false; clients
+   * never set this without an explicit user confirmation.
+   */
+  acceptUnpaidDeposit?: boolean;
 }
 
 export interface AddMaterialInput {
@@ -704,16 +734,26 @@ export interface ConfirmDeliveryData {
   confirmDelivery: GqlOrder;
 }
 
-export interface AddMaterialData {
-  addMaterial: GqlOrderMaterial;
+export interface AddItemInput {
+  orderId: string;
+  itemType?: string;
+  name: string;
+  description?: string;
+  metadata?: GqlOrderItemMetadata[];
+  unitCost: number;
+  quantity?: number;
+}
+
+export interface AddItemData {
+  addItem: GqlOrderItem;
 }
 
 export interface TogglePurchasedData {
-  togglePurchased: GqlOrderMaterial;
+  togglePurchased: GqlOrderItem;
 }
 
-export interface RemoveMaterialData {
-  removeMaterial: boolean;
+export interface RemoveItemData {
+  removeItem: boolean;
 }
 
 // --- Client Search ---

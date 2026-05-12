@@ -6,12 +6,16 @@ import { ArrowLeft, ArrowRight, Camera, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { EXTRACT_AI_MEASUREMENTS } from "@/lib/graphql/mutations/ai-measurement";
+import { ME_QUERY } from "@/lib/graphql/queries/auth";
+import { useAuthStore } from "@/lib/stores/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StitchLoader } from "@/components/ui/stitch-loader";
+import type { MeasurementUnit } from "@/lib/utils/measurement";
 import {
+  cmToInches,
   convertMeasurementData,
   inchesToCm,
   unitLabel,
@@ -42,15 +46,39 @@ export function RescanFlow({
   onCancel,
 }: RescanFlowProps) {
   const preferredUnit = usePreferencesStore((s) => s.measurementUnit);
+  const storedHeightCm = useAuthStore((s) => s.user?.heightCm ?? null);
   const [step, setStep] = useState<Step>("upload");
   const [frontImage, setFrontImage] = useState<File | null>(null);
   const [sideImage, setSideImage] = useState<File | null>(null);
-  const [heightInput, setHeightInput] = useState("");
+  // Height-input unit defaults to cm regardless of the global preferredUnit
+  // (which governs how garment measurements are displayed). The toggle next
+  // to the label lets users switch on the fly — see the matching block in
+  // ai-flow.tsx for the rationale.
+  const [heightInputUnit, setHeightInputUnit] = useState<MeasurementUnit>("cm");
+  // Seed from the user's saved height (always cm on the server) — rescans
+  // usually happen weeks/months after the original scan and the user
+  // shouldn't have to re-type it. They can still override in the input.
+  const [heightInput, setHeightInput] = useState(() =>
+    storedHeightCm === null ? "" : storedHeightCm.toString()
+  );
+
+  const handleHeightUnitChange = (next: MeasurementUnit) => {
+    if (next === heightInputUnit) return;
+    const parsed = parseFloat(heightInput);
+    if (!Number.isNaN(parsed)) {
+      const converted =
+        next === "inches" ? cmToInches(parsed) : inchesToCm(parsed);
+      setHeightInput(converted.toFixed(next === "inches" ? 1 : 0));
+    }
+    setHeightInputUnit(next);
+  };
   const [proposedMm, setProposedMm] = useState<MeasurementMmData | null>(null);
   const [landmarks, setLandmarks] = useState<Landmarks | null>(null);
 
   const [extract, { loading: extracting }] =
-    useMutation<ExtractAiMeasurementsData>(EXTRACT_AI_MEASUREMENTS);
+    useMutation<ExtractAiMeasurementsData>(EXTRACT_AI_MEASUREMENTS, {
+      refetchQueries: [{ query: ME_QUERY }],
+    });
   const { applyRescan, loading: applying } = useApplyMeasurementRescan();
 
   const cancelledRef = useRef(false);
@@ -75,18 +103,33 @@ export function RescanFlow({
       return;
     }
 
+    // Range-check in cm before sending — mirrors the server's 50–250 guard.
+    // The cm conversion uses `heightInputUnit` (the per-field toggle),
+    // which is independent of the global preferredUnit display setting.
+    let heightCmForRequest: number | null = null;
+    if (heightInput) {
+      const parsed = parseFloat(heightInput);
+      if (!Number.isNaN(parsed)) {
+        const cm = heightInputUnit === "inches" ? inchesToCm(parsed) : parsed;
+        if (cm < 50 || cm > 250) {
+          const unit = unitName(heightInputUnit).toLowerCase();
+          toast.error(
+            `Height looks off — please enter a realistic value in ${unit}, or switch units above.`
+          );
+          return;
+        }
+        heightCmForRequest = cm;
+      }
+    }
+
     cancelledRef.current = false;
     setStep("processing");
 
     try {
       const variables: Record<string, unknown> = { frontImage };
       if (sideImage) variables.sideImage = sideImage;
-      if (heightInput) {
-        const parsed = parseFloat(heightInput);
-        if (!Number.isNaN(parsed)) {
-          variables.heightCm =
-            preferredUnit === "inches" ? inchesToCm(parsed) : parsed;
-        }
+      if (heightCmForRequest !== null) {
+        variables.heightCm = heightCmForRequest;
       }
 
       const { data } = await extract({ variables });
@@ -206,22 +249,49 @@ export function RescanFlow({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="rescan-height">
-              Your height in {unitName(preferredUnit).toLowerCase()} (optional)
-            </Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="rescan-height">Your height (optional)</Label>
+              <div
+                role="group"
+                aria-label="Height unit"
+                className="border-border bg-muted/40 inline-flex overflow-hidden rounded-md border text-xs"
+              >
+                {(["cm", "inches"] as const).map((u) => {
+                  const active = heightInputUnit === u;
+                  return (
+                    <button
+                      key={u}
+                      type="button"
+                      aria-pressed={active ? "true" : "false"}
+                      onClick={() => handleHeightUnitChange(u)}
+                      className={
+                        "px-2.5 py-1 font-medium tracking-wide uppercase transition-colors " +
+                        (active
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground hover:text-foreground")
+                      }
+                    >
+                      {u === "cm" ? "cm" : "in"}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <Input
               id="rescan-height"
               type="number"
-              step={preferredUnit === "inches" ? "0.25" : "0.1"}
-              min={preferredUnit === "inches" ? "39" : "100"}
-              max={preferredUnit === "inches" ? "98" : "250"}
+              step={heightInputUnit === "inches" ? "0.25" : "0.1"}
+              min={heightInputUnit === "inches" ? "39" : "100"}
+              max={heightInputUnit === "inches" ? "98" : "250"}
               value={heightInput}
-              placeholder={preferredUnit === "inches" ? "e.g. 67" : "e.g. 170"}
+              placeholder={
+                heightInputUnit === "inches" ? "e.g. 67" : "e.g. 170"
+              }
               onChange={(e) => setHeightInput(e.target.value)}
             />
             <p className="text-muted-foreground text-xs">
-              Providing your height improves accuracy. Enter in{" "}
-              {unitLabel(preferredUnit)}; we convert automatically.
+              Providing your height improves accuracy. We&apos;ll remember it
+              for next time.
             </p>
           </div>
         </GlassCard>

@@ -8,6 +8,7 @@ export const ME_QUERY = gql`
       lastName
       otherNames
       fullName
+      heightCm
       phone
       email
       avatarUrl

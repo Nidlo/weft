@@ -8,6 +8,7 @@ export interface User {
   lastName: string | null;
   otherNames?: string | null;
   fullName: string | null;
+  heightCm?: number | null;
   phone: string;
   email: string | null;
   avatarUrl: string | null;
