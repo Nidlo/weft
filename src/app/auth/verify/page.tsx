@@ -12,6 +12,7 @@ import type { VerifyOtpData, RequestOtpData } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
 import { maskPhone } from "@/lib/utils/phone";
+import { safeNext } from "@/lib/utils/safe-next";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StitchLoader } from "@/components/ui/stitch-loader";
@@ -138,12 +139,23 @@ function VerifyOtpContent() {
 
           toast.success("Phone verified!");
           sessionStorage.removeItem("nidlo:auth:pendingPhone");
+          // Honour the deep-link target captured on /auth/phone via
+          // ?next=, so an SMS / email / push click lands on the
+          // intended page after login. Already-onboarded users go
+          // straight to the deep-link; non-onboarded users finish
+          // onboarding first (the captured next survives in
+          // sessionStorage and is picked up later if the role flow
+          // forwards it — handled by the role page or simply cleared).
+          const rawNext = sessionStorage.getItem("nidlo:auth:next");
+          if (rawNext) {
+            sessionStorage.removeItem("nidlo:auth:next");
+          }
           navigated = true;
 
           if (isNew || !user.isOnboarded) {
             router.push("/auth/role");
           } else {
-            router.push("/dashboard");
+            router.push(safeNext(rawNext));
           }
         }
       } catch (error) {
@@ -342,14 +354,12 @@ function VerifyOtpContent() {
             variant="ghost"
             size="sm"
             onClick={handleResend}
-            disabled={resending}
+            loading={resending}
+            loadingLabel="Sending..."
             className="gap-1.5"
           >
-            <RotateCw
-              className={cn("h-3.5 w-3.5", resending && "animate-spin")}
-              aria-hidden
-            />
-            {resending ? "Sending..." : "Resend code"}
+            <RotateCw className="h-3.5 w-3.5" aria-hidden />
+            Resend code
           </Button>
         )}
       </div>

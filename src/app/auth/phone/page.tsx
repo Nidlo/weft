@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useCallback, useEffect, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { ArrowRight, Phone } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import type {
 } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
+import { safeNext } from "@/lib/utils/safe-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,14 +54,36 @@ const FALLBACK_COUNTRIES: GqlCountry[] = [
   },
 ];
 
+// The `?next=` deep-link target is shared by phone-OTP and social login.
+// It's captured into sessionStorage here on /auth/phone (so it survives
+// the OTP redirect into /auth/verify) and consumed by both completion
+// paths (social-login on this page, OTP verify on the next page).
+const NEXT_STORAGE_KEY = "nidlo:auth:next";
+
 export default function PhoneAuthPage() {
+  return (
+    <Suspense fallback={null}>
+      <PhoneAuthContent />
+    </Suspense>
+  );
+}
+
+function PhoneAuthContent() {
   const { isGuest, isLoading } = useGuestGuard();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [phone, setPhone] = useState("");
   const [selectedCode, setSelectedCode] = useState("+233");
   const [requestOtp, { loading }] = useMutation(REQUEST_OTP);
   const [socialLogin, { loading: socialLoading }] = useMutation(SOCIAL_LOGIN);
   const setUser = useAuthStore((s) => s.setUser);
+
+  useEffect(() => {
+    const next = searchParams?.get("next");
+    if (next && typeof window !== "undefined") {
+      sessionStorage.setItem(NEXT_STORAGE_KEY, next);
+    }
+  }, [searchParams]);
 
   const { data: countriesData } = useQuery<CountriesData>(GET_COUNTRIES, {
     variables: { activeOnly: true },
@@ -131,10 +154,20 @@ export default function PhoneAuthPage() {
 
           toast.success("Signed in successfully!");
 
+          const rawNext =
+            typeof window !== "undefined"
+              ? sessionStorage.getItem(NEXT_STORAGE_KEY)
+              : null;
+          if (rawNext && typeof window !== "undefined") {
+            sessionStorage.removeItem(NEXT_STORAGE_KEY);
+          }
+          // Onboarding is non-negotiable — deep-links wait until the
+          // user has a complete profile. Snad's UX: hit /auth/role first,
+          // then bounce to the captured deep-link after onboarding.
           if (isNew || !user.isOnboarded) {
             router.push("/auth/role");
           } else {
-            router.push("/dashboard");
+            router.push(safeNext(rawNext));
           }
         }
       } catch (error) {
@@ -294,10 +327,12 @@ export default function PhoneAuthPage() {
           variant="luxe"
           size="lg"
           className="w-full"
-          disabled={isBusy || !isValidPhone(phone)}
+          disabled={socialLoading || !isValidPhone(phone)}
+          loading={loading}
+          loadingLabel="Sending..."
         >
-          {loading ? "Sending..." : "Send verification code"}
-          {!loading && <ArrowRight className="ml-1 h-4 w-4" />}
+          Send verification code
+          <ArrowRight className="ml-1 h-4 w-4" />
         </Button>
       </form>
 
@@ -316,7 +351,9 @@ export default function PhoneAuthPage() {
               variant="luxe-outline"
               size="lg"
               className="w-full"
-              disabled={isBusy}
+              disabled={loading}
+              loading={socialLoading}
+              loadingLabel="Signing in..."
               onClick={handleAppleLogin}
             >
               <svg
@@ -327,7 +364,7 @@ export default function PhoneAuthPage() {
               >
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
               </svg>
-              {socialLoading ? "Signing in..." : "Continue with Apple"}
+              Continue with Apple
             </Button>
           </div>
         </>
