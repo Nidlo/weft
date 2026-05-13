@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { ArrowLeft, ArrowRight, Camera, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { EXTRACT_AI_MEASUREMENTS } from "@/lib/graphql/mutations/ai-measurement";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import { useAuthStore } from "@/lib/stores/auth";
+import { useScanJob } from "@/lib/hooks/use-scan-job";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,10 +19,8 @@ import {
   cmToInches,
   convertMeasurementData,
   inchesToCm,
-  unitLabel,
   unitName,
 } from "@/lib/utils/measurement";
-import { usePreferencesStore } from "@/lib/stores/preferences";
 import { useApplyMeasurementRescan } from "@/lib/hooks/use-measurements";
 import type {
   ExtractAiMeasurementsData,
@@ -45,7 +44,6 @@ export function RescanFlow({
   onComplete,
   onCancel,
 }: RescanFlowProps) {
-  const preferredUnit = usePreferencesStore((s) => s.measurementUnit);
   const storedHeightCm = useAuthStore((s) => s.user?.heightCm ?? null);
   const [step, setStep] = useState<Step>("upload");
   const [frontImage, setFrontImage] = useState<File | null>(null);
@@ -81,21 +79,37 @@ export function RescanFlow({
     });
   const { applyRescan, loading: applying } = useApplyMeasurementRescan();
 
-  const cancelledRef = useRef(false);
-  const [elapsed, setElapsed] = useState(0);
+  // Sprint 33a — mutation returns a jobId; the actual scan runs in a
+  // queued worker. useScanJob polls until terminal status then fires
+  // callbacks (not a projection effect; avoids React 19's
+  // set-state-in-effect rule).
+  const [scanJobId, setScanJobId] = useState<string | null>(null);
+  const { elapsedSeconds: elapsed } = useScanJob(scanJobId, {
+    onCompleted: (job) => {
+      if (cancelledRef.current || !job.result?.data) return;
+      // Convert cm → mm for the diff view, the canonical unit.
+      const proposed = convertMeasurementData(
+        job.result.data as Record<string, Record<string, number | null>>,
+        "cm",
+        "mm"
+      );
+      setProposedMm(proposed as MeasurementMmData);
+      setLandmarks(job.result.landmarks ?? null);
+      setStep("diff");
+      setScanJobId(null);
+    },
+    onFailed: (job) => {
+      if (cancelledRef.current) return;
+      const friendly =
+        job.errorMessage ??
+        "Re-scan failed. Try a different photo, or enter measurements manually.";
+      toast.error(friendly, { duration: 6000 });
+      setStep("upload");
+      setScanJobId(null);
+    },
+  });
 
-  // Tick elapsed seconds while processing. We compute from an absolute start
-  // timestamp so re-entering "processing" naturally restarts at 0 on the
-  // first tick — without a synchronous setState in the effect body
-  // (React 19 cascading-render rule).
-  useEffect(() => {
-    if (step !== "processing") return;
-    const start = Date.now();
-    const id = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - start) / 1000));
-    }, 1000);
-    return () => clearInterval(id);
-  }, [step]);
+  const cancelledRef = useRef(false);
 
   const handleExtract = async () => {
     if (!frontImage) {
@@ -135,29 +149,19 @@ export function RescanFlow({
       const { data } = await extract({ variables });
       if (cancelledRef.current) return;
 
-      const result = data?.extractAiMeasurements ?? null;
-      if (!result?.data) {
-        toast.error("No measurements were returned. Try a different photo.");
+      const jobId = data?.extractAiMeasurements?.id ?? null;
+      if (!jobId) {
+        toast.error("Couldn't queue the re-scan. Try again.");
         setStep("upload");
         return;
       }
-
-      // The extract mutation returns the data in cm (per fitscan boundary).
-      // Convert to mm for the diff view, which is the canonical unit.
-      const proposed = convertMeasurementData(
-        result.data as Record<string, Record<string, number | null>>,
-        "cm",
-        "mm"
-      );
-      setProposedMm(proposed as MeasurementMmData);
-      setLandmarks(result.landmarks ?? null);
-      setStep("diff");
+      setScanJobId(jobId);
     } catch (err) {
       if (cancelledRef.current) return;
       const msg =
         err instanceof Error
           ? err.message
-          : "Couldn't extract from that photo.";
+          : "Couldn't queue the re-scan. Try again.";
       toast.error(`Re-scan failed: ${msg}`);
       setStep("upload");
     }

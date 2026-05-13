@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import {
   ArrowLeft,
@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { EXTRACT_AI_MEASUREMENTS } from "@/lib/graphql/mutations/ai-measurement";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import { useAuthStore } from "@/lib/stores/auth";
+import { useScanJob } from "@/lib/hooks/use-scan-job";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,6 +64,32 @@ const TIPS = [
   "Stand straight with arms slightly away from your sides.",
   "A side photo improves accuracy (optional but recommended).",
 ];
+
+/**
+ * Map a backend `ScanJobErrorCategory` to user-facing copy. The free-form
+ * `errorMessage` is only used as a fallback — by category we know enough
+ * to suggest a specific retry action.
+ */
+function scanFailureMessage(
+  category: string | null,
+  rawMessage: string | null
+): string {
+  switch (category) {
+    case "image_quality":
+      return "The photo didn't pass quality checks. Try a clearer shot with better lighting and a plain background.";
+    case "upstream_unavailable":
+      return "The measurement service is offline right now. Try again in a minute, or enter measurements manually.";
+    case "upstream_error":
+      return "The measurement service hit a snag. Try a different photo, or enter measurements manually.";
+    case "claude_failed":
+      return "We extracted measurements but our review check is unavailable. Please verify the values yourself before saving.";
+    default:
+      return (
+        rawMessage ??
+        "We couldn't complete the scan. Try a different photo, or enter measurements manually."
+      );
+  }
+}
 
 export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   const preferredUnit = usePreferencesStore((s) => s.measurementUnit);
@@ -137,24 +164,37 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       refetchQueries: [{ query: ME_QUERY }],
     });
 
-  const cancelledRef = useRef(false);
-  const [elapsed, setElapsed] = useState(0);
+  // Sprint 33a — the mutation now returns a jobId; the scan runs in a
+  // queued worker. useScanJob polls until terminal status, then fires
+  // onCompleted / onFailed callbacks. Setting state from callbacks (not a
+  // projection effect) avoids React 19's set-state-in-effect rule.
+  const [scanJobId, setScanJobId] = useState<string | null>(null);
+  const { elapsedSeconds: elapsed } = useScanJob(scanJobId, {
+    onCompleted: (job) => {
+      if (cancelledRef.current || !job.result) return;
+      setExtractedData(job.result.data ?? null);
+      setExtractedLandmarks(job.result.landmarks ?? null);
+      setPhotoUrl(job.result.photoUrl ?? null);
+      setPhotoPublicId(job.result.photoPublicId ?? null);
+      setPhotoDisk(job.result.photoDisk ?? null);
+      setDegradedModes(job.result.degradedModes ?? []);
+      setAiStep("review");
+      setScanJobId(null);
+    },
+    onFailed: (job) => {
+      if (cancelledRef.current) return;
+      const friendly = scanFailureMessage(job.errorCategory, job.errorMessage);
+      toast.error(friendly, { duration: 6000 });
+      setAiStep("upload");
+      setScanJobId(null);
+    },
+  });
 
-  // Tick elapsed seconds while processing so users see progress. We compute
-  // from an absolute start timestamp so re-entering "processing" naturally
-  // restarts at 0 on the first tick — without a synchronous setState in the
-  // effect body (React 19 cascading-render rule).
-  useEffect(() => {
-    if (aiStep !== "processing") return;
-    const start = Date.now();
-    const id = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - start) / 1000));
-    }, 1000);
-    return () => clearInterval(id);
-  }, [aiStep]);
+  const cancelledRef = useRef(false);
 
   const handleCancelProcessing = () => {
     cancelledRef.current = true;
+    setScanJobId(null);
     setAiStep("upload");
     toast.info("Cancelled. You can re-upload or enter measurements manually.");
   };
@@ -197,63 +237,31 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
 
       const { data } = await extractMeasurements({ variables });
       if (cancelledRef.current) return;
-      setExtractedData(data?.extractAiMeasurements?.data ?? null);
-      setExtractedLandmarks(data?.extractAiMeasurements?.landmarks ?? null);
-      setPhotoUrl(data?.extractAiMeasurements?.photoUrl ?? null);
-      setPhotoPublicId(data?.extractAiMeasurements?.photoPublicId ?? null);
-      setPhotoDisk(data?.extractAiMeasurements?.photoDisk ?? null);
-      setDegradedModes(data?.extractAiMeasurements?.degradedModes ?? []);
-      setAiStep("review");
+
+      const jobId = data?.extractAiMeasurements?.id ?? null;
+      if (!jobId) {
+        toast.error(
+          "We couldn't queue the scan. Try again, or enter measurements manually.",
+          { duration: 6000 }
+        );
+        setAiStep("upload");
+        return;
+      }
+      // useScanJob starts polling on jobId change; the projection effect
+      // above flips us into "review" or back to "upload" on completion.
+      setScanJobId(jobId);
     } catch (err) {
       if (cancelledRef.current) return;
-      const raw = err instanceof Error ? err.message.toLowerCase() : "";
-      let friendly =
-        "We couldn't extract measurements from that photo. Try a different photo, or enter your measurements manually.";
-      if (
-        raw.includes("no person") ||
-        raw.includes("no body") ||
-        raw.includes("not detected")
-      ) {
-        friendly =
-          "We couldn't find a person in the photo. Try one with your full body in frame, on a plain background.";
-      } else if (raw.includes("multiple") || raw.includes("more than one")) {
-        friendly =
-          "We saw more than one person in the photo. Use a photo of just yourself.";
-      } else if (
-        raw.includes("too small") ||
-        raw.includes("resolution") ||
-        raw.includes("low quality")
-      ) {
-        friendly =
-          "The photo's resolution is too low. Take a new one in good lighting and try again.";
-      } else if (
-        raw.includes("blurry") ||
-        raw.includes("blur") ||
-        raw.includes("focus")
-      ) {
-        friendly =
-          "The photo looks blurry. Hold your phone steady and use natural light if possible.";
-      } else if (
-        raw.includes("confidence") ||
-        raw.includes("uncertain") ||
-        raw.includes("ambiguous")
-      ) {
-        friendly =
-          "We weren't confident enough in the result. Try a photo with fitted clothing and arms slightly away from your body.";
-      } else if (
-        raw.includes("timeout") ||
-        raw.includes("timed out") ||
-        raw.includes("504")
-      ) {
-        // Distinguish "server too slow" from "network unreachable" - a
-        // user with full bars but a heavy photo gets a hint about photo
-        // size, not a misleading "check your connection" message.
-        friendly =
-          "Your photo took too long to analyse. Try a smaller or clearer photo - good lighting and a plain background help most.";
-      } else if (raw.includes("network") || raw.includes("fetch")) {
-        friendly =
-          "We couldn't reach the measurement service. Check your connection and try again.";
-      }
+      // This catch only fires for synchronous mutation failures — height
+      // validation errors, network/CSRF blowups, GraphQL schema mismatches.
+      // The async-pipeline errors flow through the scanJob projection
+      // effect with a proper errorCategory, not through here.
+      const raw = err instanceof Error ? err.message : "";
+      const isValidation =
+        raw.includes("Height must be") || raw.includes("your height");
+      const friendly = isValidation
+        ? raw
+        : "We couldn't queue the scan. Check your connection and try again.";
       toast.error(friendly, { duration: 6000 });
       setAiStep("upload");
     }

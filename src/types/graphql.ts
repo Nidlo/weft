@@ -467,8 +467,40 @@ export interface ExtractAiMeasurementsResult {
   degradedModes: string[];
 }
 
+export type ScanJobStatus =
+  | "queued"
+  | "running"
+  | "completed"
+  | "failed"
+  | "image_rejected";
+
+export type ScanJobErrorCategory =
+  | "image_quality"
+  | "upstream_unavailable"
+  | "upstream_error"
+  | "claude_failed"
+  | "unknown";
+
+/**
+ * One AI body-scan attempt — created by the `extractAiMeasurements`
+ * mutation, polled via `MEASUREMENT_SCAN_JOB` until terminal. Sprint 33b
+ * will push the same payload over Reverb so polling becomes a fallback.
+ */
+export interface MeasurementScanJob {
+  id: string;
+  status: ScanJobStatus;
+  errorCategory: ScanJobErrorCategory | null;
+  errorMessage: string | null;
+  /** Populated only when `status === "completed"`. */
+  result: ExtractAiMeasurementsResult | null;
+}
+
 export interface ExtractAiMeasurementsData {
-  extractAiMeasurements: ExtractAiMeasurementsResult;
+  extractAiMeasurements: Pick<MeasurementScanJob, "id" | "status">;
+}
+
+export interface MeasurementScanJobData {
+  measurementScanJob: MeasurementScanJob | null;
 }
 
 export interface CreateMeasurementInput {
