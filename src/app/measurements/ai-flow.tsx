@@ -20,6 +20,7 @@ import { useScanJob } from "@/lib/hooks/use-scan-job";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StitchLoader } from "@/components/ui/stitch-loader";
 import type {
@@ -449,26 +450,11 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
                 cues (door, furniture, body proportions).
               </p>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={useEstimatedHeight ? "true" : "false"}
+            <Switch
+              checked={useEstimatedHeight}
+              onCheckedChange={setUseEstimatedHeight}
               aria-label="Estimate height from photo"
-              onClick={() => setUseEstimatedHeight((v) => !v)}
-              className={
-                "relative h-6 w-11 shrink-0 rounded-full border transition-colors " +
-                (useEstimatedHeight
-                  ? "bg-foreground border-foreground"
-                  : "bg-muted border-border")
-              }
-            >
-              <span
-                className={
-                  "bg-background absolute top-0.5 size-5 rounded-full shadow transition-transform " +
-                  (useEstimatedHeight ? "translate-x-5" : "translate-x-0.5")
-                }
-              />
-            </button>
+            />
           </div>
 
           <div
