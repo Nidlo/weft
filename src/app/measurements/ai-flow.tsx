@@ -591,16 +591,19 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   }
 
   if (aiStep === "processing") {
-    // Stage hint based on elapsed time — keeps the user informed even though
-    // the backend is opaque.
+    // Stage hint based on elapsed time — keeps the user informed even
+    // though the backend is opaque. Thresholds match the real pipeline
+    // shape with HMR2 + Claude validation: pose (~10s) → SMPL fitting
+    // (~30s) → Claude vision measurement (~30s) → Claude correction
+    // (~20s, only when needed).
     const stage =
-      elapsed < 4
+      elapsed < 10
         ? "Detecting body landmarks..."
-        : elapsed < 10
-          ? "Computing measurements..."
-          : elapsed < 20
-            ? "Refining results..."
-            : "Almost there...";
+        : elapsed < 40
+          ? "Building 3D body model..."
+          : elapsed < 75
+            ? "Cross-checking with AI vision..."
+            : "Refining the trickier measurements...";
     return (
       <GlassCard
         variant="solid"
@@ -612,7 +615,8 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         </p>
         <p className="text-muted-foreground mt-2 text-xs tabular-nums">
           <span className="text-foreground font-semibold">{elapsed}s</span>{" "}
-          elapsed · usually takes 5–15 seconds
+          elapsed · typically 60–120s. First scan after a server restart can
+          take longer while the model warms up.
         </p>
         <Button
           variant="ghost"
