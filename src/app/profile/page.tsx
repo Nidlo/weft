@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   Bell,
   ChevronRight,
+  ExternalLink,
   LogOut,
   Mail,
   MapPin,
@@ -176,6 +177,42 @@ export default function ProfilePage() {
 
         {/* Style profile (Anthropic Fitscan) */}
         <StyleProfileCard />
+
+        {/* Designer: public profile shortcut */}
+        {user.isDesigner && user.designerProfile?.slug && (
+          <section>
+            <header className="mb-4">
+              <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
+                Designer
+              </p>
+              <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+                Your public profile
+              </h2>
+            </header>
+            <GlassCard variant="solid" className="p-2">
+              <Link
+                href={`/designer/${user.designerProfile.slug}`}
+                className="group hover:bg-card focus-visible:bg-card flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 focus-visible:outline-none"
+              >
+                <span className="bg-secondary text-foreground ring-border group-hover:bg-foreground group-hover:text-background flex size-10 shrink-0 items-center justify-center rounded-xl ring-1 transition-colors">
+                  <Scissors className="h-4 w-4" aria-hidden />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-display text-sm font-semibold tracking-tight">
+                    View as client
+                  </p>
+                  <p className="text-muted-foreground truncate text-xs">
+                    See exactly what clients see on your profile
+                  </p>
+                </div>
+                <ExternalLink
+                  className="text-muted-foreground group-hover:text-copper h-4 w-4 shrink-0 transition-colors"
+                  aria-hidden
+                />
+              </Link>
+            </GlassCard>
+          </section>
+        )}
 
         {/* Quick links */}
         <section>

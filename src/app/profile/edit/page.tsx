@@ -5,12 +5,17 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
+  AlertCircle,
   ArrowLeft,
   Camera,
   Check,
+  ImagePlus,
   Loader2,
   Plus,
+  RefreshCw,
   Scissors,
+  Trash2,
+  Upload,
   User,
   X,
 } from "lucide-react";
@@ -33,10 +38,17 @@ import {
   UPDATE_MY_INFO,
   UPDATE_AVATAR,
   UPDATE_PROFILE,
+  ADD_PORTFOLIO_IMAGE,
+  REMOVE_PORTFOLIO_IMAGE,
 } from "@/lib/graphql/mutations/profile";
 import { GET_DESIGNER } from "@/lib/graphql/queries/designer";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
-import type { DesignerData } from "@/types/graphql";
+import type {
+  AddPortfolioImageData,
+  DesignerData,
+  PortfolioImage,
+  RemovePortfolioImageData,
+} from "@/types/graphql";
 import type { LocationData } from "@/types/location";
 import { cn } from "@/lib/utils";
 
@@ -111,6 +123,23 @@ export default function ProfileEditPage() {
   }>(UPDATE_AVATAR, {
     refetchQueries: [{ query: ME_QUERY }],
   });
+
+  const [addPortfolioImage] =
+    useMutation<AddPortfolioImageData>(ADD_PORTFOLIO_IMAGE);
+  const [removePortfolioImage, { loading: removingImage }] =
+    useMutation<RemovePortfolioImageData>(REMOVE_PORTFOLIO_IMAGE);
+
+  // Portfolio upload state — mirrors StepPortfolio pattern
+  const portfolioInputRef = useRef<HTMLInputElement>(null);
+  const [portfolioUploading, setPortfolioUploading] = useState(false);
+  const [portfolioDragOver, setPortfolioDragOver] = useState(false);
+  const [removingIndex, setRemovingIndex] = useState<number | null>(null);
+  interface FailedUpload {
+    id: string;
+    file: File;
+    reason: string;
+  }
+  const [portfolioFailed, setPortfolioFailed] = useState<FailedUpload[]>([]);
 
   if (user && user.id !== seededFromUserId) {
     setSeededFromUserId(user.id);
@@ -241,6 +270,100 @@ export default function ProfileEditPage() {
     } catch {
       toast.error("Failed to upload avatar");
       setAvatarPreview(null);
+    }
+  };
+
+  const MAX_PORTFOLIO = 20;
+  const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+  const currentImages: PortfolioImage[] =
+    designerData?.designer?.designerProfile?.portfolioImages ?? [];
+
+  const uploadPortfolioFile = async (
+    file: File
+  ): Promise<{ ok: true } | { ok: false; reason: string }> => {
+    try {
+      const { data } = await addPortfolioImage({ variables: { file } });
+      if (data?.addPortfolioImage) return { ok: true };
+      return { ok: false, reason: "Server didn't return the updated profile." };
+    } catch (err) {
+      return {
+        ok: false,
+        reason:
+          err instanceof Error ? err.message : "Upload failed. Try again.",
+      };
+    }
+  };
+
+  const handlePortfolioFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const remaining = MAX_PORTFOLIO - currentImages.length;
+    const toUpload = Array.from(files).slice(0, remaining);
+    if (toUpload.length === 0) {
+      toast.error(`Maximum ${MAX_PORTFOLIO} images allowed`);
+      return;
+    }
+    setPortfolioUploading(true);
+    try {
+      for (const file of toUpload) {
+        if (!ACCEPTED_TYPES.includes(file.type)) {
+          setPortfolioFailed((prev) => [
+            ...prev,
+            {
+              id: `${file.name}-${Date.now()}`,
+              file,
+              reason: "Only JPEG, PNG, and WebP are accepted.",
+            },
+          ]);
+          continue;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          setPortfolioFailed((prev) => [
+            ...prev,
+            {
+              id: `${file.name}-${Date.now()}`,
+              file,
+              reason: "File exceeds the 10 MB limit.",
+            },
+          ]);
+          continue;
+        }
+        const result = await uploadPortfolioFile(file);
+        if (!result.ok) {
+          setPortfolioFailed((prev) => [
+            ...prev,
+            { id: `${file.name}-${Date.now()}`, file, reason: result.reason },
+          ]);
+        }
+      }
+    } finally {
+      setPortfolioUploading(false);
+      if (portfolioInputRef.current) portfolioInputRef.current.value = "";
+    }
+  };
+
+  const handlePortfolioRetry = async (entry: FailedUpload) => {
+    const result = await uploadPortfolioFile(entry.file);
+    if (result.ok) {
+      setPortfolioFailed((prev) => prev.filter((f) => f.id !== entry.id));
+    } else {
+      setPortfolioFailed((prev) =>
+        prev.map((f) =>
+          f.id === entry.id ? { ...f, reason: result.reason } : f
+        )
+      );
+    }
+  };
+
+  const handleRemovePortfolioImage = async (index: number) => {
+    setRemovingIndex(index);
+    try {
+      await removePortfolioImage({ variables: { index } });
+    } catch {
+      toast.error("Failed to remove image. Try again.");
+    } finally {
+      setRemovingIndex(null);
     }
   };
 
@@ -587,7 +710,7 @@ export default function ProfileEditPage() {
                                   ? "bg-foreground text-background hover:bg-foreground/85"
                                   : "border-border bg-card hover:border-foreground/30 border hover:-translate-y-0.5 hover:shadow-(--shadow-1)"
                               )}
-                              aria-pressed={selected ? "true" : "false"}
+                              aria-pressed={selected}
                             >
                               {selected ? (
                                 <X className="h-3 w-3" aria-hidden />
@@ -670,6 +793,289 @@ export default function ProfileEditPage() {
                   </div>
                 </>
               )}
+            </GlassCard>
+          </section>
+        )}
+
+        {/* Portfolio */}
+        {user.isDesigner && (
+          <section>
+            <header className="mb-4">
+              <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
+                Portfolio
+              </p>
+              <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+                Your work
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                3+ photos unlock search visibility and get 5× more inquiries.
+              </p>
+            </header>
+            <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
+              {/* Counter */}
+              <p className="text-sm">
+                <span className="font-semibold tabular-nums">
+                  {currentImages.length}
+                </span>
+                <span className="text-muted-foreground">
+                  /{MAX_PORTFOLIO} uploaded
+                  {currentImages.length < 3 && (
+                    <>
+                      {" "}
+                      ·{" "}
+                      <span className="text-copper font-medium">
+                        {3 - currentImages.length} more needed
+                      </span>
+                    </>
+                  )}
+                </span>
+              </p>
+
+              {/* Existing images */}
+              {currentImages.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {currentImages.map((img, i) => (
+                    <div
+                      key={img.public_id ?? i}
+                      className="ring-border relative aspect-square overflow-hidden rounded-xl ring-1"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={img.thumbnail_url ?? img.url}
+                        alt={img.caption ?? `Portfolio ${i + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePortfolioImage(i)}
+                        disabled={removingIndex === i || removingImage}
+                        aria-label={`Remove portfolio image ${i + 1}`}
+                        className="absolute top-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity hover:bg-black/80 disabled:cursor-wait"
+                      >
+                        {removingIndex === i ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3 w-3" aria-hidden />
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Upload zone */}
+              {currentImages.length < MAX_PORTFOLIO && (
+                <div
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setPortfolioDragOver(false);
+                    void handlePortfolioFiles(e.dataTransfer.files);
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setPortfolioDragOver(true);
+                  }}
+                  onDragLeave={() => setPortfolioDragOver(false)}
+                  className={cn(
+                    "relative rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-200",
+                    portfolioDragOver
+                      ? "border-copper bg-copper/5"
+                      : "border-border hover:border-foreground/30 hover:bg-card/40"
+                  )}
+                >
+                  <span className="bg-secondary text-foreground mx-auto flex size-12 items-center justify-center rounded-2xl">
+                    <Upload className="h-5 w-5" aria-hidden />
+                  </span>
+                  <p className="mt-3 text-sm font-medium">
+                    Drag &amp; drop, or pick from your device
+                  </p>
+                  <Button
+                    type="button"
+                    variant="luxe-outline"
+                    size="sm"
+                    className="mt-3"
+                    loading={portfolioUploading}
+                    loadingLabel="Uploading..."
+                    onClick={() => portfolioInputRef.current?.click()}
+                  >
+                    <ImagePlus className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+                    Add photos
+                  </Button>
+                  <input
+                    ref={portfolioInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    className="hidden"
+                    aria-label="Upload portfolio images"
+                    onChange={(e) => void handlePortfolioFiles(e.target.files)}
+                  />
+                  <p className="text-muted-foreground mt-2 text-xs">
+                    JPEG, PNG, or WebP · max 10 MB each
+                  </p>
+                </div>
+              )}
+
+              {/* Failed uploads */}
+              {portfolioFailed.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-status-error-fg text-sm font-medium">
+                    {portfolioFailed.length} upload
+                    {portfolioFailed.length === 1 ? "" : "s"} failed
+                  </p>
+                  <ul className="space-y-2">
+                    {portfolioFailed.map((entry) => (
+                      <li
+                        key={entry.id}
+                        className="border-status-error-soft bg-status-error-soft/40 flex items-center gap-3 rounded-2xl border p-3"
+                      >
+                        <AlertCircle className="text-status-error h-4 w-4 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">
+                            {entry.file.name}
+                          </p>
+                          <p className="text-status-error-fg text-xs">
+                            {entry.reason}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void handlePortfolioRetry(entry)}
+                        >
+                          <RefreshCw className="mr-1 h-3 w-3" aria-hidden />
+                          Retry
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Dismiss ${entry.file.name}`}
+                          onClick={() =>
+                            setPortfolioFailed((prev) =>
+                              prev.filter((f) => f.id !== entry.id)
+                            )
+                          }
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </GlassCard>
+          </section>
+        )}
+
+        {/* Completeness indicator (designer only) */}
+        {user.isDesigner && designerHydrated && (
+          <section>
+            <header className="mb-4">
+              <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
+                Visibility
+              </p>
+              <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+                Profile completeness
+              </h2>
+            </header>
+            <GlassCard variant="solid" className="space-y-4 p-5 sm:p-6">
+              {(() => {
+                const score =
+                  designerData?.designer?.designerProfile
+                    ?.profileCompleteness ?? 0;
+                const profile = designerData?.designer?.designerProfile;
+                const u = user;
+                return (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        {score >= 70
+                          ? "You appear in search"
+                          : "Complete to unlock search"}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-sm font-semibold tabular-nums",
+                          score >= 70 ? "text-status-success" : "text-copper"
+                        )}
+                      >
+                        {score}%
+                      </span>
+                    </div>
+                    <div className="bg-border h-2 w-full overflow-hidden rounded-full">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all duration-500",
+                          score >= 70 ? "bg-status-success" : "bg-copper"
+                        )}
+                        style={{ width: `${Math.min(score, 100)}%` }}
+                        role="progressbar"
+                        aria-valuenow={score}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`Profile ${score}% complete`}
+                      />
+                    </div>
+                    <ul className="space-y-2 text-sm">
+                      {[
+                        {
+                          done: !!u.avatarUrl,
+                          label: "Profile photo",
+                          pts: 10,
+                        },
+                        { done: !!profile?.bio, label: "Bio", pts: 15 },
+                        {
+                          done: (profile?.portfolioImages?.length ?? 0) >= 3,
+                          label: "3+ portfolio photos",
+                          pts: 25,
+                        },
+                        {
+                          done: (profile?.specializations?.length ?? 0) > 0,
+                          label: "Specializations",
+                          pts: 15,
+                        },
+                        {
+                          done: !!profile?.pricingMin && !!profile?.pricingMax,
+                          label: "Pricing range",
+                          pts: 15,
+                        },
+                        { done: !!u.city, label: "Location", pts: 10 },
+                        {
+                          done: (profile?.ordersCompleted ?? 0) > 0,
+                          label: "First order completed",
+                          pts: 10,
+                        },
+                      ].map(({ done, label, pts }) => (
+                        <li
+                          key={label}
+                          className={cn(
+                            "flex items-center gap-2",
+                            done ? "text-foreground" : "text-muted-foreground"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                              done
+                                ? "bg-status-success/15 text-status-success"
+                                : "bg-border text-muted-foreground"
+                            )}
+                            aria-hidden
+                          >
+                            {done ? "✓" : "·"}
+                          </span>
+                          <span className="flex-1">{label}</span>
+                          <span className="text-muted-foreground tabular-nums">
+                            +{pts}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                );
+              })()}
             </GlassCard>
           </section>
         )}
