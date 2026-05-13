@@ -187,8 +187,14 @@ export function RescanDiff({
         </p>
       </div>
 
-      <div className="border-border bg-card overflow-hidden rounded-2xl border">
-        <table className="w-full text-sm">
+      {/* Sprint 36 mobile-overflow fix — the 7-column table is wider than
+          a phone viewport. The outer wrapper was `overflow-hidden` which
+          clipped everything past column 3 with no way to reach it.
+          `overflow-x-auto` + `min-w-[640px]` on the table gives a
+          horizontal scroll on small screens while still fitting the
+          whole table on tablet / desktop. */}
+      <div className="border-border bg-card overflow-x-auto rounded-2xl border">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="border-border bg-card/80 border-b">
             <tr className="text-muted-foreground text-[10px] font-semibold tracking-[0.14em] uppercase">
               <th className="px-4 py-2.5 text-left">Field</th>
