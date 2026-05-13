@@ -59,6 +59,11 @@ export function RescanFlow({
   const [heightInput, setHeightInput] = useState(() =>
     storedHeightCm === null ? "" : storedHeightCm.toString()
   );
+  // See ai-flow.tsx for the rationale — "Saved · tap to update" chip
+  // forces the user to confirm or override a stale stored value.
+  const [heightWasEdited, setHeightWasEdited] = useState(false);
+  const heightIsFromSaved =
+    storedHeightCm !== null && !heightWasEdited && heightInput !== "";
 
   const handleHeightUnitChange = (next: MeasurementUnit) => {
     if (next === heightInputUnit) return;
@@ -254,7 +259,14 @@ export function RescanFlow({
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="rescan-height">Your height (optional)</Label>
+              <Label htmlFor="rescan-height">
+                Your height (optional)
+                {heightIsFromSaved && (
+                  <span className="bg-copper/15 text-copper ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
+                    Saved · tap to update
+                  </span>
+                )}
+              </Label>
               <div
                 role="group"
                 aria-label="Height unit"
@@ -291,7 +303,10 @@ export function RescanFlow({
               placeholder={
                 heightInputUnit === "inches" ? "e.g. 67" : "e.g. 170"
               }
-              onChange={(e) => setHeightInput(e.target.value)}
+              onChange={(e) => {
+                setHeightInput(e.target.value);
+                setHeightWasEdited(true);
+              }}
             />
             <p className="text-muted-foreground text-xs">
               Providing your height improves accuracy. We&apos;ll remember it

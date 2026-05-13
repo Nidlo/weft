@@ -114,6 +114,15 @@ interface ManualFormProps {
   onSave: (label: string, unit: string, data: MeasurementData) => Promise<void>;
   saving?: boolean;
   onCancel?: () => void;
+  /**
+   * Sprint 34 Phase A3 — field names the AI pipeline's anthropometric
+   * sanity check flagged as outside the adult-population proportion
+   * band. Render a "Low confidence — verify with tape" badge inline on
+   * each matching field so the user knows which values to scrutinise
+   * before saving. Field names match the keys in `FIELD_LABELS` (e.g.
+   * `"waist"`, `"bicep"`).
+   */
+  lowConfidenceFields?: ReadonlySet<string>;
 }
 
 function isMeasurementUnit(value: string): value is MeasurementUnit {
@@ -128,6 +137,7 @@ export function ManualForm({
   onSave,
   saving = false,
   onCancel,
+  lowConfidenceFields,
 }: ManualFormProps) {
   const preferredUnit = usePreferencesStore((s) => s.measurementUnit);
   // Editing an existing profile keeps its stored unit so existing numeric
@@ -276,13 +286,23 @@ export function ManualForm({
                     typeof value === "number"
                       ? checkBounds(field, value, unit)
                       : null;
+                  const lowConfidence =
+                    lowConfidenceFields?.has(field) ?? false;
                   return (
                     <div key={field} className="space-y-1.5">
                       <Label
                         htmlFor={`${section}-${field}`}
-                        className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase"
+                        className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.14em] uppercase"
                       >
-                        {fieldLabel}
+                        <span>{fieldLabel}</span>
+                        {lowConfidence && (
+                          <span
+                            className="bg-status-warning/15 text-status-warning rounded-full px-1.5 py-0.5 text-[9px] tracking-normal normal-case"
+                            title="The AI's value for this field was outside the typical adult proportion range. Verify with a tape measure."
+                          >
+                            Low confidence
+                          </span>
+                        )}
                       </Label>
                       <Input
                         id={`${section}-${field}`}
@@ -296,13 +316,19 @@ export function ManualForm({
                         }
                         className={cn(
                           "h-10 tabular-nums",
-                          warning &&
+                          (warning || lowConfidence) &&
                             "border-status-warning focus-visible:ring-status-warning"
                         )}
                       />
                       {warning && (
                         <p className="text-status-warning-fg text-[10px] leading-tight">
                           {warning}
+                        </p>
+                      )}
+                      {!warning && lowConfidence && (
+                        <p className="text-status-warning-fg text-[10px] leading-tight">
+                          Outside typical adult proportions — please verify with
+                          a tape measure.
                         </p>
                       )}
                     </div>

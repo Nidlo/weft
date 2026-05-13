@@ -111,6 +111,15 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   const [heightInput, setHeightInput] = useState(() =>
     storedHeightCm === null ? "" : storedHeightCm.toString()
   );
+  // Phase A1 (Sprint 34) — track whether the user has actually edited the
+  // height. The previous UX silently pre-filled the saved value and the
+  // user couldn't tell that a stale 170 from an earlier test was carrying
+  // forward into every scan. Now we surface a "Saved · tap to update"
+  // chip whenever the value is still the seeded stored one, which forces
+  // the user to confirm or change rather than auto-submitting a stale value.
+  const [heightWasEdited, setHeightWasEdited] = useState(false);
+  const heightIsFromSaved =
+    storedHeightCm !== null && !heightWasEdited && heightInput !== "";
 
   const handleHeightUnitChange = (next: MeasurementUnit) => {
     if (next === heightInputUnit) return;
@@ -121,6 +130,8 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       setHeightInput(converted.toFixed(next === "inches" ? 1 : 0));
     }
     setHeightInputUnit(next);
+    // Switching the unit alone shouldn't dismiss the "saved" indicator —
+    // the value is still the saved one, just displayed differently.
   };
   const [extractedData, setExtractedData] = useState<MeasurementData | null>(
     null
@@ -154,6 +165,47 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       "mm"
     );
   }, [extractedData]);
+
+  // Sprint 34 Phase A3 — anthropometric flags arrive as
+  // `anthropometric:<field>` entries inside `degradedModes`. Strip the
+  // prefix and map the backend column names onto ManualForm field keys so
+  // each flagged field renders a "Low confidence" badge inline.
+  const lowConfidenceFields = useMemo(() => {
+    const fields = new Set<string>();
+    for (const mode of degradedModes) {
+      if (!mode.startsWith("anthropometric:")) continue;
+      const raw = mode.slice("anthropometric:".length);
+      // Map Fitscan field names (e.g. `around_arm_cm`, `hip_cm`) onto the
+      // ManualForm keys (`bicep`, `hips`). Mirrors AiMeasurementService's
+      // FIELD_MAP on the backend.
+      const mapped = (
+        {
+          waist_cm: "waist",
+          hip_cm: "hips",
+          bust_cm: "bust",
+          chest_cm: "bust",
+          under_breast_waist_cm: "underbust",
+          neck_cm: "neck",
+          thigh_cm: "thigh",
+          around_arm_cm: "bicep",
+          wrist_cm: "wrist",
+          knee_cm: "knee",
+          ankle_cm: "ankle",
+          shoulder_cm: "shoulder",
+          sleeve_length_cm: "arm_length",
+          nape_to_waist_cm: "back_length",
+          inseam_cm: "inseam",
+          outseam_cm: "outseam",
+          height_cm: "full_height",
+          shoulder_to_waist_cm: "shoulder_to_waist",
+          waist_to_knee_cm: "waist_to_knee",
+          waist_to_floor_cm: "waist_to_floor",
+        } as const
+      )[raw as keyof object];
+      if (mapped) fields.add(mapped);
+    }
+    return fields;
+  }, [degradedModes]);
 
   const [extractMeasurements, { loading: extracting }] =
     useMutation<ExtractAiMeasurementsData>(EXTRACT_AI_MEASUREMENTS, {
@@ -364,6 +416,11 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
               <Label htmlFor="height" className="text-sm">
                 Your height{" "}
                 <span className="text-muted-foreground">(optional)</span>
+                {heightIsFromSaved && (
+                  <span className="bg-copper/15 text-copper ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
+                    Saved · tap to update
+                  </span>
+                )}
               </Label>
               <div
                 role="group"
@@ -401,7 +458,10 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
                 heightInputUnit === "inches" ? "e.g. 67" : "e.g. 170"
               }
               value={heightInput}
-              onChange={(e) => setHeightInput(e.target.value)}
+              onChange={(e) => {
+                setHeightInput(e.target.value);
+                setHeightWasEdited(true);
+              }}
               className="h-11 tabular-nums"
             />
             <p className="text-muted-foreground text-xs">
@@ -512,9 +572,11 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
               Manual review recommended
             </p>
             <p className="text-foreground/90 mt-0.5 text-sm">
-              {degradedModes.includes("validators_disagree")
-                ? "Our rule check and the AI vision check disagreed about whether this scan is reliable. Look at the values below carefully — adjust anything that doesn't match your body before saving."
-                : "The AI flagged something unusual about this scan. Review the values carefully before saving."}
+              {lowConfidenceFields.size > 0
+                ? `Some values look out of proportion: ${Array.from(lowConfidenceFields).slice(0, 4).join(", ")}${lowConfidenceFields.size > 4 ? ` and ${lowConfidenceFields.size - 4} more` : ""}. They're flagged below — verify with a tape measure before saving.`
+                : degradedModes.includes("validators_disagree")
+                  ? "Our rule check and the AI vision check disagreed about whether this scan is reliable. Look at the values below carefully — adjust anything that doesn't match your body before saving."
+                  : "The AI flagged something unusual about this scan. Review the values carefully before saving."}
             </p>
           </div>
         </GlassCard>
@@ -554,6 +616,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         key={formKey}
         initialLabel="Fitscan AI"
         initialData={extractedData ?? undefined}
+        lowConfidenceFields={lowConfidenceFields}
         onSave={(label, unit, data) =>
           onComplete(
             label,
