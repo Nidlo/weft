@@ -313,6 +313,10 @@ export interface MeasurementData {
   upper_body?: Record<string, number | null>;
   lower_body?: Record<string, number | null>;
   vertical?: Record<string, number | null>;
+  // Sprint 36 booth-coverage. Style choices, not AI-measured fields —
+  // populated only via the manual form (blouse_length, kaba_length,
+  // skirt_length, slit_length, dress_length, cape).
+  garments?: Record<string, number | null>;
 }
 
 /**
@@ -326,6 +330,7 @@ export type MeasurementMmData = {
   upper_body?: Record<string, number | null>;
   lower_body?: Record<string, number | null>;
   vertical?: Record<string, number | null>;
+  garments?: Record<string, number | null>;
 };
 
 export interface GqlMeasurement {

@@ -143,6 +143,7 @@ export const ADULT_BOUNDS_CM: Record<string, { min: number; max: number }> = {
   neck: { min: 25, max: 55 },
   arm_length: { min: 40, max: 80 },
   bicep: { min: 18, max: 55 },
+  around_arm_3_4: { min: 15, max: 50 },
   wrist: { min: 12, max: 25 },
   thigh: { min: 35, max: 90 },
   inseam: { min: 50, max: 95 },
@@ -150,11 +151,18 @@ export const ADULT_BOUNDS_CM: Record<string, { min: number; max: number }> = {
   knee: { min: 25, max: 60 },
   calf: { min: 25, max: 60 },
   ankle: { min: 15, max: 35 },
+  hip_depth: { min: 15, max: 50 },
   full_height: { min: 120, max: 220 },
   height: { min: 120, max: 220 },
   back_length: { min: 30, max: 70 },
   front_length: { min: 30, max: 70 },
+  across_back: { min: 28, max: 50 },
+  across_chest: { min: 25, max: 48 },
+  nipple_to_nipple: { min: 14, max: 30 },
+  shoulder_to_nipple: { min: 18, max: 35 },
+  shoulder_to_underbust: { min: 25, max: 42 },
   shoulder_to_waist: { min: 30, max: 70 },
+  shoulder_to_hip: { min: 40, max: 80 },
   waist_to_knee: { min: 40, max: 80 },
   waist_to_floor: { min: 70, max: 130 },
 };
@@ -342,6 +350,86 @@ export function recomputeFromLandmarks(
     result.vertical = {
       ...result.vertical,
       waist_to_knee: Math.round(px * mmPerPx),
+    };
+  }
+
+  // ── waist_to_floor (vertical: hip-mid → foot-mid) ───────────────
+  // Booth-coverage Sprint 36. Uses the same hip-mid + foot-mid we
+  // already derived above for full_height — drag the foot and the
+  // floor anchor moves with it.
+  {
+    const hipMid = midpoint(landmarks.left_hip, landmarks.right_hip);
+    const px = verticalDistance(hipMid, footMid);
+    if (px > 0) {
+      result.vertical = {
+        ...result.vertical,
+        waist_to_floor: Math.round(px * mmPerPx),
+      };
+    }
+  }
+
+  // ── shoulder_to_hip (vertical: shoulder-mid → hip-mid) ─────────
+  // Distinct from `shoulder_to_waist` above: the booth's
+  // "Shoulder to Hip" is the longer vertical span used for full-length
+  // bodice patterns (kaba, wedding gowns). Both update independently
+  // when the user drags shoulder or hip landmarks.
+  if (
+    landmarks.left_shoulder &&
+    landmarks.right_shoulder &&
+    landmarks.left_hip &&
+    landmarks.right_hip
+  ) {
+    const shoulderMid = midpoint(
+      landmarks.left_shoulder,
+      landmarks.right_shoulder
+    );
+    const hipMid = midpoint(landmarks.left_hip, landmarks.right_hip);
+    const px = verticalDistance(shoulderMid, hipMid);
+    // Booth's shoulder-to-hip lands ~5-8cm longer than shoulder-to-waist
+    // because the hip-mid pose landmark sits at the iliac crest (lower
+    // than the natural waist). The raw landmark distance IS the booth
+    // measurement — don't add a correction here; if the user wanted
+    // a custom offset, they'd edit the value manually.
+    result.vertical = {
+      ...result.vertical,
+      shoulder_to_hip: Math.round(px * mmPerPx),
+    };
+  }
+
+  // ── nape_to_waist (vertical: ear-mid → hip-mid) ────────────────
+  // Approximation: C7 vertebra (the booth's "nape") sits within a few
+  // mm of the ear's vertical position on a standing adult, so ear-mid
+  // is the cleanest landmark proxy we have without a back photo. The
+  // booth uses this for the back panel of a bodice (the "back_length"
+  // field in the FE points at the same value).
+  {
+    const napeProxy = midpoint(leftEar, rightEar);
+    const hipMid = midpoint(landmarks.left_hip, landmarks.right_hip);
+    if (landmarks.left_hip && landmarks.right_hip) {
+      const px = verticalDistance(napeProxy, hipMid);
+      result.upper_body = {
+        ...(result.upper_body ?? {}),
+        back_length: Math.round(px * mmPerPx),
+      };
+    }
+  }
+
+  // ── across_back / across_chest (derived from shoulder width) ────
+  // Front-photo-only approximation: across-chest/across-back are the
+  // distances between the front/rear armhole points, ~5cm inside the
+  // shoulder tips. Without a back photo we can't measure separately;
+  // both default to standard ratios of the shoulder width. The user
+  // sees them update live as they drag the shoulder landmarks.
+  if (landmarks.left_shoulder && landmarks.right_shoulder) {
+    const shoulderPx = pointDistance(
+      landmarks.left_shoulder,
+      landmarks.right_shoulder
+    );
+    const shoulderMm = shoulderPx * mmPerPx;
+    result.upper_body = {
+      ...(result.upper_body ?? {}),
+      across_chest: Math.round(shoulderMm * 0.85),
+      across_back: Math.round(shoulderMm * 0.9),
     };
   }
 

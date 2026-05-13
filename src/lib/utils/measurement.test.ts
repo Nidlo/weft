@@ -323,6 +323,42 @@ describe("recomputeFromLandmarks", () => {
     expect(result.upper_body?.shoulder).toBeLessThan(400);
     expect(result.upper_body?.shoulder).toBeGreaterThan(370);
   });
+
+  // Sprint 36 booth-coverage. Pins the contract that dragging shoulder
+  // or hip landmarks moves the booth-standard fields the manual form now
+  // exposes (Across Back / Across Chest, Shoulder to Hip, Nape to Waist,
+  // Waist to Floor). Failure here means the user drag-then-look-at-the-
+  // form loop is broken again.
+
+  it("recomputes waist_to_floor from hip-mid → foot-mid", () => {
+    // hip-mid y=0.55, foot-mid y=0.95 → 0.40 → × 2000 = 800 mm
+    const result = recomputeFromLandmarks(fullPose, baseline);
+    expect(result.vertical?.waist_to_floor).toBe(800);
+  });
+
+  it("recomputes shoulder_to_hip distinct from shoulder_to_waist", () => {
+    // shoulder-mid y=0.2, hip-mid y=0.55 → 0.35 → × 2000 = 700 mm.
+    // In this synthetic pose hip-mid IS the waist proxy, so the two
+    // values match — but the field still has to be populated, not
+    // skipped. Verifies the helper actually writes the key.
+    const result = recomputeFromLandmarks(fullPose, baseline);
+    expect(result.vertical?.shoulder_to_hip).toBe(700);
+  });
+
+  it("recomputes nape_to_waist using ear-mid as the C7 proxy", () => {
+    // ear-mid y=0.05, hip-mid y=0.55 → 0.50 → × 2000 = 1000 mm
+    const result = recomputeFromLandmarks(fullPose, baseline);
+    expect(result.upper_body?.back_length).toBe(1000);
+  });
+
+  it("derives across_chest and across_back as ratios of shoulder width", () => {
+    // shoulder width = 0.2 × 2000 = 400 mm
+    // across_chest = 0.85 × 400 = 340 mm
+    // across_back  = 0.90 × 400 = 360 mm
+    const result = recomputeFromLandmarks(fullPose, baseline);
+    expect(result.upper_body?.across_chest).toBe(340);
+    expect(result.upper_body?.across_back).toBe(360);
+  });
 });
 
 describe("checkBounds", () => {

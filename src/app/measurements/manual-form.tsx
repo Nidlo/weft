@@ -46,33 +46,60 @@ export type MeasurementTemplate =
 const TEMPLATE_FIELDS: Record<Exclude<MeasurementTemplate, "all">, string[]> = {
   kaba_slit: [
     "bust",
+    "underbust",
     "waist",
     "hips",
     "shoulder",
+    "across_back",
+    "across_chest",
+    "nipple_to_nipple",
     "arm_length",
+    "bicep",
+    "around_arm_3_4",
+    "wrist",
+    "back_length",
     "full_height",
+    "shoulder_to_nipple",
+    "shoulder_to_underbust",
+    "shoulder_to_waist",
+    "shoulder_to_hip",
     "waist_to_knee",
     "waist_to_floor",
+    "hip_depth",
+    "blouse_length",
+    "kaba_length",
+    "skirt_length",
+    "slit_length",
   ],
   agbada: [
     "shoulder",
     "bust",
     "arm_length",
     "neck",
+    "back_length",
     "full_height",
+    "shoulder_to_waist",
+    "shoulder_to_hip",
     "waist_to_knee",
+    "dress_length",
   ],
   suit: [
     "shoulder",
     "bust",
     "waist",
     "neck",
+    "across_back",
+    "across_chest",
     "arm_length",
     "bicep",
+    "wrist",
     "hips",
     "inseam",
     "outseam",
     "full_height",
+    "back_length",
+    "shoulder_to_waist",
+    "shoulder_to_hip",
   ],
   wedding_dress: [
     "bust",
@@ -80,13 +107,72 @@ const TEMPLATE_FIELDS: Record<Exclude<MeasurementTemplate, "all">, string[]> = {
     "waist",
     "hips",
     "shoulder",
+    "across_back",
+    "across_chest",
+    "nipple_to_nipple",
     "arm_length",
     "full_height",
-    "waist_to_floor",
+    "shoulder_to_nipple",
+    "shoulder_to_underbust",
     "shoulder_to_waist",
+    "shoulder_to_hip",
+    "waist_to_floor",
+    "hip_depth",
+    "dress_length",
+    "cape",
   ],
-  shirt: ["shoulder", "bust", "neck", "arm_length", "bicep", "wrist"],
-  trousers: ["waist", "hips", "inseam", "outseam", "thigh", "knee", "ankle"],
+  shirt: [
+    "shoulder",
+    "bust",
+    "neck",
+    "across_back",
+    "across_chest",
+    "arm_length",
+    "bicep",
+    "around_arm_3_4",
+    "wrist",
+    "back_length",
+    "shoulder_to_waist",
+    "blouse_length",
+  ],
+  trousers: [
+    "waist",
+    "hips",
+    "hip_depth",
+    "inseam",
+    "outseam",
+    "thigh",
+    "knee",
+    "ankle",
+    "waist_to_knee",
+    "waist_to_floor",
+  ],
+};
+
+// Smart defaults for garment-length fields per template, in CM. Pre-fill
+// the manual form so the user only adjusts; leaving these as null
+// produces "—" in the response and forces the designer to chase the
+// customer for a value. Defaults pulled from typical Ghana ladies-wear
+// proportions on a 165-170cm wearer; users override as needed.
+const GARMENT_LENGTH_DEFAULTS_CM: Partial<
+  Record<MeasurementTemplate, Record<string, number>>
+> = {
+  kaba_slit: {
+    blouse_length: 55,
+    kaba_length: 110,
+    skirt_length: 95,
+    slit_length: 90,
+  },
+  wedding_dress: {
+    dress_length: 145,
+    cape: 80,
+  },
+  shirt: {
+    blouse_length: 60,
+  },
+  agbada: {
+    dress_length: 140,
+  },
 };
 
 const TEMPLATE_LABELS: Record<MeasurementTemplate, string> = {
@@ -151,9 +237,38 @@ export function ManualForm({
   const [unit, setUnit] = useState<MeasurementUnit>(startingUnit);
   const [template, setTemplate] =
     useState<MeasurementTemplate>(initialTemplate);
-  const [data, setData] = useState<MeasurementData>(
-    initialData ?? { upper_body: {}, lower_body: {}, vertical: {} }
-  );
+  const [data, setData] = useState<MeasurementData>(() => {
+    // Seed garment defaults from the starting template so the user sees
+    // sensible pre-fills (Kaba 110cm, Wedding dress 145cm, …) instead
+    // of blank inputs. Stored values from `initialData` win over the
+    // template defaults — never overwrite user-supplied numbers.
+    const seed: MeasurementData = initialData ?? {
+      upper_body: {},
+      lower_body: {},
+      vertical: {},
+      garments: {},
+    };
+    if (
+      initialTemplate !== "all" &&
+      GARMENT_LENGTH_DEFAULTS_CM[initialTemplate]
+    ) {
+      const defaults = GARMENT_LENGTH_DEFAULTS_CM[initialTemplate]!;
+      const existing = seed.garments ?? {};
+      const merged: Record<string, number | null> = { ...existing };
+      for (const [field, defaultCm] of Object.entries(defaults)) {
+        if (merged[field] == null) {
+          // Convert template default (cm) into the form's starting unit
+          // so the displayed number matches the unit toggle.
+          merged[field] =
+            startingUnit === "cm"
+              ? defaultCm
+              : Math.round((defaultCm / 2.54) * 10) / 10;
+        }
+      }
+      return { ...seed, garments: merged };
+    }
+    return seed;
+  });
 
   const handleFieldChange = (
     section: keyof MeasurementData,
