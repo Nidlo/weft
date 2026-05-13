@@ -206,10 +206,12 @@ export function StepPortfolio() {
           variant="luxe-outline"
           size="sm"
           className="mt-4"
-          disabled={uploading || isFull}
+          disabled={isFull}
+          loading={uploading}
+          loadingLabel="Uploading..."
           onClick={() => inputRef.current?.click()}
         >
-          {uploading ? "Uploading..." : "Choose files"}
+          Choose files
         </Button>
         <input
           ref={inputRef}

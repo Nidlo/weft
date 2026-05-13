@@ -152,15 +152,12 @@ export function StyleProfileCard() {
             variant="luxe-outline"
             size="sm"
             onClick={handleGenerate}
-            disabled={generating}
+            loading={generating}
+            loadingLabel="Refreshing..."
             className="gap-1.5 self-start"
             aria-label="Refresh style profile"
           >
-            {generating ? (
-              <StitchLoader size={14} tone="copper" />
-            ) : (
-              <RefreshCw className="h-3.5 w-3.5" aria-hidden />
-            )}
+            <RefreshCw className="h-3.5 w-3.5" aria-hidden />
             Refresh
           </Button>
         </div>

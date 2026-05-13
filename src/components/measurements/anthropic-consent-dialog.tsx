@@ -106,8 +106,13 @@ export function AnthropicConsentDialog({
           <Button variant="outline" onClick={handleDecline} disabled={saving}>
             No thanks
           </Button>
-          <Button onClick={handleAccept} disabled={!agreed || saving}>
-            {saving ? "Saving..." : "Accept and continue"}
+          <Button
+            onClick={handleAccept}
+            disabled={!agreed}
+            loading={saving}
+            loadingLabel="Saving..."
+          >
+            Accept and continue
           </Button>
         </DialogFooter>
       </DialogContent>

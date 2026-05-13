@@ -188,9 +188,10 @@ export default function OrdersPage() {
                     <Button
                       variant="luxe-outline"
                       onClick={() => setPage((p) => p + 1)}
-                      disabled={loading}
+                      loading={loading}
+                      loadingLabel="Loading..."
                     >
-                      {loading ? "Loading..." : "Load more"}
+                      Load more
                     </Button>
                   </div>
                 )}

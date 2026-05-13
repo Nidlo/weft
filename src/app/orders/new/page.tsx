@@ -32,7 +32,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { GlassCard } from "@/components/ui/glass-card";
 import {
@@ -52,6 +51,7 @@ import { cn } from "@/lib/utils";
 
 import { GarmentTypeCombobox } from "@/components/orders/garment-type-combobox";
 import { FabricTypeCombobox } from "@/components/orders/fabric-type-combobox";
+import { AdditionalDetailsCombobox } from "@/components/orders/additional-details-combobox";
 import { ReferenceImageUpload } from "@/components/orders/reference-image-upload";
 import { MeasurementSelector } from "@/components/orders/measurement-selector";
 import { BudgetInput } from "@/components/orders/budget-input";
@@ -154,12 +154,6 @@ export default function NewOrderPage() {
     budgetMaxValid &&
     parseFloat(budgetMinGhs) <= parseFloat(budgetMaxGhs);
   const canSubmit = garmentType && budgetValid && deadline && !submitting;
-
-  const toggleDetail = (value: string) => {
-    setSelectedDetails((prev) =>
-      prev.includes(value) ? prev.filter((d) => d !== value) : [...prev, value]
-    );
-  };
 
   const handleSelectClient = (client: ClientSearchResult) => {
     setSelectedClient(client);
@@ -278,25 +272,11 @@ export default function NewOrderPage() {
                 {optionsLoading ? (
                   <Skeleton className="h-16 w-full" />
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    {options?.designFields?.additional_detail?.map((detail) => (
-                      <label
-                        key={detail.value}
-                        className={cn(
-                          "border-border bg-card/60 flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm",
-                          "hover:border-foreground/30 hover:bg-card transition-colors",
-                          selectedDetails.includes(detail.value) &&
-                            "border-foreground/40 bg-foreground/5"
-                        )}
-                      >
-                        <Checkbox
-                          checked={selectedDetails.includes(detail.value)}
-                          onCheckedChange={() => toggleDetail(detail.value)}
-                        />
-                        <span>{detail.label}</span>
-                      </label>
-                    ))}
-                  </div>
+                  <AdditionalDetailsCombobox
+                    options={options?.designFields?.additional_detail ?? []}
+                    selected={selectedDetails}
+                    onChange={setSelectedDetails}
+                  />
                 )}
               </Field>
 
@@ -611,9 +591,19 @@ export default function NewOrderPage() {
                 </p>
               )}
 
-              {linkedClientId && (
+              {/* In-system client OR walk-in with a phone — either gets
+                  the MeasurementSelector + inline "+ Take new measurement"
+                  affordance. Walk-ins park rows against the phone; orphan
+                  rows are claimed at signup via linkOrphansByPhone. */}
+              {(linkedClientId ||
+                (clientMode === "external" && clientPhone.trim())) && (
                 <MeasurementSelector
-                  clientId={linkedClientId}
+                  clientId={linkedClientId ?? null}
+                  pendingClientPhone={
+                    !linkedClientId && clientMode === "external"
+                      ? clientPhone.trim() || null
+                      : null
+                  }
                   value={measurementId}
                   onChange={setMeasurementId}
                 />
@@ -628,18 +618,11 @@ export default function NewOrderPage() {
             size="xl"
             className="w-full gap-1.5"
             disabled={!canSubmit}
+            loading={submitting}
+            loadingLabel="Creating order..."
           >
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                Creating order...
-              </>
-            ) : (
-              <>
-                Create order
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </>
-            )}
+            Create order
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </Button>
         </form>
       </div>

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
 import { StarRating } from "./star-rating";
 import { ReviewPhotoUpload } from "./review-photo-upload";
 import { useSubmitReview } from "@/lib/hooks/use-reviews";
@@ -71,17 +70,12 @@ export function ReviewForm({ orderId, onSuccess, onSkip }: ReviewFormProps) {
       <div className="flex gap-2">
         <Button
           onClick={handleSubmit}
-          disabled={loading || rating === 0}
+          disabled={rating === 0}
+          loading={loading}
+          loadingLabel="Submitting..."
           className="flex-1"
         >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            "Submit Review"
-          )}
+          Submit Review
         </Button>
         {onSkip && (
           <Button variant="ghost" onClick={onSkip} disabled={loading}>

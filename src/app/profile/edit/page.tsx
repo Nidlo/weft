@@ -680,14 +680,11 @@ export default function ProfileEditPage() {
           size="xl"
           className="w-full gap-1.5"
           onClick={handleSave}
-          disabled={saving || !isDirty}
+          disabled={!isDirty}
+          loading={saving}
+          loadingLabel="Saving..."
         >
-          {saving ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              Saving...
-            </>
-          ) : isDirty ? (
+          {isDirty ? (
             <>
               Save changes
               <Check className="h-4 w-4" aria-hidden />

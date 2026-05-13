@@ -56,6 +56,8 @@ import { PaymentSection } from "@/components/payment/payment-section";
 import { PayoutSection } from "@/components/payment/payout-section";
 import { ExternalPaymentSection } from "@/components/payment/external-payment-section";
 import { ReviewPromptDialog } from "@/components/reviews/review-prompt-dialog";
+import { DepositUnpaidDialog } from "@/components/order/deposit-unpaid-dialog";
+import { extractErrorCode } from "@/lib/graphql/error-code";
 import { StarRating } from "@/components/reviews/star-rating";
 import {
   formatPesewas,
@@ -92,6 +94,14 @@ export default function OrderDetailPage({
   const [updateNotes, setUpdateNotes] = useState("");
   const [showUpdate, setShowUpdate] = useState(false);
   const [showReviewPrompt, setShowReviewPrompt] = useState(false);
+  // Soft payment gate: the BE returns DEPOSIT_NOT_PAID when the designer
+  // tries to advance to fabric_ready without a recorded deposit. We catch
+  // it here and surface the dialog (instead of a red error toast); on
+  // confirm we re-fire the same mutation with `acceptUnpaidDeposit: true`.
+  const [showDepositConfirm, setShowDepositConfirm] = useState(false);
+  const [depositConfirmTarget, setDepositConfirmTarget] = useState<
+    string | null
+  >(null);
 
   if (!isReady || !user || loading) {
     return (
@@ -176,16 +186,38 @@ export default function OrderDetailPage({
     refetch();
   };
 
-  const handleUpdateStatus = async () => {
+  const runStatusUpdate = async (acceptUnpaidDeposit: boolean) => {
     if (!nextStage) return;
-    await updateOrderStatus({
-      orderId: order.id,
-      status: nextStage,
-      notes: updateNotes || undefined,
-    });
-    setShowUpdate(false);
-    setUpdateNotes("");
-    refetch();
+    try {
+      await updateOrderStatus({
+        orderId: order.id,
+        status: nextStage,
+        notes: updateNotes || undefined,
+        acceptUnpaidDeposit,
+      });
+      setShowUpdate(false);
+      setShowDepositConfirm(false);
+      setDepositConfirmTarget(null);
+      setUpdateNotes("");
+      refetch();
+    } catch (err) {
+      // DEPOSIT_NOT_PAID is a soft signal, not a failure. Hand off to
+      // the confirm dialog and swallow the throw so it doesn't reach
+      // the Apollo errorLink / Next dev overlay.
+      if (extractErrorCode(err) === "DEPOSIT_NOT_PAID") {
+        setDepositConfirmTarget(nextStage);
+        setShowDepositConfirm(true);
+        return;
+      }
+      throw err;
+    }
+  };
+
+  const handleUpdateStatus = () => runStatusUpdate(false);
+  const handleDepositOverrideConfirm = () => runStatusUpdate(true);
+  const handleDepositOverrideCancel = () => {
+    setShowDepositConfirm(false);
+    setDepositConfirmTarget(null);
   };
 
   const handleMessage = async () => {
@@ -360,11 +392,12 @@ export default function OrderDetailPage({
                 variant="luxe-outline"
                 size="lg"
                 onClick={handleMessage}
-                disabled={startingChat}
+                loading={startingChat}
+                loadingLabel="Opening..."
                 className="gap-1.5"
               >
                 <MessageSquare className="h-4 w-4" aria-hidden />
-                {startingChat ? "Opening..." : "Message"}
+                Message
               </Button>
             )}
 
@@ -394,14 +427,11 @@ export default function OrderDetailPage({
                         await confirmOrder(order.id);
                         refetch();
                       }}
-                      disabled={confirming}
+                      loading={confirming}
+                      loadingLabel="Confirming..."
                     >
-                      {confirming
-                        ? "Confirming..."
-                        : `Accept counter (${formatPesewas(order.counterPrice)})`}
-                      {!confirming && (
-                        <ArrowRight className="h-4 w-4" aria-hidden />
-                      )}
+                      Accept counter ({formatPesewas(order.counterPrice)})
+                      <ArrowRight className="h-4 w-4" aria-hidden />
                     </Button>
                   )}
 
@@ -434,11 +464,10 @@ export default function OrderDetailPage({
                             variant="luxe"
                             size="sm"
                             onClick={handleUpdateStatus}
-                            disabled={updating}
+                            loading={updating}
+                            loadingLabel="Updating..."
                           >
-                            {updating
-                              ? "Updating..."
-                              : `Move to ${nextStageConfig?.label}`}
+                            Move to {nextStageConfig?.label}
                           </Button>
                           <Button
                             variant="ghost"
@@ -465,12 +494,11 @@ export default function OrderDetailPage({
                         refetch();
                         if (isClient) setShowReviewPrompt(true);
                       }}
-                      disabled={delivering}
+                      loading={delivering}
+                      loadingLabel="Confirming..."
                     >
-                      {delivering ? "Confirming..." : "Confirm delivery"}
-                      {!delivering && (
-                        <ArrowRight className="h-4 w-4" aria-hidden />
-                      )}
+                      Confirm delivery
+                      <ArrowRight className="h-4 w-4" aria-hidden />
                     </Button>
                   )}
 
@@ -540,12 +568,13 @@ export default function OrderDetailPage({
                         size="sm"
                         onClick={handleCancel}
                         disabled={
-                          cancelling ||
-                          (cancelReasonCategory === "other" &&
-                            !cancelReasonNotes.trim())
+                          cancelReasonCategory === "other" &&
+                          !cancelReasonNotes.trim()
                         }
+                        loading={cancelling}
+                        loadingLabel="Cancelling..."
                       >
-                        {cancelling ? "Cancelling..." : "Confirm cancel"}
+                        Confirm cancel
                       </Button>
                       <Button
                         variant="ghost"
@@ -645,6 +674,14 @@ export default function OrderDetailPage({
           }}
         />
 
+        <DepositUnpaidDialog
+          open={showDepositConfirm}
+          targetLabel={depositConfirmTarget?.replace(/_/g, " ")}
+          loading={updating}
+          onConfirm={handleDepositOverrideConfirm}
+          onCancel={handleDepositOverrideCancel}
+        />
+
         {/* Payment + payout sections — clients see pay buttons, both sides see history */}
         {order.confirmedPrice && (
           <PaymentSection
@@ -685,8 +722,7 @@ export default function OrderDetailPage({
           <SectionBlock eyebrow="Margins" title="Cost book" icon={Coins}>
             <CostBookPanel
               orderId={order.id}
-              materials={order.materials}
-              onMaterialChange={() => refetch()}
+              items={order.items ?? order.materials ?? []}
             />
           </SectionBlock>
         )}

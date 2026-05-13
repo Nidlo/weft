@@ -7,7 +7,6 @@ import {
   Bell,
   ChevronRight,
   Info,
-  Loader2,
   Lock,
   LogOut,
   ShieldCheck,
@@ -195,14 +194,12 @@ export default function SettingsPage() {
             size="lg"
             className="w-full gap-1.5"
             onClick={logout}
-            disabled={loggingOut || signingOutAll}
+            disabled={signingOutAll}
+            loading={loggingOut}
+            loadingLabel="Logging out..."
           >
-            {loggingOut ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            ) : (
-              <LogOut className="h-4 w-4" aria-hidden />
-            )}
-            {loggingOut ? "Logging out..." : "Log out"}
+            <LogOut className="h-4 w-4" aria-hidden />
+            Log out
           </Button>
 
           <Button
@@ -251,11 +248,9 @@ export default function SettingsPage() {
                 setConfirmAllOpen(false);
                 await signOutAll();
               }}
-              disabled={signingOutAll}
+              loading={signingOutAll}
+              loadingLabel="Signing out everywhere..."
             >
-              {signingOutAll && (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              )}
               <ShieldOff className="h-4 w-4" aria-hidden />
               Sign out everywhere
             </Button>

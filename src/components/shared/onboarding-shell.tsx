@@ -121,11 +121,13 @@ export function OnboardingShell({
                 variant="luxe"
                 size="lg"
                 onClick={onComplete}
-                disabled={!canProceed || saving}
+                disabled={!canProceed}
+                loading={saving}
+                loadingLabel="Saving..."
                 className="gap-1.5"
               >
-                {saving ? "Saving..." : completeLabel}
-                {!saving && <Check className="h-4 w-4" aria-hidden />}
+                {completeLabel}
+                <Check className="h-4 w-4" aria-hidden />
               </Button>
             ) : (
               <Button

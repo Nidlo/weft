@@ -113,16 +113,11 @@ export function Header() {
               size="icon"
               className="hidden md:flex"
               onClick={handleLogout}
-              disabled={loggingOut}
+              loading={loggingOut}
               title={loggingOut ? "Signing out..." : "Log out"}
               aria-label={loggingOut ? "Signing out" : "Log out"}
-              aria-busy={loggingOut}
             >
-              {loggingOut ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              ) : (
-                <LogOut className="h-4 w-4" />
-              )}
+              {loggingOut ? null : <LogOut className="h-4 w-4" />}
             </Button>
 
             {/* Mobile actions: notifications bell + theme + overflow menu.

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -49,17 +50,54 @@ const buttonVariants = cva(
   }
 );
 
+type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+    /**
+     * When true the button displays a spinner in place of its leading content,
+     * is `disabled`, and sets `aria-busy="true"`. Footprint stays identical so
+     * neighbouring elements don't shift on every state flip. Pair with
+     * `loadingLabel` to swap the visible text while loading; otherwise the
+     * children are rendered alongside the spinner.
+     */
+    loading?: boolean;
+    loadingLabel?: React.ReactNode;
+  };
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
+  loading = false,
+  loadingLabel,
+  disabled,
+  children,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? Slot : "button";
+}: ButtonProps) {
+  // asChild can't host an arbitrary spinner sibling (Slot expects a single
+  // child), so when loading we ignore asChild for the spinner overlay and
+  // render a real <button>.
+  const Comp = asChild && !loading ? Slot : "button";
+  const isDisabled = disabled || loading;
+
+  if (loading) {
+    return (
+      <button
+        data-slot="button"
+        data-variant={variant}
+        data-size={size}
+        data-loading="true"
+        className={cn(buttonVariants({ variant, size, className }))}
+        disabled
+        aria-busy="true"
+        {...props}
+      >
+        <Loader2 className="animate-spin" aria-hidden />
+        {loadingLabel ?? children}
+      </button>
+    );
+  }
 
   return (
     <Comp
@@ -67,9 +105,13 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
+      disabled={isDisabled}
       {...props}
-    />
+    >
+      {children}
+    </Comp>
   );
 }
 
 export { Button, buttonVariants };
+export type { ButtonProps };

@@ -100,8 +100,15 @@ const errorLink = new ErrorLink(({ error, operation }) => {
       probeSessionAndLogoutIfDead();
     }
 
+    // Use console.warn (not console.error) so user-recoverable domain
+    // errors — "Invalid code", "Validation failed", "Too many requests"
+    // — don't trip Next.js 16's dev overlay (which red-panels on any
+    // console.error call). The log content is unchanged; only the
+    // severity is downgraded to match the actual nature of these
+    // responses (predictable, recoverable, surfaced to the user via
+    // toast already).
     error.errors.forEach(({ message, locations, path }) => {
-      console.error(
+      console.warn(
         `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(locations)}, Path: ${path}, Operation: ${operation.operationName}`
       );
     });

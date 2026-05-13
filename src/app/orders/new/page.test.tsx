@@ -40,6 +40,12 @@ vi.mock("@/components/orders/garment-type-combobox", () => ({
   GarmentTypeCombobox: () => <div data-testid="garment-type-combobox" />,
 }));
 
+vi.mock("@/components/orders/additional-details-combobox", () => ({
+  AdditionalDetailsCombobox: () => (
+    <div data-testid="additional-details-combobox" />
+  ),
+}));
+
 vi.mock("@/components/orders/fabric-type-combobox", () => ({
   FabricTypeCombobox: () => <div data-testid="fabric-type-combobox" />,
 }));

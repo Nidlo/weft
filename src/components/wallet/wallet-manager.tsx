@@ -1,15 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  CheckCircle2,
-  Loader2,
-  Phone,
-  Plus,
-  Star,
-  Trash2,
-  Wallet,
-} from "lucide-react";
+import { CheckCircle2, Phone, Plus, Star, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -223,12 +215,12 @@ export function WalletManager() {
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => handleRemove(account.id)}
-                    disabled={removing}
+                    loading={removing}
                     aria-label="Remove account"
                     title="Remove account"
                     className="text-muted-foreground hover:bg-status-error-soft hover:text-status-error-fg"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    {!removing && <Trash2 className="h-3.5 w-3.5" />}
                   </Button>
                 </div>
               </GlassCard>
@@ -291,12 +283,11 @@ export function WalletManager() {
                     variant="luxe"
                     size="lg"
                     onClick={handleResolve}
-                    disabled={resolving || phone.length < 10}
+                    disabled={phone.length < 10}
+                    loading={resolving}
+                    loadingLabel="Looking up..."
                     className={cn("gap-1.5", "sm:flex-1")}
                   >
-                    {resolving && (
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    )}
                     Look up account
                   </Button>
                   <Button
@@ -333,11 +324,9 @@ export function WalletManager() {
                       size="lg"
                       className="gap-1.5 sm:flex-1"
                       onClick={handleConfirmAndAdd}
-                      disabled={adding}
+                      loading={adding}
+                      loadingLabel="Adding..."
                     >
-                      {adding && (
-                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                      )}
                       Confirm & add
                     </Button>
                     <Button

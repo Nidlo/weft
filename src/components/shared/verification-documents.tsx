@@ -142,9 +142,10 @@ export function VerificationDocuments() {
           type="button"
           variant="outline"
           onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
+          loading={uploading}
+          loadingLabel="Uploading..."
         >
-          {uploading ? "Uploading..." : "Upload Document"}
+          Upload Document
         </Button>
       </div>
 

@@ -291,12 +291,14 @@ export function RescanDiff({
             Cancel
           </Button>
         )}
-        <Button onClick={handleApply} disabled={applying}>
-          {applying
-            ? "Applying..."
-            : promptRows.length > 0
-              ? "Apply confirmed changes"
-              : "Apply auto changes"}
+        <Button
+          onClick={handleApply}
+          loading={applying}
+          loadingLabel="Applying..."
+        >
+          {promptRows.length > 0
+            ? "Apply confirmed changes"
+            : "Apply auto changes"}
         </Button>
       </div>
 

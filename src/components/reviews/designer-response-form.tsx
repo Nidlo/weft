@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
 import { useRespondToReview } from "@/lib/hooks/use-reviews";
 import { toast } from "sonner";
 
@@ -63,9 +62,10 @@ export function DesignerResponseForm({
           <Button
             size="sm"
             onClick={handleSubmit}
-            disabled={loading || !response.trim()}
+            disabled={!response.trim()}
+            loading={loading}
+            loadingLabel="Submitting..."
           >
-            {loading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
             Submit
           </Button>
         </div>

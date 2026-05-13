@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { ArrowLeft, Check, Loader2, Moon } from "lucide-react";
+import { ArrowLeft, Check, Moon } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
@@ -257,15 +257,12 @@ export default function NotificationPreferencesPage() {
                   variant="luxe"
                   size="lg"
                   onClick={handleSavePreferences}
-                  disabled={savingPrefs}
+                  loading={savingPrefs}
+                  loadingLabel="Saving..."
                   className="w-full gap-1.5"
                 >
-                  {savingPrefs ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  ) : (
-                    <Check className="h-4 w-4" aria-hidden />
-                  )}
-                  {savingPrefs ? "Saving..." : "Save preferences"}
+                  <Check className="h-4 w-4" aria-hidden />
+                  Save preferences
                 </Button>
               </div>
             )}
@@ -326,15 +323,12 @@ export default function NotificationPreferencesPage() {
                 variant="luxe"
                 size="lg"
                 onClick={handleSaveQuietHours}
-                disabled={savingQuiet}
+                loading={savingQuiet}
+                loadingLabel="Saving..."
                 className="gap-1.5 sm:flex-1"
               >
-                {savingQuiet ? (
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                ) : (
-                  <Check className="h-4 w-4" aria-hidden />
-                )}
-                {savingQuiet ? "Saving..." : "Save quiet hours"}
+                <Check className="h-4 w-4" aria-hidden />
+                Save quiet hours
               </Button>
               {(quietStart || quietEnd) && (
                 <Button
