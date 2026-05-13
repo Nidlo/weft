@@ -527,6 +527,8 @@ export interface UpdateMeasurementInput {
   label?: string;
   unit?: string;
   data?: MeasurementData;
+  /** User-corrected landmark coordinates from the editable LandmarkOverlay. Replaces `landmarks_normalized` on the row when present; omit to leave unchanged. */
+  landmarks?: Landmarks;
 }
 
 export interface BlueprintData {

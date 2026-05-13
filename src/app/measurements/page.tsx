@@ -59,6 +59,12 @@ export default function MeasurementsPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editingId, setEditingId] = useState<string | null>(null);
+  // Sprint 36 — landmarks the user has dragged in the edit view since
+  // opening it. null while the view is closed or untouched; an object
+  // means "user has corrected; send these on save".
+  const [editingLandmarks, setEditingLandmarks] = useState<Landmarks | null>(
+    null
+  );
   const preferredUnit = usePreferencesStore((s) => s.measurementUnit);
 
   if (!isReady || !user) {
@@ -125,9 +131,19 @@ export default function MeasurementsPage() {
   ) => {
     if (!editingId) return;
     try {
-      await updateMeasurement(editingId, { label, unit, data });
+      await updateMeasurement(editingId, {
+        label,
+        unit,
+        data,
+        // Forward edited landmarks only when the user actually dragged
+        // something. Omitting (undefined) preserves the row's existing
+        // landmarks_normalized; sending the unchanged map would still
+        // work but creates noisy snapshots downstream.
+        ...(editingLandmarks !== null ? { landmarks: editingLandmarks } : {}),
+      });
       toast.success("Measurement profile updated!");
       setEditingId(null);
+      setEditingLandmarks(null);
       setViewMode("list");
       refetch();
     } catch {
@@ -267,18 +283,40 @@ export default function MeasurementsPage() {
               "mm",
               preferredUnit
             ) as MeasurementData;
+            // Sprint 36 — when the user opened the edit view we keep the
+            // saved landmark map as the starting state; drag callbacks
+            // overwrite it via `setEditingLandmarks`. Reading directly
+            // from `editingMeasurement.landmarksNormalized` for the
+            // photo render works while the user hasn't dragged anything;
+            // once they drag, the overlay re-renders from the local
+            // `editingLandmarks` state so dots track the pointer.
+            const overlayLandmarks =
+              editingLandmarks ??
+              editingMeasurement.landmarksNormalized ??
+              null;
             return (
-              <ManualForm
-                initialLabel={editingMeasurement.label}
-                initialUnit={preferredUnit}
-                initialData={formInitialData}
-                onSave={handleUpdate}
-                saving={updating}
-                onCancel={() => {
-                  setEditingId(null);
-                  setViewMode("list");
-                }}
-              />
+              <div className="space-y-7">
+                {editingMeasurement.photoUrl && overlayLandmarks && (
+                  <LandmarkOverlay
+                    photo={editingMeasurement.photoUrl}
+                    landmarks={overlayLandmarks}
+                    editable
+                    onLandmarksChange={setEditingLandmarks}
+                  />
+                )}
+                <ManualForm
+                  initialLabel={editingMeasurement.label}
+                  initialUnit={preferredUnit}
+                  initialData={formInitialData}
+                  onSave={handleUpdate}
+                  saving={updating}
+                  onCancel={() => {
+                    setEditingId(null);
+                    setEditingLandmarks(null);
+                    setViewMode("list");
+                  }}
+                />
+              </div>
             );
           })()}
 
