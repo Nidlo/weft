@@ -127,6 +127,12 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   // eliminating the height-input typo class of error.
   const [refObjectCm, setRefObjectCm] = useState("");
 
+  // Sprint 35 — when checked, Claude estimates the person's height from
+  // the front photo (door frames, furniture, body proportions). Skips
+  // both the manual input and the stored fallback. Useful when the user
+  // doesn't know their exact height or wants the system to figure it out.
+  const [useEstimatedHeight, setUseEstimatedHeight] = useState(false);
+
   const handleHeightUnitChange = (next: MeasurementUnit) => {
     if (next === heightInputUnit) return;
     const parsed = parseFloat(heightInput);
@@ -267,8 +273,9 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     // bouncing a clearly-bad value here saves the round-trip and gives a
     // unit-aware hint via `heightInputUnit` (which is independent of the
     // global preferredUnit — see the heightInputUnit declaration above).
+    // Skip entirely when the user chose "estimate from photo".
     let heightCmForRequest: number | null = null;
-    if (heightInput) {
+    if (!useEstimatedHeight && heightInput) {
       const parsed = parseFloat(heightInput);
       if (!Number.isNaN(parsed)) {
         const cm = heightInputUnit === "inches" ? inchesToCm(parsed) : parsed;
@@ -289,7 +296,12 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     try {
       const variables: Record<string, unknown> = { frontImage };
       if (sideImage) variables.sideImage = sideImage;
-      if (heightCmForRequest !== null) {
+      // Sprint 35 — when the user picks "estimate from photo" we do NOT
+      // send heightCm; the server skips the stored fallback and Claude
+      // estimates from the photo's contextual cues.
+      if (useEstimatedHeight) {
+        variables.useEstimatedHeight = true;
+      } else if (heightCmForRequest !== null) {
         variables.heightCm = heightCmForRequest;
       }
       // Phase D: pass reference-object size when supplied. Server validates
@@ -425,12 +437,52 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
             onChange={setSideImage}
           />
 
-          <div className="space-y-2">
+          {/* Sprint 35 — "Estimate from photo" toggle. When on, the height
+              input is hidden and Claude estimates the value directly from
+              the photo's contextual cues (door frames, furniture, body
+              proportions). Skips the manual input AND the stored fallback. */}
+          <div className="border-border bg-muted/30 flex items-center justify-between gap-3 rounded-xl border p-3">
+            <div>
+              <p className="text-sm font-medium">Estimate height from photo</p>
+              <p className="text-muted-foreground text-xs">
+                Skip typing your height — let the AI figure it out from visible
+                cues (door, furniture, body proportions).
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={useEstimatedHeight ? "true" : "false"}
+              aria-label="Estimate height from photo"
+              onClick={() => setUseEstimatedHeight((v) => !v)}
+              className={
+                "relative h-6 w-11 shrink-0 rounded-full border transition-colors " +
+                (useEstimatedHeight
+                  ? "bg-foreground border-foreground"
+                  : "bg-muted border-border")
+              }
+            >
+              <span
+                className={
+                  "bg-background absolute top-0.5 size-5 rounded-full shadow transition-transform " +
+                  (useEstimatedHeight ? "translate-x-5" : "translate-x-0.5")
+                }
+              />
+            </button>
+          </div>
+
+          <div
+            className={
+              useEstimatedHeight
+                ? "pointer-events-none space-y-2 opacity-50"
+                : "space-y-2"
+            }
+          >
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor="height" className="text-sm">
                 Your height{" "}
                 <span className="text-muted-foreground">(optional)</span>
-                {heightIsFromSaved && (
+                {heightIsFromSaved && !useEstimatedHeight && (
                   <span className="bg-copper/15 text-copper ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
                     Saved · tap to update
                   </span>
