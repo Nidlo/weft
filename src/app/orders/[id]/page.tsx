@@ -67,6 +67,7 @@ import {
   getStatusConfig,
   PRODUCTION_STAGES,
 } from "@/lib/utils/order";
+import { TourAutoFire } from "@/lib/tour/auto-fire";
 import { cn } from "@/lib/utils";
 
 export default function OrderDetailPage({
@@ -237,6 +238,7 @@ export default function OrderDetailPage({
 
   return (
     <AppShell>
+      <TourAutoFire tour="orderDetail" />
       <div className="space-y-8">
         <Link
           href="/orders"
@@ -247,7 +249,7 @@ export default function OrderDetailPage({
         </Link>
 
         {/* Editorial header */}
-        <header>
+        <header data-tour-id="orderDetail.status">
           <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
             Order · {order.id.slice(0, 8)}
           </p>
@@ -299,7 +301,9 @@ export default function OrderDetailPage({
 
         {/* Progress bar (for confirmed+ orders) */}
         {currentStageIndex >= 0 && (
-          <OrderProgressBar currentStatus={order.status} />
+          <div data-tour-id="orderDetail.progress">
+            <OrderProgressBar currentStatus={order.status} />
+          </div>
         )}
 
         {/* Price + budget */}
@@ -386,7 +390,10 @@ export default function OrderDetailPage({
 
         {/* Action bar */}
         {(order.clientId || isActive) && (
-          <div className="flex flex-wrap gap-2">
+          <div
+            data-tour-id="orderDetail.negotiate"
+            className="flex flex-wrap gap-2"
+          >
             {order.clientId && (
               <Button
                 variant="luxe-outline"
@@ -394,6 +401,7 @@ export default function OrderDetailPage({
                 onClick={handleMessage}
                 loading={startingChat}
                 loadingLabel="Opening..."
+                data-tour-id="orderDetail.messages"
                 className="gap-1.5"
               >
                 <MessageSquare className="h-4 w-4" aria-hidden />
@@ -508,6 +516,7 @@ export default function OrderDetailPage({
                     size="lg"
                     className="text-status-error hover:bg-status-error-soft hover:text-status-error-fg"
                     onClick={() => setShowCancel(true)}
+                    data-tour-id="orderDetail.cancel"
                   >
                     Cancel order
                   </Button>
@@ -684,14 +693,16 @@ export default function OrderDetailPage({
 
         {/* Payment + payout sections — clients see pay buttons, both sides see history */}
         {order.confirmedPrice && (
-          <PaymentSection
-            orderId={order.id}
-            confirmedPrice={order.confirmedPrice}
-            payments={order.payments ?? []}
-            summary={order.paymentSummary ?? null}
-            isClient={isClient}
-            orderStatus={order.status}
-          />
+          <div data-tour-id="orderDetail.payment">
+            <PaymentSection
+              orderId={order.id}
+              confirmedPrice={order.confirmedPrice}
+              payments={order.payments ?? []}
+              summary={order.paymentSummary ?? null}
+              isClient={isClient}
+              orderStatus={order.status}
+            />
+          </div>
         )}
 
         {order.confirmedPrice && (order.payouts ?? []).length > 0 && (

@@ -24,6 +24,13 @@ vi.mock("@/lib/config", () => ({
   APP_VERSION: "1.2.3-test",
 }));
 
+// ReplayMenu calls next/navigation's useRouter, which needs an app
+// router context that's not mounted here. Stub it out — the menu has
+// its own dedicated tests for behavior.
+vi.mock("@/lib/tour/replay-menu", () => ({
+  ReplayMenu: () => <div data-testid="replay-menu" />,
+}));
+
 import SettingsPage from "./page";
 
 const CLIENT_USER = {

@@ -31,6 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReplayMenu } from "@/lib/tour/replay-menu";
 
 interface Tile {
   href: string;
@@ -150,6 +151,14 @@ export default function SettingsPage() {
             <SettingsTile key={`${tile.href}-${tile.label}`} tile={tile} />
           ))}
         </GlassCard>
+
+        {/* Show me around */}
+        <section>
+          <p className="text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.18em] uppercase">
+            Show me around
+          </p>
+          <ReplayMenu />
+        </section>
 
         {/* Coming soon */}
         <section>

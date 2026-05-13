@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Bell,
+  HelpCircle,
   LogOut,
   Loader2,
   Menu,
@@ -16,6 +17,11 @@ import { Button } from "@/components/ui/button";
 import { NidloMark } from "@/components/brand/nidlo-mark";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -27,6 +33,7 @@ import { useAuthStore } from "@/lib/stores/auth";
 import { useMessagesStore } from "@/lib/stores/messages";
 import { useNotificationsStore } from "@/lib/stores/notifications";
 import { useLogout } from "@/lib/hooks/use-logout";
+import { ReplayMenu } from "@/lib/tour/replay-menu";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -39,6 +46,7 @@ export function Header() {
   const unreadCount = useMessagesStore((s) => s.unreadCount);
   const notifUnread = useNotificationsStore((s) => s.unreadCount);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   return (
     <header
@@ -99,6 +107,31 @@ export function Header() {
                 {notifUnread > 0 && <Pip count={notifUnread} />}
               </Link>
             </Button>
+            <Popover open={helpOpen} onOpenChange={setHelpOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hidden md:flex"
+                  aria-label="Show me around"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80 p-0">
+                <div className="px-4 pt-4 pb-2">
+                  <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
+                    Help
+                  </p>
+                  <h3 className="text-display mt-1 text-base font-semibold tracking-tight">
+                    Show me around
+                  </h3>
+                </div>
+                <div className="px-3 pb-3">
+                  <ReplayMenu onReplay={() => setHelpOpen(false)} />
+                </div>
+              </PopoverContent>
+            </Popover>
             <ThemeToggle className="hidden md:flex" />
             <Button
               variant="ghost"
@@ -175,6 +208,13 @@ export function Header() {
                     icon={SlidersHorizontal}
                     label="Notification preferences"
                     description="Push, email, SMS, quiet hours"
+                    onSelect={() => setMenuOpen(false)}
+                  />
+                  <MenuRow
+                    href="/settings"
+                    icon={HelpCircle}
+                    label="Show me around"
+                    description="Replay any feature tour"
                     onSelect={() => setMenuOpen(false)}
                   />
                   <SheetClose asChild>

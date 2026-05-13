@@ -20,6 +20,7 @@ export interface GqlUser {
   isOnboarded: boolean;
   hasVerifiedWalletAccount: boolean;
   termsAcceptedVersion: string | null;
+  tourProgress: Record<string, "completed" | "skipped"> | null;
 }
 
 export interface GqlLegalVersions {

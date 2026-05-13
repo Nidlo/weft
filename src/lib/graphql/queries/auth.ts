@@ -19,6 +19,7 @@ export const ME_QUERY = gql`
       isImpersonated
       impersonatorEmail
       termsAcceptedVersion
+      tourProgress
       designerProfile {
         slug
         profileViewsCount

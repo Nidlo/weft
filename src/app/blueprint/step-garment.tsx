@@ -24,7 +24,7 @@ export function StepGarment() {
   }
 
   return (
-    <div className="space-y-7">
+    <div data-tour-id="newOrder.fields" className="space-y-7">
       <div>
         <Label className="flex items-center gap-1.5 text-sm">
           What type of garment?

@@ -17,6 +17,7 @@ import { HowItWorks } from "@/components/shared/how-it-works";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Section } from "@/components/ui/section";
 import { APP_VERSION } from "@/lib/config";
+import { TourAutoFire } from "@/lib/tour/auto-fire";
 
 interface SocialLink {
   icon: LucideIcon;
@@ -35,6 +36,7 @@ const SOCIALS: SocialLink[] = [
 export default function Home() {
   return (
     <AppShell bare>
+      <TourAutoFire tour="home" />
       <HomeHero />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -99,7 +101,11 @@ function ContactSection() {
   const visibleSocials = SOCIALS.filter((s) => s.href.trim().length > 0);
 
   return (
-    <div id="contact" className="mx-auto max-w-7xl px-4 sm:px-6">
+    <div
+      id="contact"
+      data-tour-id="home.contact"
+      className="mx-auto max-w-7xl px-4 sm:px-6"
+    >
       <Section
         density="loose"
         eyebrow="Contact"

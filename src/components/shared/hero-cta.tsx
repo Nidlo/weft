@@ -23,7 +23,10 @@ export function HeroCta() {
   const authed = isAuthenticated && user;
 
   return (
-    <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
+    <div
+      data-tour-id="home.hero-cta"
+      className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4"
+    >
       {authed ? (
         <>
           <Button variant="luxe" size="xl" asChild>
