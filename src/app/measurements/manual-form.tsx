@@ -23,6 +23,7 @@ import {
 import { usePreferencesStore } from "@/lib/stores/preferences";
 import {
   checkBounds,
+  convertMeasurementData,
   unitLabel,
   unitName,
   type MeasurementUnit,
@@ -169,7 +170,24 @@ export function ManualForm({
   };
 
   const handleUnitToggle = () => {
-    setUnit((prev) => (prev === "cm" ? "inches" : "cm"));
+    // Sprint 35 — the previous implementation flipped the unit label
+    // without touching the values. Anyone scanning while their preferred
+    // unit was "inches" saw cm values displayed next to an "in" label —
+    // e.g. AI waist 95cm rendered as "95 in" (which would be 241cm,
+    // monstrous). Convert the data alongside the unit so the displayed
+    // number always matches the displayed label.
+    setUnit((prev) => {
+      const next = prev === "cm" ? "inches" : "cm";
+      setData(
+        (d) =>
+          convertMeasurementData(
+            d as Record<string, Record<string, number | null>>,
+            prev,
+            next
+          ) as MeasurementData
+      );
+      return next;
+    });
   };
 
   const handleSubmit = async () => {

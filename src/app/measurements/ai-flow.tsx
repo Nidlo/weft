@@ -237,7 +237,20 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   const { elapsedSeconds: elapsed } = useScanJob(scanJobId, {
     onCompleted: (job) => {
       if (cancelledRef.current || !job.result) return;
-      setExtractedData(job.result.data ?? null);
+      // Fitscan always emits cm. Convert to the user's preferred unit
+      // here so ManualForm's `data` state and its `unit` label stay in
+      // sync — previously the form rendered cm values next to an "in"
+      // label, making the user see 95cm-waist as "95 in".
+      const rawCm = job.result.data ?? null;
+      const projected =
+        rawCm !== null && preferredUnit !== "cm"
+          ? (convertMeasurementData(
+              rawCm as Record<string, Record<string, number | null>>,
+              "cm",
+              preferredUnit
+            ) as MeasurementData)
+          : rawCm;
+      setExtractedData(projected);
       setExtractedLandmarks(job.result.landmarks ?? null);
       setPhotoUrl(job.result.photoUrl ?? null);
       setPhotoPublicId(job.result.photoPublicId ?? null);
@@ -697,6 +710,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       <ManualForm
         key={formKey}
         initialLabel="Fitscan AI"
+        initialUnit={preferredUnit}
         initialData={extractedData ?? undefined}
         lowConfidenceFields={lowConfidenceFields}
         onSave={(label, unit, data) =>
