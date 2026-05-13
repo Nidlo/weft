@@ -10,6 +10,7 @@ import { StitchLoader } from "@/components/ui/stitch-loader";
 import { GENERATE_STYLE_PROFILE } from "@/lib/graphql/mutations/style";
 import { MY_STYLE_PROFILE } from "@/lib/graphql/queries/style";
 import { useMeasurements } from "@/lib/hooks/use-measurements";
+import { usePreferencesStore } from "@/lib/stores/preferences";
 import { cn } from "@/lib/utils";
 import type {
   GenerateStyleProfileData,
@@ -28,6 +29,10 @@ export function StyleProfileCard() {
   const { data, loading: loadingProfile } =
     useQuery<MyStyleProfileData>(MY_STYLE_PROFILE);
   const { measurements, loading: loadingMeasurements } = useMeasurements();
+  // Pass the user's preferred unit so Claude writes the summary in the
+  // same unit they see everywhere else — avoids "your bust of 101 cm"
+  // when the rest of the app speaks inches.
+  const measurementUnit = usePreferencesStore((s) => s.measurementUnit);
 
   const [generate, { loading: generating }] =
     useMutation<GenerateStyleProfileData>(GENERATE_STYLE_PROFILE, {
@@ -46,7 +51,10 @@ export function StyleProfileCard() {
     }
     try {
       await generate({
-        variables: { measurementId: defaultMeasurement.id },
+        variables: {
+          measurementId: defaultMeasurement.id,
+          displayUnit: measurementUnit,
+        },
       });
       toast.success("Style profile generated.");
     } catch (err) {
