@@ -121,6 +121,12 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   const heightIsFromSaved =
     storedHeightCm !== null && !heightWasEdited && heightInput !== "";
 
+  // Phase D (Sprint 34) — optional reference-object scale. When the user
+  // holds a known-size object (credit card ≈ 8.56 cm, A4 = 21 cm) visibly
+  // in the photo, Fitscan calibrates pixel-to-cm directly from it,
+  // eliminating the height-input typo class of error.
+  const [refObjectCm, setRefObjectCm] = useState("");
+
   const handleHeightUnitChange = (next: MeasurementUnit) => {
     if (next === heightInputUnit) return;
     const parsed = parseFloat(heightInput);
@@ -285,6 +291,14 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       if (sideImage) variables.sideImage = sideImage;
       if (heightCmForRequest !== null) {
         variables.heightCm = heightCmForRequest;
+      }
+      // Phase D: pass reference-object size when supplied. Server validates
+      // the 1-100 cm band; we send anything non-empty and parseable.
+      if (refObjectCm) {
+        const parsedRef = parseFloat(refObjectCm);
+        if (!Number.isNaN(parsedRef) && parsedRef > 0) {
+          variables.referenceObjectCm = parsedRef;
+        }
       }
 
       const { data } = await extractMeasurements({ variables });
@@ -467,6 +481,32 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
             <p className="text-muted-foreground text-xs">
               Providing your height improves accuracy. Enter in{" "}
               {unitLabel(preferredUnit)} — we convert automatically.
+            </p>
+          </div>
+
+          {/* Phase D — reference-object scale. Optional, but eliminates
+              the "I typed 170 but I'm actually 177" 4% scale tax on
+              every other measurement. */}
+          <div className="space-y-2">
+            <Label htmlFor="reference-object" className="text-sm">
+              Reference object size{" "}
+              <span className="text-muted-foreground">(optional, cm)</span>
+            </Label>
+            <Input
+              id="reference-object"
+              type="number"
+              step="0.1"
+              min="1"
+              max="100"
+              placeholder="e.g. 8.56 (credit card)"
+              value={refObjectCm}
+              onChange={(e) => setRefObjectCm(e.target.value)}
+              className="h-11 tabular-nums"
+            />
+            <p className="text-muted-foreground text-xs">
+              Hold a known-size object visibly in the front photo (credit card ≈
+              8.56 cm, A4 ≈ 21 cm) and enter its width here. Skips the
+              height-typo problem and locks scale to a real-world object.
             </p>
           </div>
         </GlassCard>

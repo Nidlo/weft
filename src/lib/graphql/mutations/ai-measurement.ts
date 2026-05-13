@@ -13,11 +13,13 @@ export const EXTRACT_AI_MEASUREMENTS = gql`
     $frontImage: Upload!
     $sideImage: Upload
     $heightCm: Float
+    $referenceObjectCm: Float
   ) {
     extractAiMeasurements(
       frontImage: $frontImage
       sideImage: $sideImage
       heightCm: $heightCm
+      referenceObjectCm: $referenceObjectCm
     ) {
       id
       status
