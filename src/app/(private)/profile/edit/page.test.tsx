@@ -174,42 +174,63 @@ describe("ProfileEditPage", () => {
     expect(
       screen.queryByRole("heading", { name: /studio location/i })
     ).not.toBeInTheDocument();
+    // Designer profile section is also hidden for clients.
+    expect(
+      screen.queryByRole("heading", { name: /designer profile/i })
+    ).not.toBeInTheDocument();
   });
 
-  it("shows the Studio location section + studio-name input for designers", () => {
-    useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
-    render(<ProfileEditPage />);
-    expect(
-      screen.getByRole("heading", { name: /studio location/i })
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText(/studio name/i)).toBeInTheDocument();
-    expect(
-      screen.getByTestId("location-picker-studio-address")
-    ).toBeInTheDocument();
-  });
-
-  it("dirty-state enables Save when the studio address pin moves, and updateProfile is called with workshop coordinates", async () => {
+  it("shows three independent Save bars for designers (personal, designer, studio)", () => {
     useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
     render(<ProfileEditPage />);
 
-    const saveBtn = screen.getByRole("button", {
-      name: /all saved|save changes/i,
+    // Each Save button keeps a stable aria-label regardless of dirty state,
+    // so the three are queryable + assertable as disabled out of the gate.
+    const personalBtn = screen.getByRole("button", {
+      name: /save personal info/i,
     });
-    expect(saveBtn).toBeDisabled();
+    const designerBtn = screen.getByRole("button", {
+      name: /save designer profile/i,
+    });
+    const studioBtn = screen.getByRole("button", {
+      name: /save studio location/i,
+    });
+    expect(personalBtn).toBeDisabled();
+    expect(designerBtn).toBeDisabled();
+    expect(studioBtn).toBeDisabled();
+  });
 
-    // Pick a studio location via the stub.
+  it("clients only see the personal-info Save bar", () => {
+    useAuthGuardSpy.mockReturnValue({ user: CLIENT_USER, isReady: true });
+    render(<ProfileEditPage />);
+    expect(
+      screen.getByRole("button", { name: /save personal info/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /save designer profile/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /save studio location/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("saving the studio location only sends workshop fields to updateProfile (no profile fields touched)", async () => {
+    useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
+    render(<ProfileEditPage />);
+
     await act(async () => {
       fireEvent.click(
         screen.getByRole("button", { name: /pin-studio address/i })
       );
     });
 
-    // Save should now be enabled.
-    const dirtyBtn = screen.getByRole("button", { name: /save changes/i });
-    expect(dirtyBtn).toBeEnabled();
+    const studioBtn = screen.getByRole("button", {
+      name: /save studio location/i,
+    });
+    expect(studioBtn).toBeEnabled();
 
     await act(async () => {
-      fireEvent.click(dirtyBtn);
+      fireEvent.click(studioBtn);
     });
 
     expect(updateProfileSpy).toHaveBeenCalledTimes(1);
@@ -219,6 +240,69 @@ describe("ProfileEditPage", () => {
       workshopLat: 5.61,
       workshopLng: -0.185,
     });
+    // Crucially the shop-profile fields must NOT be in the payload — the
+    // user only edited the studio, so we must not blindly resubmit (and
+    // potentially overwrite with stale form state) the bio / pricing /
+    // specializations.
+    expect(variables).not.toHaveProperty("bio");
+    expect(variables).not.toHaveProperty("specializations");
+    expect(variables).not.toHaveProperty("pricingMin");
+    expect(variables).not.toHaveProperty("isAcceptingOrders");
+    // And updateMyInfo (personal info) must not have fired at all.
+    expect(updateMyInfoSpy).not.toHaveBeenCalled();
+  });
+
+  it("saving the designer profile only sends shop fields, never workshop fields", async () => {
+    useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
+    render(<ProfileEditPage />);
+
+    // Edit the bio to dirty the designer-profile section.
+    const bio = screen.getByLabelText(/^bio$/i);
+    await act(async () => {
+      fireEvent.change(bio, { target: { value: "Updated bio copy." } });
+    });
+
+    const designerBtn = screen.getByRole("button", {
+      name: /save designer profile/i,
+    });
+    expect(designerBtn).toBeEnabled();
+
+    await act(async () => {
+      fireEvent.click(designerBtn);
+    });
+
+    expect(updateProfileSpy).toHaveBeenCalledTimes(1);
+    const variables = updateProfileSpy.mock.calls[0][0]?.variables?.input;
+    expect(variables).toMatchObject({ bio: "Updated bio copy." });
+    expect(variables).not.toHaveProperty("workshopName");
+    expect(variables).not.toHaveProperty("workshopAddress");
+    expect(variables).not.toHaveProperty("workshopLat");
+    expect(updateMyInfoSpy).not.toHaveBeenCalled();
+  });
+
+  it("saving personal info calls updateMyInfo, never updateProfile", async () => {
+    useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
+    render(<ProfileEditPage />);
+
+    const firstNameInput = screen.getByLabelText(/first name/i);
+    await act(async () => {
+      fireEvent.change(firstNameInput, { target: { value: "Akua" } });
+    });
+
+    const personalBtn = screen.getByRole("button", {
+      name: /save personal info/i,
+    });
+    expect(personalBtn).toBeEnabled();
+
+    await act(async () => {
+      fireEvent.click(personalBtn);
+    });
+
+    expect(updateMyInfoSpy).toHaveBeenCalledTimes(1);
+    expect(updateMyInfoSpy.mock.calls[0][0]?.variables?.input).toMatchObject({
+      firstName: "Akua",
+    });
+    expect(updateProfileSpy).not.toHaveBeenCalled();
   });
 
   it("renders auto-save guidance under the Portfolio header", () => {
@@ -233,5 +317,14 @@ describe("ProfileEditPage", () => {
     expect(
       screen.getByText(/tap photo to change · saves automatically/i)
     ).toBeInTheDocument();
+  });
+
+  it("marks first name + last name with the required-field asterisk", () => {
+    useAuthGuardSpy.mockReturnValue({ user: CLIENT_USER, isReady: true });
+    render(<ProfileEditPage />);
+    const firstName = screen.getByLabelText(/first name/i);
+    const lastName = screen.getByLabelText(/last name/i);
+    expect(firstName).toBeRequired();
+    expect(lastName).toBeRequired();
   });
 });
