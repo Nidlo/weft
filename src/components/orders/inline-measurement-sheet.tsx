@@ -17,8 +17,8 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CREATE_MEASUREMENT } from "@/lib/graphql/mutations/measurement";
 import { CLIENT_MEASUREMENTS } from "@/lib/graphql/queries/order";
-import { ManualForm } from "@/app/measurements/manual-form";
-import { AiFlow } from "@/app/measurements/ai-flow";
+import { ManualForm } from "@/app/(private)/measurements/manual-form";
+import { AiFlow } from "@/app/(private)/measurements/ai-flow";
 import type {
   Landmarks,
   MeasurementData,

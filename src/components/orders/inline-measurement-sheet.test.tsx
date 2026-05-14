@@ -9,7 +9,7 @@ import { CREATE_MEASUREMENT } from "@/lib/graphql/mutations/measurement";
 // store, motion, and the camera SDK — none of which are interesting here.
 // Stub them so the test focuses on the sheet's wiring: trigger gating,
 // tab rendering, and the mutation payload.
-vi.mock("@/app/measurements/manual-form", () => ({
+vi.mock("@/app/(private)/measurements/manual-form", () => ({
   ManualForm: ({
     onSave,
   }: {
@@ -33,7 +33,7 @@ vi.mock("@/app/measurements/manual-form", () => ({
   ),
 }));
 
-vi.mock("@/app/measurements/ai-flow", () => ({
+vi.mock("@/app/(private)/measurements/ai-flow", () => ({
   AiFlow: () => <div data-testid="ai-flow-stub" />,
 }));
 

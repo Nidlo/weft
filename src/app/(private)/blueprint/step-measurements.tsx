@@ -12,8 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GlassCard } from "@/components/ui/glass-card";
 import { MeasurementSummary } from "@/components/shared/measurement-summary";
-import { ManualForm } from "@/app/measurements/manual-form";
-import { AiFlow } from "@/app/measurements/ai-flow";
+import { ManualForm } from "@/app/(private)/measurements/manual-form";
+import { AiFlow } from "@/app/(private)/measurements/ai-flow";
 import { cn } from "@/lib/utils";
 import type { MeasurementData } from "@/types/graphql";
 
