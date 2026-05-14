@@ -10,6 +10,10 @@ vi.mock("@/lib/hooks/use-auth-guard", () => ({
 
 vi.mock("@/lib/hooks/use-logout", () => ({
   useLogout: () => ({ logout: logoutSpy, loading: false }),
+  useSignOutAllDevices: () => ({
+    signOutAll: vi.fn().mockResolvedValue(undefined),
+    loading: false,
+  }),
 }));
 
 vi.mock("@/components/layout/app-shell", () => ({
@@ -30,6 +34,13 @@ vi.mock("next/image", () => ({
 // links + contact rows.
 vi.mock("@/components/profile/style-profile-card", () => ({
   StyleProfileCard: () => <div data-testid="style-profile-card-stub" />,
+}));
+
+// ReplayMenu uses next/navigation's useRouter, which needs an App Router
+// context that isn't mounted in unit tests. Stub it — the menu has its
+// own tests.
+vi.mock("@/lib/tour/replay-menu", () => ({
+  ReplayMenu: () => <div data-testid="replay-menu-stub" />,
 }));
 
 import ProfilePage from "./page";
@@ -84,10 +95,9 @@ describe("ProfilePage", () => {
     expect(screen.getByText(/^designer$/i)).toBeInTheDocument();
   });
 
-  it("shows the trimmed quick-links surface (no bottom-nav duplicates)", () => {
-    // Quick Links was cleaned up so it stops duplicating the bottom nav.
-    // Designer dashboard / My orders / Wallet & payouts live there; Quick
-    // Links keeps the surfaces that DON'T appear in the nav.
+  it("shows the everyday quick-links surface for clients (no Notifications, Settings, or Earnings)", () => {
+    // Notifications + privacy / process actions live on Settings.
+    // Earnings is a designer-only Profile tile.
     useAuthGuardSpy.mockReturnValue({ user: CLIENT_USER, isReady: true });
     render(<ProfilePage />);
     expect(
@@ -97,31 +107,34 @@ describe("ProfilePage", () => {
       screen.getByRole("link", { name: /body vault/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /notifications/i })
+      screen.getByRole("link", { name: /help & support/i })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /designer dashboard/i })
+      screen.queryByRole("link", { name: /^notifications/i })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /wallet/i })
+      screen.queryByRole("link", { name: /^earnings/i })
     ).not.toBeInTheDocument();
+    // Settings IS expected on Profile — it's the single entry point into
+    // the configuration/danger-zone surface, not a duplicate of any tile
+    // that lives inside Settings.
+    expect(
+      screen.getByRole("link", { name: /^settings/i })
+    ).toBeInTheDocument();
   });
 
-  it("shows the same quick-links surface for designers (no extra entries)", () => {
+  it("adds the Earnings tile to the designer quick-links surface", () => {
     useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
     render(<ProfilePage />);
-    expect(
-      screen.getByRole("link", { name: /name, contact, location/i })
-    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /body vault/i })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /designer dashboard/i })
-    ).not.toBeInTheDocument();
+      screen.getByRole("link", { name: /^earnings/i })
+    ).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /^wallet/i })
-    ).not.toBeInTheDocument();
+      screen.getByRole("link", { name: /help & support/i })
+    ).toBeInTheDocument();
   });
 
   it("renders the contact info rows (phone always, email + city when present)", () => {

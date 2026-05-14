@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -8,31 +7,15 @@ import {
   ChevronRight,
   Info,
   Lock,
-  LogOut,
   ShieldCheck,
-  ShieldOff,
   Trash2,
-  User,
-  Coins,
   type LucideIcon,
 } from "lucide-react";
 
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
-import { useLogout, useSignOutAllDevices } from "@/lib/hooks/use-logout";
-import { APP_VERSION } from "@/lib/config";
 import { AppShell } from "@/components/layout/app-shell";
-import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReplayMenu } from "@/lib/tour/replay-menu";
 
 interface Tile {
   href: string;
@@ -44,23 +27,10 @@ interface Tile {
 
 const TILES: Tile[] = [
   {
-    href: "/profile/edit",
-    icon: User,
-    label: "Account",
-    description: "Name, photo, location",
-  },
-  {
     href: "/notifications/preferences",
     icon: Bell,
     label: "Notifications",
     description: "Email, SMS, and push preferences",
-  },
-  {
-    href: "/earnings",
-    icon: Coins,
-    label: "Earnings",
-    description: "Order history, transactions, and payout accounts",
-    designerOnly: true,
   },
   {
     href: "/privacy",
@@ -69,22 +39,10 @@ const TILES: Tile[] = [
     description: "How we handle your data",
   },
   {
-    href: "/#contact",
-    icon: Info,
-    label: "Help & support",
-    description: "Contact us or browse FAQs",
-  },
-  {
     href: "/#about",
     icon: Info,
     label: "About Nidlo",
     description: "What we're building and why",
-  },
-  {
-    href: "/settings/delete-account",
-    icon: Trash2,
-    label: "Delete account",
-    description: "Deactivate now with a 30-day restore window",
   },
 ];
 
@@ -104,9 +62,6 @@ const COMING_SOON: ComingSoonTile[] = [
 
 export default function SettingsPage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
-  const { logout, loading: loggingOut } = useLogout();
-  const { signOutAll, loading: signingOutAll } = useSignOutAllDevices();
-  const [confirmAllOpen, setConfirmAllOpen] = useState(false);
 
   if (!isReady || !user) {
     return (
@@ -154,14 +109,6 @@ export default function SettingsPage() {
           ))}
         </GlassCard>
 
-        {/* Show me around */}
-        <section>
-          <p className="text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.18em] uppercase">
-            Show me around
-          </p>
-          <ReplayMenu />
-        </section>
-
         {/* Coming soon */}
         <section>
           <p className="text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.18em] uppercase">
@@ -198,76 +145,35 @@ export default function SettingsPage() {
           </GlassCard>
         </section>
 
-        {/* Sign-out actions */}
-        <div className="space-y-2">
-          <Button
-            variant="luxe-outline"
-            size="lg"
-            className="w-full gap-1.5"
-            onClick={logout}
-            disabled={signingOutAll}
-            loading={loggingOut}
-            loadingLabel="Logging out..."
-          >
-            <LogOut className="h-4 w-4" aria-hidden />
-            Log out
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="lg"
-            className="text-status-error hover:bg-status-error-soft hover:text-status-error-fg w-full gap-1.5"
-            onClick={() => setConfirmAllOpen(true)}
-            disabled={loggingOut || signingOutAll}
-          >
-            <ShieldOff className="h-4 w-4" aria-hidden />
-            Sign out of all devices
-          </Button>
-        </div>
-
-        <p className="text-muted-foreground pt-2 text-center text-[11px] font-semibold tracking-[0.16em] uppercase">
-          Nidlo · v{APP_VERSION}
-        </p>
+        {/* Danger zone */}
+        <section>
+          <p className="text-status-error mb-3 text-[11px] font-semibold tracking-[0.18em] uppercase">
+            Danger zone
+          </p>
+          <GlassCard variant="solid" className="border-status-error/20 p-2">
+            <Link
+              href="/settings/delete-account"
+              className="group hover:bg-status-error-soft focus-visible:bg-status-error-soft flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 focus-visible:outline-none"
+            >
+              <span className="bg-status-error-soft text-status-error-fg ring-status-error/30 flex size-10 shrink-0 items-center justify-center rounded-xl ring-1">
+                <Trash2 className="h-4 w-4" aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-display text-sm font-semibold tracking-tight">
+                  Delete account
+                </p>
+                <p className="text-muted-foreground truncate text-xs">
+                  Deactivate now with a 30-day restore window
+                </p>
+              </div>
+              <ChevronRight
+                className="text-muted-foreground group-hover:text-status-error h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </Link>
+          </GlassCard>
+        </section>
       </div>
-
-      <Dialog open={confirmAllOpen} onOpenChange={setConfirmAllOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-display text-2xl font-semibold tracking-tight">
-              Sign out of all devices?
-            </DialogTitle>
-            <DialogDescription className="text-sm leading-relaxed">
-              This signs you out of every browser and tab where you&apos;re
-              currently logged in — phone, laptop, tablet, anywhere. You&apos;ll
-              need to log in again on each device.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-2">
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={() => setConfirmAllOpen(false)}
-              disabled={signingOutAll}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              size="lg"
-              className="gap-1.5"
-              onClick={async () => {
-                setConfirmAllOpen(false);
-                await signOutAll();
-              }}
-              loading={signingOutAll}
-              loadingLabel="Signing out everywhere..."
-            >
-              <ShieldOff className="h-4 w-4" aria-hidden />
-              Sign out everywhere
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </AppShell>
   );
 }

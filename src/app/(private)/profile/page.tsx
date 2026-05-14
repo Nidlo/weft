@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -14,15 +15,25 @@ import {
   Phone,
   Ruler,
   Scissors,
+  Settings,
+  ShieldOff,
   User,
   type LucideIcon,
 } from "lucide-react";
 
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
-import { useLogout } from "@/lib/hooks/use-logout";
+import { useLogout, useSignOutAllDevices } from "@/lib/hooks/use-logout";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StyleProfileCard } from "@/components/profile/style-profile-card";
 import { ReplayMenu } from "@/lib/tour/replay-menu";
@@ -62,11 +73,19 @@ const QUICK_LINKS: QuickLink[] = [
     label: "Help & support",
     description: "Get help with an order or your account",
   },
+  {
+    href: "/settings",
+    icon: Settings,
+    label: "Settings",
+    description: "Notifications, privacy, delete account",
+  },
 ];
 
 export default function ProfilePage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
   const { logout: handleLogout, loading: loggingOut } = useLogout();
+  const { signOutAll, loading: signingOutAll } = useSignOutAllDevices();
+  const [confirmAllOpen, setConfirmAllOpen] = useState(false);
 
   if (!isReady || !user) {
     return (
@@ -253,18 +272,72 @@ export default function ProfilePage() {
           <ReplayMenu />
         </section>
 
-        {/* Logout */}
-        <Button
-          variant="luxe-outline"
-          size="lg"
-          className="text-status-error hover:bg-status-error-soft hover:text-status-error-fg w-full gap-1.5"
-          onClick={handleLogout}
-          disabled={loggingOut}
-        >
-          <LogOut className="h-4 w-4" aria-hidden />
-          {loggingOut ? "Logging out..." : "Log out"}
-        </Button>
+        {/* Sign-out actions */}
+        <div className="space-y-2">
+          <Button
+            variant="luxe-outline"
+            size="lg"
+            className="text-status-error hover:bg-status-error-soft hover:text-status-error-fg w-full gap-1.5"
+            onClick={handleLogout}
+            disabled={loggingOut || signingOutAll}
+            loading={loggingOut}
+            loadingLabel="Logging out..."
+          >
+            <LogOut className="h-4 w-4" aria-hidden />
+            Log out
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="lg"
+            className="text-status-error hover:bg-status-error-soft hover:text-status-error-fg w-full gap-1.5"
+            onClick={() => setConfirmAllOpen(true)}
+            disabled={loggingOut || signingOutAll}
+          >
+            <ShieldOff className="h-4 w-4" aria-hidden />
+            Sign out of all devices
+          </Button>
+        </div>
       </div>
+
+      <Dialog open={confirmAllOpen} onOpenChange={setConfirmAllOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-display text-2xl font-semibold tracking-tight">
+              Sign out of all devices?
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              This signs you out of every browser and tab where you&apos;re
+              currently logged in &mdash; phone, laptop, tablet, anywhere.
+              You&apos;ll need to log in again on each device.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="ghost"
+              size="lg"
+              onClick={() => setConfirmAllOpen(false)}
+              disabled={signingOutAll}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="lg"
+              className="gap-1.5"
+              onClick={async () => {
+                setConfirmAllOpen(false);
+                await signOutAll();
+              }}
+              loading={signingOutAll}
+              loadingLabel="Signing out everywhere..."
+            >
+              <ShieldOff className="h-4 w-4" aria-hidden />
+              Sign out everywhere
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
