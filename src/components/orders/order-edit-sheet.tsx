@@ -228,9 +228,15 @@ export function OrderEditSheet({
                 />
               )}
 
-              {/* Measurement */}
+              {/* Measurement — picks from the linked client's vault when
+                  client_id is set, the walk-in's pending rows when only
+                  client_phone is set, or the designer's own body vault
+                  when neither (e.g. a prototype). Backend's
+                  MeasurementAccessGuard validates the chosen id against
+                  the post-update order state. */}
               <MeasurementSelector
                 clientId={order.clientId}
+                pendingClientPhone={order.clientId ? null : order.clientPhone}
                 value={measurementId}
                 onChange={setMeasurementId}
               />

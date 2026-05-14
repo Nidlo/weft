@@ -591,23 +591,24 @@ export default function NewOrderPage() {
                 </p>
               )}
 
-              {/* In-system client OR walk-in with a phone — either gets
-                  the MeasurementSelector + inline "+ Take new measurement"
-                  affordance. Walk-ins park rows against the phone; orphan
-                  rows are claimed at signup via linkOrphansByPhone. */}
-              {(linkedClientId ||
-                (clientMode === "external" && clientPhone.trim())) && (
-                <MeasurementSelector
-                  clientId={linkedClientId ?? null}
-                  pendingClientPhone={
-                    !linkedClientId && clientMode === "external"
-                      ? clientPhone.trim() || null
-                      : null
-                  }
-                  value={measurementId}
-                  onChange={setMeasurementId}
-                />
-              )}
+              {/* Three measurement paths share one component:
+                    (1) linked in-system client → their saved measurements
+                    (2) walk-in with phone → inline-take parks against phone
+                        (claimed at signup via linkOrphansByPhone)
+                    (3) no client at all → designer's own body vault
+                        (samples / prototypes / drafts). Same selector,
+                    different list — the backend's MeasurementAccessGuard
+                    validates the chosen ID against the order context. */}
+              <MeasurementSelector
+                clientId={linkedClientId ?? null}
+                pendingClientPhone={
+                  !linkedClientId && clientMode === "external"
+                    ? clientPhone.trim() || null
+                    : null
+                }
+                value={measurementId}
+                onChange={setMeasurementId}
+              />
             </GlassCard>
           </FormSection>
 

@@ -39,11 +39,55 @@ export interface RequestOtpData {
   };
 }
 
+/**
+ * Surface set when verifyOtp matches a soft-deleted account still inside its
+ * 30-day recovery window. Backend does NOT sign the caller in; the caller
+ * must choose between `restoreAccount` and `declineRestore`.
+ */
+export interface GqlPendingRestore {
+  /** ISO 8601 timestamp when the account was soft-deleted (window start). */
+  deletedAt: string;
+  /** ISO 8601 timestamp after which the account is permanently purged. */
+  expiresAt: string;
+  /** Whole days remaining in the window (floored; 0 once we're inside the final 24h). */
+  daysRemaining: number;
+}
+
 export interface VerifyOtpData {
   verifyOtp: {
     token: string | null;
     isNew: boolean;
+    /** Orphan orders (parked against this phone by a designer) that were claimed at signup. */
+    claimedOrdersCount: number;
+    /** Orphan measurements (parked against this phone by a designer) that were claimed at signup. */
+    claimedMeasurementsCount: number;
     user: GqlUser;
+    /** Populated only when the phone matches a soft-deleted account inside its recovery window. The caller has NOT been signed in. */
+    pendingRestore: GqlPendingRestore | null;
+  };
+}
+
+export interface RestoreAccountData {
+  restoreAccount: {
+    isNew: boolean;
+    claimedOrdersCount: number;
+    claimedMeasurementsCount: number;
+    user: GqlUser;
+  };
+}
+
+export interface DeclineRestoreData {
+  declineRestore: boolean;
+}
+
+export interface DeleteMyAccountData {
+  deleteMyAccount: {
+    success: boolean;
+    immediate: boolean;
+    /** Null when `immediate` is true. */
+    deletedAt: string | null;
+    /** Null when `immediate` is true. After this instant the account is permanently purged. */
+    recoverableUntil: string | null;
   };
 }
 
@@ -51,6 +95,8 @@ export interface SocialLoginData {
   socialLogin: {
     token: string | null;
     isNew: boolean;
+    claimedOrdersCount: number;
+    claimedMeasurementsCount: number;
     user: GqlUser;
   };
 }

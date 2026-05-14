@@ -1,6 +1,7 @@
 "use client";
 
 import { useClientMeasurements } from "@/lib/hooks/use-orders";
+import { useMeasurements } from "@/lib/hooks/use-measurements";
 import type { GqlMeasurement } from "@/types/graphql";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,13 +18,31 @@ import { formatMeasurement, unitLabel } from "@/lib/utils/measurement";
 import { InlineMeasurementSheet } from "./inline-measurement-sheet";
 
 interface MeasurementSelectorProps {
+  /**
+   * The order's linked client (in-system user). When set, the selector
+   * lists THAT client's measurements.
+   */
   clientId: string | null;
   /**
-   * Phone of a walk-in / external client (when no clientId). Used by the
-   * inline measurement sheet to park the new measurement against this
-   * phone — AuthService::linkOrphansByPhone() rebinds at signup.
+   * Walk-in client's phone (E.164 or loose-Ghana-local). When set with
+   * no `clientId`, the inline-take-new-measurement sheet parks new rows
+   * against this phone for AuthService::linkOrphansByPhone() to claim
+   * at signup.
    */
   pendingClientPhone?: string | null;
+  /**
+   * When BOTH clientId and pendingClientPhone are absent, the selector
+   * falls into "designer's own body vault" mode — useful for samples,
+   * prototypes, or drafts where the designer is the one being fitted.
+   * The selector reads the authenticated designer's own measurements
+   * via useMeasurements(). New rows save against the designer's
+   * user_id (default createMeasurement path, no pendingClientPhone).
+   *
+   * Backend's MeasurementAccessGuard validates that the chosen
+   * measurement matches the order's context — same legitimate paths
+   * (own / linked client / pending phone), so picking a designer-self
+   * measurement from this list is accepted on submit.
+   */
   value: string | undefined;
   onChange: (measurementId: string | undefined) => void;
 }
@@ -34,23 +53,33 @@ export function MeasurementSelector({
   value,
   onChange,
 }: MeasurementSelectorProps) {
-  const { measurements, loading } = useClientMeasurements(clientId);
+  const hasPhone = !!pendingClientPhone;
+  const isSelfMode = !clientId && !hasPhone;
+
+  // Whichever path is active, load the right list. The two hooks are
+  // cheap (Apollo cache-first on subsequent renders) and the inactive
+  // one returns an empty array, so unconditional calls keep the hook
+  // order stable across mode flips.
+  const { measurements: clientMeasurements, loading: clientLoading } =
+    useClientMeasurements(clientId);
+  const { measurements: ownMeasurements, loading: ownLoading } =
+    useMeasurements();
+
   const displayUnit = usePreferencesStore((s) => s.measurementUnit);
 
-  const hasPhone = !!pendingClientPhone;
+  const measurements = isSelfMode ? ownMeasurements : clientMeasurements;
+  const loading = isSelfMode ? ownLoading : clientLoading;
 
-  // No client linked AND no walk-in phone — nothing to attach a
-  // measurement to yet. Surface the rule, no inline sheet.
-  if (!clientId && !hasPhone) {
-    return (
-      <div className="text-muted-foreground rounded-lg border border-dashed p-3 text-center text-sm">
-        <Ruler className="mx-auto mb-1 h-4 w-4" />
-        Add a client (or their phone for a walk-in) to attach measurements
-      </div>
-    );
-  }
+  const headerLabel = isSelfMode
+    ? "Your body vault"
+    : "Client measurement profile";
+  const emptyCopy = isSelfMode
+    ? "No measurements in your body vault yet"
+    : "No saved measurements yet";
+  const selfModeHint =
+    "No client linked — pick from your own body vault or take a new measurement for this order.";
 
-  if (clientId && loading) {
+  if (clientId && clientLoading) {
     return <Skeleton className="h-10 w-full" />;
   }
 
@@ -77,15 +106,13 @@ export function MeasurementSelector({
       : m.source;
   };
 
-  const noSavedMeasurements = clientId && measurements.length === 0;
+  const hasMeasurements = measurements.length > 0;
 
   return (
     <div className="space-y-2">
-      <Label>Client Measurement Profile</Label>
+      <Label>{headerLabel}</Label>
 
-      {/* In-system client with at least one saved measurement: standard
-          select with an inline "+ Take new measurement" trigger underneath. */}
-      {clientId && !noSavedMeasurements && (
+      {hasMeasurements && (
         <Select
           value={value ?? "none"}
           onValueChange={(v) => onChange(v === "none" ? undefined : v)}
@@ -112,23 +139,22 @@ export function MeasurementSelector({
         </Select>
       )}
 
-      {/* In-system client with no measurements yet: skip the empty select
-          and lead straight into the take-new affordance. */}
-      {noSavedMeasurements && (
+      {!hasMeasurements && (
         <div className="text-muted-foreground rounded-lg border border-dashed p-3 text-center text-sm">
           <Ruler className="mx-auto mb-1 h-4 w-4" />
-          No saved measurements yet
+          {loading ? "Loading measurements..." : emptyCopy}
         </div>
       )}
 
-      {/* Walk-in client (phone provided, no user_id): no list to show
-          (the orphan rows are invisible until claim), so just surface
-          the inline sheet trigger. */}
-      {!clientId && hasPhone && (
-        <div className="text-muted-foreground rounded-lg border border-dashed p-3 text-center text-sm">
-          <Ruler className="mx-auto mb-1 h-4 w-4" />
-          Take measurements now — they&apos;ll attach when the client signs up.
-        </div>
+      {isSelfMode && hasMeasurements && (
+        <p className="text-muted-foreground text-xs">{selfModeHint}</p>
+      )}
+
+      {hasPhone && !clientId && (
+        <p className="text-muted-foreground text-xs">
+          Take measurements now — they&apos;ll attach to the client when they
+          sign up.
+        </p>
       )}
 
       <InlineMeasurementSheet

@@ -4,16 +4,35 @@ import { Suspense, useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowLeft, RotateCw } from "lucide-react";
+import { ArrowLeft, Clock, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 
-import { VERIFY_OTP, REQUEST_OTP } from "@/lib/graphql/mutations/auth";
-import type { VerifyOtpData, RequestOtpData } from "@/types/graphql";
+import {
+  DECLINE_RESTORE,
+  REQUEST_OTP,
+  RESTORE_ACCOUNT,
+  VERIFY_OTP,
+} from "@/lib/graphql/mutations/auth";
+import type {
+  GqlPendingRestore,
+  RestoreAccountData,
+  VerifyOtpData,
+  RequestOtpData,
+} from "@/types/graphql";
+import { buildClaimedToast } from "@/lib/utils/claimed-toast";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
 import { maskPhone } from "@/lib/utils/phone";
 import { safeNext } from "@/lib/utils/safe-next";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StitchLoader } from "@/components/ui/stitch-loader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -85,6 +104,13 @@ function VerifyOtpContent() {
 
   const [verifyOtp, { loading: verifying }] = useMutation(VERIFY_OTP);
   const [requestOtp, { loading: resending }] = useMutation(REQUEST_OTP);
+  const [restoreAccount, { loading: restoring }] = useMutation(RESTORE_ACCOUNT);
+  const [declineRestore, { loading: declining }] = useMutation(DECLINE_RESTORE);
+
+  // Set after verifyOtp returns pendingRestore. The modal renders off this
+  // state and gates the restore / decline mutations on it.
+  const [pendingRestore, setPendingRestore] =
+    useState<GqlPendingRestore | null>(null);
 
   useEffect(() => {
     // Wait one tick for the phone-from-sessionStorage effect to run before
@@ -123,6 +149,16 @@ function VerifyOtpContent() {
         const result = data as VerifyOtpData | undefined;
 
         if (result?.verifyOtp) {
+          // Phone belongs to a soft-deleted account inside its recovery
+          // window. The backend has NOT signed us in; surface the restore
+          // prompt instead. submitting stays true so the auto-dispatch
+          // doesn't refire while the modal is open — declineRestore will
+          // reset it.
+          if (result.verifyOtp.pendingRestore) {
+            setPendingRestore(result.verifyOtp.pendingRestore);
+            return;
+          }
+
           const { user, isNew } = result.verifyOtp;
           setUser({
             id: user.id,
@@ -138,6 +174,17 @@ function VerifyOtpContent() {
           });
 
           toast.success("Phone verified!");
+          // If a designer parked orders/measurements against this phone
+          // before signup, AuthService::linkOrphansByPhone() claimed them
+          // in the same DB transaction as user creation. Surface the
+          // counts so the user knows where the records came from.
+          const claimedCopy = buildClaimedToast(
+            result.verifyOtp.claimedOrdersCount,
+            result.verifyOtp.claimedMeasurementsCount
+          );
+          if (claimedCopy) {
+            toast.success(claimedCopy);
+          }
           sessionStorage.removeItem("nidlo:auth:pendingPhone");
           // Honour the deep-link target captured on /auth/phone via
           // ?next=, so an SMS / email / push click lands on the
@@ -181,6 +228,69 @@ function VerifyOtpContent() {
     },
     [phone, verifyOtp, setUser, router]
   );
+
+  const handleConfirmRestore = useCallback(async () => {
+    try {
+      const { data } = await restoreAccount();
+      const result = data as RestoreAccountData | undefined;
+      if (!result?.restoreAccount) {
+        toast.error("Could not restore your account. Try again.");
+        return;
+      }
+      const { user } = result.restoreAccount;
+      setUser({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: user.fullName,
+        phone: user.phone || "",
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        city: user.city,
+        isDesigner: user.isDesigner,
+        isOnboarded: user.isOnboarded,
+      });
+      toast.success("Welcome back. Your account has been restored.");
+      const claimedCopy = buildClaimedToast(
+        result.restoreAccount.claimedOrdersCount,
+        result.restoreAccount.claimedMeasurementsCount
+      );
+      if (claimedCopy) toast.success(claimedCopy);
+
+      sessionStorage.removeItem("nidlo:auth:pendingPhone");
+      const rawNext = sessionStorage.getItem("nidlo:auth:next");
+      if (rawNext) sessionStorage.removeItem("nidlo:auth:next");
+
+      setPendingRestore(null);
+      if (!user.isOnboarded) {
+        router.push("/auth/role");
+      } else {
+        router.push(safeNext(rawNext));
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not restore account";
+      toast.error(message);
+    }
+  }, [restoreAccount, setUser, router]);
+
+  const handleDeclineRestore = useCallback(async () => {
+    try {
+      await declineRestore();
+    } catch {
+      // Server-side marker clear is best-effort; we still let the user
+      // dismiss locally.
+    }
+    setPendingRestore(null);
+    setDigits(Array(OTP_LENGTH).fill(""));
+    submitting.current = false;
+    lastSubmittedCode.current = null;
+    inputRefs.current[0]?.focus();
+    toast.message(
+      "Got it. Your account stays in its 30-day recovery window. Sign in again any time before then to restore it."
+    );
+    router.replace("/auth/phone");
+  }, [declineRestore, router]);
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -372,6 +482,55 @@ function VerifyOtpContent() {
         <ArrowLeft className="h-4 w-4" aria-hidden />
         Use a different number
       </Button>
+
+      <Dialog
+        open={pendingRestore !== null}
+        onOpenChange={(open) => {
+          if (!open && !restoring) handleDeclineRestore();
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <div className="bg-copper/15 text-copper ring-copper/30 mb-3 inline-flex size-10 items-center justify-center rounded-xl ring-1">
+              <Clock className="h-5 w-5" aria-hidden />
+            </div>
+            <DialogTitle className="text-display text-2xl font-semibold tracking-tight">
+              Restore your Nidlo account?
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              You deactivated this account, but we have been keeping it for you.
+              There{" "}
+              {pendingRestore?.daysRemaining === 1
+                ? "is 1 day"
+                : `are ${pendingRestore?.daysRemaining ?? 0} days`}{" "}
+              left to restore everything &mdash; your profile, order history,
+              saved measurements and messages all come back as they were.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="ghost"
+              size="lg"
+              onClick={handleDeclineRestore}
+              disabled={restoring}
+              loading={declining}
+              loadingLabel="One moment..."
+            >
+              Not now
+            </Button>
+            <Button
+              variant="luxe-outline"
+              size="lg"
+              onClick={handleConfirmRestore}
+              loading={restoring}
+              loadingLabel="Restoring..."
+              disabled={declining}
+            >
+              Restore my account
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </GlassCard>
   );
 }

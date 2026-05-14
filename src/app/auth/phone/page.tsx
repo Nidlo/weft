@@ -17,6 +17,7 @@ import type {
 import { useAuthStore } from "@/lib/stores/auth";
 import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
 import { safeNext } from "@/lib/utils/safe-next";
+import { buildClaimedToast } from "@/lib/utils/claimed-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -153,6 +154,16 @@ function PhoneAuthContent() {
           });
 
           toast.success("Signed in successfully!");
+          // Social-login users only have a phone when they reused an
+          // existing OTP-signup account. When they do, surface any
+          // walk-in records the AuthService just claimed for them.
+          const claimedCopy = buildClaimedToast(
+            result.socialLogin.claimedOrdersCount,
+            result.socialLogin.claimedMeasurementsCount
+          );
+          if (claimedCopy) {
+            toast.success(claimedCopy);
+          }
 
           const rawNext =
             typeof window !== "undefined"
