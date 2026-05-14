@@ -11,6 +11,7 @@ import {
   LogOut,
   ShieldCheck,
   ShieldOff,
+  Trash2,
   User,
   Wallet,
   type LucideIcon,
@@ -79,6 +80,12 @@ const TILES: Tile[] = [
     label: "About Nidlo",
     description: "What we're building and why",
   },
+  {
+    href: "/settings/delete-account",
+    icon: Trash2,
+    label: "Delete account",
+    description: "Deactivate now with a 30-day restore window",
+  },
 ];
 
 interface ComingSoonTile {
@@ -92,11 +99,6 @@ const COMING_SOON: ComingSoonTile[] = [
     icon: Lock,
     label: "Change phone number",
     description: "Re-verify with a new phone via OTP",
-  },
-  {
-    icon: Lock,
-    label: "Delete account",
-    description: "Permanently remove your data after a 30-day cool-off",
   },
 ];
 

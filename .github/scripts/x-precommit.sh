@@ -368,11 +368,23 @@ scan_pattern "CRITICAL" "Q-08" "Drizzle where() uses && instead of and()" \
     '\.(ts|tsx)$' \
     "Import { and } from 'drizzle-orm' and wrap conditions: and(condA, condB) — JS && breaks the query. See backend audit."
 
-# P-01: Escrow tokens in NEW code
-scan_pattern "CRITICAL" "P-01" "Escrow code added (escrow is OUT of MVP scope)" \
-    '(escrow|escrowStatus|escrow_status|releaseEscrow|release_escrow|paymentHeld|payment_held|holdPayment|hold_payment)' \
-    '\.(ts|tsx|dart|sql)$' \
-    "Snad confirmed escrow is removed from MVP. Drop the field/endpoint/UI section. Phase 2 may bring it back via Paystack."
+# P-01: Escrow tokens in NEW code (legal-copy pages are exempt — they say "does not escrow")
+LEGAL_PAGE_PATTERN='app/(terms|privacy|cookies|data-deletion)/'
+P01_FILES=$(printf "%s\n" "$CODE_FILES" | grep -E '\.(ts|tsx|dart|sql)$' | grep -vE "$LEGAL_PAGE_PATTERN" 2>/dev/null || true)
+if [ -n "$P01_FILES" ]; then
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        matches=$(read_file_content "$file" | grep -nE '(escrow|escrowStatus|escrow_status|releaseEscrow|release_escrow|paymentHeld|payment_held|holdPayment|hold_payment)' 2>/dev/null || true)
+        if [ -n "$matches" ]; then
+            while IFS= read -r match; do
+                line=$(printf "%s" "$match" | cut -d: -f1)
+                snippet=$(printf "%s" "$match" | cut -d: -f2- | sed 's/^[[:space:]]*//' | cut -c1-100)
+                emit_violation "CRITICAL" "P-01" "Escrow code added (escrow is OUT of MVP scope)" "$file" "$line" "$snippet" \
+                    "Snad confirmed escrow is removed from MVP. Drop the field/endpoint/UI section. Phase 2 may bring it back via Paystack."
+            done <<< "$matches"
+        fi
+    done <<< "$P01_FILES"
+fi
 
 # ============================================================
 # WARNINGS (don't block commit, but flag)

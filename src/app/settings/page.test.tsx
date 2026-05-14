@@ -88,7 +88,7 @@ describe("SettingsPage", () => {
     useAuthGuardSpy.mockReturnValue({ user: CLIENT_USER, isReady: true });
     render(<SettingsPage />);
     expect(screen.getByText(/^coming soon$/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/^soon$/i).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText(/^soon$/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders the version footer + sign-out actions", () => {
