@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
           "/messages",
           "/profile",
           "/wallet",
+          "/earnings",
           "/notifications",
           "/auth/verify",
           "/auth/role",

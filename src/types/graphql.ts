@@ -1193,17 +1193,29 @@ export interface GqlResolvedAccount {
   accountNumber: string;
 }
 
-export interface GqlWalletBalance {
-  balance: number;
+export interface GqlEarningsBreakdownItem {
+  payoutId: string;
+  orderId: string;
+  grossPesewas: number;
+  feePesewas: number;
+  netPesewas: number;
+  status: PayoutStatusValue;
+  transferredAt: string | null;
+  createdAt: string;
 }
 
-export interface GqlWalletTransaction {
-  id: string;
-  type: "deposit" | "withdraw";
-  amount: number;
-  confirmed: boolean;
-  meta: Record<string, unknown> | null;
-  createdAt: string;
+export interface GqlEarningsSummary {
+  ordersCount: number;
+  grossPesewas: number;
+  feePesewas: number;
+  netPesewas: number;
+  paidOutPesewas: number;
+  awaitingPayoutSetupPesewas: number;
+  breakdown: GqlEarningsBreakdownItem[];
+}
+
+export interface MyEarningsSummaryData {
+  myEarningsSummary: GqlEarningsSummary;
 }
 
 export interface ResolveMomoAccountData {
@@ -1224,14 +1236,6 @@ export interface RemoveWalletAccountData {
 
 export interface MyWalletAccountsData {
   myWalletAccounts: GqlWalletAccount[];
-}
-
-export interface MyWalletBalanceData {
-  myWalletBalance: GqlWalletBalance;
-}
-
-export interface MyWalletTransactionsData {
-  myWalletTransactions: GqlWalletTransaction[];
 }
 
 export type ExternalPaymentMethodValue =

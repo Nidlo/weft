@@ -69,19 +69,21 @@ describe("SettingsPage", () => {
     expect(screen.getByText(/back to profile/i)).toBeInTheDocument();
   });
 
-  it("hides the Wallet tile from clients", () => {
+  it("hides the Earnings tile from clients", () => {
     useAuthGuardSpy.mockReturnValue({ user: CLIENT_USER, isReady: true });
     render(<SettingsPage />);
     expect(screen.getByRole("link", { name: /^account/i })).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /^wallet/i })
+      screen.queryByRole("link", { name: /^earnings/i })
     ).not.toBeInTheDocument();
   });
 
-  it("shows the Wallet tile for designers", () => {
+  it("shows the Earnings tile for designers", () => {
     useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
     render(<SettingsPage />);
-    expect(screen.getByRole("link", { name: /^wallet/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /^earnings/i })
+    ).toBeInTheDocument();
   });
 
   it("renders the coming-soon section with Soon badges", () => {

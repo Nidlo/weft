@@ -13,7 +13,7 @@ import {
   ShieldOff,
   Trash2,
   User,
-  Wallet,
+  Coins,
   type LucideIcon,
 } from "lucide-react";
 
@@ -56,10 +56,10 @@ const TILES: Tile[] = [
     description: "Email, SMS, and push preferences",
   },
   {
-    href: "/wallet",
-    icon: Wallet,
-    label: "Wallet",
-    description: "Payout accounts and transactions",
+    href: "/earnings",
+    icon: Coins,
+    label: "Earnings",
+    description: "Order history, transactions, and payout accounts",
     designerOnly: true,
   },
   {

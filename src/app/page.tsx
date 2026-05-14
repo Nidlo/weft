@@ -99,9 +99,9 @@ function AboutSection() {
               For designers
             </h3>
             <p className="text-muted-foreground mt-2 text-sm">
-              A portfolio, an order pipeline, and instant payouts to the wallet
-              you already use. Grow beyond word-of-mouth and walk-in traffic
-              without giving up control of your craft.
+              A portfolio, an order pipeline, and instant payouts straight to
+              your MoMo. Grow beyond word-of-mouth and walk-in traffic without
+              giving up control of your craft.
             </p>
           </GlassCard>
 
