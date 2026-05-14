@@ -160,19 +160,28 @@ export default function ProfileEditPage() {
     refetchQueries: [{ query: ME_QUERY }],
   });
 
+  // Refetch GET_DESIGNER only when we have a slug — firing it with an empty
+  // string makes the backend reject the request ("$slug must not be null")
+  // and the mutation's caller sees a confusing error even though the upload
+  // / remove itself succeeded. A brand-new designer with no displayName yet
+  // doesn't have a slug; the addPortfolioImage / removePortfolioImage
+  // response already returns the updated portfolioImages, so the cache
+  // reflects the change either way.
   const [addPortfolioImage] = useMutation<AddPortfolioImageData>(
     ADD_PORTFOLIO_IMAGE,
     {
-      refetchQueries: () => [
-        { query: GET_DESIGNER, variables: { slug: designerSlug ?? "" } },
-      ],
+      refetchQueries: () =>
+        designerSlug
+          ? [{ query: GET_DESIGNER, variables: { slug: designerSlug } }]
+          : [],
     }
   );
   const [removePortfolioImage, { loading: removingImage }] =
     useMutation<RemovePortfolioImageData>(REMOVE_PORTFOLIO_IMAGE, {
-      refetchQueries: () => [
-        { query: GET_DESIGNER, variables: { slug: designerSlug ?? "" } },
-      ],
+      refetchQueries: () =>
+        designerSlug
+          ? [{ query: GET_DESIGNER, variables: { slug: designerSlug } }]
+          : [],
     });
 
   // Portfolio upload state — mirrors StepPortfolio pattern

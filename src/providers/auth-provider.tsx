@@ -79,6 +79,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             city: me.city,
             isDesigner: me.isDesigner,
             isOnboarded: me.isOnboarded,
+            // Carrying designerProfile.slug through to the authStore is what
+            // lets /profile/edit (and any other page) fire GET_DESIGNER —
+            // without it, every page reload looks like "no slug yet" and the
+            // form skips its backend hydration, making saved values appear
+            // to disappear.
+            designerProfile: me.designerProfile ?? null,
           });
           useTourStore.getState().hydrate(filterTourProgress(me.tourProgress));
         } else {

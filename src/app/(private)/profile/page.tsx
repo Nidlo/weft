@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Bell,
   ChevronRight,
+  Coins,
   ExternalLink,
+  LifeBuoy,
   LogOut,
   Mail,
   MapPin,
@@ -24,6 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StyleProfileCard } from "@/components/profile/style-profile-card";
+import { ReplayMenu } from "@/lib/tour/replay-menu";
 import { cn } from "@/lib/utils";
 
 interface QuickLink {
@@ -48,10 +50,17 @@ const QUICK_LINKS: QuickLink[] = [
     description: "Saved measurements + Fitscan AI",
   },
   {
-    href: "/notifications/preferences",
-    icon: Bell,
-    label: "Notifications",
-    description: "Push, email, SMS preferences",
+    href: "/earnings",
+    icon: Coins,
+    label: "Earnings",
+    description: "Order history, transactions, and payout accounts",
+    designerOnly: true,
+  },
+  {
+    href: "/#contact",
+    icon: LifeBuoy,
+    label: "Help & support",
+    description: "Get help with an order or your account",
   },
 ];
 
@@ -229,6 +238,19 @@ export default function ProfilePage() {
               <QuickLinkRow key={link.href} link={link} />
             ))}
           </GlassCard>
+        </section>
+
+        {/* Show me around */}
+        <section>
+          <header className="mb-4">
+            <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
+              Show me around
+            </p>
+            <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+              Replay a tour
+            </h2>
+          </header>
+          <ReplayMenu />
         </section>
 
         {/* Logout */}
