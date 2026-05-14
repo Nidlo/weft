@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
@@ -11,6 +10,7 @@ import {
   Check,
   ImagePlus,
   Loader2,
+  MapPin,
   Plus,
   RefreshCw,
   Scissors,
@@ -59,6 +59,8 @@ interface DesignerFormState {
   pricingMin: string;
   pricingMax: string;
   isAcceptingOrders: boolean;
+  workshopName: string;
+  workshopLocation: LocationData | null;
 }
 
 const emptyDesigner: DesignerFormState = {
@@ -68,12 +70,23 @@ const emptyDesigner: DesignerFormState = {
   pricingMin: "",
   pricingMax: "",
   isAcceptingOrders: true,
+  workshopName: "",
+  workshopLocation: null,
 };
+
+/**
+ * Studio location lat/lng of (0, 0) is the magic value we use when seeding a
+ * `LocationData` from just the stored `workshopAddress` string — there's no
+ * realistic Ghanaian point at (0, 0), so we use it to detect "the user hasn't
+ * actually moved the pin in this session yet" and skip forwarding lat/lng on
+ * save (mirrors how the personal-location LocationPicker is seeded).
+ */
+const isFreshLocationPick = (loc: LocationData | null): boolean =>
+  !!loc && (loc.lat !== 0 || loc.lng !== 0);
 
 export default function ProfileEditPage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
   const setUser = useAuthStore((s) => s.setUser);
-  const router = useRouter();
 
   // Account basics
   const [firstName, setFirstName] = useState("");
@@ -98,6 +111,14 @@ export default function ProfileEditPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  // Timestamps drive transient "Saved · just now" affordances. Cleared by
+  // the user editing again (which sets isDirty back to true).
+  const [avatarJustSavedAt, setAvatarJustSavedAt] = useState<number | null>(
+    null
+  );
+  const [profileJustSavedAt, setProfileJustSavedAt] = useState<number | null>(
+    null
+  );
 
   const designerSlug = user?.designerProfile?.slug ?? null;
   const { data: designerData, loading: designerLoading } =
@@ -112,12 +133,27 @@ export default function ProfileEditPage() {
   const [updateMyInfo, { loading: savingInfo }] = useMutation(UPDATE_MY_INFO, {
     refetchQueries: [{ query: ME_QUERY }],
   });
-  const [updateProfile, { loading: savingProfile }] = useMutation(
-    UPDATE_PROFILE,
-    {
-      refetchQueries: [{ query: ME_QUERY }],
-    }
-  );
+  const [updateProfile, { loading: savingProfile }] = useMutation<{
+    updateProfile: { id: string; slug: string | null };
+  }>(UPDATE_PROFILE, {
+    // Re-pull the designer record too — without this, the user clicks
+    // Save, the mutation returns the updated DesignerProfile, but the
+    // page's `designerData` (driven by GET_DESIGNER) still shows the old
+    // values until the next cache eviction.
+    refetchQueries: ({ data }) => {
+      const queries: Array<{ query: typeof ME_QUERY; variables?: object }> = [
+        { query: ME_QUERY },
+      ];
+      const slug = data?.updateProfile?.slug ?? designerSlug;
+      if (slug) {
+        queries.push({
+          query: GET_DESIGNER as unknown as typeof ME_QUERY,
+          variables: { slug },
+        });
+      }
+      return queries;
+    },
+  });
   const [updateAvatar, { loading: uploadingAvatar }] = useMutation<{
     updateAvatar: { id: string; avatarUrl: string | null };
   }>(UPDATE_AVATAR, {
@@ -179,6 +215,10 @@ export default function ProfileEditPage() {
   // idiom for deriving state from props/queries without an effect.
   if (!designerHydrated && designerData?.designer?.designerProfile) {
     const profile = designerData.designer.designerProfile;
+    const hasStoredWorkshop =
+      !!profile.workshopAddress ||
+      profile.workshopLat !== null ||
+      profile.workshopLng !== null;
     const seed: DesignerFormState = {
       displayName: profile.displayName ?? "",
       bio: profile.bio ?? "",
@@ -192,6 +232,20 @@ export default function ProfileEditPage() {
           ? String(Math.round(profile.pricingMax / 100))
           : "",
       isAcceptingOrders: profile.isAcceptingOrders,
+      workshopName: profile.workshopName ?? "",
+      workshopLocation: hasStoredWorkshop
+        ? {
+            lat: profile.workshopLat ?? 0,
+            lng: profile.workshopLng ?? 0,
+            formattedAddress: profile.workshopAddress ?? "",
+            city: null,
+            region: null,
+            country: null,
+            countryCode: null,
+            postalCode: null,
+            addressLine: null,
+          }
+        : null,
     };
     setDesigner(seed);
     setDesignerSnapshot(seed);
@@ -217,6 +271,13 @@ export default function ProfileEditPage() {
       designer.pricingMin !== designerSnapshot.pricingMin ||
       designer.pricingMax !== designerSnapshot.pricingMax ||
       designer.isAcceptingOrders !== designerSnapshot.isAcceptingOrders ||
+      designer.workshopName !== designerSnapshot.workshopName ||
+      // Address-string change counts as dirty even if the user hasn't moved
+      // the pin (e.g. they typed a search query). A fresh pin pick (non-zero
+      // lat/lng) always counts as dirty.
+      (designer.workshopLocation?.formattedAddress ?? null) !==
+        (designerSnapshot.workshopLocation?.formattedAddress ?? null) ||
+      isFreshLocationPick(designer.workshopLocation) ||
       designer.specializations.length !==
         designerSnapshot.specializations.length ||
       designer.specializations.some(
@@ -225,6 +286,42 @@ export default function ProfileEditPage() {
 
   const isDirty = accountDirty || designerDirty;
   const saving = savingInfo || savingProfile;
+
+  // "Saved · just now" affordances. These show under the avatar / on the
+  // Save button for ~5s after a successful save. Re-editing reverses the
+  // dirty flag so the affordance becomes contextually irrelevant.
+  const SAVED_NOTICE_MS = 5000;
+  const avatarRecentlySaved =
+    avatarJustSavedAt !== null &&
+    Date.now() - avatarJustSavedAt < SAVED_NOTICE_MS;
+  const profileRecentlySaved =
+    !isDirty &&
+    profileJustSavedAt !== null &&
+    Date.now() - profileJustSavedAt < SAVED_NOTICE_MS;
+
+  // Force a re-render once the "just saved" window expires so the affordance
+  // disappears. Cheap setTimeout is fine here — no need for a polling loop.
+  useEffect(() => {
+    if (avatarJustSavedAt === null) return;
+    const elapsed = Date.now() - avatarJustSavedAt;
+    if (elapsed >= SAVED_NOTICE_MS) return;
+    const id = window.setTimeout(
+      () => setAvatarJustSavedAt(null),
+      SAVED_NOTICE_MS - elapsed
+    );
+    return () => window.clearTimeout(id);
+  }, [avatarJustSavedAt]);
+
+  useEffect(() => {
+    if (profileJustSavedAt === null) return;
+    const elapsed = Date.now() - profileJustSavedAt;
+    if (elapsed >= SAVED_NOTICE_MS) return;
+    const id = window.setTimeout(
+      () => setProfileJustSavedAt(null),
+      SAVED_NOTICE_MS - elapsed
+    );
+    return () => window.clearTimeout(id);
+  }, [profileJustSavedAt]);
 
   // Autosave draft so a refresh / session expiry doesn't lose work
   // (per docs/journeys/05-failure-modes.md §1.1).
@@ -275,10 +372,11 @@ export default function ProfileEditPage() {
       const { data } = await updateAvatar({ variables: { file } });
       if (data?.updateAvatar) {
         setUser({ ...user!, avatarUrl: data.updateAvatar.avatarUrl });
-        toast.success("Avatar updated");
+        setAvatarJustSavedAt(Date.now());
+        toast.success("Photo saved");
       }
     } catch {
-      toast.error("Failed to upload avatar");
+      toast.error("Couldn't upload that photo. Try again.");
       setAvatarPreview(null);
     }
   };
@@ -406,7 +504,7 @@ export default function ProfileEditPage() {
           input.addressLine = location.addressLine;
           // Only forward lat/lng for fresh map picks (lat 0/0 means we
           // synthesised the LocationData from the stored city string).
-          if (location.lat !== 0 || location.lng !== 0) {
+          if (isFreshLocationPick(location)) {
             input.locationLat = location.lat;
             input.locationLng = location.lng;
           }
@@ -430,26 +528,42 @@ export default function ProfileEditPage() {
           toast.error("Minimum price must be less than or equal to maximum");
           return;
         }
+        const profileInput: Record<string, unknown> = {
+          displayName: designer.displayName.trim() || null,
+          bio: designer.bio.trim() || null,
+          specializations: designer.specializations,
+          pricingMin: min,
+          pricingMax: max,
+          isAcceptingOrders: designer.isAcceptingOrders,
+          workshopName: designer.workshopName.trim() || null,
+        };
+        if (designer.workshopLocation) {
+          profileInput.workshopAddress =
+            designer.workshopLocation.formattedAddress || null;
+          if (isFreshLocationPick(designer.workshopLocation)) {
+            profileInput.workshopLat = designer.workshopLocation.lat;
+            profileInput.workshopLng = designer.workshopLocation.lng;
+          }
+        } else {
+          profileInput.workshopAddress = null;
+          profileInput.workshopLat = null;
+          profileInput.workshopLng = null;
+        }
         await updateProfile({
-          variables: {
-            input: {
-              displayName: designer.displayName.trim() || null,
-              bio: designer.bio.trim() || null,
-              specializations: designer.specializations,
-              pricingMin: min,
-              pricingMax: max,
-              isAcceptingOrders: designer.isAcceptingOrders,
-            },
-          },
+          variables: { input: profileInput },
         });
         setDesignerSnapshot(designer);
       }
 
       clearDraft();
-      toast.success("Profile updated");
-      router.push("/profile");
+      // Stay on the page with a "Saved" affordance so the user can see the
+      // refetched values come back. Previously we navigated to /profile,
+      // which doesn't surface bio / specializations / studio fields — so
+      // the user couldn't visually confirm the save.
+      setProfileJustSavedAt(Date.now());
+      toast.success("Profile saved");
     } catch {
-      toast.error("Failed to update profile");
+      toast.error("Couldn't save your profile. Try again.");
     }
   };
 
@@ -536,8 +650,19 @@ export default function ProfileEditPage() {
             className="hidden"
             onChange={handleAvatarChange}
           />
-          <p className="text-muted-foreground text-xs">
-            {uploadingAvatar ? "Uploading..." : "Tap photo to change"}
+          <p
+            className={cn(
+              "text-xs",
+              avatarRecentlySaved
+                ? "text-status-success font-medium"
+                : "text-muted-foreground"
+            )}
+          >
+            {uploadingAvatar
+              ? "Uploading..."
+              : avatarRecentlySaved
+                ? "Saved · just now"
+                : "Tap photo to change · saves automatically"}
           </p>
         </GlassCard>
 
@@ -550,6 +675,10 @@ export default function ProfileEditPage() {
             <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
               Personal information
             </h2>
+            <p className="text-muted-foreground mt-1 text-xs">
+              Click <span className="font-medium">Save changes</span> at the
+              bottom to commit edits in this section.
+            </p>
           </header>
           <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -807,6 +936,76 @@ export default function ProfileEditPage() {
           </section>
         )}
 
+        {/* Studio / workshop location — designer only. Distinct from
+            Personal information above: this is the shopfront clients use
+            to find the designer; it's PUBLIC and feeds "designers near me"
+            search. The personal-location field above is private. */}
+        {user.isDesigner && (
+          <section>
+            <header className="mb-4">
+              <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
+                Studio
+              </p>
+              <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="text-copper h-5 w-5" aria-hidden />
+                  Studio location
+                </span>
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Where clients find your shop. Used by &ldquo;designers near
+                me&rdquo; — keep it accurate, leave personal address private
+                above.
+              </p>
+            </header>
+            <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
+              {designerLoading && !designerHydrated ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-11 w-full" />
+                  <Skeleton className="h-56 w-full" />
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="workshopName" className="text-sm">
+                      Studio name{" "}
+                      <span className="text-muted-foreground">(optional)</span>
+                    </Label>
+                    <Input
+                      id="workshopName"
+                      value={designer.workshopName}
+                      onChange={(e) =>
+                        setDesigner((d) => ({
+                          ...d,
+                          workshopName: e.target.value,
+                        }))
+                      }
+                      placeholder="e.g. Adwoa Atelier · Osu"
+                      className="h-11"
+                    />
+                    <p className="text-muted-foreground text-xs">
+                      Shown on your public profile near your address.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <LocationPicker
+                      value={designer.workshopLocation}
+                      onChange={(loc) =>
+                        setDesigner((d) => ({ ...d, workshopLocation: loc }))
+                      }
+                      label="Studio address"
+                      placeholder="Search shop address, area, or landmark"
+                      showMap
+                      mapHeight="220px"
+                    />
+                  </div>
+                </>
+              )}
+            </GlassCard>
+          </section>
+        )}
+
         {/* Portfolio */}
         {user.isDesigner && (
           <section>
@@ -818,7 +1017,8 @@ export default function ProfileEditPage() {
                 Your work
               </h2>
               <p className="text-muted-foreground mt-1 text-sm">
-                3+ photos unlock search visibility and get 5× more inquiries.
+                3+ photos unlock search visibility and get 5× more inquiries.{" "}
+                <span className="font-medium">Each photo saves on upload.</span>
               </p>
             </header>
             <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
@@ -1091,27 +1291,50 @@ export default function ProfileEditPage() {
         )}
 
         {/* Save */}
-        <Button
-          variant="luxe"
-          size="xl"
-          className="w-full gap-1.5"
-          onClick={handleSave}
-          disabled={!isDirty}
-          loading={saving}
-          loadingLabel="Saving..."
-        >
-          {isDirty ? (
-            <>
-              Save changes
-              <Check className="h-4 w-4" aria-hidden />
-            </>
-          ) : (
-            <>
-              <Check className="h-4 w-4" aria-hidden />
-              Saved
-            </>
+        <div className="space-y-2">
+          <Button
+            variant="luxe"
+            size="xl"
+            className="w-full gap-1.5"
+            onClick={handleSave}
+            disabled={!isDirty}
+            loading={saving}
+            loadingLabel="Saving..."
+          >
+            {isDirty ? (
+              <>
+                Save changes
+                <Check className="h-4 w-4" aria-hidden />
+              </>
+            ) : profileRecentlySaved ? (
+              <>
+                <Check className="h-4 w-4" aria-hidden />
+                Saved · just now
+              </>
+            ) : (
+              <>
+                <Check className="h-4 w-4" aria-hidden />
+                All saved
+              </>
+            )}
+          </Button>
+          {profileRecentlySaved && (
+            <p className="text-status-success text-center text-xs font-medium">
+              Your profile is live. Refresh{" "}
+              <Link
+                href={
+                  user?.designerProfile?.slug
+                    ? `/designer/${user.designerProfile.slug}`
+                    : "/profile"
+                }
+                className="underline underline-offset-2"
+              >
+                your public profile
+              </Link>{" "}
+              to see what clients see.
+            </p>
           )}
-        </Button>
+        </div>
       </div>
     </AppShell>
   );

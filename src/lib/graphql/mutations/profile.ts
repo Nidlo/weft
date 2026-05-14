@@ -27,6 +27,10 @@ export const UPDATE_PROFILE = gql`
       pricingMax
       equipment
       isAcceptingOrders
+      workshopName
+      workshopAddress
+      workshopLat
+      workshopLng
       profileCompleteness
     }
   }

@@ -143,6 +143,10 @@ export interface GqlDesignerProfile {
   onTimeRate: number;
   responseTimeAvg: number | null;
   isAcceptingOrders: boolean;
+  workshopName: string | null;
+  workshopAddress: string | null;
+  workshopLat: number | null;
+  workshopLng: number | null;
   profileCompleteness: number;
   profileViewsCount: number;
   profileViewsThisWeek: number;
