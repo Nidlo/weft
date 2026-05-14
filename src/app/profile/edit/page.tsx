@@ -124,10 +124,20 @@ export default function ProfileEditPage() {
     refetchQueries: [{ query: ME_QUERY }],
   });
 
-  const [addPortfolioImage] =
-    useMutation<AddPortfolioImageData>(ADD_PORTFOLIO_IMAGE);
+  const [addPortfolioImage] = useMutation<AddPortfolioImageData>(
+    ADD_PORTFOLIO_IMAGE,
+    {
+      refetchQueries: () => [
+        { query: GET_DESIGNER, variables: { slug: designerSlug ?? "" } },
+      ],
+    }
+  );
   const [removePortfolioImage, { loading: removingImage }] =
-    useMutation<RemovePortfolioImageData>(REMOVE_PORTFOLIO_IMAGE);
+    useMutation<RemovePortfolioImageData>(REMOVE_PORTFOLIO_IMAGE, {
+      refetchQueries: () => [
+        { query: GET_DESIGNER, variables: { slug: designerSlug ?? "" } },
+      ],
+    });
 
   // Portfolio upload state — mirrors StepPortfolio pattern
   const portfolioInputRef = useRef<HTMLInputElement>(null);
