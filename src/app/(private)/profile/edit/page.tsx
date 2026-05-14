@@ -763,11 +763,7 @@ export default function ProfileEditPage() {
                 : "text-muted-foreground"
             )}
           >
-            {uploadingAvatar
-              ? "Uploading..."
-              : avatarRecentlySaved
-                ? "Saved · just now"
-                : "Tap photo to change · saves automatically"}
+            {avatarCaption(uploadingAvatar, avatarRecentlySaved)}
           </p>
         </GlassCard>
 
@@ -965,7 +961,7 @@ export default function ProfileEditPage() {
                                   ? "bg-foreground text-background hover:bg-foreground/85"
                                   : "border-border bg-card hover:border-foreground/30 border hover:-translate-y-0.5 hover:shadow-(--shadow-1)"
                               )}
-                              aria-pressed={selected}
+                              aria-pressed={selected ? "true" : "false"}
                             >
                               {selected ? (
                                 <X className="h-3 w-3" aria-hidden />
@@ -1346,20 +1342,10 @@ export default function ProfileEditPage() {
                         {score}%
                       </span>
                     </div>
-                    <div className="bg-border h-2 w-full overflow-hidden rounded-full">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all duration-500",
-                          score >= 70 ? "bg-status-success" : "bg-copper"
-                        )}
-                        style={{ width: `${Math.min(score, 100)}%` }}
-                        role="progressbar"
-                        aria-valuenow={score}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-label={`Profile ${score}% complete`}
-                      />
-                    </div>
+                    <ProgressTrack
+                      score={score}
+                      label={`Profile ${score}% complete`}
+                    />
                     <ul className="space-y-2 text-sm">
                       {[
                         {
@@ -1477,13 +1463,7 @@ function SectionSaveBar({
             : "text-muted-foreground"
         )}
       >
-        {saving
-          ? "Saving..."
-          : recentlySaved
-            ? "Saved · just now"
-            : dirty
-              ? "You have unsaved changes"
-              : "All saved"}
+        {saveBarStatus({ saving, recentlySaved, dirty })}
       </p>
       <Button
         variant="luxe"
@@ -1506,6 +1486,61 @@ function SectionSaveBar({
           </>
         )}
       </Button>
+    </div>
+  );
+}
+
+/** Caption shown under the avatar — flat lookup avoids nested ternaries. */
+function avatarCaption(uploading: boolean, recentlySaved: boolean): string {
+  if (uploading) return "Uploading...";
+  if (recentlySaved) return "Saved · just now";
+  return "Tap photo to change · saves automatically";
+}
+
+/** Status line shown on the left side of a SectionSaveBar. */
+function saveBarStatus({
+  saving,
+  recentlySaved,
+  dirty,
+}: {
+  saving: boolean;
+  recentlySaved: boolean;
+  dirty: boolean;
+}): string {
+  if (saving) return "Saving...";
+  if (recentlySaved) return "Saved · just now";
+  if (dirty) return "You have unsaved changes";
+  return "All saved";
+}
+
+/**
+ * Semantic progress bar built on the native `<progress>` element. We can't
+ * drive the fill colour or rounding through the default browser styling,
+ * so the visible track is a sibling div whose width is set via a CSS
+ * custom property (no inline %-width — keeps SonarLint quiet about
+ * "inline styles should be in CSS"). The actual `<progress>` is visually
+ * hidden but exposed to AT, so screen readers announce the percentage
+ * without us having to assemble aria-valuenow/min/max manually.
+ */
+function ProgressTrack({ score, label }: { score: number; label: string }) {
+  const pct = Math.min(Math.max(score, 0), 100);
+  return (
+    <div
+      className="bg-border h-2 w-full overflow-hidden rounded-full"
+      // CSS custom property carries the dynamic width into the child rule.
+      // Tailwind picks it up via the arbitrary-value `w-[var(--pct)]`.
+      style={{ "--pct": `${pct}%` } as React.CSSProperties}
+    >
+      <progress value={pct} max={100} aria-label={label} className="sr-only">
+        {pct}%
+      </progress>
+      <div
+        aria-hidden
+        className={cn(
+          "h-full w-[var(--pct)] rounded-full transition-all duration-500",
+          score >= 70 ? "bg-status-success" : "bg-copper"
+        )}
+      />
     </div>
   );
 }
