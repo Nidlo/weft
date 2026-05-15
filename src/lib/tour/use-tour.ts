@@ -30,7 +30,7 @@ interface TourState {
    * reconciles `progress` when the server response lands.
    */
   finish: (outcome: TourOutcome) => void;
-  /** Server-side mark landed — reconcile the progress mirror. */
+  /** Server-side mark landed - reconcile the progress mirror. */
   markPersisted: (tourId: TourId, outcome: TourOutcome) => void;
 }
 
@@ -75,7 +75,7 @@ export const useTourStore = create<TourState>((set) => ({
     })),
 }));
 
-/** Public hook surface — every consumer should go through this. */
+/** Public hook surface - every consumer should go through this. */
 export function useTour() {
   return useTourStore();
 }

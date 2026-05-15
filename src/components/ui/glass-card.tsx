@@ -8,14 +8,14 @@ const glassCardVariants = cva(
   {
     variants: {
       variant: {
-        // The default frosted glass surface — bone in light, deep in dark.
+        // The default frosted glass surface - bone in light, deep in dark.
         default: "surface-glass text-card-foreground",
         // Solid white-ish lift used for primary content cards.
         solid:
           "bg-card text-card-foreground border border-border shadow-[var(--shadow-2)]",
-        // Heavier glass — for elevated dialogs / sticky panels.
+        // Heavier glass - for elevated dialogs / sticky panels.
         strong: "surface-glass-strong text-card-foreground",
-        // Outlined ghost surface — used inside other glass containers.
+        // Outlined ghost surface - used inside other glass containers.
         ghost: "border border-border/60 text-card-foreground",
       },
       interactive: {
@@ -41,7 +41,7 @@ export interface GlassCardProps
 }
 
 /**
- * Frosted-glass surface with the iOS-26 vibe — translucent fill, hairline
+ * Frosted-glass surface with the iOS-26 vibe - translucent fill, hairline
  * border, soft elevation. Use for hero compositions, floating panels, and
  * decorative content cards.
  *

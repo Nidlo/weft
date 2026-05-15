@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/stores/auth";
 
 /**
- * Home-page hero CTA pair. Branches on auth state — "Get started" pre-auth,
+ * Home-page hero CTA pair. Branches on auth state - "Get started" pre-auth,
  * "My dashboard" once signed in. Hidden until hydration to avoid label
  * flash, but the wrapper still reserves vertical space.
  */

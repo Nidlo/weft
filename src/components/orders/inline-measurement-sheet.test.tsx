@@ -6,7 +6,7 @@ import { MockedProvider } from "@apollo/client/testing/react";
 import { CREATE_MEASUREMENT } from "@/lib/graphql/mutations/measurement";
 
 // ManualForm + AiFlow drag in Apollo, the auth store, the preferences
-// store, motion, and the camera SDK — none of which are interesting here.
+// store, motion, and the camera SDK - none of which are interesting here.
 // Stub them so the test focuses on the sheet's wiring: trigger gating,
 // tab rendering, and the mutation payload.
 vi.mock("@/app/(private)/measurements/manual-form", () => ({
@@ -145,7 +145,7 @@ describe("InlineMeasurementSheet", () => {
     await user.click(
       screen.getByRole("button", { name: /take new measurement/i })
     );
-    // Sheet opens — manual tab is the default, click the stubbed save
+    // Sheet opens - manual tab is the default, click the stubbed save
     await user.click(screen.getByTestId("manual-save"));
 
     // Wait for the mutation + onSaved callback

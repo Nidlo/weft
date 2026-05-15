@@ -187,7 +187,7 @@ export function useConfirmDelivery() {
  * returns it with __typename + id); the array just needs the new ref.
  *
  * Also refetches `orderProfitSummary` because that summary is computed
- * server-side from the items list — Apollo can't recompute it from a
+ * server-side from the items list - Apollo can't recompute it from a
  * cache.modify, and the totals (totalItemCost, itemCount, purchasedCount)
  * would otherwise stay stale until the next GET_ORDER.
  */
@@ -231,7 +231,7 @@ export function useAddItem() {
 
 /**
  * TogglePurchased relies on Apollo's automatic by-id merge for the item
- * itself — the mutation returns the updated row, Apollo writes it into the
+ * itself - the mutation returns the updated row, Apollo writes it into the
  * entity store, every subscriber re-renders. BUT `orderProfitSummary` is
  * a separate query whose `purchasedCount` is computed server-side; Apollo
  * has no way to recompute it from the toggled item alone. Caller passes

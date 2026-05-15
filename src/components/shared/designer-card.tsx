@@ -118,7 +118,7 @@ export function DesignerCard({ designer }: Props) {
           </div>
           {designer.pricingMin != null && designer.pricingMax != null && (
             <span className="text-foreground/80 font-medium tabular-nums">
-              {formatPesewasShort(designer.pricingMin)} –{" "}
+              {formatPesewasShort(designer.pricingMin)} -{" "}
               {formatPesewasShort(designer.pricingMax)}
             </span>
           )}

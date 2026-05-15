@@ -85,7 +85,7 @@ export function DesignerProfileView({ designer }: Props) {
 
   return (
     <AppShell bare>
-      {/* Editorial hero band — bg-thread-mesh ties it visually to the home + auth */}
+      {/* Editorial hero band - bg-thread-mesh ties it visually to the home + auth */}
       <section className="bg-thread-mesh relative overflow-hidden">
         <div
           className="via-copper/40 pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent"
@@ -160,7 +160,7 @@ export function DesignerProfileView({ designer }: Props) {
             </div>
           </div>
 
-          {/* Action panel — glass surface, sits below the hero */}
+          {/* Action panel - glass surface, sits below the hero */}
           <GlassCard
             variant="solid"
             className="mt-8 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4"
@@ -199,7 +199,7 @@ export function DesignerProfileView({ designer }: Props) {
         </div>
       </section>
 
-      {/* Body — editorial-spaced sections */}
+      {/* Body - editorial-spaced sections */}
       <div className="mx-auto max-w-5xl space-y-12 px-4 pt-12 pb-16 sm:px-6">
         {profile?.bio && (
           <SectionBlock eyebrow="About" title={`Meet ${displayName}.`}>
@@ -230,7 +230,7 @@ export function DesignerProfileView({ designer }: Props) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:gap-6">
               <span className="text-display text-4xl font-semibold tabular-nums sm:text-5xl">
                 {formatPesewasShort(profile.pricingMin)}
-                <span className="text-muted-foreground/50 mx-3">–</span>
+                <span className="text-muted-foreground/50 mx-3">-</span>
                 {formatPesewasShort(profile.pricingMax)}
               </span>
               <p className="text-muted-foreground text-sm">
@@ -257,7 +257,7 @@ export function DesignerProfileView({ designer }: Props) {
               value={
                 profile?.responseTimeAvg
                   ? `${Math.round(profile.responseTimeAvg / 60)}h`
-                  : "—"
+                  : "-"
               }
               label="Avg response"
             />
@@ -307,7 +307,7 @@ export function DesignerProfileView({ designer }: Props) {
         />
       </div>
 
-      {/* Lightbox — preserves keyboard cycle, premium chrome */}
+      {/* Lightbox - preserves keyboard cycle, premium chrome */}
       <Dialog
         open={lightboxIndex !== null}
         onOpenChange={() => setLightboxIndex(null)}

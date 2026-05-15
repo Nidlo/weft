@@ -46,7 +46,7 @@ export default async function UnsubscribePage({
             </h1>
             <p className="text-muted-foreground mt-3 text-sm">
               We&apos;ve received your request. While we finish the one-click
-              flow, sign in to fine-tune which emails you receive — including
+              flow, sign in to fine-tune which emails you receive - including
               the option to turn them all off.
             </p>
           </>

@@ -33,7 +33,7 @@ import type {
 /**
  * Convert a notification type slug like `"message_received"` to the
  * `messageReceived` key on `GqlNotificationPreferences`. Returns null
- * if the prefs object doesn't expose that category — the caller should
+ * if the prefs object doesn't expose that category - the caller should
  * fall through to "show the toast" rather than silently swallow.
  */
 function shouldToast(
@@ -114,7 +114,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch(() => {
-        // Silently fail — badge will show 0
+        // Silently fail - badge will show 0
       });
 
     apolloClient
@@ -128,7 +128,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch(() => {
-        // Silently fail — badge will show 0
+        // Silently fail - badge will show 0
       });
   }, [
     hasHydrated,

@@ -28,7 +28,7 @@ export default function ClientOnboardingError({
           Something went wrong.
         </h2>
         <p className="text-muted-foreground mt-2 text-sm">
-          We couldn&apos;t load this step. Your progress has been saved — try
+          We couldn&apos;t load this step. Your progress has been saved - try
           again or jump to your dashboard.
         </p>
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">

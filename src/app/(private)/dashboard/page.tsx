@@ -200,7 +200,7 @@ function DesignerDashboard({ user }: { user: AuthUser }) {
         <DesignerStat
           icon={Star}
           label="Rating"
-          value="—"
+          value="-"
           accent={
             <span className="text-muted-foreground text-[11px] tracking-[0.16em] uppercase">
               No reviews yet

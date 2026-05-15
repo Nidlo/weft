@@ -59,7 +59,7 @@ interface AiFlowProps {
 type AiStep = "instructions" | "upload" | "processing" | "review";
 
 const TIPS = [
-  "Wear fitted clothing — avoid baggy or loose layers.",
+  "Wear fitted clothing - avoid baggy or loose layers.",
   "Stand in a well-lit area with a plain background.",
   "Keep your full body in frame, head to toe.",
   "Stand straight with arms slightly away from your sides.",
@@ -68,7 +68,7 @@ const TIPS = [
 
 /**
  * Map a backend `ScanJobErrorCategory` to user-facing copy. The free-form
- * `errorMessage` is only used as a fallback — by category we know enough
+ * `errorMessage` is only used as a fallback - by category we know enough
  * to suggest a specific retry action.
  */
 function scanFailureMessage(
@@ -101,18 +101,18 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   // The height-input unit is deliberately INDEPENDENT of the global
   // `preferredUnit` (which governs how measurement results are displayed).
   // People typically know their height in cm even when they prefer to view
-  // garment measurements in inches — defaulting to cm here removes the
+  // garment measurements in inches - defaulting to cm here removes the
   // most common "I typed 170 in an inches field" trap. The toggle next to
   // the label lets users switch on the fly.
   const [heightInputUnit, setHeightInputUnit] = useState<MeasurementUnit>("cm");
   // Stored as a free-text string in `heightInputUnit`; converted to cm
   // only at submit time. Seeds from the user's saved height (always in cm
-  // on the server) — the backend persists the value on first capture and
+  // on the server) - the backend persists the value on first capture and
   // falls back to it whenever the arg is omitted.
   const [heightInput, setHeightInput] = useState(() =>
     storedHeightCm === null ? "" : storedHeightCm.toString()
   );
-  // Phase A1 (Sprint 34) — track whether the user has actually edited the
+  // Phase A1 (Sprint 34) - track whether the user has actually edited the
   // height. The previous UX silently pre-filled the saved value and the
   // user couldn't tell that a stale 170 from an earlier test was carrying
   // forward into every scan. Now we surface a "Saved · tap to update"
@@ -122,13 +122,13 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   const heightIsFromSaved =
     storedHeightCm !== null && !heightWasEdited && heightInput !== "";
 
-  // Phase D (Sprint 34) — optional reference-object scale. When the user
+  // Phase D (Sprint 34) - optional reference-object scale. When the user
   // holds a known-size object (credit card ≈ 8.56 cm, A4 = 21 cm) visibly
   // in the photo, Fitscan calibrates pixel-to-cm directly from it,
   // eliminating the height-input typo class of error.
   const [refObjectCm, setRefObjectCm] = useState("");
 
-  // Sprint 35 — when checked, Claude estimates the person's height from
+  // Sprint 35 - when checked, Claude estimates the person's height from
   // the front photo (door frames, furniture, body proportions). Skips
   // both the manual input and the stored fallback. Useful when the user
   // doesn't know their exact height or wants the system to figure it out.
@@ -143,7 +143,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       setHeightInput(converted.toFixed(next === "inches" ? 1 : 0));
     }
     setHeightInputUnit(next);
-    // Switching the unit alone shouldn't dismiss the "saved" indicator —
+    // Switching the unit alone shouldn't dismiss the "saved" indicator -
     // the value is still the saved one, just displayed differently.
   };
   const [extractedData, setExtractedData] = useState<MeasurementData | null>(
@@ -151,19 +151,19 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   );
   const [extractedLandmarks, setExtractedLandmarks] =
     useState<Landmarks | null>(null);
-  // S2.5c — disk-aware photo references captured from extractAiMeasurements
+  // S2.5c - disk-aware photo references captured from extractAiMeasurements
   // so the saved overlay can re-render on revisit. The triplet
   // (url / public_id / disk) is what the backend resolver needs to
   // build the right URL at read time. Pass through verbatim on save.
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoPublicId, setPhotoPublicId] = useState<string | null>(null);
   const [photoDisk, setPhotoDisk] = useState<string | null>(null);
-  // FS-NIDLO-VALID-03 — Structured signals from the AI run. When
+  // FS-NIDLO-VALID-03 - Structured signals from the AI run. When
   // non-empty (e.g. ["validators_disagree"]) we render a "Manual
   // review recommended" notice on the review step so designers /
   // clients know to scrutinise the values before saving.
   const [degradedModes, setDegradedModes] = useState<string[]>([]);
-  // S2.5d — bumping this key remounts ManualForm so a recompute apply can
+  // S2.5d - bumping this key remounts ManualForm so a recompute apply can
   // re-seed `initialData`. We don't want to remount on every drag (kills
   // focus + in-progress edits), only on explicit "Apply".
   const [formKey, setFormKey] = useState(0);
@@ -179,7 +179,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     );
   }, [extractedData]);
 
-  // Sprint 34 Phase A3 — anthropometric flags arrive as
+  // Sprint 34 Phase A3 - anthropometric flags arrive as
   // `anthropometric:<field>` entries inside `degradedModes`. Strip the
   // prefix and map the backend column names onto ManualForm field keys so
   // each flagged field renders a "Low confidence" badge inline.
@@ -224,12 +224,12 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     useMutation<ExtractAiMeasurementsData>(EXTRACT_AI_MEASUREMENTS, {
       // The resolver persists `heightCm` to the user on first capture (or
       // any later correction). Refetch Me so AuthProvider sees the new
-      // value — the next scan in this session can then read it without
+      // value - the next scan in this session can then read it without
       // a page reload.
       refetchQueries: [{ query: ME_QUERY }],
     });
 
-  // Sprint 33a — the mutation now returns a jobId; the scan runs in a
+  // Sprint 33a - the mutation now returns a jobId; the scan runs in a
   // queued worker. useScanJob polls until terminal status, then fires
   // onCompleted / onFailed callbacks. Setting state from callbacks (not a
   // projection effect) avoids React 19's set-state-in-effect rule.
@@ -239,7 +239,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       if (cancelledRef.current || !job.result) return;
       // Fitscan always emits cm. Convert to the user's preferred unit
       // here so ManualForm's `data` state and its `unit` label stay in
-      // sync — previously the form rendered cm values next to an "in"
+      // sync - previously the form rendered cm values next to an "in"
       // label, making the user see 95cm-waist as "95 in".
       const rawCm = job.result.data ?? null;
       const projected =
@@ -283,10 +283,10 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       return;
     }
 
-    // Pre-validate the height range client-side. The server enforces 50–250 cm;
+    // Pre-validate the height range client-side. The server enforces 50-250 cm;
     // bouncing a clearly-bad value here saves the round-trip and gives a
     // unit-aware hint via `heightInputUnit` (which is independent of the
-    // global preferredUnit — see the heightInputUnit declaration above).
+    // global preferredUnit - see the heightInputUnit declaration above).
     // Skip entirely when the user chose "estimate from photo".
     let heightCmForRequest: number | null = null;
     if (!useEstimatedHeight && heightInput) {
@@ -296,7 +296,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         if (cm < 50 || cm > 250) {
           const unit = unitName(heightInputUnit).toLowerCase();
           toast.error(
-            `Height looks off — please enter a realistic value in ${unit}, or switch units above.`
+            `Height looks off - please enter a realistic value in ${unit}, or switch units above.`
           );
           return;
         }
@@ -310,7 +310,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
     try {
       const variables: Record<string, unknown> = { frontImage };
       if (sideImage) variables.sideImage = sideImage;
-      // Sprint 35 — when the user picks "estimate from photo" we do NOT
+      // Sprint 35 - when the user picks "estimate from photo" we do NOT
       // send heightCm; the server skips the stored fallback and Claude
       // estimates from the photo's contextual cues.
       if (useEstimatedHeight) {
@@ -344,7 +344,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
       setScanJobId(jobId);
     } catch (err) {
       if (cancelledRef.current) return;
-      // This catch only fires for synchronous mutation failures — height
+      // This catch only fires for synchronous mutation failures - height
       // validation errors, network/CSRF blowups, GraphQL schema mismatches.
       // The async-pipeline errors flow through the scanJob projection
       // effect with a proper errorCategory, not through here.
@@ -451,7 +451,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
             onChange={setSideImage}
           />
 
-          {/* Sprint 35 — "Estimate from photo" toggle. When on, the height
+          {/* Sprint 35 - "Estimate from photo" toggle. When on, the height
               input is hidden and Claude estimates the value directly from
               the photo's contextual cues (door frames, furniture, body
               proportions). Skips the manual input AND the stored fallback. */}
@@ -459,7 +459,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
             <div>
               <p className="text-sm font-medium">Estimate height from photo</p>
               <p className="text-muted-foreground text-xs">
-                Skip typing your height — let the AI figure it out from visible
+                Skip typing your height - let the AI figure it out from visible
                 cues (door, furniture, body proportions).
               </p>
             </div>
@@ -531,11 +531,11 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
             />
             <p className="text-muted-foreground text-xs">
               Providing your height improves accuracy. Enter in{" "}
-              {unitLabel(preferredUnit)} — we convert automatically.
+              {unitLabel(preferredUnit)} - we convert automatically.
             </p>
           </div>
 
-          {/* Phase D — reference-object scale. Optional, but eliminates
+          {/* Phase D - reference-object scale. Optional, but eliminates
               the "I typed 170 but I'm actually 177" 4% scale tax on
               every other measurement. */}
           <div className="space-y-2">
@@ -590,7 +590,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   }
 
   if (aiStep === "processing") {
-    // Stage hint based on elapsed time — keeps the user informed even
+    // Stage hint based on elapsed time - keeps the user informed even
     // though the backend is opaque. Thresholds match the real pipeline
     // shape with HMR2 + Claude validation: pose (~10s) → SMPL fitting
     // (~30s) → Claude vision measurement (~30s) → Claude correction
@@ -614,7 +614,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         </p>
         <p className="text-muted-foreground mt-2 text-xs tabular-nums">
           <span className="text-foreground font-semibold">{elapsed}s</span>{" "}
-          elapsed · typically 60–120s. First scan after a server restart can
+          elapsed · typically 60-120s. First scan after a server restart can
           take longer while the model warms up.
         </p>
         <Button
@@ -645,12 +645,12 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
           </p>
           <p className="text-foreground/90 mt-0.5 text-sm">
             Review and edit the values below. Anything blank wasn&apos;t
-            detected — fill it in manually.
+            detected - fill it in manually.
           </p>
         </div>
       </GlassCard>
 
-      {/* FS-NIDLO-VALID-03 — surface AI-pipeline degraded signals.
+      {/* FS-NIDLO-VALID-03 - surface AI-pipeline degraded signals.
           When the rule + Claude validators disagreed, render a warning
           band so the reviewer knows to scrutinise the numbers before
           saving. Empty array → component is invisible. */}
@@ -668,19 +668,19 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
             </p>
             <p className="text-foreground/90 mt-0.5 text-sm">
               {lowConfidenceFields.size > 0
-                ? `Some values look out of proportion: ${Array.from(lowConfidenceFields).slice(0, 4).join(", ")}${lowConfidenceFields.size > 4 ? ` and ${lowConfidenceFields.size - 4} more` : ""}. They're flagged below — verify with a tape measure before saving.`
+                ? `Some values look out of proportion: ${Array.from(lowConfidenceFields).slice(0, 4).join(", ")}${lowConfidenceFields.size > 4 ? ` and ${lowConfidenceFields.size - 4} more` : ""}. They're flagged below - verify with a tape measure before saving.`
                 : degradedModes.includes("validators_disagree")
-                  ? "Our rule check and the AI vision check disagreed about whether this scan is reliable. Look at the values below carefully — adjust anything that doesn't match your body before saving."
+                  ? "Our rule check and the AI vision check disagreed about whether this scan is reliable. Look at the values below carefully - adjust anything that doesn't match your body before saving."
                   : "The AI flagged something unusual about this scan. Review the values carefully before saving."}
             </p>
           </div>
         </GlassCard>
       )}
 
-      {/* S2.5b / 32a — editable photo overlay. Drag dots to reposition them;
+      {/* S2.5b / 32a - editable photo overlay. Drag dots to reposition them;
           the corrected positions persist on save via `landmarks_normalized`.
           Renders the captured photo from the local File (no backend round-trip
-          for the in-flight preview — see `LandmarkOverlay`'s URL.createObjectURL
+          for the in-flight preview - see `LandmarkOverlay`'s URL.createObjectURL
           path). When the upstream service didn't return landmarks (degraded
           pipeline path), the photo still shows so users have visual context
           for the values below. */}
@@ -693,7 +693,7 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         />
       )}
 
-      {/* S2.5d — recompute distance-based fields from corrected landmarks.
+      {/* S2.5d - recompute distance-based fields from corrected landmarks.
           Banner appears when the user has dragged landmarks AND those
           drags would change at least one measurement. Click "Apply" to
           fold the recomputed values into the form below. */}
@@ -731,12 +731,12 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   );
 }
 
-// ────────────────────── S2.5d — Recompute integration ──────────────────────
+// ────────────────────── S2.5d - Recompute integration ──────────────────────
 
 /**
  * Compares the current landmark-derived recompute result against the
  * baseline values displayed in the form. Returns the per-field deltas
- * (in cm — the form's display unit) that an "Apply" would push into
+ * (in cm - the form's display unit) that an "Apply" would push into
  * the form. An empty list means there's nothing to apply.
  */
 function diffRecompute(
@@ -757,7 +757,7 @@ function diffRecompute(
   for (const [section, fields] of Object.entries(recomputed)) {
     for (const [field, mm] of Object.entries(fields)) {
       const baselineMmValue = baselineMm?.[section]?.[field] ?? null;
-      // Skip fields where the recompute lands within ~1mm of the baseline —
+      // Skip fields where the recompute lands within ~1mm of the baseline -
       // those drags didn't move that field meaningfully.
       if (baselineMmValue !== null && Math.abs(mm - baselineMmValue) < 5) {
         continue;

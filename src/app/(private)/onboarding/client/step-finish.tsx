@@ -34,7 +34,7 @@ export function StepFinish() {
             Almost there.
           </h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            One last thing — help us understand how you discovered Nidlo, and
+            One last thing - help us understand how you discovered Nidlo, and
             agree to our terms.
           </p>
         </div>

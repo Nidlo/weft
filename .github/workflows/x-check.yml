@@ -1,6 +1,6 @@
 name: x-check
 
-# stitchub rule check — runs on PR + push, blocks merges with critical violations.
+# stitchub rule check - runs on PR + push, blocks merges with critical violations.
 #
 # This file is deployed by .claude/scripts/install-workflows.sh.
 # Source of truth: /Users/mac/Projects/mine/stitchub/.claude/workflows/x-check.yml
@@ -137,7 +137,7 @@ jobs:
 
             const body = [
               '<!-- x-check-marker -->',
-              `## ❌ Rule check — ${critical} critical violation(s), ${warnings} warning(s)`,
+              `## ❌ Rule check - ${critical} critical violation(s), ${warnings} warning(s)`,
               '',
               '<details><summary>Click for full output</summary>',
               '',
@@ -151,7 +151,7 @@ jobs:
               '',
               '1. Run locally: `bash .github/scripts/x-precommit.sh --ci origin/' + context.payload.pull_request.base.ref + '`',
               '2. Or in Claude Code: `/x-check` (full LLM-based scan) or `/x-implement` (auto-fix)',
-              '3. Push your fixes — this comment will update automatically',
+              '3. Push your fixes - this comment will update automatically',
               '',
               '_Bypass (NOT recommended): commit with `--no-verify` and the PR will still fail this check until you fix it._',
             ].join('\n');
@@ -193,7 +193,7 @@ jobs:
                 comment_id: existing.id,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: '<!-- x-check-marker -->\n## ✅ Rule check — passed\n\nAll critical rules satisfied. Latest run: ' + new Date().toISOString(),
+                body: '<!-- x-check-marker -->\n## ✅ Rule check - passed\n\nAll critical rules satisfied. Latest run: ' + new Date().toISOString(),
               });
             }
 

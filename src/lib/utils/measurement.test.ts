@@ -77,9 +77,9 @@ describe("mm conversion helpers", () => {
 
 describe("formatMeasurement", () => {
   it("returns em-dash for null/undefined/NaN", () => {
-    expect(formatMeasurement(null, "cm", "inches")).toBe("—");
-    expect(formatMeasurement(undefined, "cm", "inches")).toBe("—");
-    expect(formatMeasurement(NaN, "cm", "inches")).toBe("—");
+    expect(formatMeasurement(null, "cm", "inches")).toBe("-");
+    expect(formatMeasurement(undefined, "cm", "inches")).toBe("-");
+    expect(formatMeasurement(NaN, "cm", "inches")).toBe("-");
   });
 
   it("formats with the display unit suffix by default", () => {
@@ -201,7 +201,7 @@ describe("classifyRescanDelta", () => {
 });
 
 describe("recomputeFromLandmarks", () => {
-  // Helper to build a landmark with high visibility — saves boilerplate.
+  // Helper to build a landmark with high visibility - saves boilerplate.
   const lm = (x: number, y: number) => ({ x, y, visibility: 1.0 });
 
   // Pose with all the landmarks the helper consults. Picture a 6-foot
@@ -251,7 +251,7 @@ describe("recomputeFromLandmarks", () => {
   it("recomputes shoulder width from left/right shoulder distance", () => {
     // shoulders at (0.4, 0.2) and (0.6, 0.2) → pixel distance 0.2
     // mmPerPx = 1800 / 0.9 = 2000
-    // shoulder = 0.2 × 2000 = 400 mm (40 cm — adult-shoulder territory)
+    // shoulder = 0.2 × 2000 = 400 mm (40 cm - adult-shoulder territory)
     const result = recomputeFromLandmarks(fullPose, baseline);
     expect(result.upper_body?.shoulder).toBe(400);
   });
@@ -303,7 +303,7 @@ describe("recomputeFromLandmarks", () => {
     const noFootIndex = { ...fullPose };
     delete (noFootIndex as Record<string, unknown>).left_foot_index;
     delete (noFootIndex as Record<string, unknown>).right_foot_index;
-    // ankles at y=0.93 — slightly shorter than foot_index, but recompute
+    // ankles at y=0.93 - slightly shorter than foot_index, but recompute
     // still works
     const result = recomputeFromLandmarks(noFootIndex, baseline);
     expect(result.vertical?.full_height).toBeGreaterThan(0);
@@ -318,7 +318,7 @@ describe("recomputeFromLandmarks", () => {
     };
     // Head→foot pixel distance: 0.94 (was 0.9)
     // mmPerPx = 1800 / 0.94 ≈ 1914.9
-    // shoulder pixel = 0.2 → 382 mm (vs 400 before — proportional shrink)
+    // shoulder pixel = 0.2 → 382 mm (vs 400 before - proportional shrink)
     const result = recomputeFromLandmarks(dragged, baseline);
     expect(result.upper_body?.shoulder).toBeLessThan(400);
     expect(result.upper_body?.shoulder).toBeGreaterThan(370);
@@ -339,7 +339,7 @@ describe("recomputeFromLandmarks", () => {
   it("recomputes shoulder_to_hip distinct from shoulder_to_waist", () => {
     // shoulder-mid y=0.2, hip-mid y=0.55 → 0.35 → × 2000 = 700 mm.
     // In this synthetic pose hip-mid IS the waist proxy, so the two
-    // values match — but the field still has to be populated, not
+    // values match - but the field still has to be populated, not
     // skipped. Verifies the helper actually writes the key.
     const result = recomputeFromLandmarks(fullPose, baseline);
     expect(result.vertical?.shoulder_to_hip).toBe(700);

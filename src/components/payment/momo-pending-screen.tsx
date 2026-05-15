@@ -78,7 +78,7 @@ export function MomoPendingScreen({
         className="gap-2"
       >
         <RefreshCw className="h-4 w-4" aria-hidden />
-        I&apos;ve approved — check now
+        I&apos;ve approved - check now
       </Button>
 
       <p className="text-muted-foreground text-xs">

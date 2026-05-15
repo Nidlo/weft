@@ -232,7 +232,7 @@ export default function NotificationsPage() {
                 Enable push notifications
               </p>
               <p className="text-muted-foreground mt-0.5 text-xs">
-                Get instant alerts for orders, messages, and payments — even
+                Get instant alerts for orders, messages, and payments - even
                 when Nidlo isn&apos;t open.
               </p>
             </div>

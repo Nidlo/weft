@@ -152,7 +152,7 @@ export default function ChatPage({
     });
   };
 
-  // Hooks must run on every render — keep useMemo above any early return.
+  // Hooks must run on every render - keep useMemo above any early return.
   const messagesByDate = useMemo(() => {
     const displayMessages = [...messages].reverse();
     const groups: { date: string; msgs: typeof displayMessages }[] = [];
@@ -187,7 +187,7 @@ export default function ChatPage({
   return (
     <AppShell>
       <div className="-mx-4 flex h-[calc(100dvh-4rem-4rem)] flex-col sm:-mx-6 md:mx-0 md:h-[calc(100dvh-4rem-1rem)]">
-        {/* Chat header — glass surface, sticky to the top of the chat */}
+        {/* Chat header - glass surface, sticky to the top of the chat */}
         <header className="border-border/60 bg-background/70 flex items-center gap-3 border-b px-3 py-3 backdrop-blur-xl backdrop-saturate-150 sm:px-4">
           <Button
             variant="ghost"

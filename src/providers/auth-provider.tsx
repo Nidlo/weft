@@ -12,7 +12,7 @@ import type { MeData } from "@/types/graphql";
 
 // Narrow the server payload to the FE-known allowlist. Defensive against
 // a future tour added BE-side that the deployed client doesn't know about
-// yet — silently drop unknown keys, drop unexpected outcome strings.
+// yet - silently drop unknown keys, drop unexpected outcome strings.
 function filterTourProgress(
   raw: Record<string, "completed" | "skipped"> | null | undefined
 ): TourProgress {
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Prime the Sanctum XSRF-TOKEN cookie once per page load. The csrfLink
     // in apolloClient mirrors it as X-XSRF-TOKEN on every mutation; without
-    // this, every state-changing request 419s. Catch is intentional — when
+    // this, every state-changing request 419s. Catch is intentional - when
     // the backend is unreachable (dev with API down, brief network blip)
     // we don't want an unhandled-rejection in the console; the next
     // mutation will retry the prime via inflight semantics.
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             isDesigner: me.isDesigner,
             isOnboarded: me.isOnboarded,
             // Carrying designerProfile.slug through to the authStore is what
-            // lets /profile/edit (and any other page) fire GET_DESIGNER —
+            // lets /profile/edit (and any other page) fire GET_DESIGNER -
             // without it, every page reload looks like "no slug yet" and the
             // form skips its backend hydration, making saved values appear
             // to disappear.
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .catch((err: unknown) => {
         // Only logout on explicit auth errors (session expired/invalidated).
-        // Network errors or backend-down should NOT log the user out —
+        // Network errors or backend-down should NOT log the user out -
         // keep them authenticated optimistically with cached profile data.
         const graphQLErrors =
           err instanceof Object &&
@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (isAuthError) {
           logout();
         } else {
-          // Network error — keep user logged in with cached data
+          // Network error - keep user logged in with cached data
           setLoading(false);
         }
       });

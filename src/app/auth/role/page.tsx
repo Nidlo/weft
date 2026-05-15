@@ -72,7 +72,7 @@ export default function RoleSelectionPage() {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   // The role chooser is the authed-but-not-onboarded interstitial. Anyone
-  // already onboarded gets bounced to /dashboard by the guard itself —
+  // already onboarded gets bounced to /dashboard by the guard itself -
   // this page no longer rolls its own redirect / loading state.
   // (FE-NIDLO-AUTH-18 / audit H6)
   const { isReady } = useAuthGuard({ redirectOnboardedTo: "/dashboard" });
@@ -130,7 +130,7 @@ export default function RoleSelectionPage() {
           How will you use Nidlo?
         </h1>
         <p className="text-muted-foreground mt-1.5 text-sm">
-          Pick one to get started — you can switch later.
+          Pick one to get started - you can switch later.
         </p>
       </header>
 

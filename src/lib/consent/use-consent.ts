@@ -32,7 +32,7 @@ export const CONSENT_VERSION = 1;
 const READING_LISTENERS = new Set<() => void>();
 
 // Snapshot cache. `useSyncExternalStore` requires `getSnapshot` to return a
-// stable reference between renders when state hasn't changed — otherwise
+// stable reference between renders when state hasn't changed - otherwise
 // React's strict-mode bail-out fails and we infinite-loop. The cache is
 // invalidated only by `bustCache()`, which `writeRecord` and the storage
 // event listener call.
@@ -110,7 +110,7 @@ export function __resetConsentCacheForTests(): void {
 function subscribe(listener: () => void): () => void {
   READING_LISTENERS.add(listener);
   // Cross-tab sync: another tab writing the consent key fires `storage`
-  // here. We MUST bust the cache before notifying — `readRecord` would
+  // here. We MUST bust the cache before notifying - `readRecord` would
   // otherwise return our stale snapshot and ignore the new tab's write.
   const onStorage = (e: StorageEvent) => {
     if (e.key === STORAGE_KEY) {
@@ -140,7 +140,7 @@ export interface UseConsentResult {
   accept: () => void;
   /** Record an opt-out from analytics (still records consent, just negative). */
   decline: () => void;
-  /** Wipe the stored record — re-shows the banner on next render. */
+  /** Wipe the stored record - re-shows the banner on next render. */
   reset: () => void;
 }
 
@@ -176,7 +176,7 @@ export function useConsent(): UseConsentResult {
   }, []);
 
   // Notify listeners after mount in case another component mounted us first
-  // without a write happening yet — keeps consumers synced on first paint.
+  // without a write happening yet - keeps consumers synced on first paint.
   useEffect(() => {
     for (const listener of READING_LISTENERS) listener();
   }, []);

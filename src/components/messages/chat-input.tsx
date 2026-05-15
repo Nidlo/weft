@@ -107,7 +107,7 @@ export function ChatInput({ onSend, sending }: ChatInputProps) {
 
   const disabled = sending || uploading;
 
-  // Image preview mode — Telegram-style preview with caption input
+  // Image preview mode - Telegram-style preview with caption input
   if (pendingImage) {
     return (
       <div className="border-border/60 bg-background/70 supports-backdrop-filter:bg-background/55 border-t backdrop-blur-xl backdrop-saturate-150">

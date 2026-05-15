@@ -6,7 +6,7 @@ import { CombinedGraphQLErrors } from "@apollo/client/errors";
  * structured GraphQL error or when no error in the bundle carries a code.
  *
  * Used to branch on server-side soft-error codes (e.g. DEPOSIT_NOT_PAID)
- * without string-matching the message text — which is brittle and breaks
+ * without string-matching the message text - which is brittle and breaks
  * the moment a backend dev rewords the copy.
  */
 export function extractErrorCode(error: unknown): string | null {

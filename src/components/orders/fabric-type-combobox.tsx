@@ -36,7 +36,7 @@ export function FabricTypeCombobox({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   // Session-local cache of user-submitted entries that are awaiting admin
-  // approval — keeps the proper label on the chip after creation.
+  // approval - keeps the proper label on the chip after creation.
   const [localAdditions, setLocalAdditions] = useState<BlueprintOption[]>([]);
   const { createBlueprintOption, loading: creating } =
     useCreateBlueprintOption();
@@ -85,7 +85,7 @@ export function FabricTypeCombobox({
       onChange([...selected, result.value]);
       setSearch("");
       toast.success(
-        `"${result.label}" submitted — visible to others once approved`
+        `"${result.label}" submitted - visible to others once approved`
       );
     }
   };

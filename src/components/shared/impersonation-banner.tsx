@@ -3,7 +3,7 @@
 import { useAuthStore } from "@/lib/stores/auth";
 
 /**
- * QA-AD-USER-012 — Sticky top banner that surfaces an active admin
+ * QA-AD-USER-012 - Sticky top banner that surfaces an active admin
  * impersonation session. Reads `isImpersonated` + `impersonatorEmail` off
  * the auth store (sourced from the GraphQL `me` query) and links to the
  * backend's stop endpoint, which clears the impersonation session and
@@ -27,7 +27,7 @@ export function ImpersonationBanner() {
 
   // The backend's POST /admin/impersonate/{user} redirects here on the
   // way in. The stop route accepts both GET and POST so the banner can
-  // be a plain link — no need to forge a CSRF token from the FE.
+  // be a plain link - no need to forge a CSRF token from the FE.
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
   const stopUrl = apiUrl.replace(/\/graphql$/, "") + "/admin/impersonate-stop";
 

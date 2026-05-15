@@ -50,16 +50,16 @@ export function RescanFlow({
   const [sideImage, setSideImage] = useState<File | null>(null);
   // Height-input unit defaults to cm regardless of the global preferredUnit
   // (which governs how garment measurements are displayed). The toggle next
-  // to the label lets users switch on the fly — see the matching block in
+  // to the label lets users switch on the fly - see the matching block in
   // ai-flow.tsx for the rationale.
   const [heightInputUnit, setHeightInputUnit] = useState<MeasurementUnit>("cm");
-  // Seed from the user's saved height (always cm on the server) — rescans
+  // Seed from the user's saved height (always cm on the server) - rescans
   // usually happen weeks/months after the original scan and the user
   // shouldn't have to re-type it. They can still override in the input.
   const [heightInput, setHeightInput] = useState(() =>
     storedHeightCm === null ? "" : storedHeightCm.toString()
   );
-  // See ai-flow.tsx for the rationale — "Saved · tap to update" chip
+  // See ai-flow.tsx for the rationale - "Saved · tap to update" chip
   // forces the user to confirm or override a stale stored value.
   const [heightWasEdited, setHeightWasEdited] = useState(false);
   const heightIsFromSaved =
@@ -84,7 +84,7 @@ export function RescanFlow({
     });
   const { applyRescan, loading: applying } = useApplyMeasurementRescan();
 
-  // Sprint 33a — mutation returns a jobId; the actual scan runs in a
+  // Sprint 33a - mutation returns a jobId; the actual scan runs in a
   // queued worker. useScanJob polls until terminal status then fires
   // callbacks (not a projection effect; avoids React 19's
   // set-state-in-effect rule).
@@ -122,7 +122,7 @@ export function RescanFlow({
       return;
     }
 
-    // Range-check in cm before sending — mirrors the server's 50–250 guard.
+    // Range-check in cm before sending - mirrors the server's 50-250 guard.
     // The cm conversion uses `heightInputUnit` (the per-field toggle),
     // which is independent of the global preferredUnit display setting.
     let heightCmForRequest: number | null = null;
@@ -133,7 +133,7 @@ export function RescanFlow({
         if (cm < 50 || cm > 250) {
           const unit = unitName(heightInputUnit).toLowerCase();
           toast.error(
-            `Height looks off — please enter a realistic value in ${unit}, or switch units above.`
+            `Height looks off - please enter a realistic value in ${unit}, or switch units above.`
           );
           return;
         }
@@ -341,7 +341,7 @@ export function RescanFlow({
   }
 
   if (step === "processing") {
-    // Same staging windows as ai-flow.tsx — pipeline is identical between
+    // Same staging windows as ai-flow.tsx - pipeline is identical between
     // first scan and re-scan.
     const stage =
       elapsed < 10
@@ -356,7 +356,7 @@ export function RescanFlow({
         <StitchLoader size={32} tone="copper" label="Analysing photo" />
         <p className="mt-4 text-sm font-medium">{stage}</p>
         <p className="text-muted-foreground mt-1 text-xs tabular-nums">
-          {elapsed}s elapsed · typically 60–120s
+          {elapsed}s elapsed · typically 60-120s
         </p>
         <Button
           variant="ghost"
@@ -376,9 +376,9 @@ export function RescanFlow({
   if (step === "diff" && proposedMm) {
     return (
       <div className="space-y-6">
-        {/* S2.5b / 32a — editable landmark overlay so the user can drag-correct
+        {/* S2.5b / 32a - editable landmark overlay so the user can drag-correct
             occluded points before approving the diff. Photo always renders
-            when the File is in state — landmarks may be null on a degraded
+            when the File is in state - landmarks may be null on a degraded
             Fitscan run, but the user still needs the captured image for
             visual context against the diff. */}
         {frontImage && (
@@ -400,6 +400,6 @@ export function RescanFlow({
     );
   }
 
-  // step === "applied" — typically immediately replaced by onComplete
+  // step === "applied" - typically immediately replaced by onComplete
   return null;
 }

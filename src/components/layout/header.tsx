@@ -40,7 +40,7 @@ export function Header() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const _hasHydrated = useAuthStore((s) => s._hasHydrated);
-  // FE-NIDLO-AUTH-21 / audit H13 — disable + spin during logout to
+  // FE-NIDLO-AUTH-21 / audit H13 - disable + spin during logout to
   // prevent double-click on slow networks.
   const { logout: handleLogout, loading: loggingOut } = useLogout();
   const unreadCount = useMessagesStore((s) => s.unreadCount);
@@ -66,7 +66,7 @@ export function Header() {
         </Link>
 
         {!_hasHydrated ? (
-          /* Pre-hydration — reserve width to avoid layout flash */
+          /* Pre-hydration - reserve width to avoid layout flash */
           <div className="h-9 w-32" aria-hidden />
         ) : isAuthenticated ? (
           <div className="flex items-center gap-1 sm:gap-2">

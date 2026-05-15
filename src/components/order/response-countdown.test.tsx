@@ -5,7 +5,7 @@ import { ResponseCountdown } from "./response-countdown";
 /**
  * The component renders a chip whose text + color refreshes every minute
  * as the response window narrows. These tests pin both the initial paint
- * and the tick-driven update — without the timer, a 23h59m chip stays
+ * and the tick-driven update - without the timer, a 23h59m chip stays
  * "23h left" forever after one minute, which is the exact bug a passing
  * helper test wouldn't catch. (FE-NIDLO-ORDER-02 / B102)
  */
@@ -69,7 +69,7 @@ describe("<ResponseCountdown />", () => {
     expect(container.textContent).toContain("Designer has 59m left");
 
     // `advanceTimersByTime` advances both the fake timer clock AND
-    // Date.now() — the component's setInterval fires at +60s and
+    // Date.now() - the component's setInterval fires at +60s and
     // `new Date()` inside the callback reads the same advanced clock.
     act(() => {
       vi.advanceTimersByTime(60 * 1000);

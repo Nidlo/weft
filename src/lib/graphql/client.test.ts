@@ -116,7 +116,7 @@ describe("probeSessionAndLogoutIfDead (Apollo errorLink Me-probe)", () => {
     // Bug A: a transient Unauthenticated from a non-Me query (e.g.
     // RealtimeProvider's UnreadMessagesCount racing the freshly-set
     // cookie post-verifyOtp) must not silently log the user out.
-    // The probe asks Me directly — if Me says we're authenticated,
+    // The probe asks Me directly - if Me says we're authenticated,
     // the original error was a fluke and we ignore it.
     vi.spyOn(apolloClient, "query").mockResolvedValueOnce({
       data: { me: { id: "u-1", phone: "+233557560032" } },
@@ -130,7 +130,7 @@ describe("probeSessionAndLogoutIfDead (Apollo errorLink Me-probe)", () => {
   });
 
   it("logs out when Me also confirms the session is dead", async () => {
-    // Real session expiry — Me itself fails Unauthenticated.
+    // Real session expiry - Me itself fails Unauthenticated.
     // We catch on the rejection and trigger logout so the UI re-routes.
     vi.spyOn(apolloClient, "query").mockRejectedValueOnce(
       new Error("Unauthenticated.")
@@ -153,10 +153,10 @@ describe("probeSessionAndLogoutIfDead (Apollo errorLink Me-probe)", () => {
     expect(logoutSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("dedupes concurrent probes — only one Me query fires per cluster", async () => {
+  it("dedupes concurrent probes - only one Me query fires per cluster", async () => {
     // When 401s arrive in a burst (e.g. several queries all fail at once
     // after a real session expiry), the probe should fire ONCE and
-    // logout ONCE — not N times.
+    // logout ONCE - not N times.
     const querySpy = vi.spyOn(apolloClient, "query").mockResolvedValueOnce({
       data: { me: null },
       loading: false,

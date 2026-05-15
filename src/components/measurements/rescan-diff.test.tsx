@@ -37,10 +37,10 @@ describe("RescanDiff", () => {
         onCancel={vi.fn()}
       />
     );
-    // "auto-applied" appears in the header summary AND the badge — assert
+    // "auto-applied" appears in the header summary AND the badge - assert
     // both surfaces are populated by checking the count is at least one.
     expect(screen.getAllByText(/auto-applied/i).length).toBeGreaterThan(0);
-    // "Confirm" appears as both a column header and the badge — at least
+    // "Confirm" appears as both a column header and the badge - at least
     // one badge plus the header counts as ≥ 2.
     expect(screen.getAllByText(/^Confirm$/).length).toBeGreaterThanOrEqual(2);
   });

@@ -154,10 +154,10 @@ export default function OrdersPage() {
                   {user.isDesigner
                     ? tab === "all"
                       ? "Once clients commission you, their orders will land here."
-                      : "Nothing matching this filter — try a different tab."
+                      : "Nothing matching this filter - try a different tab."
                     : tab === "all"
-                      ? "Browse designers and place an order — you'll be able to follow every step from here."
-                      : "Nothing matching this filter — try a different tab."}
+                      ? "Browse designers and place an order - you'll be able to follow every step from here."
+                      : "Nothing matching this filter - try a different tab."}
                 </p>
                 {!user.isDesigner && (tab === "all" || tab === "active") && (
                   <Button

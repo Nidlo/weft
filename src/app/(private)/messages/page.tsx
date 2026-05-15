@@ -31,7 +31,7 @@ export default function MessagesPage() {
     };
   }, [echo, user?.id, refetch]);
 
-  // Refetch on reconnect — events that fired while the socket was down would
+  // Refetch on reconnect - events that fired while the socket was down would
   // otherwise be silent.
   useEchoReconnect(echo, refetch);
 
@@ -109,7 +109,7 @@ export default function MessagesPage() {
                     className="text-copper inline h-3.5 w-3.5"
                     aria-hidden
                   />{" "}
-                  designer&apos;s order page — they&apos;ll reach out the moment
+                  designer&apos;s order page - they&apos;ll reach out the moment
                   they have an update.
                 </>
               )}

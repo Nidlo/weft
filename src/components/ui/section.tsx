@@ -8,7 +8,7 @@ interface SectionProps extends Omit<
 > {
   /** Small uppercase tracker shown above the title. */
   eyebrow?: React.ReactNode;
-  /** Section title — rendered as h2 in display type. */
+  /** Section title - rendered as h2 in display type. */
   title?: React.ReactNode;
   /** Supporting copy underneath the title. */
   description?: React.ReactNode;
@@ -27,7 +27,7 @@ const DENSITY: Record<NonNullable<SectionProps["density"]>, string> = {
 };
 
 /**
- * Server-component section wrapper — gives every page a consistent
+ * Server-component section wrapper - gives every page a consistent
  * eyebrow/title/description rhythm without each consumer rewriting it.
  *
  * Use the `action` slot for trailing controls ("See all" link, sort

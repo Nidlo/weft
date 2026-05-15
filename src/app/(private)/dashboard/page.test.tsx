@@ -100,7 +100,7 @@ describe("DashboardPage", () => {
   it("links the designer's profile via the shared profile URL", () => {
     useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
     render(<DashboardPage />);
-    // The host is whatever jsdom produces — assert the slug is rendered.
+    // The host is whatever jsdom produces - assert the slug is rendered.
     expect(screen.getByText(/\/designer\/kojo-atelier/)).toBeInTheDocument();
   });
 });

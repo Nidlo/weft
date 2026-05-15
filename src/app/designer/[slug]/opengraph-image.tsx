@@ -122,7 +122,7 @@ export default async function OgImage({ params }: Props) {
         }}
       />
 
-      {/* Brand mark — top left */}
+      {/* Brand mark - top left */}
       <div
         style={{
           position: "absolute",

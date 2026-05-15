@@ -125,7 +125,7 @@ describe("<TermsReacceptDialog />", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("does NOT show the dialog when the user has never accepted (null) — handled by onboarding wizard", () => {
+  it("does NOT show the dialog when the user has never accepted (null) - handled by onboarding wizard", () => {
     setAuthState({
       user: {
         id: "user-1",

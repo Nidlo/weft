@@ -76,7 +76,7 @@ const emptyDesigner: DesignerFormState = {
 
 /**
  * Studio location lat/lng of (0, 0) is the magic value we use when seeding a
- * `LocationData` from just the stored `workshopAddress` string — there's no
+ * `LocationData` from just the stored `workshopAddress` string - there's no
  * realistic Ghanaian point at (0, 0), so we use it to detect "the user hasn't
  * actually moved the pin in this session yet" and skip forwarding lat/lng on
  * save (mirrors how the personal-location LocationPicker is seeded).
@@ -97,7 +97,7 @@ export default function ProfileEditPage() {
 
   // Designer-only fields
   const [designer, setDesigner] = useState<DesignerFormState>(emptyDesigner);
-  // Snapshot of the designer state at hydration — used for dirty-detection.
+  // Snapshot of the designer state at hydration - used for dirty-detection.
   const [designerSnapshot, setDesignerSnapshot] =
     useState<DesignerFormState>(emptyDesigner);
 
@@ -142,7 +142,7 @@ export default function ProfileEditPage() {
   const [updateProfile, { loading: savingProfile }] = useMutation<{
     updateProfile: { id: string; slug: string | null };
   }>(UPDATE_PROFILE, {
-    // Re-pull the designer record too — without this, the user clicks
+    // Re-pull the designer record too - without this, the user clicks
     // Save, the mutation returns the updated DesignerProfile, but the
     // page's `designerData` (driven by GET_DESIGNER) still shows the old
     // values until the next cache eviction.
@@ -166,7 +166,7 @@ export default function ProfileEditPage() {
     refetchQueries: [{ query: ME_QUERY }],
   });
 
-  // Refetch GET_DESIGNER only when we have a slug — firing it with an empty
+  // Refetch GET_DESIGNER only when we have a slug - firing it with an empty
   // string makes the backend reject the request ("$slug must not be null")
   // and the mutation's caller sees a confusing error even though the upload
   // / remove itself succeeded. A brand-new designer with no displayName yet
@@ -190,7 +190,7 @@ export default function ProfileEditPage() {
           : [],
     });
 
-  // Portfolio upload state — mirrors StepPortfolio pattern
+  // Portfolio upload state - mirrors StepPortfolio pattern
   const portfolioInputRef = useRef<HTMLInputElement>(null);
   const [portfolioUploading, setPortfolioUploading] = useState(false);
   const [portfolioDragOver, setPortfolioDragOver] = useState(false);
@@ -225,7 +225,7 @@ export default function ProfileEditPage() {
     );
   }
 
-  // Hydrate designer fields the same way as `seededFromUserId` above —
+  // Hydrate designer fields the same way as `seededFromUserId` above -
   // setState during render (guarded by a one-shot flag) is the React 19
   // idiom for deriving state from props/queries without an effect.
   if (!designerHydrated && designerData?.designer?.designerProfile) {
@@ -269,7 +269,7 @@ export default function ProfileEditPage() {
 
   // Per-section dirty detection. Three independent sections each save
   // through their OWN button so the user can change one block without
-  // touching the others — feedback from Snad: "I want to just change my
+  // touching the others - feedback from Snad: "I want to just change my
   // designer profile, I don't want to scroll down to one global Save".
   const personalInfoDirty =
     !!user &&
@@ -279,7 +279,7 @@ export default function ProfileEditPage() {
       (email.trim() || null) !== (user.email ?? null) ||
       (location?.city ?? null) !== (user.city ?? null) ||
       // Treat a fresh map pick (non-zero lat/lng) as dirty even if city
-      // happens to be the same — region/lat/lng/country may have changed.
+      // happens to be the same - region/lat/lng/country may have changed.
       !!(location && location.lat !== 0 && location.lng !== 0));
 
   const designerProfileDirty =
@@ -329,7 +329,7 @@ export default function ProfileEditPage() {
     Date.now() - studioJustSavedAt < SAVED_NOTICE_MS;
 
   // Force a re-render once each "just saved" window expires so the affordance
-  // disappears. Cheap setTimeouts — no polling loop.
+  // disappears. Cheap setTimeouts - no polling loop.
   useEffect(() => {
     if (avatarJustSavedAt === null) return;
     const elapsed = Date.now() - avatarJustSavedAt;
@@ -612,7 +612,7 @@ export default function ProfileEditPage() {
           },
         },
       });
-      // Snapshot only the profile slice of designer state — leave the
+      // Snapshot only the profile slice of designer state - leave the
       // workshop fields untouched so a pending studio edit isn't silently
       // marked clean by this save.
       setDesignerSnapshot((prev) => ({
@@ -650,7 +650,7 @@ export default function ProfileEditPage() {
           input.workshopLng = designer.workshopLocation.lng;
         }
       } else {
-        // User cleared the studio — null everything so search stops using it.
+        // User cleared the studio - null everything so search stops using it.
         input.workshopAddress = null;
         input.workshopLat = null;
         input.workshopLng = null;
@@ -1056,7 +1056,7 @@ export default function ProfileEditPage() {
           </section>
         )}
 
-        {/* Studio / workshop location — designer only. Distinct from
+        {/* Studio / workshop location - designer only. Distinct from
             Personal information above: this is the shopfront clients use
             to find the designer; it's PUBLIC and feeds "designers near me"
             search. The personal-location field above is private. */}
@@ -1074,7 +1074,7 @@ export default function ProfileEditPage() {
               </h2>
               <p className="text-muted-foreground mt-1 text-sm">
                 Where clients find your shop. Used by &ldquo;designers near
-                me&rdquo; — keep it accurate, leave personal address private
+                me&rdquo; - keep it accurate, leave personal address private
                 above.
               </p>
             </header>
@@ -1424,7 +1424,7 @@ export default function ProfileEditPage() {
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
-            Done — back to profile
+            Done - back to profile
           </Link>
         </div>
       </div>
@@ -1490,7 +1490,7 @@ function SectionSaveBar({
   );
 }
 
-/** Caption shown under the avatar — flat lookup avoids nested ternaries. */
+/** Caption shown under the avatar - flat lookup avoids nested ternaries. */
 function avatarCaption(uploading: boolean, recentlySaved: boolean): string {
   if (uploading) return "Uploading...";
   if (recentlySaved) return "Saved · just now";
@@ -1517,7 +1517,7 @@ function saveBarStatus({
  * Semantic progress bar built on the native `<progress>` element. We can't
  * drive the fill colour or rounding through the default browser styling,
  * so the visible track is a sibling div whose width is set via a CSS
- * custom property (no inline %-width — keeps SonarLint quiet about
+ * custom property (no inline %-width - keeps SonarLint quiet about
  * "inline styles should be in CSS"). The actual `<progress>` is visually
  * hidden but exposed to AT, so screen readers announce the percentage
  * without us having to assemble aria-valuenow/min/max manually.

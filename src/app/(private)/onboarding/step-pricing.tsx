@@ -31,7 +31,7 @@ export function StepPricing() {
             What&apos;s your typical price range?
           </h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Optional. Helps clients filter by budget — you can negotiate per
+            Optional. Helps clients filter by budget - you can negotiate per
             order, and update this anytime.
           </p>
         </div>

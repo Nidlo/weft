@@ -40,7 +40,7 @@ export function OtpVerification({
   const [otp, setOtp] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(expiresInSeconds);
   // Track the start time so the timer survives re-renders without resetting.
-  // Init lazily inside an effect — `Date.now()` during render is impure and
+  // Init lazily inside an effect - `Date.now()` during render is impure and
   // trips React 19's purity rule.
   const startedAtRef = useRef<number | null>(null);
 
@@ -150,7 +150,7 @@ export function OtpVerification({
                 className="w-full"
                 disabled
               >
-                Code expired — restart the payment
+                Code expired - restart the payment
               </Button>
             )
           ) : (

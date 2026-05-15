@@ -70,7 +70,7 @@
  * Black + bone + copper palette. OKLCH for perceptual uniformity.
  * Light is the default surface (Ghana mobile + outdoor legibility);
  * dark mirrors the same hierarchy with intentional inversions, not blunt
- * inversions. Hue stays in the 50–75° (warm) band so the brand reads
+ * inversions. Hue stays in the 50-75° (warm) band so the brand reads
  * consistently across modes.
  * ========================================================================= */
 :root {
@@ -104,10 +104,10 @@
   /* `--copper-soft` is used as a TEXT colour (badges, eyebrow labels,
    * icon glyphs sitting on `bg-copper/15` chips). The previous value
    * `oklch(0.92 0.05 70)` was a surface tone and rendered "pale on pale"
-   * in light mode — the workshop "Soon" badge had border + text both
+   * in light mode - the workshop "Soon" badge had border + text both
    * unreadable. Deep copper restores WCAG-readable contrast against
    * both bone backgrounds and the chip tint. Dark-theme override
-   * stays unchanged below — it works there. */
+   * stays unchanged below - it works there. */
   --copper-soft: oklch(0.45 0.12 55);
   --bone: oklch(0.985 0.005 75);
   --ink: oklch(0.16 0.012 50);
@@ -129,7 +129,7 @@
   --sidebar-border: oklch(0.9 0.012 75);
   --sidebar-ring: oklch(0.74 0.11 60);
 
-  /* Status — kept harmonized with the warm band */
+  /* Status - kept harmonized with the warm band */
   --status-success: oklch(0.55 0.16 150);
   --status-success-fg: oklch(0.4 0.13 150);
   --status-success-soft: oklch(0.94 0.04 150);
@@ -143,15 +143,15 @@
   --status-info-fg: oklch(0.4 0.1 230);
   --status-info-soft: oklch(0.94 0.04 230);
 
-  /* Glass surfaces — use behind backdrop-blur for the iOS-26 frost effect.
-   * `--glass` sits over a busy background with 60–70% opacity; the border
+  /* Glass surfaces - use behind backdrop-blur for the iOS-26 frost effect.
+   * `--glass` sits over a busy background with 60-70% opacity; the border
    * gives the soft 1px highlight that makes glass read as glass. */
   --glass: oklch(1 0 0 / 0.62);
   --glass-strong: oklch(1 0 0 / 0.85);
   --glass-border: oklch(1 0 0 / 0.55);
   --glass-shadow: oklch(0.16 0.012 50 / 0.06);
 
-  /* Elevation stack — short shadow + long shadow combo for modern depth */
+  /* Elevation stack - short shadow + long shadow combo for modern depth */
   --shadow-1:
     0 1px 2px oklch(0.16 0.012 50 / 0.04), 0 1px 1px oklch(0.16 0.012 50 / 0.02);
   --shadow-2:
@@ -163,9 +163,9 @@
   --shadow-glow:
     0 0 0 1px oklch(0.74 0.11 60 / 0.25), 0 8px 24px oklch(0.74 0.11 60 / 0.15);
 
-  /* Motion — easing curves used across the system. Stitch is the brand's
+  /* Motion - easing curves used across the system. Stitch is the brand's
    * signature: a soft snap that mimics the moment a needle pulls thread
-   * taut. Needle is gentler — used for hovers and incidental motion. */
+   * taut. Needle is gentler - used for hovers and incidental motion. */
   --ease-stitch: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-needle: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
@@ -177,7 +177,7 @@
 }
 
 .dark {
-  /* Surfaces — deep warm charcoal, never pure black (pure black flattens) */
+  /* Surfaces - deep warm charcoal, never pure black (pure black flattens) */
   --background: oklch(0.135 0.012 50);
   --foreground: oklch(0.97 0.008 75);
   --card: oklch(0.175 0.013 50);
@@ -185,7 +185,7 @@
   --popover: oklch(0.175 0.013 50);
   --popover-foreground: oklch(0.97 0.008 75);
 
-  /* Brand inverts — bone takes primary, copper pushes brighter */
+  /* Brand inverts - bone takes primary, copper pushes brighter */
   --primary: oklch(0.97 0.008 75);
   --primary-foreground: oklch(0.135 0.012 50);
   --secondary: oklch(0.22 0.014 50);
@@ -233,7 +233,7 @@
   --status-info-fg: oklch(0.8 0.1 230);
   --status-info-soft: oklch(0.25 0.07 230);
 
-  /* Glass — darker base, lower opacity, brighter highlight */
+  /* Glass - darker base, lower opacity, brighter highlight */
   --glass: oklch(0.18 0.015 50 / 0.55);
   --glass-strong: oklch(0.18 0.015 50 / 0.82);
   --glass-border: oklch(1 0 0 / 0.1);
@@ -266,11 +266,11 @@
 }
 
 /* =========================================================================
- * UTILITY LAYER — brand-specific composition helpers
+ * UTILITY LAYER - brand-specific composition helpers
  * Keep these short. Anything more than ~6 lines should become a component.
  * ========================================================================= */
 @layer utilities {
-  /* Glass surface — pair with `backdrop-blur-xl` */
+  /* Glass surface - pair with `backdrop-blur-xl` */
   .surface-glass {
     background: var(--glass);
     border: 1px solid var(--glass-border);
@@ -299,7 +299,7 @@
     padding-bottom: 2px;
   }
 
-  /* Editorial display type — Fraunces with optical-size axis pushed for
+  /* Editorial display type - Fraunces with optical-size axis pushed for
    * headlines. Use sparingly; pairs with Geist sans for body. */
   .text-display {
     font-family: var(--font-display, var(--font-geist-sans));
@@ -310,7 +310,7 @@
     letter-spacing: -0.02em;
   }
 
-  /* Layered radial mesh — used behind the hero. Cheap, no JS, fades on dark. */
+  /* Layered radial mesh - used behind the hero. Cheap, no JS, fades on dark. */
   .bg-thread-mesh {
     background-image:
       radial-gradient(
@@ -348,7 +348,7 @@
       );
   }
 
-  /* Drag-disable for the hero composition — prevents accidental selection
+  /* Drag-disable for the hero composition - prevents accidental selection
    * during the marquee interactions. */
   .no-drag {
     -webkit-user-drag: none;
@@ -357,7 +357,7 @@
   }
 
   /* Branded skeleton sweep. A soft copper gradient traverses a muted base
-   * — crispier than flat `animate-pulse`. Keyed off CSS custom props so
+   * - crispier than flat `animate-pulse`. Keyed off CSS custom props so
    * it auto-adapts in dark mode. Reduced-motion is honored by the global
    * `prefers-reduced-motion` block at the bottom of this file. */
   .skeleton-shimmer {
@@ -378,7 +378,7 @@
 }
 
 /* =========================================================================
- * KEYFRAMES — brand motion library
+ * KEYFRAMES - brand motion library
  * Reduced-motion is honored per-component (motion library does this for
  * us); these CSS keyframes are only used where JS animation would be
  * overkill.
@@ -392,7 +392,7 @@
   }
 }
 
-/* The signature: a needle stitching across — used for ThreadDivider and
+/* The signature: a needle stitching across - used for ThreadDivider and
  * any decorative dashed line. */
 @keyframes thread-stitch {
   0% {
@@ -424,7 +424,7 @@
   }
 }
 
-/* Needle wiggle — a tiny rotational jitter for the pin icon */
+/* Needle wiggle - a tiny rotational jitter for the pin icon */
 @keyframes needle-wiggle {
   0%,
   100% {

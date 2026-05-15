@@ -37,7 +37,7 @@ export default function OnboardingPage() {
   const [completeOnboarding] = useMutation(COMPLETE_ONBOARDING);
   const setUser = useAuthStore((s) => s.setUser);
   // Synchronous in-flight guard. `saving` flips a tick AFTER the mutation
-  // fires — long enough for a fast double-tap on "Complete setup" to
+  // fires - long enough for a fast double-tap on "Complete setup" to
   // re-enter handleComplete and double-submit. Mirrors the verify-OTP
   // pattern in /auth/verify.
   const submitting = useRef(false);

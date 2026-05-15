@@ -78,7 +78,7 @@ describe("<CookieConsentBanner />", () => {
     expect(
       screen.queryByTestId("cookie-consent-banner")
     ).not.toBeInTheDocument();
-    // Crucially, no storage was written — user is still "undecided".
+    // Crucially, no storage was written - user is still "undecided".
     expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 

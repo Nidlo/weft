@@ -14,7 +14,7 @@ interface Props {
 }
 
 /**
- * Icon-only theme toggle. Cross-fades sun/moon with a soft rotation —
+ * Icon-only theme toggle. Cross-fades sun/moon with a soft rotation -
  * subtle enough to not distract from form interactions but distinctive
  * enough to feel intentional.
  */
@@ -28,7 +28,7 @@ export function ThemeToggle({ className, size = "icon" }: Props) {
   // Pre-hydration placeholder keeps layout stable + avoids the
   // sun-vs-moon flash on cold load.
   // `min-h-11 min-w-11` enforces the 44px tap-target minimum without
-  // growing the visual button size — Tailwind hit-area pattern.
+  // growing the visual button size - Tailwind hit-area pattern.
   if (!mounted) {
     return (
       <Button

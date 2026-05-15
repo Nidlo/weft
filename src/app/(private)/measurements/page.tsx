@@ -59,7 +59,7 @@ export default function MeasurementsPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editingId, setEditingId] = useState<string | null>(null);
-  // Sprint 36 — landmarks the user has dragged in the edit view since
+  // Sprint 36 - landmarks the user has dragged in the edit view since
   // opening it. null while the view is closed or untouched; an object
   // means "user has corrected; send these on save".
   const [editingLandmarks, setEditingLandmarks] = useState<Landmarks | null>(
@@ -283,7 +283,7 @@ export default function MeasurementsPage() {
               "mm",
               preferredUnit
             ) as MeasurementData;
-            // Sprint 36 — when the user opened the edit view we keep the
+            // Sprint 36 - when the user opened the edit view we keep the
             // saved landmark map as the starting state; drag callbacks
             // overwrite it via `setEditingLandmarks`. Reading directly
             // from `editingMeasurement.landmarksNormalized` for the
@@ -438,7 +438,7 @@ export default function MeasurementsPage() {
                   }
                 />
 
-                {/* S2.5c — saved photo + landmark overlay (read-only) on
+                {/* S2.5c - saved photo + landmark overlay (read-only) on
                     revisits. Renders only when both the ImageKit URL and
                     the corrected landmark coordinates are present. */}
                 {m.photoUrl && m.landmarksNormalized && (

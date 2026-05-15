@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
     },
     // Auto-rewrite `import { Foo } from "<lib>"` into deep imports so we
     // don't ship the full barrel. Big win for libs with many named exports
-    // — lucide alone has hundreds.
+    // - lucide alone has hundreds.
     optimizePackageImports: ["lucide-react", "motion", "date-fns"],
   },
 };

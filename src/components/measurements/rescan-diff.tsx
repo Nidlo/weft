@@ -22,9 +22,9 @@ import { cn } from "@/lib/utils";
 import type { MeasurementMmData } from "@/types/graphql";
 
 interface RescanDiffProps {
-  /** Current canonical mm payload — what the profile is now. */
+  /** Current canonical mm payload - what the profile is now. */
   baselineMm: MeasurementMmData;
-  /** Newly proposed mm payload — typically derived from a fresh AI scan, then converted. */
+  /** Newly proposed mm payload - typically derived from a fresh AI scan, then converted. */
   proposedMm: MeasurementMmData;
   /** Called with the section/field pairs the user has confirmed. Auto-tier rows always apply, reject-tier never. */
   onApply: (
@@ -64,7 +64,7 @@ function buildRows(
     for (const field of Object.keys(fields)) {
       const base = readField(baselineMm, section, field);
       const prop = readField(proposedMm, section, field);
-      if (base === prop) continue; // Unchanged — skip
+      if (base === prop) continue; // Unchanged - skip
       rows.push({
         section,
         field,
@@ -96,7 +96,7 @@ function tierBadge(tier: RescanTier, displayUnit: MeasurementUnit) {
       return (
         <span
           className="bg-status-danger/15 text-status-danger-fg inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase"
-          title={`Change is too large to trust automatically — likely an AI error. Re-scan or edit manually. (>= 2 ${unitLabel(displayUnit)})`}
+          title={`Change is too large to trust automatically - likely an AI error. Re-scan or edit manually. (>= 2 ${unitLabel(displayUnit)})`}
         >
           <X className="h-3 w-3" aria-hidden />
           Rejected
@@ -187,7 +187,7 @@ export function RescanDiff({
         </p>
       </div>
 
-      {/* Sprint 36 mobile-overflow fix — the 7-column table is wider than
+      {/* Sprint 36 mobile-overflow fix - the 7-column table is wider than
           a phone viewport. The outer wrapper was `overflow-hidden` which
           clipped everything past column 3 with no way to reach it.
           `overflow-x-auto` + `min-w-[640px]` on the table gives a
@@ -274,7 +274,7 @@ export function RescanDiff({
                         aria-label={`Confirm ${fieldLabel} change`}
                       />
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </td>
                 </tr>
@@ -286,7 +286,7 @@ export function RescanDiff({
 
       {rejectRows.length > 0 && (
         <p className="text-status-danger-fg text-xs">
-          Rejected fields will not apply — the change is too large for the AI to
+          Rejected fields will not apply - the change is too large for the AI to
           be trustworthy. Try a clearer photo or edit those fields manually.
         </p>
       )}

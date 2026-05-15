@@ -90,7 +90,7 @@ export function usePushPermission() {
         try {
           localStorage.setItem(PROMPT_FLAG, "1");
         } catch {
-          // Storage may be unavailable in private mode — non-fatal.
+          // Storage may be unavailable in private mode - non-fatal.
         }
         if (result === "granted") {
           await registerForPushImpl(registerToken);

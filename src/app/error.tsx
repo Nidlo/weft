@@ -14,7 +14,7 @@ interface ErrorPageProps {
 
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
   useEffect(() => {
-    // The error boundary swallows the error from the console — log it so
+    // The error boundary swallows the error from the console - log it so
     // the developer / Sentry can still see what blew up.
     console.error("App error:", error);
   }, [error]);

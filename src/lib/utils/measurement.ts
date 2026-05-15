@@ -1,12 +1,12 @@
 /**
- * Display unit — what the user sees and what the unit toggle flips between.
+ * Display unit - what the user sees and what the unit toggle flips between.
  * Storage layer can be richer (mm), but only cm and inches are meaningful
  * to humans, so the preferences store and toggle stay binary.
  */
 export type MeasurementUnit = "cm" | "inches";
 
 /**
- * Storage unit — what a measurement value can be stored as. Adds `mm`,
+ * Storage unit - what a measurement value can be stored as. Adds `mm`,
  * which is the canonical integer storage post-S1B. Pass into
  * `formatMeasurement` / `convertMeasurement` when rendering values from
  * `dataMm` / `aiBaselineMm` / `manualOverridesMm` GraphQL fields.
@@ -75,7 +75,7 @@ export function formatMeasurement(
   displayUnit: MeasurementUnit,
   { digits, withUnit = true }: FormatOptions = {}
 ): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return "—";
+  if (value === null || value === undefined || Number.isNaN(value)) return "-";
   const converted = convertMeasurement(value, storedUnit, displayUnit);
   const decimals = digits ?? 1;
   const rounded = converted.toFixed(decimals);
@@ -169,7 +169,7 @@ export const ADULT_BOUNDS_CM: Record<string, { min: number; max: number }> = {
 
 /**
  * Re-scan tier thresholds in mm. Mirrors the backend's
- * `MeasurementService::RESCAN_*_THRESHOLD_MM` constants — kept in sync
+ * `MeasurementService::RESCAN_*_THRESHOLD_MM` constants - kept in sync
  * by hand because this is the single fact (≈ 0.5″ and ≈ 2″ from Snad's
  * brief). If the backend numbers move, update these too AND the
  * `compareDataMm` test fixtures.
@@ -191,14 +191,14 @@ export function classifyRescanDelta(
 }
 
 /**
- * S2.5d — Recompute distance-based measurement fields from corrected
+ * S2.5d - Recompute distance-based measurement fields from corrected
  * MediaPipe landmark positions. Returns a sparse `MeasurementMmData`-shaped
  * map containing only the fields this helper handles.
  *
  * **Scale anchoring**: the helper computes a px-to-mm scale by taking the
  * baseline measurement's `vertical.full_height` (in mm) and dividing by
  * the current pixel distance from head landmarks to foot landmarks. This
- * means the scale stays consistent with the AI's original extraction —
+ * means the scale stays consistent with the AI's original extraction -
  * dragging an arm landmark doesn't randomly change the global scale;
  * dragging the foot landmark DOES (because it's redefining where the
  * body ends in the photo).
@@ -274,7 +274,7 @@ export function recomputeFromLandmarks(
 
   // ── full_height ──────────────────────────────────────────────────
   // Always reflects the current head-to-foot pixel span. Dragging the
-  // foot DOES change full_height — that's the intended semantic.
+  // foot DOES change full_height - that's the intended semantic.
   result.vertical = { full_height: Math.round(pixelHeight * mmPerPx) };
 
   // ── shoulder ─────────────────────────────────────────────────────
@@ -355,7 +355,7 @@ export function recomputeFromLandmarks(
 
   // ── waist_to_floor (vertical: hip-mid → foot-mid) ───────────────
   // Booth-coverage Sprint 36. Uses the same hip-mid + foot-mid we
-  // already derived above for full_height — drag the foot and the
+  // already derived above for full_height - drag the foot and the
   // floor anchor moves with it.
   {
     const hipMid = midpoint(landmarks.left_hip, landmarks.right_hip);
@@ -388,7 +388,7 @@ export function recomputeFromLandmarks(
     // Booth's shoulder-to-hip lands ~5-8cm longer than shoulder-to-waist
     // because the hip-mid pose landmark sits at the iliac crest (lower
     // than the natural waist). The raw landmark distance IS the booth
-    // measurement — don't add a correction here; if the user wanted
+    // measurement - don't add a correction here; if the user wanted
     // a custom offset, they'd edit the value manually.
     result.vertical = {
       ...result.vertical,
@@ -453,7 +453,7 @@ export function checkBounds(
       unit === "inches"
         ? cmToInches(bound.max).toFixed(1)
         : bound.max.toString();
-    return `Outside typical range (${minDisp}–${maxDisp} ${unitLabel(unit)}). Double-check before saving.`;
+    return `Outside typical range (${minDisp}-${maxDisp} ${unitLabel(unit)}). Double-check before saving.`;
   }
   return null;
 }

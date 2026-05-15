@@ -38,7 +38,7 @@ const MOBILE_BREAKPOINT_PX = 640;
  * sheet instead so the user always sees the copy regardless of where
  * the anchor sits on a small screen.
  *
- * Mounts once in providers.tsx — components anywhere in the tree call
+ * Mounts once in providers.tsx - components anywhere in the tree call
  * `useTour().start("home")` to fire a tour.
  */
 export function TourProvider() {
@@ -71,7 +71,7 @@ export function TourProvider() {
   //
   // The setAnchorRect(null) calls inside this effect *are* the React
   // 19 anti-pattern shape (sync setState in an effect body), but the
-  // alternative — deriving the rect via render — can't work: we're
+  // alternative - deriving the rect via render - can't work: we're
   // measuring a foreign DOM element on scroll/resize, which is exactly
   // the "subscribe to external state" escape hatch React docs allow.
   // Stale rect would otherwise stick after a step transitions to an
@@ -121,7 +121,7 @@ export function TourProvider() {
         markPersisted(tourId, outcome);
       } catch {
         // Low-criticality. A failed mark just means the tour might
-        // replay next session — annoying but not breaking. Silent.
+        // replay next session - annoying but not breaking. Silent.
       }
     },
     [activeTour, finish, markTour, markPersisted]

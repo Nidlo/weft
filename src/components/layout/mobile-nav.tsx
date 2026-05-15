@@ -17,7 +17,7 @@ const clientNavItems = [
   { href: "/profile", label: "Profile", icon: User },
 ];
 
-// Earnings lives under Profile (Settings → Earnings) — it's a personal
+// Earnings lives under Profile (Settings → Earnings) - it's a personal
 // report, not a core feature on its own, and the legal copy says Nidlo
 // doesn't operate a wallet. Designers and clients share the same nav
 // shape; Profile is the entry point to anything role-specific.

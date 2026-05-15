@@ -151,7 +151,7 @@ const TEMPLATE_FIELDS: Record<Exclude<MeasurementTemplate, "all">, string[]> = {
 
 // Smart defaults for garment-length fields per template, in CM. Pre-fill
 // the manual form so the user only adjusts; leaving these as null
-// produces "—" in the response and forces the designer to chase the
+// produces "-" in the response and forces the designer to chase the
 // customer for a value. Defaults pulled from typical Ghana ladies-wear
 // proportions on a 165-170cm wearer; users override as needed.
 const GARMENT_LENGTH_DEFAULTS_CM: Partial<
@@ -202,9 +202,9 @@ interface ManualFormProps {
   saving?: boolean;
   onCancel?: () => void;
   /**
-   * Sprint 34 Phase A3 — field names the AI pipeline's anthropometric
+   * Sprint 34 Phase A3 - field names the AI pipeline's anthropometric
    * sanity check flagged as outside the adult-population proportion
-   * band. Render a "Low confidence — verify with tape" badge inline on
+   * band. Render a "Low confidence - verify with tape" badge inline on
    * each matching field so the user knows which values to scrutinise
    * before saving. Field names match the keys in `FIELD_LABELS` (e.g.
    * `"waist"`, `"bicep"`).
@@ -239,9 +239,9 @@ export function ManualForm({
     useState<MeasurementTemplate>(initialTemplate);
   const [data, setData] = useState<MeasurementData>(() => {
     // Seed garment defaults from the starting template so the user sees
-    // sensible pre-fills (Kaba 110cm, Wedding dress 145cm, …) instead
+    // sensible pre-fills (Kaba 110cm, Wedding dress 145cm, ...) instead
     // of blank inputs. Stored values from `initialData` win over the
-    // template defaults — never overwrite user-supplied numbers.
+    // template defaults - never overwrite user-supplied numbers.
     const seed: MeasurementData = initialData ?? {
       upper_body: {},
       lower_body: {},
@@ -285,9 +285,9 @@ export function ManualForm({
   };
 
   const handleUnitToggle = () => {
-    // Sprint 35 — the previous implementation flipped the unit label
+    // Sprint 35 - the previous implementation flipped the unit label
     // without touching the values. Anyone scanning while their preferred
-    // unit was "inches" saw cm values displayed next to an "in" label —
+    // unit was "inches" saw cm values displayed next to an "in" label -
     // e.g. AI waist 95cm rendered as "95 in" (which would be 241cm,
     // monstrous). Convert the data alongside the unit so the displayed
     // number always matches the displayed label.
@@ -320,7 +320,7 @@ export function ManualForm({
           {initialLabel ? "Edit profile" : "New profile"}
         </h1>
         <p className="text-muted-foreground mt-2 text-sm">
-          Fill in the fields you know. Leave anything blank — designers can ask
+          Fill in the fields you know. Leave anything blank - designers can ask
           for the rest at fitting.
         </p>
       </header>
@@ -460,7 +460,7 @@ export function ManualForm({
                       )}
                       {!warning && lowConfidence && (
                         <p className="text-status-warning-fg text-[10px] leading-tight">
-                          Outside typical adult proportions — please verify with
+                          Outside typical adult proportions - please verify with
                           a tape measure.
                         </p>
                       )}

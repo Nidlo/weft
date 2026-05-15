@@ -179,7 +179,7 @@ export function StepPortfolio() {
         </div>
       </div>
 
-      {/* Upload zone — copper-tinted dashed border, hover/drag affordance */}
+      {/* Upload zone - copper-tinted dashed border, hover/drag affordance */}
       <div
         onDrop={handleDrop}
         onDragOver={(e) => {
@@ -227,7 +227,7 @@ export function StepPortfolio() {
         </p>
       </div>
 
-      {/* Failed uploads — persistent, with retry */}
+      {/* Failed uploads - persistent, with retry */}
       {failed.length > 0 && (
         <div className="space-y-2">
           <p className="text-status-error-fg text-sm font-medium">

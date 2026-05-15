@@ -14,8 +14,8 @@ describe("StitchLoader", () => {
   it("shows the visible label when provided, otherwise an SR-only one", () => {
     const { rerender } = render(<StitchLoader />);
     expect(screen.getByText("Loading")).toBeInTheDocument();
-    rerender(<StitchLoader label="Stitching your order…" />);
-    expect(screen.getByText("Stitching your order…")).toBeInTheDocument();
+    rerender(<StitchLoader label="Stitching your order..." />);
+    expect(screen.getByText("Stitching your order...")).toBeInTheDocument();
   });
 
   it("renders the brand-mark SVG (needle + thread, not generic dots)", () => {
@@ -24,7 +24,7 @@ describe("StitchLoader", () => {
     expect(svg.tagName.toLowerCase()).toBe("svg");
     // Thread (dashed) + needle group should both render.
     expect(svg.querySelector("line[stroke-dasharray]")).not.toBeNull();
-    // Needle traversal — SMIL animateTransform on a translation.
+    // Needle traversal - SMIL animateTransform on a translation.
     expect(
       svg.querySelector('animateTransform[type="translate"]')
     ).not.toBeNull();

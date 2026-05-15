@@ -31,7 +31,7 @@ interface AdditionalDetailsComboboxProps {
 /**
  * Multi-select picker for the `additional_detail` blueprint category, with
  * an inline "+ Add new" affordance backed by createBlueprintOption. Mirrors
- * FabricTypeCombobox 1:1 — only the category string + UX copy differ. Kept
+ * FabricTypeCombobox 1:1 - only the category string + UX copy differ. Kept
  * as its own component (vs. a generic factory) because the call sites stay
  * readable and the category constant is hard-pinned at the boundary.
  */
@@ -42,7 +42,7 @@ export function AdditionalDetailsCombobox({
 }: AdditionalDetailsComboboxProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  // Session-local cache of user-submitted entries awaiting admin approval —
+  // Session-local cache of user-submitted entries awaiting admin approval -
   // keeps the proper label on the chip after creation.
   const [localAdditions, setLocalAdditions] = useState<BlueprintOption[]>([]);
   const { createBlueprintOption, loading: creating } =
@@ -92,7 +92,7 @@ export function AdditionalDetailsCombobox({
       onChange([...selected, result.value]);
       setSearch("");
       toast.success(
-        `"${result.label}" submitted — visible to others once approved`
+        `"${result.label}" submitted - visible to others once approved`
       );
     }
   };

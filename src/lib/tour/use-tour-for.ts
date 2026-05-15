@@ -6,7 +6,7 @@ import type { TourId } from "./types";
 import { useTourStore } from "./use-tour";
 
 /**
- * Page-level hook: fires the named tour on first visit. Idempotent —
+ * Page-level hook: fires the named tour on first visit. Idempotent -
  * if the tour has already been seen (completed or skipped), this is a
  * no-op. Callers don't need to track first-visit themselves; the
  * Zustand store + hydrated server progress handle dedupe.

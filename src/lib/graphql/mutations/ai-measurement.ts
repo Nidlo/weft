@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client/core";
 
 /**
- * Sprint 33a — the mutation is now a dispatcher that returns a job row
+ * Sprint 33a - the mutation is now a dispatcher that returns a job row
  * with `status="queued"`. The FE polls the `measurementScanJob` query
  * (below) every ~3s until a terminal status, then projects `result` into
  * the existing AiFlow review step. The field shape of `result` is

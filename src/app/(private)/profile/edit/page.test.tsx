@@ -240,7 +240,7 @@ describe("ProfileEditPage", () => {
       workshopLat: 5.61,
       workshopLng: -0.185,
     });
-    // Crucially the shop-profile fields must NOT be in the payload — the
+    // Crucially the shop-profile fields must NOT be in the payload - the
     // user only edited the studio, so we must not blindly resubmit (and
     // potentially overwrite with stale form state) the bio / pricing /
     // specializations.

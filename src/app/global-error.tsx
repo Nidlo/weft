@@ -11,7 +11,7 @@ interface GlobalErrorProps {
 
 // `global-error.tsx` replaces the root layout when an uncaught error fires
 // during root-layout render. We must ship our own <html> / <body> tags and
-// can't rely on Providers (Apollo / Auth / Echo) — they may be the thing
+// can't rely on Providers (Apollo / Auth / Echo) - they may be the thing
 // that broke. Stick to Tailwind utilities served by the bundled stylesheet.
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               Nidlo couldn&apos;t recover.
             </h1>
             <p className="text-muted-foreground mt-3 text-sm">
-              We hit an unrecoverable error. Reload the page to start fresh —
+              We hit an unrecoverable error. Reload the page to start fresh -
               your data is safe on the server.
             </p>
             <button

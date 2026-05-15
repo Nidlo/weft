@@ -14,7 +14,7 @@ const TOUR_ORDER: TourId[] = ["home", "newOrder", "orderDetail"];
 
 // Tours anchor to DOM that only exists on a specific route. If the
 // user replays from settings or the header help icon we may not be on
-// that route — navigate first, then start. orderDetail points at the
+// that route - navigate first, then start. orderDetail points at the
 // order list (the user picks a specific order, then we replay on that
 // page); the auto-fire on the detail page handles the rest via the
 // force flag flowing through the store.

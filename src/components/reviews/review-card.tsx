@@ -107,7 +107,7 @@ export function ReviewCard({
         </div>
       )}
 
-      {/* Reply button — designer only, no existing response */}
+      {/* Reply button - designer only, no existing response */}
       {isDesigner && !review.designerResponse && !showResponseForm && (
         <Button
           variant="ghost"

@@ -31,7 +31,7 @@ export function safeNext(
   // Block protocol-handler smuggling via URL parsing oddities
   if (/^\/[a-z][a-z0-9+.-]*:/i.test(trimmed)) return fallback;
 
-  // Don't bounce back into auth pages — would loop
+  // Don't bounce back into auth pages - would loop
   if (
     AUTH_PATH_PREFIXES.some(
       (p) =>

@@ -175,7 +175,7 @@ function ConsentStateCopy({
     return (
       <>
         You accepted analytics cookies
-        {decidedAtPretty ? ` on ${decidedAtPretty}` : ""}. Thank you — it helps
+        {decidedAtPretty ? ` on ${decidedAtPretty}` : ""}. Thank you - it helps
         us improve Nidlo.
       </>
     );

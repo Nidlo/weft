@@ -23,7 +23,7 @@ interface AcceptUpdatedTermsData {
 
 /**
  * Modal that fires when an authenticated user is sitting on a stale
- * `terms_accepted_version`. Non-dismissible — users must view + accept the
+ * `terms_accepted_version`. Non-dismissible - users must view + accept the
  * updated terms (or sign out) to continue using the app. Wired into
  * AppShell so it's globally available on every authed route.
  *
@@ -51,7 +51,7 @@ export function TermsReacceptDialog() {
   //   1. Hydration finished and the user is authed (avoids flicker on guests).
   //   2. The BE responded with the current version.
   //   3. The user's stamped version is non-null and not equal to current.
-  // A null `acceptedVersion` is treated as legacy-pre-versioning — those users
+  // A null `acceptedVersion` is treated as legacy-pre-versioning - those users
   // are handled by the onboarding wizard, not this dialog.
   const open = Boolean(
     hasHydrated &&
@@ -98,10 +98,10 @@ export function TermsReacceptDialog() {
 
         <div className="text-muted-foreground space-y-2 text-sm">
           <p>
-            Your accepted version: <strong>{acceptedVersion ?? "—"}</strong>
+            Your accepted version: <strong>{acceptedVersion ?? "-"}</strong>
           </p>
           <p>
-            Current version: <strong>{currentVersion ?? "—"}</strong>
+            Current version: <strong>{currentVersion ?? "-"}</strong>
           </p>
           <p>
             <Link

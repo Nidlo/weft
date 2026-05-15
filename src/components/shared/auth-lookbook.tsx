@@ -19,14 +19,14 @@ interface Tile {
   craft: string;
   rating?: string;
   icon: LucideIcon;
-  /** Gradient class — applied to the tile background. */
+  /** Gradient class - applied to the tile background. */
   gradient: string;
   /** Tone of the icon + accents on top of the gradient. */
   accent: "ink" | "bone" | "copper";
 }
 
 /**
- * 12 lookbook tiles — Ghana-fashion-flavored captions, rotating gradients
+ * 12 lookbook tiles - Ghana-fashion-flavored captions, rotating gradients
  * across the warm/charcoal/copper palette. Pure CSS + lucide; zero external
  * images. The order is fixed so the duplicated marquee track loops cleanly.
  */
@@ -156,7 +156,7 @@ interface AuthLookbookProps {
 }
 
 /**
- * Fashion lookbook marquee — a vertical infinite scroll of editorial tiles
+ * Fashion lookbook marquee - a vertical infinite scroll of editorial tiles
  * that flank the auth card on `lg+` viewports. Each tile is a styled
  * gradient with a lucide icon, designer name, craft, and a subtle ankara
  * stitch overlay. Pure CSS + motion; no external images.
@@ -215,16 +215,16 @@ function LookbookTile({ tile }: { tile: Tile }) {
         accent.ring
       )}
     >
-      {/* Ankara-inspired stitch overlay — subtle pattern adds texture */}
+      {/* Ankara-inspired stitch overlay - subtle pattern adds texture */}
       <StitchPattern accent={tile.accent} />
 
-      {/* Embossed icon — sits in the upper-right, bigger than the caption */}
+      {/* Embossed icon - sits in the upper-right, bigger than the caption */}
       <Icon
         className={cn("absolute top-3 right-3 h-7 w-7 opacity-50", accent.fg)}
         aria-hidden
       />
 
-      {/* Editorial caption — bottom-aligned */}
+      {/* Editorial caption - bottom-aligned */}
       <div
         className={cn(
           "absolute inset-x-0 bottom-0 p-4 backdrop-blur-[2px]",
@@ -253,7 +253,7 @@ function LookbookTile({ tile }: { tile: Tile }) {
 }
 
 /**
- * SVG diagonal stitch pattern overlay — gives every tile a subtle, on-brand
+ * SVG diagonal stitch pattern overlay - gives every tile a subtle, on-brand
  * texture that hints at fabric weave without competing with the caption.
  */
 function StitchPattern({ accent }: { accent: Tile["accent"] }) {
@@ -313,7 +313,7 @@ const TAGS = [
 ];
 
 /**
- * Horizontal companion marquee — scrolls a row of editorial craft tags.
+ * Horizontal companion marquee - scrolls a row of editorial craft tags.
  * Used at the bottom of the auth screen on smaller viewports where the
  * vertical lookbook columns wouldn't fit.
  */

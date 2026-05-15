@@ -20,7 +20,7 @@ export function StepBasicInfo() {
             Tell us about yourself.
           </h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Your name personalizes communication with designers — both of you
+            Your name personalizes communication with designers - both of you
             see real names on the order.
           </p>
         </div>

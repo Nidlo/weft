@@ -31,7 +31,7 @@ export default function ClientOnboardingPage() {
     COMPLETE_CLIENT_ONBOARDING
   );
 
-  // Synchronous in-flight guard — same pattern as the designer onboarding
+  // Synchronous in-flight guard - same pattern as the designer onboarding
   // page. The mutation's `loading` flag is one tick behind, long enough
   // for a fast double-tap to slip through. Must be declared before the
   // early-return below to satisfy the rules-of-hooks order invariant.

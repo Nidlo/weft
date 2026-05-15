@@ -11,13 +11,13 @@ import { useConsent } from "@/lib/consent/use-consent";
  *
  * Mounted at the root layout so it appears on every route (including
  * unauthenticated landing / search / designer-profile pages). Hidden once
- * the user has either accepted or declined — controlled entirely by the
+ * the user has either accepted or declined - controlled entirely by the
  * `useConsent` hook so there is no separate dismissal state to keep in
  * sync.
  *
  * Why ESC doesn't record consent: a user who hits ESC was actively trying
  * to close the prompt without choosing. We treat that as "no decision
- * yet" so we don't silently opt them in OR out — they'll be reprompted on
+ * yet" so we don't silently opt them in OR out - they'll be reprompted on
  * the next page load. This is the privacy-safer default.
  */
 export function CookieConsentBanner() {
@@ -26,7 +26,7 @@ export function CookieConsentBanner() {
   // Defer mount until after hydration so the server-rendered HTML and the
   // first client render agree. SSR sees `hasDecided=false` (no
   // localStorage), so a decided user would otherwise get the banner in
-  // their SSR HTML then have it disappear on hydration — a textbook
+  // their SSR HTML then have it disappear on hydration - a textbook
   // hydration mismatch. There's no architecturally cleaner way to do this
   // without lazy-importing the whole banner with `ssr: false`, which is
   // heavier for a tiny widget.

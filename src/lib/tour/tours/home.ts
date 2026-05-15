@@ -2,7 +2,7 @@ import type { TourDefinition } from "../types";
 
 /**
  * Plain ASCII only. The "no AI characters" rule: no em-dashes, no smart
- * quotes, no ellipses. Read each step aloud — would a friend actually
+ * quotes, no ellipses. Read each step aloud - would a friend actually
  * say this while pointing at the screen? If not, rewrite.
  */
 export const HOME_TOUR: TourDefinition = {

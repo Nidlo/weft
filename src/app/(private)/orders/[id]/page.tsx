@@ -314,7 +314,7 @@ export default function OrderDetailPage({
           >
             <PriceCell
               label="Budget"
-              value={`${formatPesewas(order.budgetMin)} – ${formatPesewas(order.budgetMax)}`}
+              value={`${formatPesewas(order.budgetMin)} - ${formatPesewas(order.budgetMax)}`}
             />
             {order.confirmedPrice && (
               <PriceCell
@@ -600,7 +600,7 @@ export default function OrderDetailPage({
           </div>
         )}
 
-        {/* Review section — delivered orders */}
+        {/* Review section - delivered orders */}
         {order.status === "delivered" && order.review && (
           <SectionBlock eyebrow="Feedback" title="Your review">
             <GlassCard variant="solid" className="space-y-4 p-5 sm:p-6">
@@ -691,7 +691,7 @@ export default function OrderDetailPage({
           onCancel={handleDepositOverrideCancel}
         />
 
-        {/* Payment + payout sections — clients see pay buttons, both sides see history */}
+        {/* Payment + payout sections - clients see pay buttons, both sides see history */}
         {order.confirmedPrice && (
           <div data-tour-id="orderDetail.payment">
             <PaymentSection
@@ -728,7 +728,7 @@ export default function OrderDetailPage({
           <OrderTimeline updates={order.updates} />
         </SectionBlock>
 
-        {/* Cost Book — designer only, confirmed+ orders */}
+        {/* Cost Book - designer only, confirmed+ orders */}
         {isDesigner && currentStageIndex >= 0 && (
           <SectionBlock eyebrow="Margins" title="Cost book" icon={Coins}>
             <CostBookPanel
@@ -764,7 +764,7 @@ export default function OrderDetailPage({
           </SectionBlock>
         )}
 
-        {/* Garment ease — designer-set per-order allowance, separate from
+        {/* Garment ease - designer-set per-order allowance, separate from
             the client's body measurement (S3). Visible to both parties for
             transparency; only the assigned designer can mutate it. */}
         {(isDesigner ||

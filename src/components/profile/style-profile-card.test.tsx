@@ -126,7 +126,7 @@ describe("StyleProfileCard", () => {
     expect(generateMutationSpy).toHaveBeenCalledWith({
       variables: {
         measurementId: "m-1",
-        // Default preferences store starts in "inches" — forwarded so
+        // Default preferences store starts in "inches" - forwarded so
         // Claude writes the summary in the user's preferred unit.
         displayUnit: "inches",
       },

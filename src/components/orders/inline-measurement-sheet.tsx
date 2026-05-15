@@ -28,7 +28,7 @@ import type {
 interface InlineMeasurementSheetProps {
   /**
    * The linked client's user_id, when the order is for an in-system client.
-   * Mutually exclusive with `pendingClientPhone` — exactly one of the two
+   * Mutually exclusive with `pendingClientPhone` - exactly one of the two
    * MUST be supplied or the sheet trigger is disabled.
    */
   clientId?: string | null;
@@ -46,7 +46,7 @@ interface InlineMeasurementSheetProps {
   onSaved: (measurementId: string) => void;
   /**
    * Trigger label override (default: "+ Take new measurement"). The parent
-   * picks the right copy for the context — e.g. "Try Fitscan" vs
+   * picks the right copy for the context - e.g. "Try Fitscan" vs
    * "Add measurement".
    */
   triggerLabel?: string;
@@ -69,7 +69,7 @@ export function InlineMeasurementSheet({
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"manual" | "ai">("manual");
 
-  // Both client-in-system and walk-in paths hit the same mutation —
+  // Both client-in-system and walk-in paths hit the same mutation -
   // `pendingClientPhone` flips the resolver between user-owned and orphan
   // creation. The CLIENT_MEASUREMENTS refetch keeps the parent
   // MeasurementSelector's list fresh for in-system clients; the orphan
@@ -83,7 +83,7 @@ export function InlineMeasurementSheet({
 
   // The trigger is only enabled when we know who the measurement belongs
   // to. Surfacing the rule inline (rather than hiding the button) keeps
-  // designers aware of WHY they can't take a measurement yet — usually
+  // designers aware of WHY they can't take a measurement yet - usually
   // they need to type the walk-in's phone first.
   const canTakeMeasurement = !!clientId || !!pendingClientPhone;
 
@@ -122,7 +122,7 @@ export function InlineMeasurementSheet({
       if (created) {
         toast.success(
           pendingClientPhone
-            ? "Measurement saved — it will attach when they sign up"
+            ? "Measurement saved - it will attach when they sign up"
             : "Measurement saved"
         );
         onSaved(created.id);

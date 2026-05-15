@@ -13,12 +13,12 @@ interface OnboardingShellProps {
   title: string;
   steps: readonly string[];
   step: number;
-  /** The currently-rendered step content. Wrapped in AnimatePresence — pass a stable `key` per step. */
+  /** The currently-rendered step content. Wrapped in AnimatePresence - pass a stable `key` per step. */
   children: React.ReactNode;
   onBack: () => void;
   onNext: () => void;
   onComplete: () => void;
-  /** Optional skip handler — when present, a Skip button is rendered. */
+  /** Optional skip handler - when present, a Skip button is rendered. */
   onSkip?: () => void;
   /** Disables the Next/Complete button. */
   canProceed: boolean;

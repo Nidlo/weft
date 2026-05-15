@@ -234,7 +234,7 @@ export default function NewOrderPage() {
               New order
             </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-              Create a new order — for a walk-in client, an external customer,
+              Create a new order - for a walk-in client, an external customer,
               or a brief without a client yet.
             </p>
           </header>
@@ -289,7 +289,7 @@ export default function NewOrderPage() {
                 </div>
                 <Textarea
                   id="description"
-                  placeholder="Describe the garment in detail — fabric, style, beading, special requests... You can also dictate via the mic."
+                  placeholder="Describe the garment in detail - fabric, style, beading, special requests... You can also dictate via the mic."
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -597,7 +597,7 @@ export default function NewOrderPage() {
                         (claimed at signup via linkOrphansByPhone)
                     (3) no client at all → designer's own body vault
                         (samples / prototypes / drafts). Same selector,
-                    different list — the backend's MeasurementAccessGuard
+                    different list - the backend's MeasurementAccessGuard
                     validates the chosen ID against the order context. */}
               <MeasurementSelector
                 clientId={linkedClientId ?? null}

@@ -29,7 +29,7 @@ interface ItemTypeComboboxProps {
 
 /**
  * Single-select picker for the `item_type` blueprint_options category.
- * Mirrors GarmentTypeCombobox — same UX, different category. The "+ Add
+ * Mirrors GarmentTypeCombobox - same UX, different category. The "+ Add
  * new" affordance routes through createBlueprintOption; new entries land
  * is_pending=true so they're only visible to the submitter until an admin
  * approves them in Filament.
@@ -81,7 +81,7 @@ export function ItemTypeCombobox({
       setOpen(false);
       setSearch("");
       toast.success(
-        `"${result.label}" submitted — visible to others once approved`
+        `"${result.label}" submitted - visible to others once approved`
       );
     }
   };

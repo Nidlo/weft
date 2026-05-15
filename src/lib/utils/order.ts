@@ -14,7 +14,7 @@ export const ORDER_STATUS_CONFIG: Record<
   OrderStatusKey,
   { label: string; color: string; bgColor: string }
 > = {
-  // Semantic statuses — mapped to brand status tokens.
+  // Semantic statuses - mapped to brand status tokens.
   pending: {
     label: "Pending",
     color: "text-status-warning-fg",
@@ -45,7 +45,7 @@ export const ORDER_STATUS_CONFIG: Record<
     color: "text-muted-foreground",
     bgColor: "bg-muted",
   },
-  // Production-stage hues — intentionally distinct so the order timeline
+  // Production-stage hues - intentionally distinct so the order timeline
   // shows visual progression (indigo → purple → pink → orange).
   fabric_ready: {
     label: "Fabric Ready",
@@ -100,7 +100,7 @@ export function formatPesewas(pesewas: number): string {
 }
 
 /**
- * Compact rendering for cards / hero / list surfaces — drops trailing zeros,
+ * Compact rendering for cards / hero / list surfaces - drops trailing zeros,
  * uses thousands separator. e.g. 150_000 → "GHS 1,500", 12_345 → "GHS 123.45".
  */
 export function formatPesewasShort(pesewas: number): string {
@@ -154,7 +154,7 @@ export const ORDER_RESPONSE_WINDOW_HOURS = 24;
  *   - "Designer has 45m left" when < 1h but > 0
  *   - "Response window expired" when past the cutoff
  *
- * Pure helper — caller is responsible for ticking the clock (re-render
+ * Pure helper - caller is responsible for ticking the clock (re-render
  * via setInterval). Returning a string keeps the call site declarative.
  */
 export function getResponseTimeLeft(
@@ -178,7 +178,7 @@ export function getResponseTimeLeft(
 }
 
 /**
- * Severity tone for the response-window pill — green when fresh, amber
+ * Severity tone for the response-window pill - green when fresh, amber
  * mid-window, red close to expiry / past it.
  */
 export function getResponseTimeColor(

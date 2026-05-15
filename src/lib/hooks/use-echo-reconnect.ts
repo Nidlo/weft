@@ -5,7 +5,7 @@ import type Echo from "laravel-echo";
 
 // Pusher's connection emits state_change events. We only care about the
 // disconnected/unavailable/connecting -> connected transition (a true
-// reconnect), not the first connect — the host page already loaded its data.
+// reconnect), not the first connect - the host page already loaded its data.
 interface PusherStateChange {
   previous: string;
   current: string;
@@ -31,7 +31,7 @@ export function useEchoReconnect(
     if (!echo) return;
 
     // laravel-echo's reverb connector exposes the underlying pusher connection
-    // via .pusher. Type-narrow defensively — Echo's typings don't surface it.
+    // via .pusher. Type-narrow defensively - Echo's typings don't surface it.
     const pusher = (
       echo.connector as unknown as {
         pusher?: {

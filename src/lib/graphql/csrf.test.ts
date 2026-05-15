@@ -56,7 +56,7 @@ describe("ensureCsrfCookie + resetCsrfState", () => {
     await ensureCsrfCookie();
     await ensureCsrfCookie();
 
-    // Once the priming succeeds, the helper memoizes — subsequent calls
+    // Once the priming succeeds, the helper memoizes - subsequent calls
     // are no-ops until `resetCsrfState()` is called.
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0];
@@ -92,7 +92,7 @@ describe("ensureCsrfCookie + resetCsrfState", () => {
       .mockResolvedValueOnce(new Response(null, { status: 204 }));
 
     await expect(ensureCsrfCookie()).rejects.toThrow(/csrf prime failed/);
-    // Second call must reach the network — the first attempt didn't memoise.
+    // Second call must reach the network - the first attempt didn't memoise.
     await ensureCsrfCookie();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });

@@ -10,7 +10,7 @@ const DISCOVERY_LIMIT = 10;
 // Three deliberate calls:
 //  - `cache-first` so a return visit to / doesn't fire 3 fresh searches that
 //    queue against the next-page navigation (HTTP/1.1 caps the per-origin
-//    pool at 6 sockets — top + new + nearby alone can starve it);
+//    pool at 6 sockets - top + new + nearby alone can starve it);
 //  - `useCancelableQuery` so if the user clicks "Get started" mid-fetch on
 //    the first visit, the still-in-flight search is aborted and the country
 //    picker on /auth/phone gets its slot back immediately.

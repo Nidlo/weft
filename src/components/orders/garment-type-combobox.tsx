@@ -79,7 +79,7 @@ export function GarmentTypeCombobox({
       setOpen(false);
       setSearch("");
       toast.success(
-        `"${result.label}" submitted — visible to others once approved`
+        `"${result.label}" submitted - visible to others once approved`
       );
     }
   };

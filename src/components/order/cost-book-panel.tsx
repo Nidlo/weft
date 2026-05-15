@@ -97,7 +97,7 @@ export function CostBookPanel({ orderId, items }: CostBookPanelProps) {
     });
     // Apollo's `update` callback on the mutation appends the new item to
     // the order's items array in the cache, so the panel re-renders with
-    // no GET_ORDER refetch — no parent-driven onItemChange needed.
+    // no GET_ORDER refetch - no parent-driven onItemChange needed.
     if (result) {
       resetForm();
     }
@@ -106,7 +106,7 @@ export function CostBookPanel({ orderId, items }: CostBookPanelProps) {
   const handleToggle = async (itemId: string) => {
     setPendingToggleId(itemId);
     try {
-      // Pass orderId so the hook refetches orderProfitSummary — the
+      // Pass orderId so the hook refetches orderProfitSummary - the
       // "n/m items purchased" + totalItemCost line is computed
       // server-side and won't recompute from Apollo's by-id merge alone.
       await togglePurchased(itemId, orderId);

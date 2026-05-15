@@ -20,7 +20,7 @@ const TAGLINE = "Where every stitch begins.";
 const TAGLINE_DISPLAY = "WHERE EVERY STITCH BEGINS.";
 
 /**
- * Nidlo brand wordmark — needle + thread + type.
+ * Nidlo brand wordmark - needle + thread + type.
  *
  * The needle stitches across the wordmark on mount: thread enters from the
  * left, pulls taut, and the type fades in beneath it. Idle, the needle
@@ -61,7 +61,7 @@ export function NidloMark({
       height={size}
       viewBox={`0 0 ${wordWidth} 48`}
       aria-label={
-        variant === "wordmark-tagline" ? `Nidlo — ${TAGLINE}` : "Nidlo"
+        variant === "wordmark-tagline" ? `Nidlo - ${TAGLINE}` : "Nidlo"
       }
       className={cn("text-foreground", className)}
       fill="none"
@@ -113,7 +113,7 @@ export function NidloMark({
 function NeedleAndThread({ animate }: { animate: boolean }) {
   return (
     <g>
-      {/* Thread loop — draws in on mount, then idle floats */}
+      {/* Thread loop - draws in on mount, then idle floats */}
       <motion.path
         d="M 4 30 C 8 18, 18 14, 28 22 C 34 27, 38 30, 42 30"
         stroke="var(--copper)"
@@ -128,7 +128,7 @@ function NeedleAndThread({ animate }: { animate: boolean }) {
           opacity: { duration: 0.2 },
         }}
       />
-      {/* Needle body — slides into place tracing the thread end */}
+      {/* Needle body - slides into place tracing the thread end */}
       <motion.g
         initial={animate ? { x: -8, opacity: 0 } : false}
         animate={animate ? { x: 0, opacity: 1 } : { opacity: 1 }}
@@ -150,7 +150,7 @@ function NeedleAndThread({ animate }: { animate: boolean }) {
         />
         {/* Needle tip */}
         <path d="M 40 14 L 44 10 L 42 16 Z" fill="currentColor" />
-        {/* Eye of the needle — copper, catches the shimmer */}
+        {/* Eye of the needle - copper, catches the shimmer */}
         <motion.ellipse
           cx="15.5"
           cy="36.5"

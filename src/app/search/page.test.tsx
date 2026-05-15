@@ -130,7 +130,7 @@ describe("SearchPage", () => {
     render(<SearchPage />);
     const chip = screen.getByRole("button", { name: /kaba & slit/i });
     fireEvent.click(chip);
-    // The chip should still be in the document — the click toggles selection
+    // The chip should still be in the document - the click toggles selection
     expect(chip).toBeInTheDocument();
   });
 });

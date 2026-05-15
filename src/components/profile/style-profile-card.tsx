@@ -30,7 +30,7 @@ export function StyleProfileCard() {
     useQuery<MyStyleProfileData>(MY_STYLE_PROFILE);
   const { measurements, loading: loadingMeasurements } = useMeasurements();
   // Pass the user's preferred unit so Claude writes the summary in the
-  // same unit they see everywhere else — avoids "your bust of 101 cm"
+  // same unit they see everywhere else - avoids "your bust of 101 cm"
   // when the rest of the app speaks inches.
   const measurementUnit = usePreferencesStore((s) => s.measurementUnit);
 

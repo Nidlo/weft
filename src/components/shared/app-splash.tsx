@@ -6,7 +6,7 @@ import { useAuthStore } from "@/lib/stores/auth";
 
 /**
  * Brand splash that renders for the duration of the Zustand hydration step.
- * The previous "MIN_VISIBLE_MS = 600" anti-flicker tax was removed — splash
+ * The previous "MIN_VISIBLE_MS = 600" anti-flicker tax was removed - splash
  * unmounts the moment hasHydrated flips; the CSS fade smooths the
  * transition. Pointer-events gated so it stops blocking clicks once hidden.
  *

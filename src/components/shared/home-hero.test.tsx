@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-// Stub the lookbook — its infinite-loop motion.div hangs JSDOM and the test
+// Stub the lookbook - its infinite-loop motion.div hangs JSDOM and the test
 // is concerned with hero copy, not the marquee.
 vi.mock("@/components/shared/auth-lookbook", () => ({
   AuthLookbook: () => null,

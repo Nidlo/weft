@@ -52,14 +52,14 @@ function PaymentCallbackContent({
         <div className="flex flex-col items-center space-y-4 py-16 text-center">
           <StitchLoader size={32} tone="copper" />
           <p className="text-muted-foreground text-sm">
-            Verifying your payment&hellip;
+            Verifying your payment...
           </p>
         </div>
       </AppShell>
     );
   }
 
-  // The reference comes from the gateway via URL — without this guard, a
+  // The reference comes from the gateway via URL - without this guard, a
   // user holding any successful reference URL could render the success
   // page on someone else's /orders/<id>/pay/callback. Tie the reference
   // back to the order in the path.

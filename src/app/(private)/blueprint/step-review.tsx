@@ -43,7 +43,7 @@ export function StepReview({ onEditStep }: StepReviewProps) {
       ? store.fabricTypeOther
       : formatLabel(store.fabricType, options?.fabricTypes ?? []);
 
-  // Snapshot "now" once on mount via lazy initializer — calling Date.now()
+  // Snapshot "now" once on mount via lazy initializer - calling Date.now()
   // directly during render is impure and trips React 19's purity rule. The
   // review screen is short-lived so a fresh snapshot per mount is enough.
   const [nowMs] = useState<number>(() => Date.now());
@@ -169,7 +169,7 @@ export function StepReview({ onEditStep }: StepReviewProps) {
       <ReviewSection title="Budget & timeline" onEdit={() => onEditStep(5)}>
         <KeyValue
           label="Budget"
-          value={`GHS ${Number(store.budgetMin).toLocaleString()} – GHS ${Number(store.budgetMax).toLocaleString()}`}
+          value={`GHS ${Number(store.budgetMin).toLocaleString()} - GHS ${Number(store.budgetMax).toLocaleString()}`}
         />
         <div className="flex items-center justify-between gap-3">
           <span className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">

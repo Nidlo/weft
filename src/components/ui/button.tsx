@@ -21,13 +21,13 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent/40 hover:text-accent-foreground dark:hover:bg-accent/30",
         link: "text-primary underline-offset-4 hover:underline",
-        // Brand-grade primary — the "buy"/"start" button. Solid ink with a
+        // Brand-grade primary - the "buy"/"start" button. Solid ink with a
         // copper glow that breathes on hover.
         luxe: "bg-foreground text-background shadow-[var(--shadow-2)] hover:shadow-[var(--shadow-glow)] hover:-translate-y-px",
-        // Outlined luxe — same gravity, lighter footprint.
+        // Outlined luxe - same gravity, lighter footprint.
         "luxe-outline":
           "border border-foreground/80 bg-transparent text-foreground hover:bg-foreground hover:text-background hover:shadow-[var(--shadow-2)] hover:-translate-y-px",
-        // Glassy surface button — sits on top of busy backgrounds.
+        // Glassy surface button - sits on top of busy backgrounds.
         glass:
           "surface-glass text-foreground hover:shadow-[var(--shadow-3)] hover:-translate-y-px",
       },

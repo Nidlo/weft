@@ -195,7 +195,7 @@ describe("getStatusConfig", () => {
 
   it("preserves distinct production-stage hues", () => {
     // The cutting / sewing / finishing / fabric_ready stages intentionally
-    // use different hues for visual progression — locked in here so a future
+    // use different hues for visual progression - locked in here so a future
     // sweep doesn't accidentally merge them all to the same token.
     expect(getStatusConfig("fabric_ready").bgColor).toBe("bg-indigo-100");
     expect(getStatusConfig("cutting").bgColor).toBe("bg-purple-100");
@@ -227,7 +227,7 @@ describe("getReviewDeadlineLabel", () => {
   });
 
   it("returns the closed sentinel past the cutoff", () => {
-    // Delivered 8 days ago — window of 7 days has elapsed.
+    // Delivered 8 days ago - window of 7 days has elapsed.
     const delivered = new Date(
       NOW.getTime() - 8 * 24 * 60 * 60 * 1000
     ).toISOString();
@@ -249,7 +249,7 @@ describe("getReviewDeadlineLabel", () => {
     expect(getReviewDeadlineLabel(delivered, 14, NOW)).toMatch(/^Review by /);
   });
 
-  it("at the boundary — equal to cutoff is closed (exclusive)", () => {
+  it("at the boundary - equal to cutoff is closed (exclusive)", () => {
     const delivered = new Date(
       NOW.getTime() - 7 * 24 * 60 * 60 * 1000
     ).toISOString();

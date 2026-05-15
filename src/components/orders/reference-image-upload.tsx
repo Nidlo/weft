@@ -147,7 +147,7 @@ export function ReferenceImageUpload({
                 />
               </label>
               <p className="text-muted-foreground mt-1 text-xs">
-                {images.length}/{MAX_IMAGES} — JPEG, PNG, WebP up to{" "}
+                {images.length}/{MAX_IMAGES} - JPEG, PNG, WebP up to{" "}
                 {MAX_SIZE_MB}MB
               </p>
             </>

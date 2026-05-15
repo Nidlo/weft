@@ -29,17 +29,17 @@ interface UseScanJobReturn {
   job: MeasurementScanJob | null;
   /** True while waiting for the worker to reach a terminal status. */
   pending: boolean;
-  /** Seconds since the hook started polling — for the elapsed-time UI. */
+  /** Seconds since the hook started polling - for the elapsed-time UI. */
   elapsedSeconds: number;
 }
 
 /**
- * Sprint 33a — polls `measurementScanJob(id)` every {@link POLL_INTERVAL_MS}
+ * Sprint 33a - polls `measurementScanJob(id)` every {@link POLL_INTERVAL_MS}
  * until the job reaches a terminal status, then fires `onCompleted` or
  * `onFailed`. Sprint 33b will swap this for a Reverb private-channel
  * subscription; the consumer signature stays unchanged.
  *
- * Pass `null` as `jobId` while no scan is in flight — the hook no-ops.
+ * Pass `null` as `jobId` while no scan is in flight - the hook no-ops.
  *
  * Implementation note on the lint suppression below: Apollo v4 removed
  * `onCompleted` from `useQuery`, so the only way to bridge "new polling
@@ -47,7 +47,7 @@ interface UseScanJobReturn {
  * watches `data`. React 19's `react-hooks/set-state-in-effect` rule
  * rightly flags effects that synchronously setState in response to
  * async events, but in this case the setState happens inside the
- * consumer's callback (one frame later) — not in our effect body.
+ * consumer's callback (one frame later) - not in our effect body.
  */
 export function useScanJob(
   jobId: string | null,
@@ -68,7 +68,7 @@ export function useScanJob(
   );
 
   // Apollo v4 types `data` as DeepPartialObject. The server's resolver
-  // either returns a full row or null — there's no partial-field path —
+  // either returns a full row or null - there's no partial-field path -
   // so the runtime shape matches the strict type. Coerce here.
   const job =
     (data?.measurementScanJob as MeasurementScanJob | null | undefined) ?? null;
@@ -104,7 +104,7 @@ export function useScanJob(
     } else {
       options.onFailed?.(job);
     }
-    // Callbacks are intentionally not in the dep list — we want to fire
+    // Callbacks are intentionally not in the dep list - we want to fire
     // exactly once per terminal transition, not on every parent rerender.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job?.id, job?.status]);

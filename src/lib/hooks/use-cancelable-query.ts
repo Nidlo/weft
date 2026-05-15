@@ -35,7 +35,7 @@ export function useCancelableQuery<
   query: DocumentNode | TypedDocumentNode<TData, TVariables>,
   options?: Options<TData, TVariables>
 ) {
-  // Lazy state initializer — useRef would also work but reading
+  // Lazy state initializer - useRef would also work but reading
   // ref.current during render trips react-hooks/refs. State stays
   // referentially stable across renders.
   const [controller] = useState(() => new AbortController());

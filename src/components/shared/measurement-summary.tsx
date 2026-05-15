@@ -41,7 +41,7 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
     waist_to_knee: "Waist to Knee",
     waist_to_floor: "Waist to Floor",
   },
-  // Garment-length fields. NOT measured by the AI — these are style
+  // Garment-length fields. NOT measured by the AI - these are style
   // choices the customer/designer fills in. The manual form pre-fills
   // sensible defaults per garment template (e.g. Kaba → kaba_length 110).
   garments: {
@@ -62,7 +62,7 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 interface MeasurementSummaryProps {
-  /** Canonical mm-integer payload — the only persisted measurement values post-S1c. */
+  /** Canonical mm-integer payload - the only persisted measurement values post-S1c. */
   dataMm: MeasurementMmData;
   /** Sparse mm-integer map of fields the user/designer manually corrected. */
   manualOverridesMm?: MeasurementMmData | null;
@@ -152,7 +152,7 @@ export function MeasurementSummary({
                       className="text-muted-foreground flex justify-between"
                     >
                       <span>{label}</span>
-                      <span>—</span>
+                      <span>-</span>
                     </div>
                   );
                 }
@@ -184,7 +184,7 @@ export function MeasurementSummary({
                           <span
                             aria-label={
                               baseline !== null
-                                ? `Manually corrected — AI saw ${formatMeasurement(baseline, "mm", displayUnit)}`
+                                ? `Manually corrected - AI saw ${formatMeasurement(baseline, "mm", displayUnit)}`
                                 : "Manually corrected"
                             }
                             title={

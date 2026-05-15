@@ -50,7 +50,7 @@ export default function AuthLayout({
 
   return (
     <div className="bg-thread-mesh relative flex min-h-dvh flex-col overflow-hidden">
-      {/* Top-bar — back link + theme toggle. No sticky header on auth pages
+      {/* Top-bar - back link + theme toggle. No sticky header on auth pages
           to keep the focus on the form. */}
       <div className="relative z-20 flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6">
         <Link
@@ -65,10 +65,10 @@ export default function AuthLayout({
       </div>
 
       {/* Main grid: lookbook column · auth card · lookbook column.
-          The columns are decorative — they hide on smaller viewports and
+          The columns are decorative - they hide on smaller viewports and
           are replaced by a horizontal tag marquee underneath the card. */}
       <div className="relative z-10 grid flex-1 grid-cols-1 items-center gap-8 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)] lg:gap-12 lg:px-12 lg:py-10">
-        {/* LEFT lookbook — scrolls up. Hidden under lg. */}
+        {/* LEFT lookbook - scrolls up. Hidden under lg. */}
         <div className="hidden h-[min(100vh-7rem,720px)] items-stretch lg:flex">
           <motion.div
             initial={reduced ? false : { opacity: 0, x: -24 }}
@@ -80,7 +80,7 @@ export default function AuthLayout({
           </motion.div>
         </div>
 
-        {/* CENTER — the actual auth card */}
+        {/* CENTER - the actual auth card */}
         <motion.div
           initial={reduced ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -97,7 +97,7 @@ export default function AuthLayout({
           {children}
         </motion.div>
 
-        {/* RIGHT lookbook — scrolls down. Hidden under lg. */}
+        {/* RIGHT lookbook - scrolls down. Hidden under lg. */}
         <div className="hidden h-[min(100vh-7rem,720px)] items-stretch justify-end lg:flex">
           <motion.div
             initial={reduced ? false : { opacity: 0, x: 24 }}
@@ -114,13 +114,13 @@ export default function AuthLayout({
         </div>
       </div>
 
-      {/* Mobile / tablet companion — horizontal craft-tag marquee fills in
+      {/* Mobile / tablet companion - horizontal craft-tag marquee fills in
           for the missing vertical lookbooks under lg. */}
       <div className="relative z-10 pb-6 lg:hidden">
         <AuthTagMarquee />
       </div>
 
-      {/* Hairline accent at the bottom — subtle copper glow */}
+      {/* Hairline accent at the bottom - subtle copper glow */}
       <div
         className="via-copper/40 pointer-events-none h-px w-full bg-gradient-to-r from-transparent to-transparent"
         aria-hidden

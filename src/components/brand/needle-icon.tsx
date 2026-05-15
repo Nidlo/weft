@@ -8,7 +8,7 @@ interface Props extends React.SVGAttributes<SVGSVGElement> {
 }
 
 /**
- * Brand mark — the needle. Used as a logomark, loading-spinner core, and
+ * Brand mark - the needle. Used as a logomark, loading-spinner core, and
  * inline accent. Drawn at 24×24 with `currentColor` for the body and
  * `var(--copper)` for the eye highlight, so it tints with the surrounding
  * type.
@@ -24,7 +24,7 @@ export function NeedleIcon({ className, withThread = false, ...props }: Props) {
       className={cn("size-5", className)}
       {...props}
     >
-      {/* Needle body — slim, slightly tapered */}
+      {/* Needle body - slim, slightly tapered */}
       <path d="M5 19 L18.2 5.8" stroke="currentColor" strokeWidth="1.6" />
       {/* Pointed tip */}
       <path

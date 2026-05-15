@@ -27,7 +27,7 @@ interface LandmarkOverlayProps {
    * When true, dots become draggable via pointer events. Each move fires
    * `onLandmarksChange` with the FULL updated landmark map (sparse-merge
    * keeps any unchanged entries' visibility unchanged). When false, the
-   * overlay is read-only — same render path, no pointer wiring.
+   * overlay is read-only - same render path, no pointer wiring.
    */
   editable?: boolean;
   /** Called on every pointer-up after a drag with the full updated map. */
@@ -45,7 +45,7 @@ interface DragState {
  * `editable` to surface draggable dots that fire `onLandmarksChange`
  * with the full updated coordinate map (S2.5b). Recompute-from-coords
  * (the affected measurement values changing as the user drags) is
- * still deferred to S2.5c — this component only persists positions.
+ * still deferred to S2.5c - this component only persists positions.
  *
  * The component handles:
  *   - Local `File` photos (creates an object URL, revokes on unmount)
@@ -135,7 +135,7 @@ export function LandmarkOverlay({
       [drag.name]: {
         x: next.x,
         y: next.y,
-        // Preserve the original visibility — dragging signals user
+        // Preserve the original visibility - dragging signals user
         // confidence regardless of what MediaPipe scored.
         visibility: existing?.visibility ?? 1.0,
       },
@@ -240,7 +240,7 @@ export function LandmarkOverlay({
       {(editable || dots.some((d) => d.occluded)) && (
         <div className="bg-background/85 text-muted-foreground absolute right-2 bottom-2 left-2 rounded-lg px-3 py-1.5 text-[10px] tracking-[0.14em] uppercase backdrop-blur">
           {editable
-            ? "Drag any dot to reposition it. Measurements stay editable below — recompute coming in a follow-up."
+            ? "Drag any dot to reposition it. Measurements stay editable below - recompute coming in a follow-up."
             : "Hollow rings = AI saw the landmark at low confidence."}
         </div>
       )}

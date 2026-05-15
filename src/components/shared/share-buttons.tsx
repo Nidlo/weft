@@ -30,7 +30,7 @@ export function ShareButtons({
 
   const specsText =
     specializations.length > 0
-      ? ` — they specialize in ${specializations
+      ? ` - they specialize in ${specializations
           .slice(0, 3)
           .map((s) => s.replace(/-/g, " "))
           .join(", ")}`
@@ -57,7 +57,7 @@ export function ShareButtons({
         url,
       });
     } catch (e) {
-      // User cancelled share — not an error
+      // User cancelled share - not an error
       if ((e as DOMException).name !== "AbortError") {
         toast.error("Failed to share");
       }

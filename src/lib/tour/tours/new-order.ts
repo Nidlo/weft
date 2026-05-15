@@ -1,7 +1,7 @@
 import type { TourDefinition } from "../types";
 
 // The new-order flow is a 7-step wizard. Anchors here all live on
-// step 0 of the wizard — the goal is orientation (where am I, how do
+// step 0 of the wizard - the goal is orientation (where am I, how do
 // I move through this), not annotating every field on every step.
 export const NEW_ORDER_TOUR: TourDefinition = {
   id: "newOrder",

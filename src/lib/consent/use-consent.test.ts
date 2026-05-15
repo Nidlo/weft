@@ -95,7 +95,7 @@ describe("useConsent", () => {
   });
 
   it("survives localStorage throwing (private mode / quota)", () => {
-    // Spy on setItem and throw — emulates Safari private mode SecurityError.
+    // Spy on setItem and throw - emulates Safari private mode SecurityError.
     const setItemSpy = vi
       .spyOn(Storage.prototype, "setItem")
       .mockImplementation(() => {

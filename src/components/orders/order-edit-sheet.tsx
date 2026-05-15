@@ -41,7 +41,7 @@ export function OrderEditSheet({
   const { options } = useBlueprintOptions();
   const { updateOrder, loading: saving } = useUpdateOrder();
 
-  // Editable state — initialized from order
+  // Editable state - initialized from order
   const [garmentType, setGarmentType] = useState("");
   const [fabricTypes, setFabricTypes] = useState<string[]>([]);
   const [additionalDetails, setAdditionalDetails] = useState<string[]>([]);
@@ -55,7 +55,7 @@ export function OrderEditSheet({
   );
   // Track which (orderId, openCount) snapshot we've seeded the form from.
   // Setting state during render guarded by a transition flag is the React 19
-  // way to reset form state when a prop changes — no effect required.
+  // way to reset form state when a prop changes - no effect required.
   const [seededFor, setSeededFor] = useState<string | null>(null);
   const seedKey = open ? `${order.id}` : null;
 
@@ -79,7 +79,7 @@ export function OrderEditSheet({
 
   // Budget edits lock server-side once a confirmed price is set (designer
   // accepted, client may have paid). Send the budget fields only when the
-  // server would actually accept them — otherwise an unrelated edit (e.g.
+  // server would actually accept them - otherwise an unrelated edit (e.g.
   // adding a fabric type after confirmation) gets rejected with "Pricing is
   // locked", because the server treats *presence* of budget keys as intent.
   const budgetLocked = order.confirmedPrice !== null;
@@ -136,7 +136,7 @@ export function OrderEditSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         {/* Size matches the "Advance to <next stage>" luxe button it sits
-            next to on the order detail page — used to be `size="sm"` which
+            next to on the order detail page - used to be `size="sm"` which
             looked like a secondary chip. */}
         <Button variant="outline" size="lg" className="gap-1.5">
           <Pencil className="h-4 w-4" aria-hidden />
@@ -208,7 +208,7 @@ export function OrderEditSheet({
                 />
               </div>
 
-              {/* Budget — locked once a confirmed price exists. The
+              {/* Budget - locked once a confirmed price exists. The
                   renegotiation path is the counter-offer flow on the
                   order detail page. */}
               {budgetLocked ? (
@@ -228,7 +228,7 @@ export function OrderEditSheet({
                 />
               )}
 
-              {/* Measurement — picks from the linked client's vault when
+              {/* Measurement - picks from the linked client's vault when
                   client_id is set, the walk-in's pending rows when only
                   client_phone is set, or the designer's own body vault
                   when neither (e.g. a prototype). Backend's

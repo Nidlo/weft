@@ -82,7 +82,7 @@ export function StepSpecializations() {
             What do you specialize in?
           </h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Pick at least one. Clients filter designers by these — the more
+            Pick at least one. Clients filter designers by these - the more
             relevant tags, the more inquiries.
           </p>
         </div>

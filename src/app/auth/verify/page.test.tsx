@@ -13,7 +13,7 @@ let verifyLoading = false;
 
 vi.mock("@apollo/client/react", () => ({
   useMutation: (doc: unknown) => {
-    // Distinguish by the operation source string — VERIFY_OTP and REQUEST_OTP
+    // Distinguish by the operation source string - VERIFY_OTP and REQUEST_OTP
     // are the only two mutations the verify page uses.
     const text =
       typeof doc === "object" && doc !== null && "loc" in doc
@@ -174,7 +174,7 @@ describe("VerifyOtpPage", () => {
 
   it("clears the digits and stays on the page after a wrong attempt, allowing a retry", async () => {
     // Bug B: a wrong attempt must NOT lock the user out of submitting again
-    // — they should be able to enter the correct code without resending SMS.
+    // - they should be able to enter the correct code without resending SMS.
     verifyOtpMutationSpy.mockRejectedValueOnce(
       new Error("Invalid code. 2 attempt(s) remaining.")
     );
@@ -213,7 +213,7 @@ describe("VerifyOtpPage", () => {
     });
     expect(routerPushSpy).not.toHaveBeenCalled();
 
-    // Second attempt with the correct code — must succeed.
+    // Second attempt with the correct code - must succeed.
     typeCode("123456");
 
     await waitFor(() => {
@@ -281,7 +281,7 @@ describe("VerifyOtpPage", () => {
     // rejected and the in-flight flag resets, an auto-submit handler that
     // captured the same code in a stale closure could fire again. Without
     // the dedupe, that second call inflates the failed-attempts counter
-    // server-side — three of those triggers lockout, which deletes the
+    // server-side - three of those triggers lockout, which deletes the
     // otpKey. After lockout expires, the user's NEXT correct attempt then
     // hits "Verification code expired" because the key is gone. Same-code
     // resubmits must be dropped client-side.

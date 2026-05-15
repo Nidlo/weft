@@ -54,7 +54,7 @@ export function PwaInstallPrompt() {
       try {
         localStorage.setItem(DISMISSED_FLAG, "1");
       } catch {
-        // Best-effort — non-fatal.
+        // Best-effort - non-fatal.
       }
     };
     window.addEventListener("appinstalled", installedHandler);
@@ -74,7 +74,7 @@ export function PwaInstallPrompt() {
       try {
         localStorage.setItem(DISMISSED_FLAG, "1");
       } catch {
-        // Best-effort — non-fatal.
+        // Best-effort - non-fatal.
       }
     }
   };
@@ -84,7 +84,7 @@ export function PwaInstallPrompt() {
     try {
       localStorage.setItem(DISMISSED_FLAG, "1");
     } catch {
-      // Best-effort — non-fatal.
+      // Best-effort - non-fatal.
     }
   };
 

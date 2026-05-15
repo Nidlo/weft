@@ -16,7 +16,7 @@ const OFF_STATE: MaintenanceStatus = {
 };
 
 /**
- * QA-AD-OPS-011 (frontend half) — Sticky red banner shown across all
+ * QA-AD-OPS-011 (frontend half) - Sticky red banner shown across all
  * PWA tabs when the backend's maintenance flag is on. Polls
  * `/api/system/maintenance` every 30s so an operator who flips the
  * toggle in the admin panel sees the banner appear without a manual
@@ -25,7 +25,7 @@ const OFF_STATE: MaintenanceStatus = {
  * 30s + a cheap render-bail.
  *
  * Uses a bare interval+fetch instead of TanStack Query because this is
- * the only consumer of TanStack in the app — pulling in a query client
+ * the only consumer of TanStack in the app - pulling in a query client
  * for one polling endpoint loaded the whole library on every page.
  */
 export function MaintenanceBanner() {
@@ -45,7 +45,7 @@ export function MaintenanceBanner() {
           headers: { Accept: "application/json" },
         });
         if (!response.ok || cancelled) {
-          // A failed poll shouldn't shout "maintenance!" — keep the
+          // A failed poll shouldn't shout "maintenance!" - keep the
           // off-state so a single network hiccup doesn't strand users
           // on a banner with no escape.
           if (!cancelled) setData(OFF_STATE);
@@ -99,7 +99,7 @@ function formatSince(iso: string): string {
   if (Number.isNaN(parsed.getTime())) {
     return iso;
   }
-  // Local time, no seconds — operators care about "started 3 min ago",
+  // Local time, no seconds - operators care about "started 3 min ago",
   // not exact ISO precision. The full ISO is in the audit log.
   return parsed.toLocaleTimeString(undefined, {
     hour: "2-digit",

@@ -198,7 +198,7 @@ describe("LandmarkOverlay", () => {
 
       const dot = screen.getByRole("button", { name: /left shoulder/i });
       fireEvent.pointerDown(dot, { pointerId: 1, clientX: 200, clientY: 400 });
-      // Way outside the 400x800 box — clamps to (1, 1)
+      // Way outside the 400x800 box - clamps to (1, 1)
       fireEvent.pointerMove(dot, {
         pointerId: 1,
         clientX: 10000,
@@ -222,7 +222,7 @@ describe("LandmarkOverlay", () => {
       );
 
       const dot = screen.getByRole("button", { name: /left shoulder/i });
-      // No pointerDown first — move alone shouldn't trigger anything
+      // No pointerDown first - move alone shouldn't trigger anything
       fireEvent.pointerMove(dot, { pointerId: 1, clientX: 200, clientY: 400 });
 
       expect(onChange).not.toHaveBeenCalled();

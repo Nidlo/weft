@@ -27,7 +27,7 @@ import type {
   UpdateQuietHoursData,
 } from "@/types/graphql";
 
-// Channel-toggle category keys only — excludes the quiet-hours string fields
+// Channel-toggle category keys only - excludes the quiet-hours string fields
 // added to `GqlNotificationPreferences` for the quiet-window query payload.
 type CategoryKey = {
   [K in keyof GqlNotificationPreferences]: GqlNotificationPreferences[K] extends NotificationChannels

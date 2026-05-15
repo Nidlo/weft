@@ -11,20 +11,20 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   label?: string;
   /**
    * Visual tone. `default` uses foreground/copper. `copper` pushes the
-   * needle into copper too — eye-catching for primary loading moments
+   * needle into copper too - eye-catching for primary loading moments
    * (Fitscan AI processing, payment polling).
    */
   tone?: "default" | "copper";
 }
 
 /**
- * Brand loading indicator — a needle stitching through a dashed thread.
+ * Brand loading indicator - a needle stitching through a dashed thread.
  * Pure SVG + SMIL animation so the loader stays light (no motion/react
  * import dragged into critical render paths) and survives
  * prefers-reduced-motion via the SVG `<animateTransform>` `begin` /
  * the wrapping component (motion gets paused at the OS level by SMIL).
  *
- * Shapes match src/components/brand/nidlo-mark.tsx — the Nidlo glyph in
+ * Shapes match src/components/brand/nidlo-mark.tsx - the Nidlo glyph in
  * motion. Q-11: single source of truth for the brand mark shapes.
  */
 export function StitchLoader({
@@ -57,7 +57,7 @@ export function StitchLoader({
         aria-hidden
         data-testid="stitch-loader-svg"
       >
-        {/* Dashed thread runway — the path the needle stitches along */}
+        {/* Dashed thread runway - the path the needle stitches along */}
         <line
           x1="8"
           y1="16"
