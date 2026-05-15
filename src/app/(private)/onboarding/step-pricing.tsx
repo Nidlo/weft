@@ -37,7 +37,7 @@ export function StepPricing() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
+      <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr]">
         <div className="space-y-2">
           <Label htmlFor="pricingMin" className="text-sm">
             Minimum
@@ -60,15 +60,20 @@ export function StepPricing() {
               className="h-12 pl-12 text-base font-medium tabular-nums"
             />
           </div>
-          {pricingMin && (
-            <p className="text-muted-foreground text-xs">
-              {formatCurrency(pricingMin)}
-            </p>
-          )}
+          {/* Reserve a fixed-height line for the formatted preview so the
+              Min and Max columns are always the same height. Without this,
+              filling only one input would make that column taller and pull
+              the other column's input visually below the row line. */}
+          <p className="text-muted-foreground min-h-4 text-xs">
+            {pricingMin ? formatCurrency(pricingMin) : ""}
+          </p>
         </div>
 
+        {/* Vertical connector aligned with the input row on >=sm. The
+            `sm:mt-7` accounts for label height (text-sm ~20px) plus the
+            `space-y-2` gap (8px) inside each input column. */}
         <div
-          className="via-copper/60 hidden h-px w-full bg-linear-to-r from-transparent to-transparent sm:block sm:h-12 sm:w-12 sm:bg-linear-to-b"
+          className="via-copper/60 hidden h-px w-full bg-linear-to-r from-transparent to-transparent sm:mt-7 sm:block sm:h-12 sm:w-12 sm:bg-linear-to-b"
           aria-hidden
         />
 
@@ -94,11 +99,9 @@ export function StepPricing() {
               className="h-12 pl-12 text-base font-medium tabular-nums"
             />
           </div>
-          {pricingMax && (
-            <p className="text-muted-foreground text-xs">
-              {formatCurrency(pricingMax)}
-            </p>
-          )}
+          <p className="text-muted-foreground min-h-4 text-xs">
+            {pricingMax ? formatCurrency(pricingMax) : ""}
+          </p>
         </div>
       </div>
 
