@@ -33,10 +33,10 @@ const TILES: Tile[] = [
     description: "Email, SMS, and push preferences",
   },
   {
-    href: "/privacy",
+    href: "/settings/privacy",
     icon: ShieldCheck,
     label: "Privacy",
-    description: "How we handle your data",
+    description: "Cookies, tracking, and how we handle your data",
   },
   {
     href: "/#about",
