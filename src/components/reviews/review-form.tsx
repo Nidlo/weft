@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
 import { StarRating } from "./star-rating";
 import { ReviewPhotoUpload } from "./review-photo-upload";
 import { useSubmitReview } from "@/lib/hooks/use-reviews";
@@ -34,7 +33,7 @@ export function ReviewForm({ orderId, onSuccess, onSkip }: ReviewFormProps) {
         orderId,
         rating,
         comment.trim() || undefined,
-        photos.length > 0 ? photos : undefined,
+        photos.length > 0 ? photos : undefined
       );
       toast.success("Review submitted! Thank you for your feedback.");
       onSuccess();
@@ -59,7 +58,7 @@ export function ReviewForm({ orderId, onSuccess, onSkip }: ReviewFormProps) {
           onChange={(e) => setComment(e.target.value.slice(0, MAX_COMMENT))}
           rows={3}
         />
-        <p className="text-right text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-right text-xs">
           {comment.length}/{MAX_COMMENT}
         </p>
       </div>
@@ -71,17 +70,12 @@ export function ReviewForm({ orderId, onSuccess, onSkip }: ReviewFormProps) {
       <div className="flex gap-2">
         <Button
           onClick={handleSubmit}
-          disabled={loading || rating === 0}
+          disabled={rating === 0}
+          loading={loading}
+          loadingLabel="Submitting..."
           className="flex-1"
         >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            "Submit Review"
-          )}
+          Submit Review
         </Button>
         {onSkip && (
           <Button variant="ghost" onClick={onSkip} disabled={loading}>

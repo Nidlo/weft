@@ -60,7 +60,7 @@ export function MessageBubble({
             // Surfaces: own bubble = ink, theirs = soft secondary chip
             isOwn
               ? "bg-foreground text-background shadow-(--shadow-1)"
-              : "bg-secondary text-foreground ring-1 ring-border/50"
+              : "bg-secondary text-foreground ring-border/50 ring-1"
           )}
         >
           {hasMedia && (
@@ -85,7 +85,7 @@ export function MessageBubble({
           )}
 
           {hasBody && (
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">
               {linkify(
                 message.body!,
                 cn(
@@ -103,12 +103,12 @@ export function MessageBubble({
             className={cn(
               "flex items-center gap-1",
               isOwn ? "justify-end" : "justify-start",
-              hasBody ? "-mb-0.5 mt-1" : "mt-1.5 px-1"
+              hasBody ? "mt-1 -mb-0.5" : "mt-1.5 px-1"
             )}
           >
             <span
               className={cn(
-                "text-[10px] font-medium tabular-nums leading-none",
+                "text-[10px] leading-none font-medium tabular-nums",
                 isOwn ? "text-background/55" : "text-muted-foreground"
               )}
             >

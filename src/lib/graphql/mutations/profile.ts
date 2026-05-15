@@ -8,6 +8,7 @@ export const UPDATE_MY_INFO = gql`
       lastName
       otherNames
       fullName
+      email
       city
       avatarUrl
     }
@@ -26,6 +27,10 @@ export const UPDATE_PROFILE = gql`
       pricingMax
       equipment
       isAcceptingOrders
+      workshopName
+      workshopAddress
+      workshopLat
+      workshopLng
       profileCompleteness
     }
   }

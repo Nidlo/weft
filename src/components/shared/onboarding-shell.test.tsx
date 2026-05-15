@@ -5,7 +5,9 @@ import { OnboardingShell } from "./onboarding-shell";
 
 const STEPS = ["Basics", "Style", "Location", "Finish"] as const;
 
-function renderShell(overrides: Partial<React.ComponentProps<typeof OnboardingShell>> = {}) {
+function renderShell(
+  overrides: Partial<React.ComponentProps<typeof OnboardingShell>> = {}
+) {
   const props: React.ComponentProps<typeof OnboardingShell> = {
     eyebrow: "Test wizard",
     title: "Set up your profile.",
@@ -34,9 +36,7 @@ describe("OnboardingShell", () => {
   it("disables Back on the first step and Continue when canProceed is false", () => {
     renderShell({ step: 0, canProceed: false });
     expect(screen.getByRole("button", { name: /back/i })).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: /continue/i })
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /continue/i })).toBeDisabled();
   });
 
   it("calls onNext when Continue is clicked and canProceed is true", () => {
@@ -47,9 +47,7 @@ describe("OnboardingShell", () => {
 
   it("renders Skip when onSkip is provided and the step isn't the last", () => {
     renderShell({ step: 1, onSkip: vi.fn() });
-    expect(
-      screen.getByRole("button", { name: /skip/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /skip/i })).toBeInTheDocument();
   });
 
   it("swaps Continue for the complete button on the last step", () => {

@@ -1,14 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Banknote,
-  Check,
-  X,
-  Plus,
-  Image as ImageIcon,
-  Loader2,
-} from "lucide-react";
+import { Banknote, Check, X, Plus, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,9 +63,7 @@ export function ExternalPaymentSection({
   const [showForm, setShowForm] = useState(false);
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState<ExternalPaymentMethodValue>("cash");
-  const [paidAt, setPaidAt] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [paidAt, setPaidAt] = useState(new Date().toISOString().split("T")[0]);
   const [notes, setNotes] = useState("");
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -130,11 +121,7 @@ export function ExternalPaymentSection({
           Offline Payments
         </CardTitle>
         {isClient && !showForm && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowForm(true)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
             <Plus className="mr-1 h-3 w-3" />
             Record
           </Button>
@@ -143,7 +130,7 @@ export function ExternalPaymentSection({
       <CardContent className="space-y-3">
         {/* Record Form (Client) */}
         {showForm && (
-          <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+          <div className="bg-muted/30 space-y-3 rounded-lg border p-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Amount (GHS)</Label>
@@ -204,11 +191,9 @@ export function ExternalPaymentSection({
               <Button
                 className="flex-1"
                 onClick={handleRecord}
-                disabled={recording}
+                loading={recording}
+                loadingLabel="Recording..."
               >
-                {recording && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
                 Record Payment
               </Button>
             </div>
@@ -217,7 +202,7 @@ export function ExternalPaymentSection({
 
         {/* Payment List */}
         {externalPayments.length === 0 && !showForm ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             No offline payments recorded.
           </p>
         ) : (
@@ -225,13 +210,13 @@ export function ExternalPaymentSection({
             const styles = STATUS_STYLES[ep.status] ?? STATUS_STYLES.pending;
 
             return (
-              <div key={ep.id} className="rounded-lg border p-3 space-y-2">
+              <div key={ep.id} className="space-y-2 rounded-lg border p-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium">
                       {formatPesewas(ep.amount)}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       {ep.methodLabel} &middot;{" "}
                       {new Date(ep.paidAt).toLocaleDateString("en-GH", {
                         day: "numeric",
@@ -240,15 +225,13 @@ export function ExternalPaymentSection({
                       })}
                     </p>
                   </div>
-                  <Badge
-                    className={`${styles.bg} ${styles.text} border-0`}
-                  >
+                  <Badge className={`${styles.bg} ${styles.text} border-0`}>
                     {ep.statusLabel}
                   </Badge>
                 </div>
 
                 {ep.notes && (
-                  <p className="text-xs text-muted-foreground">{ep.notes}</p>
+                  <p className="text-muted-foreground text-xs">{ep.notes}</p>
                 )}
 
                 {ep.proofImages && ep.proofImages.length > 0 && (
@@ -298,11 +281,9 @@ export function ExternalPaymentSection({
                             size="sm"
                             className="flex-1"
                             onClick={handleReject}
-                            disabled={rejecting}
+                            loading={rejecting}
+                            loadingLabel="Rejecting..."
                           >
-                            {rejecting && (
-                              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                            )}
                             Reject
                           </Button>
                         </div>
@@ -314,13 +295,10 @@ export function ExternalPaymentSection({
                           variant="outline"
                           className="flex-1"
                           onClick={() => handleConfirm(ep.id)}
-                          disabled={confirming}
+                          loading={confirming}
+                          loadingLabel="Confirming..."
                         >
-                          {confirming ? (
-                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                          ) : (
-                            <Check className="mr-1 h-3 w-3" />
-                          )}
+                          <Check className="mr-1 h-3 w-3" />
                           Confirm
                         </Button>
                         <Button

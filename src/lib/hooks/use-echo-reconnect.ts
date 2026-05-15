@@ -36,8 +36,14 @@ export function useEchoReconnect(
       echo.connector as unknown as {
         pusher?: {
           connection?: {
-            bind: (event: string, cb: (data: PusherStateChange) => void) => void;
-            unbind: (event: string, cb: (data: PusherStateChange) => void) => void;
+            bind: (
+              event: string,
+              cb: (data: PusherStateChange) => void
+            ) => void;
+            unbind: (
+              event: string,
+              cb: (data: PusherStateChange) => void
+            ) => void;
           };
         };
       }

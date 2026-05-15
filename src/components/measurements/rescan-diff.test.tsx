@@ -21,7 +21,7 @@ describe("RescanDiff", () => {
         proposedMm={data}
         onApply={vi.fn()}
         onCancel={vi.fn()}
-      />,
+      />
     );
     expect(screen.getByText(/no changes detected/i)).toBeInTheDocument();
   });
@@ -35,7 +35,7 @@ describe("RescanDiff", () => {
         proposedMm={{ upper_body: { bust: 920, waist: 745 } }}
         onApply={vi.fn()}
         onCancel={vi.fn()}
-      />,
+      />
     );
     // "auto-applied" appears in the header summary AND the badge — assert
     // both surfaces are populated by checking the count is at least one.
@@ -53,11 +53,11 @@ describe("RescanDiff", () => {
         proposedMm={{ upper_body: { bust: 974 } }}
         onApply={vi.fn()}
         onCancel={vi.fn()}
-      />,
+      />
     );
     expect(screen.getByText(/^Rejected$/)).toBeInTheDocument();
     expect(
-      screen.getByText(/too large for the AI to be trustworthy/i),
+      screen.getByText(/too large for the AI to be trustworthy/i)
     ).toBeInTheDocument();
   });
 
@@ -73,7 +73,7 @@ describe("RescanDiff", () => {
         }}
         onApply={onApply}
         onCancel={vi.fn()}
-      />,
+      />
     );
 
     // Tick the prompt-tier checkbox
@@ -96,7 +96,7 @@ describe("RescanDiff", () => {
         proposedMm={{ upper_body: { bust: 920 } }} // auto only
         onApply={onApply}
         onCancel={vi.fn()}
-      />,
+      />
     );
 
     fireEvent.click(screen.getByRole("button", { name: /apply auto/i }));
@@ -110,7 +110,7 @@ describe("RescanDiff", () => {
         baselineMm={{ upper_body: { bust: 800 } }}
         proposedMm={{ upper_body: { bust: 914 } }}
         onApply={vi.fn()}
-      />,
+      />
     );
     expect(screen.getByText(/36\.0 in/)).toBeInTheDocument();
   });

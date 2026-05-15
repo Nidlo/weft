@@ -133,7 +133,7 @@ describe("probeSessionAndLogoutIfDead (Apollo errorLink Me-probe)", () => {
     // Real session expiry — Me itself fails Unauthenticated.
     // We catch on the rejection and trigger logout so the UI re-routes.
     vi.spyOn(apolloClient, "query").mockRejectedValueOnce(
-      new Error("Unauthenticated."),
+      new Error("Unauthenticated.")
     );
 
     await probeSessionAndLogoutIfDead();

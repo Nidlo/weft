@@ -4,19 +4,28 @@ import type { MeasurementMmData } from "@/types/graphql";
 import { usePreferencesStore } from "@/lib/stores/preferences";
 import { formatMeasurement } from "@/lib/utils/measurement";
 
+// Field labels follow the Ghana ladies-measurement-booth standard
+// (Sprint 36 booth-coverage). Field keys stay snake_case so they line up
+// with the backend FIELD_MAP output; display strings match the booth.
 const FIELD_LABELS: Record<string, Record<string, string>> = {
   upper_body: {
     shoulder: "Shoulder",
-    bust: "Bust / Chest",
-    underbust: "Underbust",
+    bust: "Bust",
+    underbust: "Under breast waist",
     waist: "Waist",
     neck: "Neck",
-    arm_length: "Arm Length",
-    bicep: "Bicep",
+    across_back: "Across Back",
+    across_chest: "Across Chest",
+    nipple_to_nipple: "Nipple to Nipple",
+    arm_length: "Sleeve length",
+    bicep: "Around Arm",
+    around_arm_3_4: "Around Arm 3/4",
     wrist: "Wrist",
+    back_length: "Nape to Waist",
   },
   lower_body: {
-    hips: "Hips",
+    hips: "Hip",
+    hip_depth: "Hip Depth",
     thigh: "Thigh",
     inseam: "Inseam",
     outseam: "Outseam",
@@ -25,9 +34,23 @@ const FIELD_LABELS: Record<string, Record<string, string>> = {
   },
   vertical: {
     full_height: "Full Height",
+    shoulder_to_nipple: "Shoulder to Nipple",
+    shoulder_to_underbust: "Shoulder to Underbust",
     shoulder_to_waist: "Shoulder to Waist",
+    shoulder_to_hip: "Shoulder to Hip",
     waist_to_knee: "Waist to Knee",
     waist_to_floor: "Waist to Floor",
+  },
+  // Garment-length fields. NOT measured by the AI — these are style
+  // choices the customer/designer fills in. The manual form pre-fills
+  // sensible defaults per garment template (e.g. Kaba → kaba_length 110).
+  garments: {
+    blouse_length: "Blouse length",
+    kaba_length: "Kaba length",
+    skirt_length: "Skirt length",
+    slit_length: "Slit length",
+    dress_length: "Dress length",
+    cape: "Cape",
   },
 };
 
@@ -35,6 +58,7 @@ const SECTION_LABELS: Record<string, string> = {
   upper_body: "Upper Body",
   lower_body: "Lower Body",
   vertical: "Vertical",
+  garments: "Garment lengths",
 };
 
 interface MeasurementSummaryProps {
@@ -56,7 +80,7 @@ interface MeasurementSummaryProps {
 function readField(
   payload: MeasurementMmData | null | undefined,
   section: string,
-  field: string,
+  field: string
 ): number | null {
   if (!payload) return null;
   const sec = (payload as Record<string, Record<string, number | null>>)[
@@ -69,7 +93,7 @@ function readField(
 function fieldIsOverridden(
   overrides: MeasurementMmData | null | undefined,
   section: string,
-  field: string,
+  field: string
 ): boolean {
   if (!overrides) return false;
   const sec = (overrides as Record<string, Record<string, number | null>>)[
@@ -92,7 +116,7 @@ export function MeasurementSummary({
     <div className={compact ? "space-y-2" : "space-y-4"}>
       {sections.map(([section, fields]) => {
         const hasValues = Object.entries(fields).some(
-          ([field]) => readField(dataMm, section, field) !== null,
+          ([field]) => readField(dataMm, section, field) !== null
         );
 
         if (!hasValues && compact) return null;
@@ -100,28 +124,32 @@ export function MeasurementSummary({
         return (
           <div key={section}>
             <h4
-              className={`font-medium ${compact ? "text-xs text-muted-foreground" : "text-sm mb-2"}`}
+              className={`font-medium ${compact ? "text-muted-foreground text-xs" : "mb-2 text-sm"}`}
             >
               {SECTION_LABELS[section]}
             </h4>
             <div
-              className={`grid gap-x-4 gap-y-1 ${compact ? "grid-cols-2 text-xs" : "grid-cols-2 sm:grid-cols-3 text-sm"}`}
+              className={`grid gap-x-4 gap-y-1 ${compact ? "grid-cols-2 text-xs" : "grid-cols-2 text-sm sm:grid-cols-3"}`}
             >
               {Object.entries(fields).map(([field, label]) => {
                 const value = readField(dataMm, section, field);
                 const overridden = fieldIsOverridden(
                   manualOverridesMm,
                   section,
-                  field,
+                  field
                 );
-                const baseline = readField(aiBaselineMm ?? null, section, field);
+                const baseline = readField(
+                  aiBaselineMm ?? null,
+                  section,
+                  field
+                );
 
                 if (value === null) {
                   if (compact) return null;
                   return (
                     <div
                       key={field}
-                      className="flex justify-between text-muted-foreground"
+                      className="text-muted-foreground flex justify-between"
                     >
                       <span>{label}</span>
                       <span>—</span>
@@ -148,7 +176,7 @@ export function MeasurementSummary({
                                 ? `AI baseline: ${formatMeasurement(baseline, "mm", displayUnit)} (click to reset)`
                                 : "Click to reset to AI baseline"
                             }
-                            className="cursor-pointer text-[10px] leading-none text-copper hover:text-foreground"
+                            className="text-copper hover:text-foreground cursor-pointer text-[10px] leading-none"
                           >
                             ✏
                           </button>
@@ -164,7 +192,7 @@ export function MeasurementSummary({
                                 ? `AI baseline: ${formatMeasurement(baseline, "mm", displayUnit)}`
                                 : "Manually corrected"
                             }
-                            className="text-[10px] leading-none text-copper"
+                            className="text-copper text-[10px] leading-none"
                           >
                             ✏
                           </span>

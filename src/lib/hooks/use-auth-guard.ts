@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth";
 
 interface UseAuthGuardOptions {
@@ -27,6 +27,8 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
     redirectOnboardedTo,
   } = options;
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isLoading = useAuthStore((s) => s.isLoading);
@@ -37,7 +39,23 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
     if (!_hasHydrated || isLoading) return;
 
     if (!isAuthenticated) {
-      router.replace(redirectTo);
+      // Preserve the current path as ?next= so a deep-linked arrival
+      // (SMS / email / push) lands back on the intended page after
+      // login. Skipped when we're already on an auth page (would loop)
+      // or when redirectTo is non-default (caller already specified).
+      const isAuthRedirect = redirectTo.startsWith("/auth/");
+      const currentSearch = searchParams?.toString();
+      const currentUrl = currentSearch
+        ? `${pathname}?${currentSearch}`
+        : (pathname ?? "");
+      const shouldPreserve =
+        isAuthRedirect && pathname && !pathname.startsWith("/auth/");
+
+      router.replace(
+        shouldPreserve
+          ? `${redirectTo}?next=${encodeURIComponent(currentUrl)}`
+          : redirectTo
+      );
       return;
     }
 
@@ -65,11 +83,12 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
     redirectOnboardedTo,
     designerRedirectTo,
     router,
+    pathname,
+    searchParams,
   ]);
 
   const meetsDesignerRequirement = !requireDesigner || !!user?.isDesigner;
-  const meetsOnboardedRequirement =
-    !redirectOnboardedTo || !user?.isOnboarded;
+  const meetsOnboardedRequirement = !redirectOnboardedTo || !user?.isOnboarded;
 
   return {
     user,

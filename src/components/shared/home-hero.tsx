@@ -14,7 +14,7 @@ const AuthLookbook = dynamic(
     import("@/components/shared/auth-lookbook").then((m) => ({
       default: m.AuthLookbook,
     })),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => null }
 );
 
 /**
@@ -33,11 +33,11 @@ export function HomeHero() {
       className={cn(
         "relative overflow-hidden",
         "bg-thread-mesh",
-        "px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-16"
+        "px-4 pt-12 pb-16 sm:px-6 sm:pt-16 sm:pb-20"
       )}
     >
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-copper/40 to-transparent"
+        className="via-copper/40 pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent"
         aria-hidden
       />
 
@@ -48,18 +48,18 @@ export function HomeHero() {
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           className="flex max-w-2xl flex-col items-start"
         >
-          <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/80 backdrop-blur">
+          <span className="border-border bg-background/60 text-foreground/80 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.18em] uppercase backdrop-blur">
             Nidlo
           </span>
 
-          <h1 className="text-display mt-5 text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+          <h1 className="text-display mt-5 text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
             Clothes made the way you want them.
           </h1>
 
-          <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+          <p className="text-muted-foreground mt-5 max-w-xl text-base leading-relaxed text-pretty sm:text-lg">
             Nidlo connects you with custom fashion designers, tailors, and
-            seamstresses. Find one near you to visit in person, or work with
-            one anywhere through your phone. Measurements, fittings, progress
+            seamstresses. Find one near you to visit in person, or work with one
+            anywhere through your phone. Measurements, fittings, progress
             updates, and payment all happen in one place.
           </p>
 
@@ -69,14 +69,14 @@ export function HomeHero() {
         <div className="relative hidden h-[460px] lg:block">
           <AuthLookbook direction="up" />
           <div
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-transparent to-background"
+            className="from-background to-background pointer-events-none absolute inset-0 bg-gradient-to-t via-transparent"
             aria-hidden
           />
         </div>
       </div>
 
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-copper/40 to-transparent"
+        className="via-copper/40 pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent to-transparent"
         aria-hidden
       />
     </section>

@@ -1,5 +1,6 @@
 const IMAGEKIT_ENDPOINT =
-  process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "https://ik.imagekit.io/snad";
+  process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ??
+  "https://ik.imagekit.io/snad";
 
 export function getImageKitThumbnail(url: string, width = 400): string {
   if (!url.includes("ik.imagekit.io")) return url;

@@ -55,7 +55,7 @@ export default function AuthLayout({
       <div className="relative z-20 flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground"
+          className="text-muted-foreground hover:bg-background/60 hover:text-foreground inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors"
           aria-label="Back to home"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -89,7 +89,7 @@ export default function AuthLayout({
         >
           <div className="mb-8 flex flex-col items-center text-center">
             <NidloMark variant="wordmark" size={36} />
-            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-[11px] font-semibold tracking-[0.18em] uppercase">
               Where every stitch begins
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function AuthLayout({
 
       {/* Hairline accent at the bottom — subtle copper glow */}
       <div
-        className="pointer-events-none h-px w-full bg-gradient-to-r from-transparent via-copper/40 to-transparent"
+        className="via-copper/40 pointer-events-none h-px w-full bg-gradient-to-r from-transparent to-transparent"
         aria-hidden
       />
     </div>

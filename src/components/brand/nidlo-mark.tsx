@@ -149,10 +149,7 @@ function NeedleAndThread({ animate }: { animate: boolean }) {
           strokeLinecap="round"
         />
         {/* Needle tip */}
-        <path
-          d="M 40 14 L 44 10 L 42 16 Z"
-          fill="currentColor"
-        />
+        <path d="M 40 14 L 44 10 L 42 16 Z" fill="currentColor" />
         {/* Eye of the needle — copper, catches the shimmer */}
         <motion.ellipse
           cx="15.5"

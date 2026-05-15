@@ -15,7 +15,12 @@ interface PaymentMethodSelectorProps {
   defaultPhone?: string;
 }
 
-const METHOD_ORDER: PaymentMethodValue[] = ["momo_mtn", "momo_vodafone", "momo_airteltigo", "card"];
+const METHOD_ORDER: PaymentMethodValue[] = [
+  "momo_mtn",
+  "momo_vodafone",
+  "momo_airteltigo",
+  "card",
+];
 
 export function PaymentMethodSelector({
   onSelect,
@@ -44,12 +49,14 @@ export function PaymentMethodSelector({
             <Card
               key={method}
               className={`cursor-pointer transition-colors ${
-                isSelected ? "border-primary bg-primary/5" : "hover:border-muted-foreground/30"
+                isSelected
+                  ? "border-primary bg-primary/5"
+                  : "hover:border-muted-foreground/30"
               }`}
               onClick={() => setSelected(method)}
             >
               <CardContent className="flex items-center gap-3 py-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                <div className="bg-secondary flex h-10 w-10 items-center justify-center rounded-full">
                   {config.isMomo ? (
                     <Smartphone className="h-5 w-5" />
                   ) : (
@@ -58,13 +65,13 @@ export function PaymentMethodSelector({
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium">{config.label}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {config.isMomo ? "Pay with Mobile Money" : "Visa / Mastercard"}
+                  <p className="text-muted-foreground text-xs">
+                    {config.isMomo
+                      ? "Pay with Mobile Money"
+                      : "Visa / Mastercard"}
                   </p>
                 </div>
-                {isSelected && (
-                  <Check className="h-5 w-5 text-primary" />
-                )}
+                {isSelected && <Check className="text-primary h-5 w-5" />}
               </CardContent>
             </Card>
           );
@@ -84,7 +91,7 @@ export function PaymentMethodSelector({
             autoComplete="tel"
             inputMode="numeric"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Your Mobile Money number for this payment.
           </p>
         </div>
@@ -92,10 +99,12 @@ export function PaymentMethodSelector({
 
       <Button
         className="w-full"
-        disabled={!canProceed || loading}
+        disabled={!canProceed}
+        loading={loading}
+        loadingLabel="Initializing..."
         onClick={handleProceed}
       >
-        {loading ? "Initializing..." : "Continue to Pay"}
+        Continue to Pay
       </Button>
     </div>
   );

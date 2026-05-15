@@ -50,7 +50,7 @@ export function DesignerScrollSection({
         browseHref && (
           <Link
             href={browseHref}
-            className="inline-flex items-center gap-1 text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+            className="text-foreground/80 hover:text-foreground inline-flex items-center gap-1 text-sm font-medium transition-colors"
           >
             See all
             <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -63,11 +63,7 @@ export function DesignerScrollSection({
           {loading &&
             designers.length === 0 &&
             Array.from({ length: 5 }).map((_, i) => (
-              <GlassCard
-                key={i}
-                variant="solid"
-                className="w-55 shrink-0 p-4"
-              >
+              <GlassCard key={i} variant="solid" className="w-55 shrink-0 p-4">
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-11 w-11 rounded-full" />
                   <div className="flex-1 space-y-2">
@@ -99,16 +95,11 @@ function MiniDesignerCard({ designer }: { designer: DesignerCard }) {
   return (
     <Link
       href={`/designer/${designer.slug}`}
-      className="group block shrink-0 outline-none rounded-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="group focus-visible:ring-ring focus-visible:ring-offset-background block shrink-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
     >
-      <GlassCard
-        variant="solid"
-        interactive
-        glow="copper"
-        className="w-55 p-4"
-      >
+      <GlassCard variant="solid" interactive glow="copper" className="w-55 p-4">
         <div className="flex items-center gap-3">
-          <Avatar className="h-11 w-11 ring-1 ring-border">
+          <Avatar className="ring-border h-11 w-11 ring-1">
             <AvatarImage src={designer.avatarUrl ?? undefined} alt={name} />
             <AvatarFallback className="bg-secondary text-xs font-medium">
               {getInitials(designer.displayName ?? designer.fullName)}
@@ -119,7 +110,7 @@ function MiniDesignerCard({ designer }: { designer: DesignerCard }) {
               {name}
             </p>
             {designer.city && (
-              <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
+              <p className="text-muted-foreground flex items-center gap-1 truncate text-xs">
                 <MapPin className="h-3 w-3" aria-hidden />
                 <span className="truncate">
                   {designer.city}
@@ -141,7 +132,7 @@ function MiniDesignerCard({ designer }: { designer: DesignerCard }) {
               <Badge
                 key={s}
                 variant="outline"
-                className="rounded-full border-border bg-background/50 px-2 py-0 text-[10px] font-medium capitalize"
+                className="border-border bg-background/50 rounded-full px-2 py-0 text-[10px] font-medium capitalize"
               >
                 {s.replace(/-/g, " ")}
               </Badge>
@@ -149,7 +140,7 @@ function MiniDesignerCard({ designer }: { designer: DesignerCard }) {
             {specs.length > 2 && (
               <Badge
                 variant="outline"
-                className="rounded-full border-border bg-background/50 px-2 py-0 text-[10px] font-medium"
+                className="border-border bg-background/50 rounded-full px-2 py-0 text-[10px] font-medium"
               >
                 +{specs.length - 2}
               </Badge>
@@ -157,11 +148,11 @@ function MiniDesignerCard({ designer }: { designer: DesignerCard }) {
           </div>
         )}
 
-        <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-2.5 text-xs">
+        <div className="border-border/60 mt-3 flex items-center justify-between border-t pt-2.5 text-xs">
           <div className="flex items-center gap-1">
             <Star
               className={cn(
-                "h-3.5 w-3.5 fill-copper text-copper transition-transform",
+                "fill-copper text-copper h-3.5 w-3.5 transition-transform",
                 "group-hover:rotate-12"
               )}
               aria-hidden

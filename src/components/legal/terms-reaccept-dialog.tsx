@@ -55,10 +55,10 @@ export function TermsReacceptDialog() {
   // are handled by the onboarding wizard, not this dialog.
   const open = Boolean(
     hasHydrated &&
-      isAuthenticated &&
-      currentVersion &&
-      acceptedVersion &&
-      acceptedVersion !== currentVersion,
+    isAuthenticated &&
+    currentVersion &&
+    acceptedVersion &&
+    acceptedVersion !== currentVersion
   );
 
   const handleAccept = async () => {
@@ -67,13 +67,16 @@ export function TermsReacceptDialog() {
       const result = await accept();
       const updated = result.data?.acceptUpdatedTerms;
       if (updated && user) {
-        setUser({ ...user, termsAcceptedVersion: updated.termsAcceptedVersion });
+        setUser({
+          ...user,
+          termsAcceptedVersion: updated.termsAcceptedVersion,
+        });
       }
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "We couldn't record your acceptance. Try again.",
+          : "We couldn't record your acceptance. Try again."
       );
     }
   };
@@ -93,7 +96,7 @@ export function TermsReacceptDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2 text-sm text-muted-foreground">
+        <div className="text-muted-foreground space-y-2 text-sm">
           <p>
             Your accepted version: <strong>{acceptedVersion ?? "—"}</strong>
           </p>
@@ -113,14 +116,18 @@ export function TermsReacceptDialog() {
         </div>
 
         {error && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-destructive text-sm">
             {error}
           </p>
         )}
 
         <DialogFooter>
-          <Button onClick={handleAccept} disabled={loading}>
-            {loading ? "Accepting..." : "I accept the updated Terms"}
+          <Button
+            onClick={handleAccept}
+            loading={loading}
+            loadingLabel="Accepting..."
+          >
+            I accept the updated Terms
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -38,7 +38,7 @@ import type {
  */
 function shouldToast(
   prefs: GqlNotificationPreferences | null | undefined,
-  type: string,
+  type: string
 ): boolean {
   if (!prefs) return true;
   const key = type.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()) as
@@ -88,7 +88,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     {
       skip: !hasHydrated || !isAuthenticated,
       fetchPolicy: "cache-first",
-    },
+    }
   );
   const prefs = prefsData?.myNotificationPreferences ?? null;
 
@@ -130,7 +130,14 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       .catch(() => {
         // Silently fail — badge will show 0
       });
-  }, [hasHydrated, isAuthenticated, userId, apolloClient, setUnreadCount, setNotifUnread]);
+  }, [
+    hasHydrated,
+    isAuthenticated,
+    userId,
+    apolloClient,
+    setUnreadCount,
+    setNotifUnread,
+  ]);
 
   // Fetch unread count once on authentication
   useEffect(() => {

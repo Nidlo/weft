@@ -1,4 +1,8 @@
-import type { PaymentMethodValue, PaymentStatusValue, PaymentTypeValue } from "@/types/graphql";
+import type {
+  PaymentMethodValue,
+  PaymentStatusValue,
+  PaymentTypeValue,
+} from "@/types/graphql";
 
 export interface PaymentMethodConfig {
   label: string;
@@ -8,7 +12,10 @@ export interface PaymentMethodConfig {
   provider?: string;
 }
 
-export const PAYMENT_METHOD_CONFIG: Record<PaymentMethodValue, PaymentMethodConfig> = {
+export const PAYMENT_METHOD_CONFIG: Record<
+  PaymentMethodValue,
+  PaymentMethodConfig
+> = {
   momo_mtn: {
     label: "MTN Mobile Money",
     shortLabel: "MTN MoMo",
@@ -42,10 +49,26 @@ export const PAYMENT_STATUS_CONFIG: Record<
   PaymentStatusValue,
   { label: string; color: string; bgColor: string }
 > = {
-  pending: { label: "Pending", color: "text-status-warning-fg", bgColor: "bg-status-warning-soft" },
-  success: { label: "Paid", color: "text-status-success-fg", bgColor: "bg-status-success-soft" },
-  failed: { label: "Failed", color: "text-status-error-fg", bgColor: "bg-status-error-soft" },
-  refunded: { label: "Refunded", color: "text-status-info-fg", bgColor: "bg-status-info-soft" },
+  pending: {
+    label: "Pending",
+    color: "text-status-warning-fg",
+    bgColor: "bg-status-warning-soft",
+  },
+  success: {
+    label: "Paid",
+    color: "text-status-success-fg",
+    bgColor: "bg-status-success-soft",
+  },
+  failed: {
+    label: "Failed",
+    color: "text-status-error-fg",
+    bgColor: "bg-status-error-soft",
+  },
+  refunded: {
+    label: "Refunded",
+    color: "text-status-info-fg",
+    bgColor: "bg-status-info-soft",
+  },
 };
 
 export function getPaymentStatusConfig(status: string) {

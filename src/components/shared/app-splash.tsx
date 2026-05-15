@@ -1,49 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { NidloMark } from "@/components/brand/nidlo-mark";
+import { StitchLoader } from "@/components/ui/stitch-loader";
 import { useAuthStore } from "@/lib/stores/auth";
 
-// Minimum visible duration so a fast hydration doesn't show a one-frame flash.
-const MIN_VISIBLE_MS = 600;
-
 /**
- * Brand splash that renders for the duration of the Zustand hydration step
- * (and until `MIN_VISIBLE_MS` has elapsed). Without this, PWA cold-starts
- * showed a flash of un-styled / unhydrated content before `AuthProvider`
- * settled. After hydration the splash fades out.
+ * Brand splash that renders for the duration of the Zustand hydration step.
+ * The previous "MIN_VISIBLE_MS = 600" anti-flicker tax was removed — splash
+ * unmounts the moment hasHydrated flips; the CSS fade smooths the
+ * transition. Pointer-events gated so it stops blocking clicks once hidden.
+ *
+ * Renders the brand mark via <NidloMark> instead of the previous plain
+ * "Nidlo" text + linear-bar combo. Single source of truth for the mark.
  */
 export function AppSplash() {
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
-  const [mountedAt] = useState(() => Date.now());
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    if (!hasHydrated) return;
-    const elapsed = Date.now() - mountedAt;
-    const remaining = Math.max(0, MIN_VISIBLE_MS - elapsed);
-    const id = setTimeout(() => setVisible(false), remaining);
-    return () => clearTimeout(id);
-  }, [hasHydrated, mountedAt]);
-
-  if (!visible) return null;
 
   return (
     <div
       role="status"
       aria-live="polite"
       aria-label="Loading Nidlo"
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-background transition-opacity duration-300"
-      style={{ opacity: hasHydrated ? 0 : 1 }}
+      className="bg-background fixed inset-0 z-[200] flex flex-col items-center justify-center gap-8 transition-opacity duration-300"
+      style={{
+        opacity: hasHydrated ? 0 : 1,
+        pointerEvents: hasHydrated ? "none" : "auto",
+      }}
+      aria-hidden={hasHydrated ? "true" : "false"}
     >
-      <div className="text-3xl font-bold tracking-tight text-foreground">
-        Nidlo
-      </div>
-      <p className="mt-2 text-sm uppercase tracking-widest text-primary">
-        Where every stitch begins
-      </p>
-      <div className="mt-8 h-1 w-32 overflow-hidden rounded-full bg-muted">
-        <div className="h-full w-1/3 animate-[splash-bar_1.2s_ease-in-out_infinite] rounded-full bg-primary" />
-      </div>
+      {/* `static` skips NidloMark's entrance animation. The splash is
+          typically gone before that 0.55s+ delay finishes, so without
+          this the user only saw the StitchLoader's dashes. */}
+      <NidloMark variant="wordmark-tagline" size={56} static />
+      <StitchLoader size={28} tone="copper" />
     </div>
   );
 }

@@ -25,12 +25,12 @@ export function PaymentResult({
     <div className="flex flex-col items-center space-y-6 py-8 text-center">
       {status === "success" && (
         <>
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-success-soft">
-            <CheckCircle2 className="h-10 w-10 text-status-success" />
+          <div className="bg-status-success-soft flex h-20 w-20 items-center justify-center rounded-full">
+            <CheckCircle2 className="text-status-success h-10 w-10" />
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Payment Successful</h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Your {formatPaymentType(paymentType).toLowerCase()} of{" "}
               <strong>{formatPesewas(amount)}</strong> has been received.
             </p>
@@ -40,12 +40,12 @@ export function PaymentResult({
 
       {status === "failed" && (
         <>
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-error-soft">
-            <XCircle className="h-10 w-10 text-status-error" />
+          <div className="bg-status-error-soft flex h-20 w-20 items-center justify-center rounded-full">
+            <XCircle className="text-status-error h-10 w-10" />
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Payment Failed</h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Your {formatPaymentType(paymentType).toLowerCase()} of{" "}
               <strong>{formatPesewas(amount)}</strong> could not be processed.
               Please try again.
@@ -56,14 +56,14 @@ export function PaymentResult({
 
       {status === "timeout" && (
         <>
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-status-warning-soft">
-            <Clock className="h-10 w-10 text-status-warning" />
+          <div className="bg-status-warning-soft flex h-20 w-20 items-center justify-center rounded-full">
+            <Clock className="text-status-warning h-10 w-10" />
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Payment Pending</h2>
-            <p className="text-sm text-muted-foreground">
-              We haven&apos;t received confirmation yet. If you approved the payment,
-              it may take a moment to process.
+            <p className="text-muted-foreground text-sm">
+              We haven&apos;t received confirmation yet. If you approved the
+              payment, it may take a moment to process.
             </p>
           </div>
         </>
@@ -73,7 +73,10 @@ export function PaymentResult({
         {(status === "failed" || status === "timeout") && onRetry && (
           <Button onClick={onRetry}>Try Again</Button>
         )}
-        <Button variant={status === "success" ? "default" : "outline"} onClick={onBackToOrder}>
+        <Button
+          variant={status === "success" ? "default" : "outline"}
+          onClick={onBackToOrder}
+        >
           Back to Order
         </Button>
       </div>

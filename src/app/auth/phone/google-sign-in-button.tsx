@@ -33,10 +33,12 @@ function GoogleSignInButtonInner({
       size="lg"
       className="w-full"
       disabled={disabled}
+      loading={loading}
+      loadingLabel="Signing in..."
       onClick={() => googleLogin()}
     >
       <GoogleIcon />
-      {loading ? "Signing in..." : "Continue with Google"}
+      Continue with Google
     </Button>
   );
 }
@@ -51,10 +53,12 @@ function GoogleSignInButtonFallback({
       size="lg"
       className="w-full"
       disabled={disabled}
+      loading={loading}
+      loadingLabel="Signing in..."
       onClick={() => toast.info("Google Sign-In is not configured yet.")}
     >
       <GoogleIcon />
-      {loading ? "Signing in..." : "Continue with Google"}
+      Continue with Google
     </Button>
   );
 }

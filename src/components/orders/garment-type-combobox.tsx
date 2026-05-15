@@ -34,19 +34,27 @@ export function GarmentTypeCombobox({
 }: GarmentTypeComboboxProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  // User-submitted entries land server-side as `is_pending=true` until an
+  // admin approves them in Filament, so they're excluded from the shared
+  // `options` list. We keep a session-local copy so the user can still
+  // see the proper label on the entry they just added (rather than the
+  // slug fallback).
+  const [localAdditions, setLocalAdditions] = useState<BlueprintOption[]>([]);
   const { createBlueprintOption, loading: creating } =
     useCreateBlueprintOption();
 
+  const mergedOptions = [...options, ...localAdditions];
+
   const selectedLabel =
-    options.find((o) => o.value === value)?.label ?? value ?? "";
+    mergedOptions.find((o) => o.value === value)?.label ?? value ?? "";
 
   const filtered = search
-    ? options.filter((o) =>
+    ? mergedOptions.filter((o) =>
         o.label.toLowerCase().includes(search.toLowerCase())
       )
-    : options;
+    : mergedOptions;
 
-  const exactMatch = options.some(
+  const exactMatch = mergedOptions.some(
     (o) => o.label.toLowerCase() === search.toLowerCase()
   );
 
@@ -64,10 +72,15 @@ export function GarmentTypeCombobox({
       search.trim()
     );
     if (result) {
+      setLocalAdditions((prev) =>
+        prev.some((o) => o.value === result.value) ? prev : [...prev, result]
+      );
       onChange(result.value);
       setOpen(false);
       setSearch("");
-      toast.success(`"${result.label}" added as a garment type`);
+      toast.success(
+        `"${result.label}" submitted — visible to others once approved`
+      );
     }
   };
 
@@ -84,7 +97,10 @@ export function GarmentTypeCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
+      <PopoverContent
+        className="w-(--radix-popover-trigger-width) p-0"
+        align="start"
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search or type new..."

@@ -17,7 +17,10 @@ async function fetchDesigner(slug: string) {
   try {
     const res = await fetch(apiUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: JSON.stringify({
         query: `
           query GetDesigner($slug: String!) {
@@ -82,9 +85,16 @@ export async function generateMetadata({ params }: Props) {
   const rawSpecs = profile?.specializations;
   if (Array.isArray(rawSpecs)) specs = rawSpecs;
   else if (typeof rawSpecs === "string") {
-    try { specs = JSON.parse(rawSpecs); } catch { /* ignore */ }
+    try {
+      specs = JSON.parse(rawSpecs);
+    } catch {
+      /* ignore */
+    }
   }
-  const specsText = specs.slice(0, 3).map((s: string) => s.replace(/-/g, " ")).join(", ");
+  const specsText = specs
+    .slice(0, 3)
+    .map((s: string) => s.replace(/-/g, " "))
+    .join(", ");
 
   const description = profile?.bio
     ? profile.bio.slice(0, 160)

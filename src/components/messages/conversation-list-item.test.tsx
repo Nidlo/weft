@@ -4,8 +4,9 @@ import { render, screen } from "@testing-library/react";
 const userIdRef = { current: "user-1" as string | null };
 
 vi.mock("@/lib/stores/auth", () => ({
-  useAuthStore: <T,>(selector: (s: { user: { id: string | null } | null }) => T) =>
-    selector({ user: userIdRef.current ? { id: userIdRef.current } : null }),
+  useAuthStore: <T,>(
+    selector: (s: { user: { id: string | null } | null }) => T
+  ) => selector({ user: userIdRef.current ? { id: userIdRef.current } : null }),
 }));
 
 import { ConversationListItem } from "./conversation-list-item";
@@ -50,16 +51,12 @@ beforeEach(() => {
 
 describe("ConversationListItem", () => {
   it("renders the other party's name (designer when current user is the client)", () => {
-    render(
-      <ConversationListItem conversation={makeConversation()} />
-    );
+    render(<ConversationListItem conversation={makeConversation()} />);
     expect(screen.getByText("Adwoa Studio")).toBeInTheDocument();
   });
 
   it("renders a snippet of the latest message", () => {
-    render(
-      <ConversationListItem conversation={makeConversation()} />
-    );
+    render(<ConversationListItem conversation={makeConversation()} />);
     expect(
       screen.getByText(/when would you like the fitting/i)
     ).toBeInTheDocument();

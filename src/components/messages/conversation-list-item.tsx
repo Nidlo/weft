@@ -75,7 +75,7 @@ export function ConversationListItem({
         "hover:bg-card focus-visible:bg-card focus-visible:outline-none"
       )}
     >
-      <Avatar className="size-12 shrink-0 ring-1 ring-border">
+      <Avatar className="ring-border size-12 shrink-0 ring-1">
         {other.avatarUrl && (
           <AvatarImage
             src={getImageKitThumbnail(other.avatarUrl, 100)}
@@ -92,7 +92,9 @@ export function ConversationListItem({
           <span
             className={cn(
               "truncate text-sm tracking-tight",
-              isUnread ? "font-semibold text-foreground" : "font-medium text-foreground/90"
+              isUnread
+                ? "text-foreground font-semibold"
+                : "text-foreground/90 font-medium"
             )}
           >
             {other.fullName}
@@ -120,18 +122,16 @@ export function ConversationListItem({
             <span className="truncate">{preview || "No messages yet"}</span>
           </span>
           {isUnread && (
-            <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-copper px-1.5 text-[10px] font-semibold tabular-nums text-foreground ring-2 ring-card">
+            <span className="bg-copper text-foreground ring-card inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold tabular-nums ring-2">
               {conversation.unreadCount}
             </span>
           )}
         </div>
 
         {garmentType && (
-          <span className="mt-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground/80">
-            <Package className="h-3 w-3 text-copper" aria-hidden />
-            <span className="capitalize">
-              {garmentType.replace(/_/g, " ")}
-            </span>
+          <span className="text-muted-foreground/80 mt-1 inline-flex items-center gap-1 text-[11px] tracking-[0.14em] uppercase">
+            <Package className="text-copper h-3 w-3" aria-hidden />
+            <span className="capitalize">{garmentType.replace(/_/g, " ")}</span>
           </span>
         )}
       </div>

@@ -115,10 +115,7 @@ describe("SearchPage", () => {
 
   it("renders a DesignerCard per result and the 'all shown' line when there are no more pages", () => {
     useDesignerSearchSpy.mockReturnValue({
-      designers: [
-        { id: "d-1" },
-        { id: "d-2" },
-      ],
+      designers: [{ id: "d-1" }, { id: "d-2" }],
       loading: false,
       error: null,
       hasMore: false,

@@ -22,9 +22,7 @@ describe("<ResponseCountdown />", () => {
 
   it("renders the initial remaining-time text on first paint", () => {
     // Created 1 hour ago, default 24h window → 23h left.
-    const createdAt = new Date(
-      Date.now() - 1 * 60 * 60 * 1000,
-    ).toISOString();
+    const createdAt = new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString();
 
     render(<ResponseCountdown createdAt={createdAt} />);
 
@@ -32,9 +30,7 @@ describe("<ResponseCountdown />", () => {
   });
 
   it("uses the muted tone when more than 1h remains", () => {
-    const createdAt = new Date(
-      Date.now() - 5 * 60 * 60 * 1000,
-    ).toISOString(); // 19h left
+    const createdAt = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(); // 19h left
     const { container } = render(<ResponseCountdown createdAt={createdAt} />);
 
     const span = container.querySelector("span[role='status']");
@@ -43,7 +39,7 @@ describe("<ResponseCountdown />", () => {
 
   it("escalates to warning tone in the last hour", () => {
     const createdAt = new Date(
-      Date.now() - 23 * 60 * 60 * 1000 - 30 * 60 * 1000,
+      Date.now() - 23 * 60 * 60 * 1000 - 30 * 60 * 1000
     ).toISOString(); // 30m left
     const { container } = render(<ResponseCountdown createdAt={createdAt} />);
 
@@ -53,9 +49,7 @@ describe("<ResponseCountdown />", () => {
   });
 
   it("renders the expired sentinel + error tone past cutoff", () => {
-    const createdAt = new Date(
-      Date.now() - 25 * 60 * 60 * 1000,
-    ).toISOString(); // expired 1h ago
+    const createdAt = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString(); // expired 1h ago
     const { container } = render(<ResponseCountdown createdAt={createdAt} />);
 
     expect(screen.getByText("Response window expired")).toBeInTheDocument();
@@ -68,7 +62,7 @@ describe("<ResponseCountdown />", () => {
     // component's setInterval fires, the chip recomputes against the new
     // wall-clock, and the label drops to "58m left".
     const createdAt = new Date(
-      Date.now() - 23 * 60 * 60 * 1000 - 1 * 60 * 1000 - 1 * 1000,
+      Date.now() - 23 * 60 * 60 * 1000 - 1 * 60 * 1000 - 1 * 1000
     ).toISOString();
     const { container } = render(<ResponseCountdown createdAt={createdAt} />);
 
@@ -105,9 +99,7 @@ describe("<ResponseCountdown />", () => {
 
   it("respects a custom windowHours override", () => {
     // 2h window, created 30m ago → 1.5h remaining → "2h left" (Math.ceil).
-    const createdAt = new Date(
-      Date.now() - 30 * 60 * 1000,
-    ).toISOString();
+    const createdAt = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     render(<ResponseCountdown createdAt={createdAt} windowHours={2} />);
 
     expect(screen.getByText("Designer has 2h left")).toBeInTheDocument();

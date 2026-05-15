@@ -79,7 +79,7 @@ describe("ensureCsrfCookie + resetCsrfState", () => {
 
   it("propagates errors from the priming fetch", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(null, { status: 500 }),
+      new Response(null, { status: 500 })
     );
 
     await expect(ensureCsrfCookie()).rejects.toThrow(/csrf prime failed/);

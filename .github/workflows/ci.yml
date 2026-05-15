@@ -1,0 +1,91 @@
+# =============================================================================
+# Nidlo Frontend (weft): CI Pipeline
+# =============================================================================
+# Two-lane setup:
+#   FAST LANE (fast): lint + format:check + tsc --noEmit. Always runs.
+#   FULL LANE (full): vitest + next build. Skipped on dev-snad pushes;
+#                     runs on PRs and on pushes to development/staging/
+#                     production.
+#
+# Vercel handles deploys via its own GitHub integration, so there's no
+# deploy job here. The branch promotion flow (dev-snad → development →
+# staging → production) gates merges on this CI; Vercel reads the
+# resulting commit on the appropriate branch.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [dev-snad, development, staging, production]
+  pull_request:
+    branches: [development, staging, production]
+
+# One run per workflow per branch. Cancel an older in-progress run if a
+# new push lands. (Vercel handles deploys, so no production-special-case
+# needed here.)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Force JS actions (e.g. actions/github-script in x-check) onto Node 24.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  # Test-time placeholders for the NEXT_PUBLIC_* vars referenced across
+  # src/. None of them gate behaviour in the unit-test layer, but Next.js
+  # bakes them into the bundle at build time so they need to be set or
+  # `yarn build` emits a warning per missing var.
+  NEXT_PUBLIC_API_URL: http://localhost:8000/graphql
+  NEXT_PUBLIC_APP_URL: http://localhost:3000
+  NEXT_PUBLIC_APP_NAME: Nidlo
+  NEXT_PUBLIC_DEFAULT_CURRENCY: GHS
+  NEXT_PUBLIC_DEFAULT_COUNTRY: GH
+  NEXT_PUBLIC_REVERB_APP_KEY: test-key
+  NEXT_PUBLIC_REVERB_HOST: localhost
+  NEXT_PUBLIC_REVERB_PORT: "8080"
+  NEXT_PUBLIC_REVERB_SCHEME: http
+  NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: https://ik.imagekit.io/snad
+  NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: pk_test_xxx
+  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: test-key
+
+jobs:
+  fast:
+    name: Lint, format, typecheck
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          # 22 = current Node LTS. Required by lint-staged@17 (>=22.22.1)
+          # which we pull in for the husky pre-commit auto-format.
+          node-version: "22"
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn lint
+      - run: yarn format:check
+      - run: yarn tsc --noEmit
+
+  full:
+    name: Test & build
+    runs-on: ubuntu-22.04
+    needs: fast
+    # Skip on dev-snad pushes. Heavy lane runs on PR and on
+    # promotion-branch pushes (development/staging/production).
+    if: github.event_name != 'push' || github.ref != 'refs/heads/dev-snad'
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn test
+      - run: yarn build

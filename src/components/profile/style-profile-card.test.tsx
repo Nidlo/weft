@@ -4,7 +4,9 @@ import userEvent from "@testing-library/user-event";
 
 const useQuerySpy = vi.fn();
 const generateMutationSpy = vi.fn();
-const measurementsRef = { current: [] as Array<{ id: string; isDefault: boolean }> };
+const measurementsRef = {
+  current: [] as Array<{ id: string; isDefault: boolean }>,
+};
 const toastSuccessSpy = vi.fn();
 const toastErrorSpy = vi.fn();
 
@@ -60,7 +62,10 @@ describe("StyleProfileCard", () => {
     render(<StyleProfileCard />);
 
     expect(
-      screen.getByRole("heading", { level: 3, name: /discover your style profile/i })
+      screen.getByRole("heading", {
+        level: 3,
+        name: /discover your style profile/i,
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /generate my style profile/i })
@@ -119,7 +124,12 @@ describe("StyleProfileCard", () => {
     );
 
     expect(generateMutationSpy).toHaveBeenCalledWith({
-      variables: { measurementId: "m-1" },
+      variables: {
+        measurementId: "m-1",
+        // Default preferences store starts in "inches" — forwarded so
+        // Claude writes the summary in the user's preferred unit.
+        displayUnit: "inches",
+      },
     });
     expect(toastSuccessSpy).toHaveBeenCalledWith("Style profile generated.");
   });
@@ -134,7 +144,9 @@ describe("StyleProfileCard", () => {
     render(<StyleProfileCard />);
 
     expect(
-      screen.getByText(/showing a default profile while AI analysis is unavailable/i)
+      screen.getByText(
+        /showing a default profile while AI analysis is unavailable/i
+      )
     ).toBeInTheDocument();
   });
 });

@@ -27,7 +27,9 @@ export function DesignerResponseSheet({
   onSuccess,
 }: DesignerResponseSheetProps) {
   const [open, setOpen] = useState(false);
-  const [action, setAction] = useState<"accept" | "counter" | "decline" | null>(null);
+  const [action, setAction] = useState<"accept" | "counter" | "decline" | null>(
+    null
+  );
   const [counterPriceGhs, setCounterPriceGhs] = useState("");
   const [counterMessage, setCounterMessage] = useState("");
   const [declineReason, setDeclineReason] = useState("");
@@ -39,9 +41,14 @@ export function DesignerResponseSheet({
     await respondToOrder({
       orderId: order.id,
       action,
-      counterPrice: action === "counter" ? Math.round(parseFloat(counterPriceGhs) * 100) : undefined,
-      counterMessage: action === "counter" ? counterMessage || undefined : undefined,
-      declineReason: action === "decline" ? declineReason || undefined : undefined,
+      counterPrice:
+        action === "counter"
+          ? Math.round(parseFloat(counterPriceGhs) * 100)
+          : undefined,
+      counterMessage:
+        action === "counter" ? counterMessage || undefined : undefined,
+      declineReason:
+        action === "decline" ? declineReason || undefined : undefined,
     });
 
     setOpen(false);
@@ -58,16 +65,14 @@ export function DesignerResponseSheet({
         <SheetHeader>
           <SheetTitle>Respond to Order</SheetTitle>
           <SheetDescription>
-            Budget: {formatPesewas(order.budgetMin)} - {formatPesewas(order.budgetMax)}
+            Budget: {formatPesewas(order.budgetMin)} -{" "}
+            {formatPesewas(order.budgetMax)}
           </SheetDescription>
         </SheetHeader>
 
         {!action ? (
           <div className="mt-6 grid gap-3">
-            <Button
-              onClick={() => setAction("accept")}
-              className="w-full"
-            >
+            <Button onClick={() => setAction("accept")} className="w-full">
               Accept at {formatPesewas(order.budgetMax)}
             </Button>
             <Button
@@ -88,11 +93,17 @@ export function DesignerResponseSheet({
         ) : action === "accept" ? (
           <div className="mt-6 space-y-4">
             <p className="text-sm">
-              Accept this order at <strong>{formatPesewas(order.budgetMax)}</strong>?
+              Accept this order at{" "}
+              <strong>{formatPesewas(order.budgetMax)}</strong>?
             </p>
             <div className="flex gap-2">
-              <Button onClick={handleSubmit} disabled={loading} className="flex-1">
-                {loading ? "Accepting..." : "Confirm Accept"}
+              <Button
+                onClick={handleSubmit}
+                loading={loading}
+                loadingLabel="Accepting..."
+                className="flex-1"
+              >
+                Confirm Accept
               </Button>
               <Button variant="outline" onClick={() => setAction(null)}>
                 Back
@@ -125,10 +136,12 @@ export function DesignerResponseSheet({
             <div className="flex gap-2">
               <Button
                 onClick={handleSubmit}
-                disabled={loading || !counterPriceGhs}
+                disabled={!counterPriceGhs}
+                loading={loading}
+                loadingLabel="Sending..."
                 className="flex-1"
               >
-                {loading ? "Sending..." : "Send Counter Offer"}
+                Send Counter Offer
               </Button>
               <Button variant="outline" onClick={() => setAction(null)}>
                 Back
@@ -150,10 +163,11 @@ export function DesignerResponseSheet({
               <Button
                 variant="destructive"
                 onClick={handleSubmit}
-                disabled={loading}
+                loading={loading}
+                loadingLabel="Declining..."
                 className="flex-1"
               >
-                {loading ? "Declining..." : "Confirm Decline"}
+                Confirm Decline
               </Button>
               <Button variant="outline" onClick={() => setAction(null)}>
                 Back

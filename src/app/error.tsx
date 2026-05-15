@@ -20,27 +20,27 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
   }, [error]);
 
   return (
-    <main className="relative flex min-h-[80vh] flex-col items-center justify-center bg-thread-mesh px-4 py-16">
+    <main className="bg-thread-mesh relative flex min-h-[80vh] flex-col items-center justify-center px-4 py-16">
       <GlassCard
         variant="solid"
         className="relative w-full max-w-md overflow-hidden p-8 text-center sm:p-10"
       >
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-copper/40 to-transparent"
+          className="via-copper/40 pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent"
           aria-hidden
         />
-        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-status-error-soft text-status-error ring-1 ring-status-error/20">
+        <div className="bg-status-error-soft text-status-error ring-status-error/20 mx-auto flex size-16 items-center justify-center rounded-2xl ring-1">
           <AlertTriangle className="h-7 w-7" aria-hidden />
         </div>
-        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-status-error">
+        <p className="text-status-error mt-6 text-[11px] font-semibold tracking-[0.18em] uppercase">
           Unexpected error
         </p>
         <h1 className="text-display mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
           Something went sideways.
         </h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          We hit a snag rendering this page. Try again, or head home and we&apos;ll
-          pick up where you left off.
+        <p className="text-muted-foreground mt-3 text-sm">
+          We hit a snag rendering this page. Try again, or head home and
+          we&apos;ll pick up where you left off.
         </p>
         <div className="mt-8 flex flex-col gap-2 sm:flex-row">
           <Button

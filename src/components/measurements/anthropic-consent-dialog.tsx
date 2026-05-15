@@ -53,8 +53,8 @@ export function AnthropicConsentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-status-info-soft">
-            <ShieldCheck className="h-6 w-6 text-status-info" />
+          <div className="bg-status-info-soft mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full">
+            <ShieldCheck className="text-status-info h-6 w-6" />
           </div>
           <DialogTitle className="text-center">
             Use AI to double-check your measurements?
@@ -67,16 +67,16 @@ export function AnthropicConsentDialog({
         </DialogHeader>
 
         <div className="space-y-3 py-2 text-sm">
-          <ul className="list-inside list-disc space-y-1.5 text-muted-foreground">
+          <ul className="text-muted-foreground list-inside list-disc space-y-1.5">
             <li>Used only for this measurement check. No ads. No resale.</li>
             <li>You can switch this off any time in Settings.</li>
             <li>
-              Style suggestions on your profile use only your saved
-              measurements and interests, never your photo.
+              Style suggestions on your profile use only your saved measurements
+              and interests, never your photo.
             </li>
           </ul>
 
-          <div className="flex items-start gap-2 rounded-lg border bg-muted/40 p-3">
+          <div className="bg-muted/40 flex items-start gap-2 rounded-lg border p-3">
             <Checkbox
               id="ai-consent"
               checked={agreed}
@@ -85,7 +85,7 @@ export function AnthropicConsentDialog({
             />
             <Label
               htmlFor="ai-consent"
-              className="text-xs font-normal leading-relaxed"
+              className="text-xs leading-relaxed font-normal"
             >
               I&apos;m happy for Nidlo to use this single photo with our AI
               assistant for measurement checking. I&apos;ve read the{" "}
@@ -106,8 +106,13 @@ export function AnthropicConsentDialog({
           <Button variant="outline" onClick={handleDecline} disabled={saving}>
             No thanks
           </Button>
-          <Button onClick={handleAccept} disabled={!agreed || saving}>
-            {saving ? "Saving..." : "Accept and continue"}
+          <Button
+            onClick={handleAccept}
+            disabled={!agreed}
+            loading={saving}
+            loadingLabel="Saving..."
+          >
+            Accept and continue
           </Button>
         </DialogFooter>
       </DialogContent>

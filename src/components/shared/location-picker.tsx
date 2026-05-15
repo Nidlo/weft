@@ -63,9 +63,7 @@ export function LocationPicker({
   const markerRef = useRef<google.maps.Marker | null>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
-  const [searchValue, setSearchValue] = useState(
-    value?.formattedAddress ?? ""
-  );
+  const [searchValue, setSearchValue] = useState(value?.formattedAddress ?? "");
   const [detecting, setDetecting] = useState(false);
 
   const defaultCenter = {
@@ -246,44 +244,24 @@ export function LocationPicker({
           variant="outline"
           size="sm"
           onClick={detectCurrentLocation}
-          disabled={!isLoaded || detecting}
+          disabled={!isLoaded}
+          loading={detecting}
+          loadingLabel={
+            <span className="ml-1 hidden sm:inline">Detecting...</span>
+          }
           className="shrink-0"
         >
-          {detecting ? (
-            <svg
-              className="size-4 animate-spin"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-          ) : (
-            <svg
-              className="size-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Z" />
-              <circle cx="12" cy="9" r="2.5" />
-            </svg>
-          )}
-          <span className="ml-1 hidden sm:inline">
-            {detecting ? "Detecting..." : "Use my location"}
-          </span>
+          <svg
+            className="size-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
+          <span className="ml-1 hidden sm:inline">Use my location</span>
         </Button>
       </div>
 

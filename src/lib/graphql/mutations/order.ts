@@ -79,7 +79,11 @@ export const UPDATE_ORDER = gql`
 `;
 
 export const CREATE_BLUEPRINT_OPTION = gql`
-  mutation CreateBlueprintOption($category: String!, $value: String!, $label: String!) {
+  mutation CreateBlueprintOption(
+    $category: String!
+    $value: String!
+    $label: String!
+  ) {
     createBlueprintOption(category: $category, value: $value, label: $label) {
       value
       label
@@ -140,31 +144,39 @@ export const CONFIRM_DELIVERY = gql`
   }
 `;
 
-export const ADD_MATERIAL = gql`
-  mutation AddMaterial($input: AddMaterialInput!) {
-    addMaterial(input: $input) {
+export const ADD_ITEM = gql`
+  mutation AddItem($input: AddItemInput!) {
+    addItem(input: $input) {
       id
+      orderId
+      itemType
       name
+      description
+      metadata {
+        label
+        value
+      }
       unitCost
       quantity
       totalCost
       isPurchased
+      createdAt
     }
   }
 `;
 
 export const TOGGLE_PURCHASED = gql`
-  mutation TogglePurchased($materialId: ID!) {
-    togglePurchased(materialId: $materialId) {
+  mutation TogglePurchased($itemId: ID!) {
+    togglePurchased(itemId: $itemId) {
       id
       isPurchased
     }
   }
 `;
 
-export const REMOVE_MATERIAL = gql`
-  mutation RemoveMaterial($materialId: ID!) {
-    removeMaterial(materialId: $materialId)
+export const REMOVE_ITEM = gql`
+  mutation RemoveItem($itemId: ID!) {
+    removeItem(itemId: $itemId)
   }
 `;
 

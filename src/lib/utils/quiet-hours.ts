@@ -13,7 +13,7 @@
 export function isInQuietHours(
   start: string | null | undefined,
   end: string | null | undefined,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): boolean {
   if (!start || !end) return false;
 

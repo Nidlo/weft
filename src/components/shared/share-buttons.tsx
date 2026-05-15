@@ -64,16 +64,12 @@ export function ShareButtons({
     }
   };
 
-  const supportsNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+  const supportsNativeShare =
+    typeof navigator !== "undefined" && !!navigator.share;
 
   return (
     <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        className="gap-2"
-        asChild
-      >
+      <Button variant="outline" size="sm" className="gap-2" asChild>
         <a
           href={`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`}
           target="_blank"
@@ -84,7 +80,12 @@ export function ShareButtons({
         </a>
       </Button>
 
-      <Button variant="outline" size="sm" className="gap-2" onClick={handleCopy}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2"
+        onClick={handleCopy}
+      >
         {copied ? (
           <Check className="h-4 w-4 text-green-500" />
         ) : (

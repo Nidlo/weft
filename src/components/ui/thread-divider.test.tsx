@@ -18,9 +18,7 @@ describe("ThreadDivider", () => {
   });
 
   it("uses currentColor for the ink tone variant", () => {
-    const { container } = render(
-      <ThreadDivider width={300} tone="ink" />
-    );
+    const { container } = render(<ThreadDivider width={300} tone="ink" />);
     const lines = container.querySelectorAll("line");
     lines.forEach((line) => {
       expect(line.getAttribute("stroke")).toBe("currentColor");

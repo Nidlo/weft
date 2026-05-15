@@ -66,7 +66,7 @@ describe("GarmentEaseEditor", () => {
         orderId="order-1"
         eases={[sampleEase]}
         canEdit={true}
-      />,
+      />
     );
     // 25mm ≈ 1.0 in
     expect(screen.getByText(/1\.0 in/)).toBeInTheDocument();
@@ -79,12 +79,10 @@ describe("GarmentEaseEditor", () => {
         orderId="order-1"
         eases={[sampleEase]}
         canEdit={false}
-      />,
+      />
     );
     expect(screen.queryByRole("button", { name: /add ease/i })).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: /remove ease/i }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /remove ease/i })).toBeNull();
   });
 
   it("calls clearOrderGarmentEase when the trash icon is clicked", async () => {
@@ -93,7 +91,7 @@ describe("GarmentEaseEditor", () => {
         orderId="order-1"
         eases={[sampleEase]}
         canEdit={true}
-      />,
+      />
     );
     const removeBtn = screen.getByRole("button", {
       name: /remove ease on bust/i,
@@ -110,7 +108,7 @@ describe("GarmentEaseEditor", () => {
     expect(screen.queryByRole("button", { name: /save ease/i })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /add ease/i }));
     expect(
-      screen.getByRole("button", { name: /save ease/i }),
+      screen.getByRole("button", { name: /save ease/i })
     ).toBeInTheDocument();
     // Form labels reflect the user's preferred unit (inches).
     expect(screen.getByText(/delta in in/i)).toBeInTheDocument();

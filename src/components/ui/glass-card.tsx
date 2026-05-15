@@ -9,17 +9,14 @@ const glassCardVariants = cva(
     variants: {
       variant: {
         // The default frosted glass surface — bone in light, deep in dark.
-        default:
-          "surface-glass text-card-foreground",
+        default: "surface-glass text-card-foreground",
         // Solid white-ish lift used for primary content cards.
         solid:
           "bg-card text-card-foreground border border-border shadow-[var(--shadow-2)]",
         // Heavier glass — for elevated dialogs / sticky panels.
-        strong:
-          "surface-glass-strong text-card-foreground",
+        strong: "surface-glass-strong text-card-foreground",
         // Outlined ghost surface — used inside other glass containers.
-        ghost:
-          "border border-border/60 text-card-foreground",
+        ghost: "border border-border/60 text-card-foreground",
       },
       interactive: {
         true: "cursor-pointer hover:-translate-y-0.5 hover:shadow-[var(--shadow-3)] hover:border-foreground/15",
@@ -39,8 +36,7 @@ const glassCardVariants = cva(
 );
 
 export interface GlassCardProps
-  extends React.ComponentProps<"div">,
-    VariantProps<typeof glassCardVariants> {
+  extends React.ComponentProps<"div">, VariantProps<typeof glassCardVariants> {
   asChild?: boolean;
 }
 
@@ -63,7 +59,10 @@ export function GlassCard({
     <div
       data-slot="glass-card"
       data-variant={variant ?? "default"}
-      className={cn(glassCardVariants({ variant, interactive, glow }), className)}
+      className={cn(
+        glassCardVariants({ variant, interactive, glow }),
+        className
+      )}
       {...props}
     />
   );

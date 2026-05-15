@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
 import { useRespondToReview } from "@/lib/hooks/use-reviews";
 import { toast } from "sonner";
 
@@ -15,7 +14,11 @@ interface DesignerResponseFormProps {
   onCancel: () => void;
 }
 
-export function DesignerResponseForm({ reviewId, onSuccess, onCancel }: DesignerResponseFormProps) {
+export function DesignerResponseForm({
+  reviewId,
+  onSuccess,
+  onCancel,
+}: DesignerResponseFormProps) {
   const [response, setResponse] = useState("");
   const { respondToReview, loading } = useRespondToReview();
 
@@ -36,7 +39,7 @@ export function DesignerResponseForm({ reviewId, onSuccess, onCancel }: Designer
   };
 
   return (
-    <div className="space-y-2 border-l-2 border-primary/20 pl-3">
+    <div className="border-primary/20 space-y-2 border-l-2 pl-3">
       <Textarea
         placeholder="Write your response..."
         value={response}
@@ -44,15 +47,25 @@ export function DesignerResponseForm({ reviewId, onSuccess, onCancel }: Designer
         rows={2}
       />
       <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {response.length}/{MAX_RESPONSE}
         </p>
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={onCancel} disabled={loading}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            disabled={loading}
+          >
             Cancel
           </Button>
-          <Button size="sm" onClick={handleSubmit} disabled={loading || !response.trim()}>
-            {loading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+          <Button
+            size="sm"
+            onClick={handleSubmit}
+            disabled={!response.trim()}
+            loading={loading}
+            loadingLabel="Submitting..."
+          >
             Submit
           </Button>
         </div>

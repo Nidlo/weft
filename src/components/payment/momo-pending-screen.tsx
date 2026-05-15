@@ -45,18 +45,18 @@ export function MomoPendingScreen({
 
   return (
     <div className="flex flex-col items-center space-y-6 py-8 text-center">
-      <div className="flex size-20 items-center justify-center rounded-2xl bg-copper/15 text-copper-soft ring-1 ring-copper/30">
+      <div className="bg-copper/15 text-copper-soft ring-copper/30 flex size-20 items-center justify-center rounded-2xl ring-1">
         <Phone className="h-9 w-9" aria-hidden />
       </div>
 
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+        <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           Confirm on your phone
         </p>
         <h2 className="text-display text-2xl font-semibold tracking-tight sm:text-3xl">
           Check your phone.
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           A {methodConfig.shortLabel} prompt has been sent
           {phone ? ` to ${phone}` : ""}. Approve the payment of{" "}
           <strong className="text-foreground">{formatPesewas(amount)}</strong>{" "}
@@ -81,7 +81,7 @@ export function MomoPendingScreen({
         I&apos;ve approved — check now
       </Button>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         This page will update automatically when payment is confirmed.
         {status === "polling" && " Timeout in 5 minutes."}
       </p>

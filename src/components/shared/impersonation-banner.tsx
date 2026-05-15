@@ -14,10 +14,10 @@ import { useAuthStore } from "@/lib/stores/auth";
  */
 export function ImpersonationBanner() {
   const isImpersonated = useAuthStore(
-    (state) => state.user?.isImpersonated ?? false,
+    (state) => state.user?.isImpersonated ?? false
   );
   const impersonatorEmail = useAuthStore(
-    (state) => state.user?.impersonatorEmail ?? null,
+    (state) => state.user?.impersonatorEmail ?? null
   );
   const target = useAuthStore((state) => state.user);
 
@@ -31,7 +31,8 @@ export function ImpersonationBanner() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
   const stopUrl = apiUrl.replace(/\/graphql$/, "") + "/admin/impersonate-stop";
 
-  const targetLabel = target?.fullName ?? target?.email ?? target?.phone ?? "this user";
+  const targetLabel =
+    target?.fullName ?? target?.email ?? target?.phone ?? "this user";
 
   return (
     <div

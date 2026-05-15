@@ -4,7 +4,9 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 // Mock Apollo's react bindings BEFORE importing the component so each test
 // can drive useMutation behavior independently.
 const verifyOtpMutationSpy =
-  vi.fn<(args: { variables: { phone: string; code: string } }) => Promise<unknown>>();
+  vi.fn<
+    (args: { variables: { phone: string; code: string } }) => Promise<unknown>
+  >();
 const requestOtpMutationSpy =
   vi.fn<(args: { variables: { phone: string } }) => Promise<unknown>>();
 let verifyLoading = false;
@@ -13,9 +15,13 @@ vi.mock("@apollo/client/react", () => ({
   useMutation: (doc: unknown) => {
     // Distinguish by the operation source string — VERIFY_OTP and REQUEST_OTP
     // are the only two mutations the verify page uses.
-    const text = typeof doc === "object" && doc !== null && "loc" in doc
-      ? String((doc as { loc?: { source?: { body?: string } } }).loc?.source?.body ?? "")
-      : "";
+    const text =
+      typeof doc === "object" && doc !== null && "loc" in doc
+        ? String(
+            (doc as { loc?: { source?: { body?: string } } }).loc?.source
+              ?.body ?? ""
+          )
+        : "";
     if (text.includes("verifyOtp")) {
       return [verifyOtpMutationSpy, { loading: verifyLoading }];
     }
@@ -28,7 +34,11 @@ const routerPushSpy = vi.fn<(href: string) => void>();
 const routerReplaceSpy = vi.fn<(href: string) => void>();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: routerPushSpy, replace: routerReplaceSpy, back: vi.fn() }),
+  useRouter: () => ({
+    push: routerPushSpy,
+    replace: routerReplaceSpy,
+    back: vi.fn(),
+  }),
 }));
 
 const setUserSpy = vi.fn<(...args: unknown[]) => void>();
@@ -165,7 +175,9 @@ describe("VerifyOtpPage", () => {
   it("clears the digits and stays on the page after a wrong attempt, allowing a retry", async () => {
     // Bug B: a wrong attempt must NOT lock the user out of submitting again
     // — they should be able to enter the correct code without resending SMS.
-    verifyOtpMutationSpy.mockRejectedValueOnce(new Error("Invalid code. 2 attempt(s) remaining."));
+    verifyOtpMutationSpy.mockRejectedValueOnce(
+      new Error("Invalid code. 2 attempt(s) remaining.")
+    );
     verifyOtpMutationSpy.mockResolvedValueOnce({
       data: {
         verifyOtp: {
@@ -226,7 +238,7 @@ describe("VerifyOtpPage", () => {
       () =>
         new Promise((resolve) => {
           deferred.resolve = resolve;
-        }),
+        })
     );
 
     render(<VerifyOtpPage />);
@@ -262,5 +274,39 @@ describe("VerifyOtpPage", () => {
     await waitFor(() => {
       expect(routerPushSpy).toHaveBeenCalled();
     });
+  });
+
+  it("does not re-submit the same code after a failed attempt (post-error dedupe)", async () => {
+    // The new defense beyond the `submitting` ref: after a wrong code is
+    // rejected and the in-flight flag resets, an auto-submit handler that
+    // captured the same code in a stale closure could fire again. Without
+    // the dedupe, that second call inflates the failed-attempts counter
+    // server-side — three of those triggers lockout, which deletes the
+    // otpKey. After lockout expires, the user's NEXT correct attempt then
+    // hits "Verification code expired" because the key is gone. Same-code
+    // resubmits must be dropped client-side.
+    verifyOtpMutationSpy.mockRejectedValue(
+      new Error("Invalid code. 2 attempt(s) remaining.")
+    );
+
+    render(<VerifyOtpPage />);
+    typeCode("000000");
+
+    await waitFor(() => {
+      expect(verifyOtpMutationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    // After the rejection, simulate the page autosubmitting the SAME code
+    // again (stale closure, fast re-render, etc.). The dedupe should drop it.
+    const inputs = screen.getAllByRole("textbox") as HTMLInputElement[];
+    await waitFor(() => {
+      expect(inputs.every((i) => i.value === "")).toBe(true);
+    });
+    typeCode("000000");
+
+    // Give the (rejected) microtask queue a chance to flush.
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(verifyOtpMutationSpy).toHaveBeenCalledTimes(1);
   });
 });

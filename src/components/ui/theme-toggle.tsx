@@ -58,10 +58,19 @@ export function ThemeToggle({ className, size = "icon" }: Props) {
       <AnimatePresence mode="wait" initial={false}>
         <motion.span
           key={isDark ? "moon" : "sun"}
-          initial={reduced ? { opacity: 0 } : { opacity: 0, rotate: -45, scale: 0.6 }}
-          animate={reduced ? { opacity: 1 } : { opacity: 1, rotate: 0, scale: 1 }}
-          exit={reduced ? { opacity: 0 } : { opacity: 0, rotate: 45, scale: 0.6 }}
-          transition={{ duration: reduced ? 0.1 : 0.32, ease: [0.22, 1, 0.36, 1] }}
+          initial={
+            reduced ? { opacity: 0 } : { opacity: 0, rotate: -45, scale: 0.6 }
+          }
+          animate={
+            reduced ? { opacity: 1 } : { opacity: 1, rotate: 0, scale: 1 }
+          }
+          exit={
+            reduced ? { opacity: 0 } : { opacity: 0, rotate: 45, scale: 0.6 }
+          }
+          transition={{
+            duration: reduced ? 0.1 : 0.32,
+            ease: [0.22, 1, 0.36, 1],
+          }}
           className="flex"
         >
           {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}

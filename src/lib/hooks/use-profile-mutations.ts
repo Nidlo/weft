@@ -47,9 +47,8 @@ export function useUpdateAvatar() {
 }
 
 export function useAddPortfolioImage() {
-  const [mutate, { loading, error }] = useMutation<AddPortfolioImageData>(
-    ADD_PORTFOLIO_IMAGE
-  );
+  const [mutate, { loading, error }] =
+    useMutation<AddPortfolioImageData>(ADD_PORTFOLIO_IMAGE);
 
   const addImage = async (file: File, caption?: string) => {
     const { data } = await mutate({ variables: { file, caption } });
@@ -73,8 +72,9 @@ export function useRemovePortfolioImage() {
 }
 
 export function useReorderPortfolioImages() {
-  const [mutate, { loading, error }] =
-    useMutation<ReorderPortfolioImagesData>(REORDER_PORTFOLIO_IMAGES);
+  const [mutate, { loading, error }] = useMutation<ReorderPortfolioImagesData>(
+    REORDER_PORTFOLIO_IMAGES
+  );
 
   const reorderImages = async (order: number[]) => {
     const { data } = await mutate({ variables: { order } });

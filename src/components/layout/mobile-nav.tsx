@@ -3,14 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
-import {
-  Home,
-  Search,
-  MessageSquare,
-  User,
-  ClipboardList,
-  Wallet,
-} from "lucide-react";
+import { Home, Search, MessageSquare, User, ClipboardList } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -24,11 +17,14 @@ const clientNavItems = [
   { href: "/profile", label: "Profile", icon: User },
 ];
 
+// Earnings lives under Profile (Settings → Earnings) — it's a personal
+// report, not a core feature on its own, and the legal copy says Nidlo
+// doesn't operate a wallet. Designers and clients share the same nav
+// shape; Profile is the entry point to anything role-specific.
 const designerNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/orders", label: "Orders", icon: ClipboardList },
   { href: "/messages", label: "Messages", icon: MessageSquare },
-  { href: "/wallet", label: "Wallet", icon: Wallet },
   { href: "/profile", label: "Profile", icon: User },
 ];
 
@@ -43,7 +39,7 @@ export function MobileNav() {
   return (
     <nav
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 border-t border-border/50 md:hidden",
+        "border-border/50 fixed inset-x-0 bottom-0 z-50 border-t md:hidden",
         "bg-background/75 backdrop-blur-xl backdrop-saturate-150",
         "supports-backdrop-filter:bg-background/55",
         "pb-[env(safe-area-inset-bottom)]"
@@ -76,7 +72,7 @@ export function MobileNav() {
                       ? { duration: 0 }
                       : { type: "spring", stiffness: 380, damping: 32 }
                   }
-                  className="absolute inset-x-3 top-1.5 z-0 h-1 rounded-full bg-copper"
+                  className="bg-copper absolute inset-x-3 top-1.5 z-0 h-1 rounded-full"
                 />
               )}
               <span className="relative">
@@ -88,7 +84,7 @@ export function MobileNav() {
                   strokeWidth={isActive ? 2.4 : 1.8}
                 />
                 {showBadge && (
-                  <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-copper px-1 text-[10px] font-semibold text-foreground ring-2 ring-background">
+                  <span className="bg-copper text-foreground ring-background absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold ring-2">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}

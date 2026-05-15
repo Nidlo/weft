@@ -1,7 +1,14 @@
 "use client";
 
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
-import { MY_ORDERS, GET_ORDER, ORDER_PROFIT_SUMMARY, SEARCH_CLIENTS, CLIENT_MEASUREMENTS } from "@/lib/graphql/queries/order";
+import type { Reference } from "@apollo/client";
+import {
+  MY_ORDERS,
+  GET_ORDER,
+  ORDER_PROFIT_SUMMARY,
+  SEARCH_CLIENTS,
+  CLIENT_MEASUREMENTS,
+} from "@/lib/graphql/queries/order";
 import {
   CREATE_INTERNAL_ORDER,
   UPDATE_ORDER,
@@ -11,9 +18,9 @@ import {
   UPDATE_ORDER_STATUS,
   CANCEL_ORDER,
   CONFIRM_DELIVERY,
-  ADD_MATERIAL,
+  ADD_ITEM,
   TOGGLE_PURCHASED,
-  REMOVE_MATERIAL,
+  REMOVE_ITEM,
   SET_ORDER_GARMENT_EASE,
   CLEAR_ORDER_GARMENT_EASE,
 } from "@/lib/graphql/mutations/order";
@@ -28,10 +35,10 @@ import type {
   UpdateOrderStatusInput,
   CancelOrderData,
   ConfirmDeliveryData,
-  AddMaterialData,
-  AddMaterialInput,
+  AddItemData,
+  AddItemInput,
   TogglePurchasedData,
-  RemoveMaterialData,
+  RemoveItemData,
   CreateInternalOrderData,
   CreateInternalOrderInput,
   UpdateOrderData,
@@ -60,10 +67,13 @@ export function useOrders(status?: string, first = 20, page = 1) {
 }
 
 export function useOrder(id: string) {
-  const { data, loading, error, refetch } = useQuery<OrderDetailData>(GET_ORDER, {
-    variables: { id },
-    skip: !id,
-  });
+  const { data, loading, error, refetch } = useQuery<OrderDetailData>(
+    GET_ORDER,
+    {
+      variables: { id },
+      skip: !id,
+    }
+  );
 
   return {
     order: data?.order ?? null,
@@ -91,9 +101,12 @@ export function useOrderProfitSummary(orderId: string) {
 }
 
 export function useRespondToOrder() {
-  const [mutate, { loading, error }] = useMutation<RespondToOrderData>(RESPOND_TO_ORDER, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<RespondToOrderData>(
+    RESPOND_TO_ORDER,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const respondToOrder = async (input: RespondToOrderInput) => {
     const result = await mutate({ variables: { input } });
@@ -104,9 +117,12 @@ export function useRespondToOrder() {
 }
 
 export function useConfirmOrder() {
-  const [mutate, { loading, error }] = useMutation<ConfirmOrderData>(CONFIRM_ORDER, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<ConfirmOrderData>(
+    CONFIRM_ORDER,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const confirmOrder = async (orderId: string) => {
     const result = await mutate({ variables: { orderId } });
@@ -117,9 +133,12 @@ export function useConfirmOrder() {
 }
 
 export function useUpdateOrderStatus() {
-  const [mutate, { loading, error }] = useMutation<UpdateOrderStatusData>(UPDATE_ORDER_STATUS, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<UpdateOrderStatusData>(
+    UPDATE_ORDER_STATUS,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const updateOrderStatus = async (input: UpdateOrderStatusInput) => {
     const result = await mutate({ variables: { input } });
@@ -130,9 +149,12 @@ export function useUpdateOrderStatus() {
 }
 
 export function useCancelOrder() {
-  const [mutate, { loading, error }] = useMutation<CancelOrderData>(CANCEL_ORDER, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<CancelOrderData>(
+    CANCEL_ORDER,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const cancelOrder = async (orderId: string, reason?: string) => {
     const result = await mutate({ variables: { orderId, reason } });
@@ -143,9 +165,12 @@ export function useCancelOrder() {
 }
 
 export function useConfirmDelivery() {
-  const [mutate, { loading, error }] = useMutation<ConfirmDeliveryData>(CONFIRM_DELIVERY, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<ConfirmDeliveryData>(
+    CONFIRM_DELIVERY,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const confirmDelivery = async (orderId: string) => {
     const result = await mutate({ variables: { orderId } });
@@ -155,37 +180,117 @@ export function useConfirmDelivery() {
   return { confirmDelivery, loading, error };
 }
 
-export function useAddMaterial() {
-  const [mutate, { loading, error }] = useMutation<AddMaterialData>(ADD_MATERIAL);
+/**
+ * Apollo cache update for AddItem: appends the new item ref to the parent
+ * order's `items` array so the cost-book panel re-renders without a
+ * GET_ORDER refetch. Apollo already stores the item itself (the mutation
+ * returns it with __typename + id); the array just needs the new ref.
+ *
+ * Also refetches `orderProfitSummary` because that summary is computed
+ * server-side from the items list — Apollo can't recompute it from a
+ * cache.modify, and the totals (totalItemCost, itemCount, purchasedCount)
+ * would otherwise stay stale until the next GET_ORDER.
+ */
+export function useAddItem() {
+  const [mutate, { loading, error }] = useMutation<AddItemData>(ADD_ITEM, {
+    update(cache, { data }) {
+      if (!data?.addItem) return;
+      cache.modify({
+        id: cache.identify({
+          __typename: "OrderType",
+          id: data.addItem.orderId,
+        }),
+        fields: {
+          items(existing, { toReference }) {
+            const list: readonly Reference[] = Array.isArray(existing)
+              ? (existing as readonly Reference[])
+              : [];
+            const newRef = toReference({
+              __typename: "OrderItemType",
+              id: data.addItem.id,
+            });
+            return newRef ? [...list, newRef] : list;
+          },
+        },
+      });
+    },
+  });
 
-  const addMaterial = async (input: AddMaterialInput) => {
-    const result = await mutate({ variables: { input } });
-    return result.data?.addMaterial ?? null;
+  const addItem = async (input: AddItemInput) => {
+    const result = await mutate({
+      variables: { input },
+      refetchQueries: [
+        { query: ORDER_PROFIT_SUMMARY, variables: { orderId: input.orderId } },
+      ],
+    });
+    return result.data?.addItem ?? null;
   };
 
-  return { addMaterial, loading, error };
+  return { addItem, loading, error };
 }
 
+/**
+ * TogglePurchased relies on Apollo's automatic by-id merge for the item
+ * itself — the mutation returns the updated row, Apollo writes it into the
+ * entity store, every subscriber re-renders. BUT `orderProfitSummary` is
+ * a separate query whose `purchasedCount` is computed server-side; Apollo
+ * has no way to recompute it from the toggled item alone. Caller passes
+ * `orderId` so we can refetch the summary; the call is cheap (single row
+ * by id, no joins) and keeps the panel's "n/m purchased" line live.
+ */
 export function useTogglePurchased() {
-  const [mutate, { loading, error }] = useMutation<TogglePurchasedData>(TOGGLE_PURCHASED);
+  const [mutate, { loading, error }] =
+    useMutation<TogglePurchasedData>(TOGGLE_PURCHASED);
 
-  const togglePurchased = async (materialId: string) => {
-    const result = await mutate({ variables: { materialId } });
+  const togglePurchased = async (itemId: string, orderId?: string) => {
+    const result = await mutate({
+      variables: { itemId },
+      refetchQueries: orderId
+        ? [{ query: ORDER_PROFIT_SUMMARY, variables: { orderId } }]
+        : [],
+    });
     return result.data?.togglePurchased ?? null;
   };
 
   return { togglePurchased, loading, error };
 }
 
-export function useRemoveMaterial() {
-  const [mutate, { loading, error }] = useMutation<RemoveMaterialData>(REMOVE_MATERIAL);
+/**
+ * Apollo cache update for RemoveItem: filters the deleted item's ref out
+ * of the parent order's `items` array, evicts the item entity from the
+ * cache, and refetches the profit summary so totalItemCost / itemCount /
+ * purchasedCount stay in sync.
+ */
+export function useRemoveItem() {
+  const [mutate, { loading, error }] = useMutation<RemoveItemData>(REMOVE_ITEM);
 
-  const removeMaterial = async (materialId: string) => {
-    const result = await mutate({ variables: { materialId } });
-    return result.data?.removeMaterial ?? false;
+  const removeItem = async (itemId: string, orderId: string) => {
+    const result = await mutate({
+      variables: { itemId },
+      refetchQueries: [{ query: ORDER_PROFIT_SUMMARY, variables: { orderId } }],
+      update(cache, response) {
+        if (!response.data?.removeItem) return;
+        cache.modify({
+          id: cache.identify({ __typename: "OrderType", id: orderId }),
+          fields: {
+            items(existing, { readField }) {
+              const list: readonly Reference[] = Array.isArray(existing)
+                ? (existing as readonly Reference[])
+                : [];
+              return list.filter((ref) => readField("id", ref) !== itemId);
+            },
+          },
+        });
+        cache.evict({
+          id: cache.identify({ __typename: "OrderItemType", id: itemId }),
+        });
+        cache.gc();
+      },
+    });
+    return result.data?.removeItem ?? false;
   };
 
-  return { removeMaterial, loading, error };
+  return { removeItem, loading, error };
 }
 
 export function useSetOrderGarmentEase(orderId: string) {
@@ -212,10 +317,7 @@ export function useClearOrderGarmentEase(orderId: string) {
     }
   );
 
-  const clearOrderGarmentEase = async (
-    section: string,
-    field: string
-  ) => {
+  const clearOrderGarmentEase = async (section: string, field: string) => {
     const result = await mutate({
       variables: { orderId, section, field },
     });
@@ -240,9 +342,12 @@ export function useCreateInternalOrder() {
 }
 
 export function useUpdateOrder() {
-  const [mutate, { loading, error }] = useMutation<UpdateOrderData>(UPDATE_ORDER, {
-    refetchQueries: [{ query: MY_ORDERS }],
-  });
+  const [mutate, { loading, error }] = useMutation<UpdateOrderData>(
+    UPDATE_ORDER,
+    {
+      refetchQueries: [{ query: MY_ORDERS }],
+    }
+  );
 
   const updateOrder = async (input: UpdateOrderInput) => {
     const result = await mutate({ variables: { input } });
@@ -257,7 +362,11 @@ export function useCreateBlueprintOption() {
     CREATE_BLUEPRINT_OPTION
   );
 
-  const createBlueprintOption = async (category: string, value: string, label: string) => {
+  const createBlueprintOption = async (
+    category: string,
+    value: string,
+    label: string
+  ) => {
     const result = await mutate({ variables: { category, value, label } });
     return result.data?.createBlueprintOption ?? null;
   };

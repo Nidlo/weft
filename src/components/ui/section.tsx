@@ -2,7 +2,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface SectionProps extends Omit<React.HTMLAttributes<HTMLElement>, "title"> {
+interface SectionProps extends Omit<
+  React.HTMLAttributes<HTMLElement>,
+  "title"
+> {
   /** Small uppercase tracker shown above the title. */
   eyebrow?: React.ReactNode;
   /** Section title — rendered as h2 in display type. */
@@ -53,19 +56,21 @@ export function Section({
             centered && "items-center text-center sm:flex-col"
           )}
         >
-          <div className={cn("min-w-0 flex-1", centered && "max-w-2xl mx-auto")}>
+          <div
+            className={cn("min-w-0 flex-1", centered && "mx-auto max-w-2xl")}
+          >
             {eyebrow && (
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper">
+              <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
                 {eyebrow}
               </p>
             )}
             {title && (
-              <h2 className="text-display mt-2 text-balance text-3xl font-semibold leading-[1.1] sm:text-4xl">
+              <h2 className="text-display mt-2 text-3xl leading-[1.1] font-semibold text-balance sm:text-4xl">
                 {title}
               </h2>
             )}
             {description && (
-              <p className="mt-2 max-w-xl text-pretty text-sm text-muted-foreground sm:text-base">
+              <p className="text-muted-foreground mt-2 max-w-xl text-sm text-pretty sm:text-base">
                 {description}
               </p>
             )}

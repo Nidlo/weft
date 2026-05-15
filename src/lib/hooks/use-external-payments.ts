@@ -26,7 +26,11 @@ export function useRecordExternalPayment(orderId: string) {
     method: ExternalPaymentMethodValue;
     paidAt: string;
     notes?: string;
-    proofImages?: Array<{ url: string; fileId?: string; thumbnailUrl?: string }>;
+    proofImages?: Array<{
+      url: string;
+      fileId?: string;
+      thumbnailUrl?: string;
+    }>;
   }) => {
     const result = await mutate({ variables: { input } });
     return result.data?.recordExternalPayment ?? null;

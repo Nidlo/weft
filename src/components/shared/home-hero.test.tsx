@@ -27,15 +27,17 @@ describe("HomeHero", () => {
       screen.getByRole("heading", {
         level: 1,
         name: /clothes made the way you want them/i,
-      }),
+      })
     ).toBeInTheDocument();
   });
 
   it("shows the guest CTA when unauthenticated", () => {
     render(<HomeHero />);
-    expect(screen.getByRole("link", { name: /get started/i })).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /browse designers/i }),
+      screen.getByRole("link", { name: /get started/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /browse designers/i })
     ).toBeInTheDocument();
   });
 

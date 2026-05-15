@@ -60,7 +60,6 @@ async function fetchDesigner(slug: string): Promise<DesignerOg | null> {
   }
 }
 
-
 function getPortfolioBackground(raw: unknown): string | null {
   const items = parseStringList(raw) as Array<string | { url?: string }>;
   if (items.length === 0) return null;
@@ -69,7 +68,8 @@ function getPortfolioBackground(raw: unknown): string | null {
   if (!url || typeof url !== "string") return null;
   if (url.includes("ik.imagekit.io")) {
     const endpoint =
-      process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "https://ik.imagekit.io/snad";
+      process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ??
+      "https://ik.imagekit.io/snad";
     const path = url.replace(endpoint, "").replace(/^\/tr:[^/]*/, "");
     const slash = path.startsWith("/") ? "" : "/";
     return `${endpoint}/tr:w-1200,h-630,c-maintain_ratio,fo-auto${slash}${path}`;
@@ -95,109 +95,113 @@ export default async function OgImage({ params }: Props) {
   const background = getPortfolioBackground(profile?.portfolioImages);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        padding: 64,
+        backgroundColor: "#0b0b0c",
+        backgroundImage: background ? `url(${background})` : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        color: "white",
+        fontFamily: "system-ui, sans-serif",
+      }}
+    >
+      {/* Dark overlay for legibility */}
       <div
         style={{
-          width: "100%",
-          height: "100%",
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.15) 100%)",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: 64,
-          backgroundColor: "#0b0b0c",
-          backgroundImage: background ? `url(${background})` : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          color: "white",
-          fontFamily: "system-ui, sans-serif",
+        }}
+      />
+
+      {/* Brand mark — top left */}
+      <div
+        style={{
+          position: "absolute",
+          top: 48,
+          left: 64,
+          fontSize: 28,
+          fontWeight: 600,
+          letterSpacing: 2,
+          textTransform: "uppercase",
+          display: "flex",
         }}
       >
-        {/* Dark overlay for legibility */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.15) 100%)",
-            display: "flex",
-          }}
-        />
+        NIDLO
+      </div>
 
-        {/* Brand mark — top left */}
+      {/* Content */}
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {specs.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              marginBottom: 20,
+              flexWrap: "wrap",
+            }}
+          >
+            {specs.map((s) => (
+              <div
+                key={s}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: 999,
+                  backgroundColor: "rgba(255,255,255,0.18)",
+                  fontSize: 22,
+                  display: "flex",
+                }}
+              >
+                {s.replace(/-/g, " ")}
+              </div>
+            ))}
+          </div>
+        )}
         <div
           style={{
-            position: "absolute",
-            top: 48,
-            left: 64,
-            fontSize: 28,
-            fontWeight: 600,
-            letterSpacing: 2,
-            textTransform: "uppercase",
+            fontSize: 76,
+            fontWeight: 800,
+            lineHeight: 1.05,
             display: "flex",
           }}
         >
-          NIDLO
+          {displayName}
         </div>
-
-        {/* Content */}
-        <div style={{ position: "relative", display: "flex", flexDirection: "column" }}>
-          {specs.length > 0 && (
-            <div
-              style={{
-                display: "flex",
-                gap: 12,
-                marginBottom: 20,
-                flexWrap: "wrap",
-              }}
-            >
-              {specs.map((s) => (
-                <div
-                  key={s}
-                  style={{
-                    padding: "6px 14px",
-                    borderRadius: 999,
-                    backgroundColor: "rgba(255,255,255,0.18)",
-                    fontSize: 22,
-                    display: "flex",
-                  }}
-                >
-                  {s.replace(/-/g, " ")}
-                </div>
-              ))}
+        <div
+          style={{
+            marginTop: 18,
+            display: "flex",
+            alignItems: "center",
+            gap: 24,
+            fontSize: 28,
+            opacity: 0.92,
+          }}
+        >
+          {ratingAvg > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ color: "#ffc94d" }}>★</span>
+              <span>{ratingAvg.toFixed(1)}</span>
+              <span style={{ opacity: 0.7 }}>({totalReviews})</span>
             </div>
           )}
-          <div
-            style={{
-              fontSize: 76,
-              fontWeight: 800,
-              lineHeight: 1.05,
-              display: "flex",
-            }}
-          >
-            {displayName}
-          </div>
-          <div
-            style={{
-              marginTop: 18,
-              display: "flex",
-              alignItems: "center",
-              gap: 24,
-              fontSize: 28,
-              opacity: 0.92,
-            }}
-          >
-            {ratingAvg > 0 && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ color: "#ffc94d" }}>★</span>
-                <span>{ratingAvg.toFixed(1)}</span>
-                <span style={{ opacity: 0.7 }}>({totalReviews})</span>
-              </div>
-            )}
-            {city && <div style={{ display: "flex" }}>{city}</div>}
-          </div>
+          {city && <div style={{ display: "flex" }}>{city}</div>}
         </div>
       </div>
-    ),
-    { ...size },
+    </div>,
+    { ...size }
   );
 }
