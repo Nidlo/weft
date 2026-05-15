@@ -5,11 +5,9 @@ import { useMutation } from "@apollo/client/react";
 import {
   ArrowLeft,
   ArrowRight,
-  Camera,
   CheckCircle2,
   Lightbulb,
   Sparkles,
-  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StitchLoader } from "@/components/ui/stitch-loader";
 import { PoseIllustration } from "@/components/measurements/pose-illustration";
+import { PoseCheckedPhotoField } from "@/components/measurements/pose-checked-photo-field";
 import type {
   Landmarks,
   MeasurementData,
@@ -454,9 +453,10 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
           <div className="space-y-2">
             <PoseIllustration variant="front" size="thumb" />
-            <PhotoField
+            <PoseCheckedPhotoField
               id="front-photo"
               label="Front photo"
+              variant="front"
               required
               file={frontImage}
               onChange={setFrontImage}
@@ -464,9 +464,10 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
           </div>
           <div className="space-y-2">
             <PoseIllustration variant="side" size="thumb" />
-            <PhotoField
+            <PoseCheckedPhotoField
               id="side-photo"
               label="Side photo"
+              variant="side"
               file={sideImage}
               onChange={setSideImage}
             />
@@ -882,73 +883,6 @@ function RecomputeBanner({
       >
         Apply {appliedCount > 0 ? "again" : "to form"}
       </button>
-    </div>
-  );
-}
-
-interface PhotoFieldProps {
-  id: string;
-  label: string;
-  required?: boolean;
-  file: File | null;
-  onChange: (file: File | null) => void;
-}
-
-function PhotoField({ id, label, required, file, onChange }: PhotoFieldProps) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id} className="flex items-center gap-1 text-sm">
-        {label}
-        {required && (
-          <span className="text-copper" aria-label="required">
-            *
-          </span>
-        )}
-      </Label>
-      <label
-        htmlFor={id}
-        className={cn(
-          "border-border bg-card/40 flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed p-4",
-          "hover:border-copper/50 hover:bg-card transition-colors",
-          file && "border-foreground/30 bg-card"
-        )}
-      >
-        <span
-          className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-xl ring-1",
-            file
-              ? "bg-foreground text-background ring-transparent"
-              : "bg-secondary text-foreground ring-border"
-          )}
-        >
-          {file ? (
-            <CheckCircle2 className="h-4 w-4" aria-hidden />
-          ) : (
-            <Camera className="h-4 w-4" aria-hidden />
-          )}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">
-            {file ? file.name : "Tap to choose a photo"}
-          </p>
-          <p className="text-muted-foreground text-xs">
-            {file
-              ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
-              : "JPEG, PNG, or WebP"}
-          </p>
-        </div>
-        <Upload
-          className="text-muted-foreground h-4 w-4 shrink-0"
-          aria-hidden
-        />
-      </label>
-      <Input
-        id={id}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        className="sr-only"
-        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
-      />
     </div>
   );
 }
