@@ -10,6 +10,7 @@ import { GoogleAuthProvider } from "@/providers/google-oauth-provider";
 import { AppSplash } from "@/components/shared/app-splash";
 import { ImpersonationBanner } from "@/components/shared/impersonation-banner";
 import { MaintenanceBanner } from "@/components/shared/maintenance-banner";
+import { TourProvider } from "@/lib/tour/tour-provider";
 
 // RealtimeProvider drags in laravel-echo, pusher-js, Firebase Messaging,
 // and several Apollo queries. Guests on /, /auth, /terms, /privacy don't
@@ -45,6 +46,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 normal sessions; does not affect layout flow. */}
             <ImpersonationBanner />
             <RealtimeProvider>{children}</RealtimeProvider>
+            <TourProvider />
             <Toaster richColors position="top-right" />
           </AuthProvider>
         </GoogleAuthProvider>

@@ -26,6 +26,12 @@ interface OnboardingShellProps {
   saving?: boolean;
   /** Override the final button label (e.g. "Get started", "Complete setup"). */
   completeLabel?: string;
+  /**
+   * Optional prefix for tour anchor data attributes on the header,
+   * stepper, and continue button (e.g. "newOrder" → "newOrder.header").
+   * Wizards that aren't tour targets just omit this.
+   */
+  tourPrefix?: string;
 }
 
 /**
@@ -53,6 +59,7 @@ export function OnboardingShell({
   canProceed,
   saving = false,
   completeLabel = "Complete setup",
+  tourPrefix,
 }: OnboardingShellProps) {
   const reduced = useReducedMotion();
   const isLastStep = step === steps.length - 1;
@@ -60,7 +67,10 @@ export function OnboardingShell({
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
-      <header className="mb-8 text-center">
+      <header
+        data-tour-id={tourPrefix ? `${tourPrefix}.header` : undefined}
+        className="mb-8 text-center"
+      >
         <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           {eyebrow}
         </p>
@@ -73,7 +83,9 @@ export function OnboardingShell({
         </p>
       </header>
 
-      <StepIndicator steps={steps} step={step} />
+      <div data-tour-id={tourPrefix ? `${tourPrefix}.stepper` : undefined}>
+        <StepIndicator steps={steps} step={step} />
+      </div>
 
       <GlassCard variant="solid" className="mt-8 p-6 sm:p-8">
         <div className="min-h-[420px]">
@@ -121,11 +133,13 @@ export function OnboardingShell({
                 variant="luxe"
                 size="lg"
                 onClick={onComplete}
-                disabled={!canProceed || saving}
+                disabled={!canProceed}
+                loading={saving}
+                loadingLabel="Saving..."
                 className="gap-1.5"
               >
-                {saving ? "Saving..." : completeLabel}
-                {!saving && <Check className="h-4 w-4" aria-hidden />}
+                {completeLabel}
+                <Check className="h-4 w-4" aria-hidden />
               </Button>
             ) : (
               <Button
@@ -134,6 +148,7 @@ export function OnboardingShell({
                 size="lg"
                 onClick={onNext}
                 disabled={!canProceed}
+                data-tour-id={tourPrefix ? `${tourPrefix}.continue` : undefined}
                 className="gap-1.5"
               >
                 Continue

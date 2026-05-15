@@ -35,8 +35,13 @@ export function FabricTypeCombobox({
 }: FabricTypeComboboxProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  // Session-local cache of user-submitted entries that are awaiting admin
+  // approval — keeps the proper label on the chip after creation.
+  const [localAdditions, setLocalAdditions] = useState<BlueprintOption[]>([]);
   const { createBlueprintOption, loading: creating } =
     useCreateBlueprintOption();
+
+  const mergedOptions = [...options, ...localAdditions];
 
   const toggle = (value: string) => {
     onChange(
@@ -51,12 +56,12 @@ export function FabricTypeCombobox({
   };
 
   const filtered = search
-    ? options.filter((o) =>
+    ? mergedOptions.filter((o) =>
         o.label.toLowerCase().includes(search.toLowerCase())
       )
-    : options;
+    : mergedOptions;
 
-  const exactMatch = options.some(
+  const exactMatch = mergedOptions.some(
     (o) => o.label.toLowerCase() === search.toLowerCase()
   );
 
@@ -74,9 +79,14 @@ export function FabricTypeCombobox({
       search.trim()
     );
     if (result) {
+      setLocalAdditions((prev) =>
+        prev.some((o) => o.value === result.value) ? prev : [...prev, result]
+      );
       onChange([...selected, result.value]);
       setSearch("");
-      toast.success(`"${result.label}" added as a fabric type`);
+      toast.success(
+        `"${result.label}" submitted — visible to others once approved`
+      );
     }
   };
 
@@ -151,7 +161,7 @@ export function FabricTypeCombobox({
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selected.map((v) => {
-            const label = options.find((o) => o.value === v)?.label ?? v;
+            const label = mergedOptions.find((o) => o.value === v)?.label ?? v;
             return (
               <Badge key={v} variant="secondary" className="text-xs">
                 {label}

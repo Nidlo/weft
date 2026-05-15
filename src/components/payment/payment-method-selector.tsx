@@ -99,10 +99,12 @@ export function PaymentMethodSelector({
 
       <Button
         className="w-full"
-        disabled={!canProceed || loading}
+        disabled={!canProceed}
+        loading={loading}
+        loadingLabel="Initializing..."
         onClick={handleProceed}
       >
-        {loading ? "Initializing..." : "Continue to Pay"}
+        Continue to Pay
       </Button>
     </div>
   );

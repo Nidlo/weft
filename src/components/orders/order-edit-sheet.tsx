@@ -15,11 +15,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Loader2, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 import { GarmentTypeCombobox } from "./garment-type-combobox";
 import { FabricTypeCombobox } from "./fabric-type-combobox";
+import { AdditionalDetailsCombobox } from "./additional-details-combobox";
 import { ReferenceImageUpload } from "./reference-image-upload";
 import { MeasurementSelector } from "./measurement-selector";
 import { BudgetInput } from "./budget-input";
@@ -76,21 +77,32 @@ export function OrderEditSheet({
     setSeededFor(null);
   }
 
-  const handleSave = async () => {
-    const budgetMin = Math.round(parseFloat(budgetMinGhs) * 100);
-    const budgetMax = Math.round(parseFloat(budgetMaxGhs) * 100);
+  // Budget edits lock server-side once a confirmed price is set (designer
+  // accepted, client may have paid). Send the budget fields only when the
+  // server would actually accept them — otherwise an unrelated edit (e.g.
+  // adding a fabric type after confirmation) gets rejected with "Pricing is
+  // locked", because the server treats *presence* of budget keys as intent.
+  const budgetLocked = order.confirmedPrice !== null;
 
-    if (isNaN(budgetMin) || isNaN(budgetMax) || budgetMin > budgetMax) {
-      toast.error("Invalid budget range.");
-      return;
+  const handleSave = async () => {
+    let budgetMin: number | undefined;
+    let budgetMax: number | undefined;
+
+    if (isDesigner && !budgetLocked) {
+      budgetMin = Math.round(parseFloat(budgetMinGhs) * 100);
+      budgetMax = Math.round(parseFloat(budgetMaxGhs) * 100);
+
+      if (isNaN(budgetMin) || isNaN(budgetMax) || budgetMin > budgetMax) {
+        toast.error("Invalid budget range.");
+        return;
+      }
     }
 
     const result = await updateOrder({
       orderId: order.id,
       ...(isDesigner && {
         garmentType: garmentType || undefined,
-        budgetMin,
-        budgetMax,
+        ...(!budgetLocked && { budgetMin, budgetMax }),
         description: description.trim() || undefined,
         referenceImages:
           referenceImages.length > 0 ? referenceImages : undefined,
@@ -123,8 +135,11 @@ export function OrderEditSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Pencil className="mr-2 h-3.5 w-3.5" />
+        {/* Size matches the "Advance to <next stage>" luxe button it sits
+            next to on the order detail page — used to be `size="sm"` which
+            looked like a secondary chip. */}
+        <Button variant="outline" size="lg" className="gap-1.5">
+          <Pencil className="h-4 w-4" aria-hidden />
           Edit Order
         </Button>
       </SheetTrigger>
@@ -132,11 +147,11 @@ export function OrderEditSheet({
         side="bottom"
         className="max-h-[90vh] w-full overflow-y-auto"
       >
-        <SheetHeader>
+        <SheetHeader className="px-4 sm:px-6">
           <SheetTitle>Edit Order</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-6 space-y-6 px-4 pb-6 sm:px-6">
           {/* Designer-only fields */}
           {isDesigner && (
             <>
@@ -157,6 +172,16 @@ export function OrderEditSheet({
                   options={options?.fabricTypes ?? []}
                   selected={fabricTypes}
                   onChange={setFabricTypes}
+                />
+              </div>
+
+              {/* Additional details (ruffles, pleats, embroidery...) */}
+              <div className="space-y-2">
+                <Label>Additional details</Label>
+                <AdditionalDetailsCombobox
+                  options={options?.designFields?.additional_detail ?? []}
+                  selected={additionalDetails}
+                  onChange={setAdditionalDetails}
                 />
               </div>
 
@@ -183,17 +208,35 @@ export function OrderEditSheet({
                 />
               </div>
 
-              {/* Budget */}
-              <BudgetInput
-                minGhs={budgetMinGhs}
-                maxGhs={budgetMaxGhs}
-                onMinChange={setBudgetMinGhs}
-                onMaxChange={setBudgetMaxGhs}
-              />
+              {/* Budget — locked once a confirmed price exists. The
+                  renegotiation path is the counter-offer flow on the
+                  order detail page. */}
+              {budgetLocked ? (
+                <div className="border-border bg-muted/40 rounded-md border p-3 text-xs">
+                  <p className="text-foreground font-medium">Budget locked</p>
+                  <p className="text-muted-foreground mt-1">
+                    Pricing is fixed at the confirmed price. To renegotiate,
+                    send a counter-offer from the order detail page.
+                  </p>
+                </div>
+              ) : (
+                <BudgetInput
+                  minGhs={budgetMinGhs}
+                  maxGhs={budgetMaxGhs}
+                  onMinChange={setBudgetMinGhs}
+                  onMaxChange={setBudgetMaxGhs}
+                />
+              )}
 
-              {/* Measurement */}
+              {/* Measurement — picks from the linked client's vault when
+                  client_id is set, the walk-in's pending rows when only
+                  client_phone is set, or the designer's own body vault
+                  when neither (e.g. a prototype). Backend's
+                  MeasurementAccessGuard validates the chosen id against
+                  the post-update order state. */}
               <MeasurementSelector
                 clientId={order.clientId}
+                pendingClientPhone={order.clientId ? null : order.clientPhone}
                 value={measurementId}
                 onChange={setMeasurementId}
               />
@@ -212,15 +255,13 @@ export function OrderEditSheet({
           </div>
 
           {/* Save */}
-          <Button onClick={handleSave} disabled={saving} className="w-full">
-            {saving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save Changes"
-            )}
+          <Button
+            onClick={handleSave}
+            loading={saving}
+            loadingLabel="Saving..."
+            className="w-full"
+          >
+            Save Changes
           </Button>
         </div>
       </SheetContent>

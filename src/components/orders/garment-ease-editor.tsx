@@ -301,8 +301,13 @@ export function GarmentEaseEditor({
             <Button variant="outline" onClick={reset} disabled={saving}>
               Cancel
             </Button>
-            <Button onClick={handleAdd} disabled={saving || !field}>
-              {saving ? "Saving..." : "Save ease"}
+            <Button
+              onClick={handleAdd}
+              disabled={!field}
+              loading={saving}
+              loadingLabel="Saving..."
+            >
+              Save ease
             </Button>
           </div>
         </GlassCard>

@@ -8,6 +8,7 @@ export const ME_QUERY = gql`
       lastName
       otherNames
       fullName
+      heightCm
       phone
       email
       avatarUrl
@@ -18,6 +19,7 @@ export const ME_QUERY = gql`
       isImpersonated
       impersonatorEmail
       termsAcceptedVersion
+      tourProgress
       designerProfile {
         slug
         profileViewsCount

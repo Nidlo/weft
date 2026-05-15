@@ -275,4 +275,38 @@ describe("VerifyOtpPage", () => {
       expect(routerPushSpy).toHaveBeenCalled();
     });
   });
+
+  it("does not re-submit the same code after a failed attempt (post-error dedupe)", async () => {
+    // The new defense beyond the `submitting` ref: after a wrong code is
+    // rejected and the in-flight flag resets, an auto-submit handler that
+    // captured the same code in a stale closure could fire again. Without
+    // the dedupe, that second call inflates the failed-attempts counter
+    // server-side — three of those triggers lockout, which deletes the
+    // otpKey. After lockout expires, the user's NEXT correct attempt then
+    // hits "Verification code expired" because the key is gone. Same-code
+    // resubmits must be dropped client-side.
+    verifyOtpMutationSpy.mockRejectedValue(
+      new Error("Invalid code. 2 attempt(s) remaining.")
+    );
+
+    render(<VerifyOtpPage />);
+    typeCode("000000");
+
+    await waitFor(() => {
+      expect(verifyOtpMutationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    // After the rejection, simulate the page autosubmitting the SAME code
+    // again (stale closure, fast re-render, etc.). The dedupe should drop it.
+    const inputs = screen.getAllByRole("textbox") as HTMLInputElement[];
+    await waitFor(() => {
+      expect(inputs.every((i) => i.value === "")).toBe(true);
+    });
+    typeCode("000000");
+
+    // Give the (rejected) microtask queue a chance to flush.
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(verifyOtpMutationSpy).toHaveBeenCalledTimes(1);
+  });
 });

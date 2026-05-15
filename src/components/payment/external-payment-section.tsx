@@ -1,14 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Banknote,
-  Check,
-  X,
-  Plus,
-  Image as ImageIcon,
-  Loader2,
-} from "lucide-react";
+import { Banknote, Check, X, Plus, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -198,9 +191,9 @@ export function ExternalPaymentSection({
               <Button
                 className="flex-1"
                 onClick={handleRecord}
-                disabled={recording}
+                loading={recording}
+                loadingLabel="Recording..."
               >
-                {recording && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Record Payment
               </Button>
             </div>
@@ -288,11 +281,9 @@ export function ExternalPaymentSection({
                             size="sm"
                             className="flex-1"
                             onClick={handleReject}
-                            disabled={rejecting}
+                            loading={rejecting}
+                            loadingLabel="Rejecting..."
                           >
-                            {rejecting && (
-                              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                            )}
                             Reject
                           </Button>
                         </div>
@@ -304,13 +295,10 @@ export function ExternalPaymentSection({
                           variant="outline"
                           className="flex-1"
                           onClick={() => handleConfirm(ep.id)}
-                          disabled={confirming}
+                          loading={confirming}
+                          loadingLabel="Confirming..."
                         >
-                          {confirming ? (
-                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                          ) : (
-                            <Check className="mr-1 h-3 w-3" />
-                          )}
+                          <Check className="mr-1 h-3 w-3" />
                           Confirm
                         </Button>
                         <Button

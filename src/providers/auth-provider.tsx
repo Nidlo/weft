@@ -5,7 +5,28 @@ import { useAuthStore, useHasHydrated } from "@/lib/stores/auth";
 import { apolloClient } from "@/lib/graphql/client";
 import { ensureCsrfCookie } from "@/lib/graphql/csrf";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
+import { useTourStore } from "@/lib/tour/use-tour";
+import type { TourId, TourOutcome, TourProgress } from "@/lib/tour/types";
+import { TOURS } from "@/lib/tour/registry";
 import type { MeData } from "@/types/graphql";
+
+// Narrow the server payload to the FE-known allowlist. Defensive against
+// a future tour added BE-side that the deployed client doesn't know about
+// yet — silently drop unknown keys, drop unexpected outcome strings.
+function filterTourProgress(
+  raw: Record<string, "completed" | "skipped"> | null | undefined
+): TourProgress {
+  if (!raw) return {};
+  const knownIds = Object.keys(TOURS) as TourId[];
+  const out: TourProgress = {};
+  for (const id of knownIds) {
+    const value = raw[id];
+    if (value === "completed" || value === "skipped") {
+      out[id] = value as TourOutcome;
+    }
+  }
+  return out;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
@@ -58,7 +79,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             city: me.city,
             isDesigner: me.isDesigner,
             isOnboarded: me.isOnboarded,
+            // Carrying designerProfile.slug through to the authStore is what
+            // lets /profile/edit (and any other page) fire GET_DESIGNER —
+            // without it, every page reload looks like "no slug yet" and the
+            // form skips its backend hydration, making saved values appear
+            // to disappear.
+            designerProfile: me.designerProfile ?? null,
           });
+          useTourStore.getState().hydrate(filterTourProgress(me.tourProgress));
         } else {
           logout();
         }

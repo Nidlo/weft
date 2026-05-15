@@ -40,7 +40,10 @@ export function HomeDiscovery() {
       {quickFilters.length > 0 && (
         <Section density="compact" eyebrow="Discover" title="Browse by craft">
           <ScrollArea className="-mx-4 w-screen sm:mx-0 sm:w-full">
-            <div className="flex gap-2 px-4 pb-3 sm:px-0">
+            <div
+              data-tour-id="home.quick-filters"
+              className="flex gap-2 px-4 pb-3 sm:px-0"
+            >
               {quickFilters.map((spec) => (
                 <Link
                   key={spec.id}
@@ -61,13 +64,15 @@ export function HomeDiscovery() {
         </Section>
       )}
 
-      <DesignerScrollSection
-        eyebrow="Acclaimed"
-        title="Top-rated designers"
-        designers={topRated.designers}
-        loading={topRated.loading}
-        browseHref="/search?sort=rating"
-      />
+      <div data-tour-id="home.discovery-rails">
+        <DesignerScrollSection
+          eyebrow="Acclaimed"
+          title="Top-rated designers"
+          designers={topRated.designers}
+          loading={topRated.loading}
+          browseHref="/search?sort=rating"
+        />
+      </div>
 
       {(nearby.loading || nearby.designers.length > 0) && (
         <DesignerScrollSection

@@ -129,9 +129,16 @@ export const GET_ORDER = gql`
         }
         createdAt
       }
-      materials {
+      items {
         id
+        orderId
+        itemType
         name
+        description
+        metadata {
+          label
+          value
+        }
         unitCost
         quantity
         totalCost
@@ -281,11 +288,11 @@ export const CLIENT_MEASUREMENTS = gql`
 export const ORDER_PROFIT_SUMMARY = gql`
   query OrderProfitSummary($orderId: ID!) {
     orderProfitSummary(orderId: $orderId) {
-      totalMaterialCost
+      totalItemCost
       confirmedPrice
       profit
       marginPercent
-      materialCount
+      itemCount
       purchasedCount
     }
   }
