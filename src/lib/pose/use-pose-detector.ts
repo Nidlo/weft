@@ -36,6 +36,15 @@ interface PoseLandmarkerLike {
   close: () => void;
 }
 
+/** Live-video landmarker handle owned by the camera capture component. */
+export interface VideoPoseLandmarker {
+  detectForVideo: (
+    video: HTMLVideoElement,
+    timestampMs: number
+  ) => { landmarks?: PoseLandmark[][] };
+  close: () => void;
+}
+
 let cached: PoseLandmarkerLike | null = null;
 let inflight: Promise<PoseLandmarkerLike> | null = null;
 
@@ -144,4 +153,35 @@ export function fileToImage(file: File): Promise<HTMLImageElement | null> {
     };
     img.src = url;
   });
+}
+
+/**
+ * Create a dedicated VIDEO-mode landmarker for the live camera overlay.
+ *
+ * Deliberately a separate instance from the shared IMAGE-mode singleton:
+ * switching one landmarker between IMAGE and VIDEO at runtime
+ * (`setOptions`) is async and race-prone inside a requestAnimationFrame
+ * loop. A dedicated instance is simpler and correct; the model file is
+ * already HTTP-cached from first use so this is cheap. The caller owns
+ * the handle and MUST `close()` it on unmount to free the GPU context.
+ *
+ * Resolves null on any failure (no WebGL, model fetch failed) so the
+ * camera UI can fall back to plain file upload.
+ */
+export async function createVideoLandmarker(): Promise<VideoPoseLandmarker | null> {
+  try {
+    const vision = await import("@mediapipe/tasks-vision");
+    const fileset = await vision.FilesetResolver.forVisionTasks(WASM_BASE);
+    const landmarker = await vision.PoseLandmarker.createFromOptions(fileset, {
+      baseOptions: { modelAssetPath: MODEL_URL, delegate: "GPU" },
+      runningMode: "VIDEO",
+      numPoses: 1,
+    });
+    return landmarker as unknown as VideoPoseLandmarker;
+  } catch (err) {
+    if (typeof console !== "undefined") {
+      console.error("Video pose landmarker failed to load:", err);
+    }
+    return null;
+  }
 }

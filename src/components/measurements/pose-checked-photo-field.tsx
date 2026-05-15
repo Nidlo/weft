@@ -1,7 +1,15 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { AlertTriangle, Camera, CheckCircle2, Upload, X } from "lucide-react";
+import dynamic from "next/dynamic";
+import {
+  AlertTriangle,
+  Camera,
+  CheckCircle2,
+  Upload,
+  Video,
+  X,
+} from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +17,13 @@ import { Button } from "@/components/ui/button";
 import { classifyPose, type PoseVariant } from "@/lib/pose/classify-pose";
 import { fileToImage, usePoseDetector } from "@/lib/pose/use-pose-detector";
 import { cn } from "@/lib/utils";
+
+// Camera capture pulls in the MediaPipe VIDEO landmarker. Keep it out of
+// this field's chunk; only fetch it when the user taps "Use camera".
+const PoseCameraCapture = dynamic(
+  () => import("./pose-camera-capture").then((m) => m.PoseCameraCapture),
+  { ssr: false }
+);
 
 interface Props {
   id: string;
@@ -48,6 +63,7 @@ export function PoseCheckedPhotoField({
   const inputRef = useRef<HTMLInputElement>(null);
   const { ensureReady, detectImage } = usePoseDetector();
   const [check, setCheck] = useState<CheckState>({ kind: "idle" });
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   const runCheck = useCallback(
     async (picked: File) => {
@@ -91,6 +107,35 @@ export function PoseCheckedPhotoField({
       inputRef.current.click();
     }
   };
+
+  const handleCameraCapture = (captured: File) => {
+    setCameraOpen(false);
+    onChange(captured);
+    // The live overlay only fires the capture once the pose held correct,
+    // so it's already validated - mark it good without re-running the
+    // still check.
+    setCheck({ kind: "ok" });
+  };
+
+  if (cameraOpen) {
+    return (
+      <div className="space-y-2">
+        <Label className="flex items-center gap-1 text-sm">
+          {label}
+          {required && (
+            <span className="text-copper" aria-label="required">
+              *
+            </span>
+          )}
+        </Label>
+        <PoseCameraCapture
+          variant={variant}
+          onCapture={handleCameraCapture}
+          onCancel={() => setCameraOpen(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -151,6 +196,15 @@ export function PoseCheckedPhotoField({
         className="sr-only"
         onChange={(e) => handlePick(e.target.files?.[0] ?? null)}
       />
+
+      <button
+        type="button"
+        onClick={() => setCameraOpen(true)}
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-xs font-medium transition-colors"
+      >
+        <Video className="h-3.5 w-3.5" aria-hidden />
+        Use camera with a live pose guide
+      </button>
 
       {check.kind === "warn" && (
         <div
