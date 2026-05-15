@@ -17,4 +17,16 @@ describe("StitchLoader", () => {
     rerender(<StitchLoader label="Stitching your order…" />);
     expect(screen.getByText("Stitching your order…")).toBeInTheDocument();
   });
+
+  it("renders the brand-mark SVG (needle + thread, not generic dots)", () => {
+    render(<StitchLoader />);
+    const svg = screen.getByTestId("stitch-loader-svg");
+    expect(svg.tagName.toLowerCase()).toBe("svg");
+    // Thread (dashed) + needle group should both render.
+    expect(svg.querySelector("line[stroke-dasharray]")).not.toBeNull();
+    // Needle traversal — SMIL animateTransform on a translation.
+    expect(
+      svg.querySelector('animateTransform[type="translate"]')
+    ).not.toBeNull();
+  });
 });

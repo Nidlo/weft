@@ -237,6 +237,7 @@ function SendButton({
       size="icon"
       onClick={onClick}
       disabled={disabled}
+      loading={loading}
       title={label}
       aria-label={label}
       className={cn(
@@ -246,11 +247,7 @@ function SendButton({
           : "bg-secondary text-muted-foreground hover:bg-secondary"
       )}
     >
-      {loading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Send className="h-4 w-4" />
-      )}
+      {!loading && <Send className="h-4 w-4" />}
     </Button>
   );
 }

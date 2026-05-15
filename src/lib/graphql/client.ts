@@ -100,15 +100,47 @@ const errorLink = new ErrorLink(({ error, operation }) => {
       probeSessionAndLogoutIfDead();
     }
 
+    // Use console.warn (not console.error) so user-recoverable domain
+    // errors — "Invalid code", "Validation failed", "Too many requests"
+    // — don't trip Next.js 16's dev overlay (which red-panels on any
+    // console.error call). The log content is unchanged; only the
+    // severity is downgraded to match the actual nature of these
+    // responses (predictable, recoverable, surfaced to the user via
+    // toast already).
     error.errors.forEach(({ message, locations, path }) => {
-      console.error(
+      console.warn(
         `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(locations)}, Path: ${path}, Operation: ${operation.operationName}`
       );
     });
+  } else if (isAbortError(error)) {
+    // Routine cleanup: a component unmounted (or React 19 strict-mode
+    // double-invoked) while the query was in flight, so Apollo aborted
+    // the underlying fetch. Not an error — silence it so the console
+    // isn't polluted with spurious "Network error" lines during fast
+    // navigation.
   } else {
     console.error(`[Network error]: ${error}`);
   }
 });
+
+/**
+ * Detect the AbortError that fetch / Apollo emits when a request signal
+ * is cancelled. Matches both the DOMException form (`name === "AbortError"`)
+ * and the bare-Error fallback some runtimes use.
+ */
+function isAbortError(err: unknown): boolean {
+  if (err == null) return false;
+  if (typeof err !== "object") return false;
+  const e = err as { name?: unknown; message?: unknown };
+  if (e.name === "AbortError") return true;
+  if (
+    typeof e.message === "string" &&
+    /aborted|signal is aborted/i.test(e.message)
+  ) {
+    return true;
+  }
+  return false;
+}
 
 /**
  * Shape of a paginated `designers` page in the Apollo cache. The runtime

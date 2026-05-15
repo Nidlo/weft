@@ -10,6 +10,7 @@ export interface GqlUser {
   lastName: string | null;
   otherNames: string | null;
   fullName: string | null;
+  heightCm: number | null;
   phone: string | null;
   email: string | null;
   avatarUrl: string | null;
@@ -19,6 +20,7 @@ export interface GqlUser {
   isOnboarded: boolean;
   hasVerifiedWalletAccount: boolean;
   termsAcceptedVersion: string | null;
+  tourProgress: Record<string, "completed" | "skipped"> | null;
 }
 
 export interface GqlLegalVersions {
@@ -37,11 +39,55 @@ export interface RequestOtpData {
   };
 }
 
+/**
+ * Surface set when verifyOtp matches a soft-deleted account still inside its
+ * 30-day recovery window. Backend does NOT sign the caller in; the caller
+ * must choose between `restoreAccount` and `declineRestore`.
+ */
+export interface GqlPendingRestore {
+  /** ISO 8601 timestamp when the account was soft-deleted (window start). */
+  deletedAt: string;
+  /** ISO 8601 timestamp after which the account is permanently purged. */
+  expiresAt: string;
+  /** Whole days remaining in the window (floored; 0 once we're inside the final 24h). */
+  daysRemaining: number;
+}
+
 export interface VerifyOtpData {
   verifyOtp: {
     token: string | null;
     isNew: boolean;
+    /** Orphan orders (parked against this phone by a designer) that were claimed at signup. */
+    claimedOrdersCount: number;
+    /** Orphan measurements (parked against this phone by a designer) that were claimed at signup. */
+    claimedMeasurementsCount: number;
     user: GqlUser;
+    /** Populated only when the phone matches a soft-deleted account inside its recovery window. The caller has NOT been signed in. */
+    pendingRestore: GqlPendingRestore | null;
+  };
+}
+
+export interface RestoreAccountData {
+  restoreAccount: {
+    isNew: boolean;
+    claimedOrdersCount: number;
+    claimedMeasurementsCount: number;
+    user: GqlUser;
+  };
+}
+
+export interface DeclineRestoreData {
+  declineRestore: boolean;
+}
+
+export interface DeleteMyAccountData {
+  deleteMyAccount: {
+    success: boolean;
+    immediate: boolean;
+    /** Null when `immediate` is true. */
+    deletedAt: string | null;
+    /** Null when `immediate` is true. After this instant the account is permanently purged. */
+    recoverableUntil: string | null;
   };
 }
 
@@ -49,6 +95,8 @@ export interface SocialLoginData {
   socialLogin: {
     token: string | null;
     isNew: boolean;
+    claimedOrdersCount: number;
+    claimedMeasurementsCount: number;
     user: GqlUser;
   };
 }
@@ -95,6 +143,10 @@ export interface GqlDesignerProfile {
   onTimeRate: number;
   responseTimeAvg: number | null;
   isAcceptingOrders: boolean;
+  workshopName: string | null;
+  workshopAddress: string | null;
+  workshopLat: number | null;
+  workshopLng: number | null;
   profileCompleteness: number;
   profileViewsCount: number;
   profileViewsThisWeek: number;
@@ -312,6 +364,10 @@ export interface MeasurementData {
   upper_body?: Record<string, number | null>;
   lower_body?: Record<string, number | null>;
   vertical?: Record<string, number | null>;
+  // Sprint 36 booth-coverage. Style choices, not AI-measured fields;
+  // populated only via the manual form (blouse_length, kaba_length,
+  // skirt_length, slit_length, dress_length, cape).
+  garments?: Record<string, number | null>;
 }
 
 /**
@@ -325,14 +381,15 @@ export type MeasurementMmData = {
   upper_body?: Record<string, number | null>;
   lower_body?: Record<string, number | null>;
   vertical?: Record<string, number | null>;
+  garments?: Record<string, number | null>;
 };
 
 export interface GqlMeasurement {
   id: string;
   label: string;
   /**
-   * Canonical mm-integer payload — the only persisted measurement values
-   * post-S1c. Display layers convert through `formatMeasurement(mm, "mm",
+   * Canonical mm-integer payload. The only persisted measurement values
+   * post-S1c; display layers convert through `formatMeasurement(mm, "mm",
    * displayUnit)`.
    */
   dataMm: MeasurementMmData;
@@ -346,7 +403,7 @@ export interface GqlMeasurement {
   landmarksNormalized: Landmarks | null;
   /**
    * Read-time URL for the AI-extracted source photo (S2.5c). The shape
-   * depends on `photoDisk` — a signed Laravel route for `'local'`, the
+   * depends on `photoDisk`: a signed Laravel route for `'local'`, the
    * stable CDN URL for `'imagekit'`, or a short-lived signed URL for
    * `'s3'`. Null on manual rows or rows whose upload failed.
    */
@@ -450,7 +507,7 @@ export type Landmarks = Record<string, PoseLandmark>;
 export interface ExtractAiMeasurementsResult {
   data: MeasurementData;
   landmarks: Landmarks | null;
-  /** Cached URL when the disk returns one (ImageKit); null for local + s3 — those are computed at read time. */
+  /** Cached URL when the disk returns one (ImageKit); null for local + s3 (those are computed at read time). */
   photoUrl: string | null;
   /** Disk-specific identifier the storage layer needs to delete the asset. */
   photoPublicId: string | null;
@@ -466,8 +523,40 @@ export interface ExtractAiMeasurementsResult {
   degradedModes: string[];
 }
 
+export type ScanJobStatus =
+  | "queued"
+  | "running"
+  | "completed"
+  | "failed"
+  | "image_rejected";
+
+export type ScanJobErrorCategory =
+  | "image_quality"
+  | "upstream_unavailable"
+  | "upstream_error"
+  | "claude_failed"
+  | "unknown";
+
+/**
+ * One AI body-scan attempt, created by the `extractAiMeasurements`
+ * mutation and polled via `MEASUREMENT_SCAN_JOB` until terminal. Sprint
+ * 33b will push the same payload over Reverb so polling becomes a fallback.
+ */
+export interface MeasurementScanJob {
+  id: string;
+  status: ScanJobStatus;
+  errorCategory: ScanJobErrorCategory | null;
+  errorMessage: string | null;
+  /** Populated only when `status === "completed"`. */
+  result: ExtractAiMeasurementsResult | null;
+}
+
 export interface ExtractAiMeasurementsData {
-  extractAiMeasurements: ExtractAiMeasurementsResult;
+  extractAiMeasurements: Pick<MeasurementScanJob, "id" | "status">;
+}
+
+export interface MeasurementScanJobData {
+  measurementScanJob: MeasurementScanJob | null;
 }
 
 export interface CreateMeasurementInput {
@@ -481,7 +570,7 @@ export interface CreateMeasurementInput {
   photoUrl?: string;
   /** Disk-specific identifier (path on local, fileId on imagekit, S3 key on backblaze). */
   photoPublicId?: string;
-  /** Which storage disk wrote the asset — pass through verbatim from extractAiMeasurements. */
+  /** Which storage disk wrote the asset; pass through verbatim from extractAiMeasurements. */
   photoDisk?: string;
 }
 
@@ -489,6 +578,8 @@ export interface UpdateMeasurementInput {
   label?: string;
   unit?: string;
   data?: MeasurementData;
+  /** User-corrected landmark coordinates from the editable LandmarkOverlay. Replaces `landmarks_normalized` on the row when present; omit to leave unchanged. */
+  landmarks?: Landmarks;
 }
 
 export interface BlueprintData {
@@ -541,7 +632,9 @@ export interface GqlOrderDetail extends GqlOrder {
   designer: GqlUser;
   measurement: GqlMeasurement | null;
   updates: GqlOrderUpdate[];
-  materials: GqlOrderMaterial[];
+  items: GqlOrderItem[];
+  /** @deprecated alias for items, kept for one release. */
+  materials: GqlOrderItem[];
   garmentEases: GqlOrderGarmentEase[];
   payments: GqlPayment[];
   payouts: GqlPayout[];
@@ -595,10 +688,18 @@ export interface GqlOrderUpdate {
   createdAt: string;
 }
 
-export interface GqlOrderMaterial {
+export interface GqlOrderItemMetadata {
+  label: string;
+  value: string;
+}
+
+export interface GqlOrderItem {
   id: string;
   orderId: string;
+  itemType: string;
   name: string;
+  description: string | null;
+  metadata: GqlOrderItemMetadata[] | null;
   unitCost: number;
   quantity: number;
   totalCost: number;
@@ -606,11 +707,23 @@ export interface GqlOrderMaterial {
   createdAt: string;
 }
 
+/**
+ * @deprecated schema rename; alias kept so any in-flight imports compile
+ * during the one-release back-compat window. New code should import GqlOrderItem.
+ */
+export type GqlOrderMaterial = GqlOrderItem;
+
 export interface GqlProfitSummary {
+  /** Canonical name post-rename. */
+  totalItemCost: number;
+  /** @deprecated alias for totalItemCost, kept for one release. */
   totalMaterialCost: number;
   confirmedPrice: number;
   profit: number;
   marginPercent: number;
+  /** Canonical name post-rename. */
+  itemCount: number;
+  /** @deprecated alias for itemCount, kept for one release. */
   materialCount: number;
   purchasedCount: number;
 }
@@ -675,6 +788,13 @@ export interface UpdateOrderStatusInput {
   orderId: string;
   status: string;
   notes?: string;
+  /**
+   * Set by the FE after the designer confirms a "deposit not recorded"
+   * dialog. Tells the backend to bypass the deposit gate and record the
+   * override on the order_updates audit row. Default false; clients
+   * never set this without an explicit user confirmation.
+   */
+  acceptUnpaidDeposit?: boolean;
 }
 
 export interface AddMaterialInput {
@@ -704,16 +824,26 @@ export interface ConfirmDeliveryData {
   confirmDelivery: GqlOrder;
 }
 
-export interface AddMaterialData {
-  addMaterial: GqlOrderMaterial;
+export interface AddItemInput {
+  orderId: string;
+  itemType?: string;
+  name: string;
+  description?: string;
+  metadata?: GqlOrderItemMetadata[];
+  unitCost: number;
+  quantity?: number;
+}
+
+export interface AddItemData {
+  addItem: GqlOrderItem;
 }
 
 export interface TogglePurchasedData {
-  togglePurchased: GqlOrderMaterial;
+  togglePurchased: GqlOrderItem;
 }
 
-export interface RemoveMaterialData {
-  removeMaterial: boolean;
+export interface RemoveItemData {
+  removeItem: boolean;
 }
 
 // --- Client Search ---
@@ -1063,17 +1193,29 @@ export interface GqlResolvedAccount {
   accountNumber: string;
 }
 
-export interface GqlWalletBalance {
-  balance: number;
+export interface GqlEarningsBreakdownItem {
+  payoutId: string;
+  orderId: string;
+  grossPesewas: number;
+  feePesewas: number;
+  netPesewas: number;
+  status: PayoutStatusValue;
+  transferredAt: string | null;
+  createdAt: string;
 }
 
-export interface GqlWalletTransaction {
-  id: string;
-  type: "deposit" | "withdraw";
-  amount: number;
-  confirmed: boolean;
-  meta: Record<string, unknown> | null;
-  createdAt: string;
+export interface GqlEarningsSummary {
+  ordersCount: number;
+  grossPesewas: number;
+  feePesewas: number;
+  netPesewas: number;
+  paidOutPesewas: number;
+  awaitingPayoutSetupPesewas: number;
+  breakdown: GqlEarningsBreakdownItem[];
+}
+
+export interface MyEarningsSummaryData {
+  myEarningsSummary: GqlEarningsSummary;
 }
 
 export interface ResolveMomoAccountData {
@@ -1094,14 +1236,6 @@ export interface RemoveWalletAccountData {
 
 export interface MyWalletAccountsData {
   myWalletAccounts: GqlWalletAccount[];
-}
-
-export interface MyWalletBalanceData {
-  myWalletBalance: GqlWalletBalance;
-}
-
-export interface MyWalletTransactionsData {
-  myWalletTransactions: GqlWalletTransaction[];
 }
 
 export type ExternalPaymentMethodValue =

@@ -3,14 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
-import {
-  Home,
-  Search,
-  MessageSquare,
-  User,
-  ClipboardList,
-  Wallet,
-} from "lucide-react";
+import { Home, Search, MessageSquare, User, ClipboardList } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -24,11 +17,14 @@ const clientNavItems = [
   { href: "/profile", label: "Profile", icon: User },
 ];
 
+// Earnings lives under Profile (Settings → Earnings) — it's a personal
+// report, not a core feature on its own, and the legal copy says Nidlo
+// doesn't operate a wallet. Designers and clients share the same nav
+// shape; Profile is the entry point to anything role-specific.
 const designerNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/orders", label: "Orders", icon: ClipboardList },
   { href: "/messages", label: "Messages", icon: MessageSquare },
-  { href: "/wallet", label: "Wallet", icon: Wallet },
   { href: "/profile", label: "Profile", icon: User },
 ];
 

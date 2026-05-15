@@ -131,11 +131,10 @@ export function PayoutSection({
                       variant="outline"
                       size="sm"
                       onClick={() => handleRetry(payout.id)}
-                      disabled={retrying}
+                      loading={retrying}
+                      loadingLabel="Retrying..."
                     >
-                      <RefreshCw
-                        className={`mr-1 h-3 w-3 ${retrying ? "animate-spin" : ""}`}
-                      />
+                      <RefreshCw className="mr-1 h-3 w-3" />
                       Retry
                     </Button>
                   )}

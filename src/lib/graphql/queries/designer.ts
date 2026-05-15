@@ -64,6 +64,10 @@ export const GET_DESIGNER = gql`
         onTimeRate
         responseTimeAvg
         isAcceptingOrders
+        workshopName
+        workshopAddress
+        workshopLat
+        workshopLng
         profileCompleteness
       }
     }

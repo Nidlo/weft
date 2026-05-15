@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, Loader2, Clock } from "lucide-react";
+import { ShieldCheck, Clock } from "lucide-react";
 
 interface OtpVerificationProps {
   phone?: string;
@@ -138,16 +138,10 @@ export function OtpVerification({
                 type="button"
                 className="w-full"
                 onClick={handleResend}
-                disabled={resending}
+                loading={resending}
+                loadingLabel="Sending new code..."
               >
-                {resending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending new code...
-                  </>
-                ) : (
-                  "Send a new code"
-                )}
+                Send a new code
               </Button>
             ) : (
               <Button
@@ -163,16 +157,11 @@ export function OtpVerification({
             <Button
               type="submit"
               className="w-full"
-              disabled={otp.length < 4 || loading}
+              disabled={otp.length < 4}
+              loading={loading}
+              loadingLabel="Verifying..."
             >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                "Verify & Pay"
-              )}
+              Verify &amp; Pay
             </Button>
           )}
 

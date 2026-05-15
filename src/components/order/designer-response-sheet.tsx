@@ -99,10 +99,11 @@ export function DesignerResponseSheet({
             <div className="flex gap-2">
               <Button
                 onClick={handleSubmit}
-                disabled={loading}
+                loading={loading}
+                loadingLabel="Accepting..."
                 className="flex-1"
               >
-                {loading ? "Accepting..." : "Confirm Accept"}
+                Confirm Accept
               </Button>
               <Button variant="outline" onClick={() => setAction(null)}>
                 Back
@@ -135,10 +136,12 @@ export function DesignerResponseSheet({
             <div className="flex gap-2">
               <Button
                 onClick={handleSubmit}
-                disabled={loading || !counterPriceGhs}
+                disabled={!counterPriceGhs}
+                loading={loading}
+                loadingLabel="Sending..."
                 className="flex-1"
               >
-                {loading ? "Sending..." : "Send Counter Offer"}
+                Send Counter Offer
               </Button>
               <Button variant="outline" onClick={() => setAction(null)}>
                 Back
@@ -160,10 +163,11 @@ export function DesignerResponseSheet({
               <Button
                 variant="destructive"
                 onClick={handleSubmit}
-                disabled={loading}
+                loading={loading}
+                loadingLabel="Declining..."
                 className="flex-1"
               >
-                {loading ? "Declining..." : "Confirm Decline"}
+                Confirm Decline
               </Button>
               <Button variant="outline" onClick={() => setAction(null)}>
                 Back

@@ -13,6 +13,8 @@ export const VERIFY_OTP = gql`
   mutation VerifyOtp($phone: String!, $code: String!) {
     verifyOtp(phone: $phone, code: $code) {
       isNew
+      claimedOrdersCount
+      claimedMeasurementsCount
       user {
         id
         firstName
@@ -26,6 +28,11 @@ export const VERIFY_OTP = gql`
         isDesigner
         isOnboarded
       }
+      pendingRestore {
+        deletedAt
+        expiresAt
+        daysRemaining
+      }
     }
   }
 `;
@@ -34,6 +41,8 @@ export const SOCIAL_LOGIN = gql`
   mutation SocialLogin($provider: String!, $token: String!) {
     socialLogin(provider: $provider, token: $token) {
       isNew
+      claimedOrdersCount
+      claimedMeasurementsCount
       user {
         id
         firstName
@@ -97,6 +106,46 @@ export const LOGOUT = gql`
 export const SIGN_OUT_ALL_DEVICES = gql`
   mutation SignOutAllDevices {
     signOutAllDevices
+  }
+`;
+
+export const DELETE_MY_ACCOUNT = gql`
+  mutation DeleteMyAccount($immediate: Boolean) {
+    deleteMyAccount(immediate: $immediate) {
+      success
+      immediate
+      deletedAt
+      recoverableUntil
+    }
+  }
+`;
+
+export const RESTORE_ACCOUNT = gql`
+  mutation RestoreAccount {
+    restoreAccount {
+      isNew
+      claimedOrdersCount
+      claimedMeasurementsCount
+      user {
+        id
+        firstName
+        lastName
+        fullName
+        phone
+        email
+        avatarUrl
+        city
+        isVerified
+        isDesigner
+        isOnboarded
+      }
+    }
+  }
+`;
+
+export const DECLINE_RESTORE = gql`
+  mutation DeclineRestore {
+    declineRestore
   }
 `;
 

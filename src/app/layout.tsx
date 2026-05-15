@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import { Providers } from "@/providers/providers";
 import { PwaInstallPrompt } from "@/components/shared/pwa-install-prompt";
+import { CookieConsentBanner } from "@/components/legal/cookie-consent-banner";
 import { APP_URL } from "@/lib/config";
 import "./globals.css";
 
@@ -83,6 +84,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <PwaInstallPrompt />
+          <CookieConsentBanner />
         </Providers>
       </body>
     </html>

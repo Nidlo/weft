@@ -77,16 +77,10 @@ export function ReviewsSection({
             variant="outline"
             size="sm"
             onClick={loadMore}
-            disabled={loading}
+            loading={loading}
+            loadingLabel="Loading..."
           >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              "Load More Reviews"
-            )}
+            Load More Reviews
           </Button>
         </div>
       )}

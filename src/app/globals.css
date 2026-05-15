@@ -101,7 +101,14 @@
 
   /* Brand semantic aliases (use these for needle/thread motifs) */
   --copper: oklch(0.74 0.11 60);
-  --copper-soft: oklch(0.92 0.05 70);
+  /* `--copper-soft` is used as a TEXT colour (badges, eyebrow labels,
+   * icon glyphs sitting on `bg-copper/15` chips). The previous value
+   * `oklch(0.92 0.05 70)` was a surface tone and rendered "pale on pale"
+   * in light mode — the workshop "Soon" badge had border + text both
+   * unreadable. Deep copper restores WCAG-readable contrast against
+   * both bone backgrounds and the chip tint. Dark-theme override
+   * stays unchanged below — it works there. */
+  --copper-soft: oklch(0.45 0.12 55);
   --bone: oklch(0.985 0.005 75);
   --ink: oklch(0.16 0.012 50);
 
