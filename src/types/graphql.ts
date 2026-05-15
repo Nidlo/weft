@@ -364,7 +364,7 @@ export interface MeasurementData {
   upper_body?: Record<string, number | null>;
   lower_body?: Record<string, number | null>;
   vertical?: Record<string, number | null>;
-  // Sprint 36 booth-coverage. Style choices, not AI-measured fields —
+  // Sprint 36 booth-coverage. Style choices, not AI-measured fields;
   // populated only via the manual form (blouse_length, kaba_length,
   // skirt_length, slit_length, dress_length, cape).
   garments?: Record<string, number | null>;
@@ -388,8 +388,8 @@ export interface GqlMeasurement {
   id: string;
   label: string;
   /**
-   * Canonical mm-integer payload — the only persisted measurement values
-   * post-S1c. Display layers convert through `formatMeasurement(mm, "mm",
+   * Canonical mm-integer payload. The only persisted measurement values
+   * post-S1c; display layers convert through `formatMeasurement(mm, "mm",
    * displayUnit)`.
    */
   dataMm: MeasurementMmData;
@@ -403,7 +403,7 @@ export interface GqlMeasurement {
   landmarksNormalized: Landmarks | null;
   /**
    * Read-time URL for the AI-extracted source photo (S2.5c). The shape
-   * depends on `photoDisk` — a signed Laravel route for `'local'`, the
+   * depends on `photoDisk`: a signed Laravel route for `'local'`, the
    * stable CDN URL for `'imagekit'`, or a short-lived signed URL for
    * `'s3'`. Null on manual rows or rows whose upload failed.
    */
@@ -507,7 +507,7 @@ export type Landmarks = Record<string, PoseLandmark>;
 export interface ExtractAiMeasurementsResult {
   data: MeasurementData;
   landmarks: Landmarks | null;
-  /** Cached URL when the disk returns one (ImageKit); null for local + s3 — those are computed at read time. */
+  /** Cached URL when the disk returns one (ImageKit); null for local + s3 (those are computed at read time). */
   photoUrl: string | null;
   /** Disk-specific identifier the storage layer needs to delete the asset. */
   photoPublicId: string | null;
@@ -538,9 +538,9 @@ export type ScanJobErrorCategory =
   | "unknown";
 
 /**
- * One AI body-scan attempt — created by the `extractAiMeasurements`
- * mutation, polled via `MEASUREMENT_SCAN_JOB` until terminal. Sprint 33b
- * will push the same payload over Reverb so polling becomes a fallback.
+ * One AI body-scan attempt, created by the `extractAiMeasurements`
+ * mutation and polled via `MEASUREMENT_SCAN_JOB` until terminal. Sprint
+ * 33b will push the same payload over Reverb so polling becomes a fallback.
  */
 export interface MeasurementScanJob {
   id: string;
@@ -570,7 +570,7 @@ export interface CreateMeasurementInput {
   photoUrl?: string;
   /** Disk-specific identifier (path on local, fileId on imagekit, S3 key on backblaze). */
   photoPublicId?: string;
-  /** Which storage disk wrote the asset — pass through verbatim from extractAiMeasurements. */
+  /** Which storage disk wrote the asset; pass through verbatim from extractAiMeasurements. */
   photoDisk?: string;
 }
 
@@ -633,7 +633,7 @@ export interface GqlOrderDetail extends GqlOrder {
   measurement: GqlMeasurement | null;
   updates: GqlOrderUpdate[];
   items: GqlOrderItem[];
-  /** @deprecated alias for items — kept for one release. */
+  /** @deprecated alias for items, kept for one release. */
   materials: GqlOrderItem[];
   garmentEases: GqlOrderGarmentEase[];
   payments: GqlPayment[];
@@ -708,7 +708,7 @@ export interface GqlOrderItem {
 }
 
 /**
- * @deprecated — schema rename; alias kept so any in-flight imports compile
+ * @deprecated schema rename; alias kept so any in-flight imports compile
  * during the one-release back-compat window. New code should import GqlOrderItem.
  */
 export type GqlOrderMaterial = GqlOrderItem;
@@ -716,14 +716,14 @@ export type GqlOrderMaterial = GqlOrderItem;
 export interface GqlProfitSummary {
   /** Canonical name post-rename. */
   totalItemCost: number;
-  /** @deprecated alias for totalItemCost — kept for one release. */
+  /** @deprecated alias for totalItemCost, kept for one release. */
   totalMaterialCost: number;
   confirmedPrice: number;
   profit: number;
   marginPercent: number;
   /** Canonical name post-rename. */
   itemCount: number;
-  /** @deprecated alias for itemCount — kept for one release. */
+  /** @deprecated alias for itemCount, kept for one release. */
   materialCount: number;
   purchasedCount: number;
 }

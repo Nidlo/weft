@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client/core";
 
-// Payout-account registry — the MoMo numbers the designer has registered
+// Payout-account registry - the MoMo numbers the designer has registered
 // to receive instant payouts. Internal field names still say "wallet"
 // (server-side table name); the UI surfaces them as "payout accounts".
 export const MY_WALLET_ACCOUNTS = gql`
@@ -23,7 +23,7 @@ export const MY_WALLET_ACCOUNTS = gql`
 `;
 
 // Replaces MY_WALLET_BALANCE + MY_WALLET_TRANSACTIONS. Returns a
-// derived report off the payouts table — Nidlo never holds a balance.
+// derived report off the payouts table - Nidlo never holds a balance.
 export const MY_EARNINGS_SUMMARY = gql`
   query MyEarningsSummary($from: DateTime, $to: DateTime) {
     myEarningsSummary(from: $from, to: $to) {

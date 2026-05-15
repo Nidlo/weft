@@ -105,7 +105,7 @@ export function useRemovePayoutAccount() {
 
 // ── Earnings summary ───────────────────────────────────────────────
 // Replaces the old balance + transactions queries. Period-filtered
-// report off the payouts table — no stored balance anywhere.
+// report off the payouts table - no stored balance anywhere.
 
 export function useEarningsSummary(from?: Date, to?: Date) {
   const { data, loading, error, refetch } = useQuery<MyEarningsSummaryData>(

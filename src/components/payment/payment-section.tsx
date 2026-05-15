@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,28 @@ interface PaymentSectionProps {
   summary: GqlPaymentSummary | null;
   isClient: boolean;
   orderStatus: string;
+}
+
+// Canonical copy + handler for the "in-app payments aren't live yet"
+// notice. Re-used by the pay-route guard so client-facing surfaces show
+// the same message regardless of how the user reached them.
+export function notifyPaymentsComingSoon(): void {
+  toast.info(
+    "In-app payments are coming soon. For now, record your payment below (direct MoMo, cash, or bank transfer) and your designer will confirm it.",
+    { duration: 6000 }
+  );
+}
+
+// Small "Soon" pill that lives inside the Pay button. Mirrors the
+// settings-page COMING_SOON badge palette but tuned for the dark luxe
+// button background (lighter copper, no border so it reads against the
+// solid fill).
+function ComingSoonBadge() {
+  return (
+    <span className="bg-background/25 text-background ml-2 rounded-full px-1.5 py-0 text-[9px] font-semibold tracking-wider uppercase">
+      Soon
+    </span>
+  );
 }
 
 function PaymentRow({ payment }: { payment: GqlPayment }) {
@@ -71,8 +93,11 @@ function PaymentRow({ payment }: { payment: GqlPayment }) {
   );
 }
 
+// orderId is intentionally retained in the props contract so the parent
+// doesn't churn when in-app payments go live (the buttons will link to
+// /orders/[id]/pay again then). For now the destructure pulls everything
+// except orderId, keeping the lint clean without an inline disable.
 export function PaymentSection({
-  orderId,
   confirmedPrice,
   payments,
   summary,
@@ -210,21 +235,32 @@ export function PaymentSection({
           </div>
         )}
 
-        {/* Action buttons */}
+        {/* Pay-in-app buttons. The Moolre + Paystack integration is wired in
+            code but not yet live - show the buttons (so clients see the path
+            that's coming) with a "Soon" badge, and on click toast the
+            coming-soon notice that points at the offline-payment section
+            directly below this card. Don't navigate to /orders/[id]/pay.
+            See `notifyComingSoon` for the canonical copy. */}
         {(canPayDeposit || canPayBalance) && (
           <div className="flex gap-2 pt-2">
             {canPayDeposit && (
-              <Button asChild className="flex-1">
-                <Link href={`/orders/${orderId}/pay?type=deposit`}>
-                  Pay Deposit ({formatPesewas(depositOwed)})
-                </Link>
+              <Button
+                className="flex-1"
+                onClick={notifyPaymentsComingSoon}
+                aria-label={`Pay deposit ${formatPesewas(depositOwed)} (coming soon)`}
+              >
+                Pay Deposit ({formatPesewas(depositOwed)})
+                <ComingSoonBadge />
               </Button>
             )}
             {canPayBalance && (
-              <Button asChild className="flex-1">
-                <Link href={`/orders/${orderId}/pay?type=balance`}>
-                  Pay Balance ({formatPesewas(balanceOwed)})
-                </Link>
+              <Button
+                className="flex-1"
+                onClick={notifyPaymentsComingSoon}
+                aria-label={`Pay balance ${formatPesewas(balanceOwed)} (coming soon)`}
+              >
+                Pay Balance ({formatPesewas(balanceOwed)})
+                <ComingSoonBadge />
               </Button>
             )}
           </div>

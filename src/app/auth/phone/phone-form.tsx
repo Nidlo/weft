@@ -36,7 +36,7 @@ const APPLE_CLIENT_ID = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID;
 
 // Temporarily hidden while the social-login backends (Google + Apple
 // token exchange) are being unblocked. Flip back to `true` to restore
-// the buttons and the "OR" divider — no other change needed.
+// the buttons and the "OR" divider; no other change needed.
 const SOCIAL_LOGIN_ENABLED = false;
 
 const FALLBACK_COUNTRIES: GqlCountry[] = [
@@ -172,7 +172,7 @@ function PhoneAuthContent() {
           if (rawNext && typeof window !== "undefined") {
             sessionStorage.removeItem(NEXT_STORAGE_KEY);
           }
-          // Onboarding is non-negotiable — deep-links wait until the
+          // Onboarding is non-negotiable. Deep-links wait until the
           // user has a complete profile. Snad's UX: hit /auth/role first,
           // then bounce to the captured deep-link after onboarding.
           if (isNew || !user.isOnboarded) {
@@ -248,7 +248,7 @@ function PhoneAuthContent() {
 
       if (result?.requestOtp.success) {
         toast.success("Verification code sent!");
-        // Phone is the primary login credential — keep it out of URLs,
+        // Phone is the primary login credential. Keep it out of URLs,
         // browser history, Referer headers, and access logs. sessionStorage
         // is per-tab and clears on close; the verify page reads it once.
         sessionStorage.setItem("nidlo:auth:pendingPhone", internationalPhone);

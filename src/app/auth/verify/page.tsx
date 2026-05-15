@@ -81,16 +81,16 @@ function VerifyOtpContent() {
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   // Two layered defenses against double-submitting the same OTP:
-  //   1. `submitting` — a synchronous in-flight flag. useMutation's
+  //   1. `submitting`: a synchronous in-flight flag. useMutation's
   //      `verifying` state flips a tick AFTER the mutation fires,
   //      long enough for a second auto-submit (fast paste + onChange
   //      duplication, focus-fire-after-blur, React 19 transition
   //      reschedule, etc.) to slip through.
-  //   2. `lastSubmittedCode` + `lastSubmittedAt` — once the in-flight
+  //   2. `lastSubmittedCode` + `lastSubmittedAt`: once the in-flight
   //      flag resets (after a thrown error), the user could re-submit
   //      the IDENTICAL stale code (same paste, same closure, no
   //      change in state). The code+timestamp dedupe blocks any
-  //      same-code resubmit within 5s. Different codes (the wrong→
+  //      same-code resubmit within 5s. Different codes (the wrong to
   //      right retry path) sail through untouched.
   // Together these guarantee: at most one verifyOtp call per unique
   // code within the rapid-fire window. Crucial because every double
@@ -114,7 +114,7 @@ function VerifyOtpContent() {
 
   useEffect(() => {
     // Wait one tick for the phone-from-sessionStorage effect to run before
-    // bouncing — otherwise direct page loads always redirect even when the
+    // bouncing. Otherwise direct page loads always redirect even when the
     // value is present.
     if (typeof window === "undefined") return;
     const stored = sessionStorage.getItem("nidlo:auth:pendingPhone");
@@ -152,8 +152,7 @@ function VerifyOtpContent() {
           // Phone belongs to a soft-deleted account inside its recovery
           // window. The backend has NOT signed us in; surface the restore
           // prompt instead. submitting stays true so the auto-dispatch
-          // doesn't refire while the modal is open — declineRestore will
-          // reset it.
+          // doesn't refire while the modal is open. declineRestore resets it.
           if (result.verifyOtp.pendingRestore) {
             setPendingRestore(result.verifyOtp.pendingRestore);
             return;
@@ -192,7 +191,7 @@ function VerifyOtpContent() {
           // straight to the deep-link; non-onboarded users finish
           // onboarding first (the captured next survives in
           // sessionStorage and is picked up later if the role flow
-          // forwards it — handled by the role page or simply cleared).
+          // forwards it, handled by the role page or simply cleared).
           const rawNext = sessionStorage.getItem("nidlo:auth:next");
           if (rawNext) {
             sessionStorage.removeItem("nidlo:auth:next");
@@ -218,7 +217,7 @@ function VerifyOtpContent() {
         // for 5s blocks that. The user's real retry path is to type a
         // *different* code (the correct one), which sails through.
       } finally {
-        // Reset unless we successfully navigated — keeping it true past
+        // Reset unless we successfully navigated. Keeping it true past
         // navigation is harmless (component unmounts) and prevents a
         // double-fire if router.push hasn't unmounted us yet.
         if (!navigated) {
@@ -438,7 +437,7 @@ function VerifyOtpContent() {
         </div>
       )}
 
-      {/* Cooldown — visible thread-like progress bar that drains as time passes.
+      {/* Cooldown: visible thread-like progress bar that drains as time passes.
           When it reaches zero the resend button takes its place. */}
       <div className="mt-7 text-center">
         {cooldown > 0 ? (
@@ -503,8 +502,8 @@ function VerifyOtpContent() {
               {pendingRestore?.daysRemaining === 1
                 ? "is 1 day"
                 : `are ${pendingRestore?.daysRemaining ?? 0} days`}{" "}
-              left to restore everything &mdash; your profile, order history,
-              saved measurements and messages all come back as they were.
+              left to restore everything. Your profile, order history, saved
+              measurements and messages all come back as they were.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">

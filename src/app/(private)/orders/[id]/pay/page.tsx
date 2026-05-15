@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, use, useState } from "react";
+import { Suspense, use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
@@ -13,6 +13,7 @@ import { ArrowLeft } from "lucide-react";
 import { PaymentMethodSelector } from "@/components/payment/payment-method-selector";
 import { OtpVerification } from "@/components/payment/otp-verification";
 import { MomoPendingScreen } from "@/components/payment/momo-pending-screen";
+import { notifyPaymentsComingSoon } from "@/components/payment/payment-section";
 import { formatPesewas } from "@/lib/utils/order";
 import type { PaymentMethodValue } from "@/types/graphql";
 
@@ -52,6 +53,18 @@ function PaymentPageContent({ params }: { params: Promise<{ id: string }> }) {
   const { order, loading: orderLoading } = useOrder(orderId);
   const { initiatePayment, loading: initiating } = useInitiatePayment();
 
+  // In-app payments aren't live yet. Bounce direct hits to this route
+  // (bookmarks, shared links, refresh-during-flow) back to the order
+  // detail and surface the same coming-soon copy the PaymentSection
+  // shows on the Pay buttons there. Defer until the auth-guard has
+  // finished - otherwise unauthenticated users get redirected here
+  // before they're sent to /auth/phone.
+  useEffect(() => {
+    if (!isReady) return;
+    notifyPaymentsComingSoon();
+    router.replace(`/orders/${orderId}`);
+  }, [isReady, router, orderId]);
+
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<PayStep>("method");
   const [pendingMethod, setPendingMethod] = useState<PaymentMethodValue | null>(
@@ -65,7 +78,7 @@ function PaymentPageContent({ params }: { params: Promise<{ id: string }> }) {
 
   const confirmedPrice = order?.confirmedPrice ?? 0;
   const summary = order?.paymentSummary;
-  // Always trust server-computed amounts — never reconstruct money client-side.
+  // Always trust server-computed amounts - never reconstruct money client-side.
   const amount = summary
     ? paymentType === "deposit"
       ? summary.depositOwed

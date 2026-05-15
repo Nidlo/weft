@@ -308,8 +308,8 @@ export default function ProfilePage() {
             </DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
               This signs you out of every browser and tab where you&apos;re
-              currently logged in &mdash; phone, laptop, tablet, anywhere.
-              You&apos;ll need to log in again on each device.
+              currently logged in: phone, laptop, tablet, anywhere. You&apos;ll
+              need to log in again on each device.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">

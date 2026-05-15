@@ -64,7 +64,7 @@ describe("MeasurementSelector", () => {
   it("renders the Client header + forwards clientId to the inline sheet", () => {
     // Radix Select keeps options inside a portal until opened, so we
     // assert the header copy + the trigger combobox + the forwarded
-    // props on the (mocked) inline sheet — that's the full surface
+    // props on the (mocked) inline sheet - that's the full surface
     // a parent can observe without simulating the dropdown.
     clientMeasurementsRef.current = [
       { id: "cm-1", label: "Adwoa primary", isDefault: true, source: "manual" },
@@ -105,7 +105,7 @@ describe("MeasurementSelector", () => {
 
     expect(screen.getByText("Your body vault")).toBeInTheDocument();
     expect(screen.getByRole("combobox")).toBeInTheDocument();
-    // Inline sheet got neither clientId nor pending phone → save path
+    // Inline sheet got neither clientId nor pending phone -> save path
     // is "create for the authenticated designer" (default createMeasurement).
     const sheet = screen.getByTestId("inline-sheet-stub");
     expect(sheet).toHaveAttribute("data-client-id", "");
@@ -144,7 +144,7 @@ describe("MeasurementSelector", () => {
     expect(
       screen.getByText(/No measurements in your body vault yet/i)
     ).toBeInTheDocument();
-    // No <Select> rendered — the empty-vault path goes straight to the
+    // No <Select> rendered - the empty-vault path goes straight to the
     // dashed-empty box + the inline sheet trigger.
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
   });

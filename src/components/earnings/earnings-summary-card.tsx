@@ -14,7 +14,7 @@ interface Props {
 }
 
 // Headline tile + four supporting stats. Replaces the old "Available
-// balance" hero card — Nidlo doesn't hold a balance, so we show what
+// balance" hero card - Nidlo doesn't hold a balance, so we show what
 // actually moved in the period and what's stuck because the designer
 // hasn't registered a payout account.
 export function EarningsSummaryCard({ summary, periodLabel, loading }: Props) {

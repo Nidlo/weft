@@ -51,9 +51,9 @@ export default function EarningsPage() {
             Earnings
           </h1>
           <p className="text-muted-foreground mt-2 max-w-2xl text-sm sm:text-base">
-            What you&rsquo;ve earned through Nidlo, broken down per order. Nidlo
-            doesn&rsquo;t hold your money — payments flow straight to your MoMo
-            as soon as a client pays.
+            What you&apos;ve earned through Nidlo, broken down per order. Nidlo
+            doesn&apos;t hold your money. Payments go straight to your MoMo as
+            soon as a client pays.
           </p>
         </header>
 

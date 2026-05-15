@@ -42,7 +42,7 @@ describe("buildClaimedToast", () => {
     );
   });
 
-  it("treats negative counts as zero (defensive — backend should never send these)", () => {
+  it("treats negative counts as zero (defensive - backend should never send these)", () => {
     expect(buildClaimedToast(-1, -3)).toBeNull();
     expect(buildClaimedToast(-1, 2)).toBe(
       "Linked 2 measurements we held for you."

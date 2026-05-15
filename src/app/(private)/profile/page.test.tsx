@@ -37,7 +37,7 @@ vi.mock("@/components/profile/style-profile-card", () => ({
 }));
 
 // ReplayMenu uses next/navigation's useRouter, which needs an App Router
-// context that isn't mounted in unit tests. Stub it — the menu has its
+// context that isn't mounted in unit tests. Stub it. The menu has its
 // own tests.
 vi.mock("@/lib/tour/replay-menu", () => ({
   ReplayMenu: () => <div data-testid="replay-menu-stub" />,
@@ -115,9 +115,9 @@ describe("ProfilePage", () => {
     expect(
       screen.queryByRole("link", { name: /^earnings/i })
     ).not.toBeInTheDocument();
-    // Settings IS expected on Profile — it's the single entry point into
-    // the configuration/danger-zone surface, not a duplicate of any tile
-    // that lives inside Settings.
+    // Settings IS expected on Profile. It's the single entry point into
+    // the configuration / danger-zone surface, not a duplicate of any
+    // tile that lives inside Settings.
     expect(
       screen.getByRole("link", { name: /^settings/i })
     ).toBeInTheDocument();

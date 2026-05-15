@@ -32,7 +32,7 @@ const NETWORK_OPTIONS: { value: MomoNetworkValue; label: string }[] = [
 ];
 
 // Payout-account registry. Was "WalletManager"; renamed because Nidlo
-// doesn't operate a wallet — these are the MoMo numbers we route
+// doesn't operate a wallet - these are the MoMo numbers we route
 // instant payouts TO when a client pays for an order.
 export function PayoutAccountManager() {
   const { accounts, loading: accountsLoading, refetch } = usePayoutAccounts();

@@ -24,7 +24,7 @@ interface Props {
 }
 
 // Per-order breakdown that replaces the old wallet ledger.
-// One row per payout — clicking through opens the order detail page.
+// One row per payout - clicking through opens the order detail page.
 // "Status" is the source of truth for what actually happened (success
 // = money landed; wallet_pending = stuck on payout setup; etc.).
 export function EarningsBreakdown({ rows, loading }: Props) {
@@ -153,9 +153,9 @@ function statusLabel(status: PayoutStatusValue): string {
     case "wallet_pending":
       return "Awaiting payout setup";
     case "failed":
-      return "Transfer failed — retry from Orders";
+      return "Transfer failed. Retry from Orders.";
     case "processing":
-      return "Transferring…";
+      return "Transferring...";
     case "pending":
     default:
       return "Pending";

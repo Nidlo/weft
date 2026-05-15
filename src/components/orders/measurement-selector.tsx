@@ -32,14 +32,14 @@ interface MeasurementSelectorProps {
   pendingClientPhone?: string | null;
   /**
    * When BOTH clientId and pendingClientPhone are absent, the selector
-   * falls into "designer's own body vault" mode — useful for samples,
+   * falls into "designer's own body vault" mode - useful for samples,
    * prototypes, or drafts where the designer is the one being fitted.
    * The selector reads the authenticated designer's own measurements
    * via useMeasurements(). New rows save against the designer's
    * user_id (default createMeasurement path, no pendingClientPhone).
    *
    * Backend's MeasurementAccessGuard validates that the chosen
-   * measurement matches the order's context — same legitimate paths
+   * measurement matches the order's context - same legitimate paths
    * (own / linked client / pending phone), so picking a designer-self
    * measurement from this list is accepted on submit.
    */
@@ -77,7 +77,7 @@ export function MeasurementSelector({
     ? "No measurements in your body vault yet"
     : "No saved measurements yet";
   const selfModeHint =
-    "No client linked — pick from your own body vault or take a new measurement for this order.";
+    "No client linked. Pick from your own body vault, or take a new measurement just for this order.";
 
   if (clientId && clientLoading) {
     return <Skeleton className="h-10 w-full" />;
@@ -152,7 +152,7 @@ export function MeasurementSelector({
 
       {hasPhone && !clientId && (
         <p className="text-muted-foreground text-xs">
-          Take measurements now — they&apos;ll attach to the client when they
+          Take measurements now. They&apos;ll attach to the client when they
           sign up.
         </p>
       )}

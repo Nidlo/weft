@@ -3,9 +3,9 @@
  * copy that fires after a successful signup / login when AuthService::
  * linkOrphansByPhone() claimed any walk-in records keyed to the user's
  * phone. Returns null when both counts are 0 so the caller can skip the
- * toast entirely (avoids "Linked 0 orders…" pollution).
+ * toast entirely (avoids "Linked 0 orders..." pollution).
  *
- * Pluralisation handled per-category — only non-zero categories appear
+ * Pluralisation handled per-category - only non-zero categories appear
  * in the string, so the four shapes are:
  *   - "Linked 2 orders and 1 measurement we held for you."
  *   - "Linked 1 order and 2 measurements we held for you."

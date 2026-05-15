@@ -90,7 +90,7 @@ describe("EarningsBreakdown", () => {
       />
     );
     expect(screen.getByText(/GHS 900\.00/i)).toBeInTheDocument();
-    // formatPesewas doesn't add thousands separators — 100000 → "GHS 1000.00".
+    // formatPesewas doesn't add thousands separators - 100000 -> "GHS 1000.00".
     expect(
       screen.getByText(/gross GHS 1000\.00 − fee GHS 100\.00/i)
     ).toBeInTheDocument();
