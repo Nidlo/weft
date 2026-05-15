@@ -1,8 +1,11 @@
 # =============================================================================
-# Nidlo Frontend (weft) — CI Pipeline
+# Nidlo Frontend (weft): CI Pipeline
 # =============================================================================
-# Lint + format + Vitest + Next.js build (build doubles as the typecheck
-# pass — Next.js runs tsc as part of `next build`).
+# Two-lane setup:
+#   FAST LANE (fast): lint + format:check + tsc --noEmit. Always runs.
+#   FULL LANE (full): vitest + next build. Skipped on dev-snad pushes;
+#                     runs on PRs and on pushes to development/staging/
+#                     production.
 #
 # Vercel handles deploys via its own GitHub integration, so there's no
 # deploy job here. The branch promotion flow (dev-snad → development →
@@ -46,8 +49,8 @@ env:
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: test-key
 
 jobs:
-  quality:
-    name: Lint, format, test, build
+  fast:
+    name: Lint, format, typecheck
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v5
@@ -64,5 +67,25 @@ jobs:
 
       - run: yarn lint
       - run: yarn format:check
+      - run: yarn tsc --noEmit
+
+  full:
+    name: Test & build
+    runs-on: ubuntu-22.04
+    needs: fast
+    # Skip on dev-snad pushes. Heavy lane runs on PR and on
+    # promotion-branch pushes (development/staging/production).
+    if: github.event_name != 'push' || github.ref != 'refs/heads/dev-snad'
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - run: yarn install --frozen-lockfile
+
       - run: yarn test
       - run: yarn build
