@@ -201,7 +201,15 @@
   --ring: oklch(0.78 0.13 65);
 
   --copper: oklch(0.78 0.13 65);
-  --copper-soft: oklch(0.32 0.07 65);
+  /* Dark-theme `--copper-soft` lifted from L=0.32 -> L=0.85. The original
+   * dark value was a foreground-on-light token reused by mistake; it's
+   * read as text on `bg-copper/15` badges (Designer pill on /profile, the
+   * Style Profile icon, order/notification chips...) and L=0.32 against
+   * our L=0.135 page surface fails WCAG AA contrast. L=0.85 with reduced
+   * chroma keeps the "soft" sibling identity to `--copper` (L=0.78,
+   * c=0.13) while clearing 4.5:1 against both the page surface and the
+   * copper-tinted chip background. */
+  --copper-soft: oklch(0.85 0.1 65);
   --bone: oklch(0.97 0.008 75);
   --ink: oklch(0.135 0.012 50);
 

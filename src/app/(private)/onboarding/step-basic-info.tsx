@@ -157,8 +157,17 @@ function SectionHeading({
   subtitle,
   compact = false,
 }: SectionHeadingProps) {
+  // Compact mode stacks icon+title above subtitle on mobile (no horizontal
+  // squish on narrow viewports), then lays them out side-by-side from `sm`
+  // up with the subtitle floated right.
   return (
-    <div className={compact ? "flex items-center gap-3" : "space-y-2"}>
+    <div
+      className={
+        compact
+          ? "flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
+          : "space-y-2"
+      }
+    >
       <div className="flex items-center gap-3">
         <span className="bg-secondary text-foreground flex size-9 shrink-0 items-center justify-center rounded-xl">
           <Icon className="h-4 w-4" aria-hidden />
@@ -173,7 +182,7 @@ function SectionHeading({
         </div>
       </div>
       {subtitle && compact && (
-        <p className="text-muted-foreground text-xs sm:ml-auto sm:max-w-xs sm:text-right">
+        <p className="text-muted-foreground pl-12 text-xs sm:ml-auto sm:max-w-xs sm:pl-0 sm:text-right">
           {subtitle}
         </p>
       )}
