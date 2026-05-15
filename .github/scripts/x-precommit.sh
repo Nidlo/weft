@@ -302,7 +302,7 @@ fi
 # ============================================================
 # Auto-format (precommit mode only — best-effort, language-aware)
 # ============================================================
-# Skip silently if the relevant tool isn't installed in this repo —
+# Skip silently if the relevant tool isn't installed in this repo -
 # the rule scan still runs. JS/TS auto-format is handled by husky +
 # lint-staged in repos that use them (weft); this block covers PHP +
 # Python so warp + fitscan get the same "fix-on-commit" UX.
