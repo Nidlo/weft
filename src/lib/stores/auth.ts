@@ -13,6 +13,13 @@ export interface User {
   email: string | null;
   avatarUrl: string | null;
   city: string | null;
+  region?: string | null;
+  countryCode?: string | null;
+  locationLat?: number | null;
+  locationLng?: number | null;
+  addressLine?: string | null;
+  postalCode?: string | null;
+  formattedAddress?: string | null;
   isVerified?: boolean;
   isDesigner: boolean;
   isOnboarded: boolean;

@@ -6,6 +6,9 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+// Matches both a pretty slug (kebab-case) and a lowercase UUID
+// (hex + hyphens) so a shared link resolves either way. Anything with
+// uppercase, slashes, dots, etc. is rejected before we spend an API call.
 const SLUG_RE = /^[a-z0-9-]+$/;
 
 async function fetchDesigner(slug: string) {
@@ -51,7 +54,12 @@ async function fetchDesigner(slug: string) {
                 onTimeRate
                 responseTimeAvg
                 isAcceptingOrders
+                workshopName
+                workshopAddress
+                workshopLat
+                workshopLng
                 profileCompleteness
+                publicVisibility
               }
             }
           }

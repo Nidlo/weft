@@ -152,6 +152,15 @@ const DESIGNER_QUERY_DATA = {
       workshopLng: null,
       profileCompleteness: 60,
       ordersCompleted: 0,
+      publicVisibility: {
+        bio: true,
+        pricing: true,
+        portfolio: true,
+        experience: true,
+        stats: true,
+        city: true,
+        workshop: false,
+      },
     },
   },
 };
@@ -212,6 +221,39 @@ describe("ProfileEditPage", () => {
     expect(
       screen.queryByRole("button", { name: /save studio location/i })
     ).not.toBeInTheDocument();
+  });
+
+  it("rehydrates the personal LocationPicker from the full saved location, not just city", () => {
+    useAuthGuardSpy.mockReturnValue({
+      user: {
+        ...CLIENT_USER,
+        city: "Accra",
+        region: "Greater Accra",
+        countryCode: "GH",
+        locationLat: 5.6037,
+        locationLng: -0.187,
+        addressLine: "12 Independence Ave",
+        postalCode: "GA-123-4567",
+        formattedAddress: "12 Independence Ave, Accra, Ghana",
+      },
+      isReady: true,
+    });
+    render(<ProfileEditPage />);
+
+    const picker = screen.getByTestId(
+      "location-picker-your-delivery-home-area"
+    );
+    // The mock surfaces value.formattedAddress in an <output>. Seeing the
+    // full street address (not the bare city) proves the pin + address
+    // were restored.
+    expect(picker.querySelector("output")?.textContent).toBe(
+      "12 Independence Ave, Accra, Ghana"
+    );
+
+    // A restored pin must not read as an unsaved edit.
+    expect(
+      screen.getByRole("button", { name: /save personal info/i })
+    ).toBeDisabled();
   });
 
   it("saving the studio location only sends workshop fields to updateProfile (no profile fields touched)", async () => {
@@ -326,5 +368,56 @@ describe("ProfileEditPage", () => {
     const lastName = screen.getByLabelText(/last name/i);
     expect(firstName).toBeRequired();
     expect(lastName).toBeRequired();
+  });
+
+  it("hides the 'What clients can see' section for clients", () => {
+    useAuthGuardSpy.mockReturnValue({ user: CLIENT_USER, isReady: true });
+    render(<ProfileEditPage />);
+    expect(
+      screen.queryByRole("heading", { name: /what clients can see/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the visibility toggles for designers, workshop off by default", () => {
+    useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
+    render(<ProfileEditPage />);
+    expect(
+      screen.getByRole("heading", { name: /what clients can see/i })
+    ).toBeInTheDocument();
+    const workshopToggle = screen.getByRole("switch", {
+      name: /show studio name & address/i,
+    });
+    expect(workshopToggle).not.toBeChecked();
+    const bioToggle = screen.getByRole("switch", {
+      name: /show about \/ bio/i,
+    });
+    expect(bioToggle).toBeChecked();
+  });
+
+  it("saving visibility sends only the publicVisibility map to updateProfile", async () => {
+    useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
+    render(<ProfileEditPage />);
+
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("switch", { name: /show studio name & address/i })
+      );
+    });
+
+    const saveBtn = screen.getByRole("button", { name: /save visibility/i });
+    expect(saveBtn).toBeEnabled();
+
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    expect(updateProfileSpy).toHaveBeenCalledTimes(1);
+    const input = updateProfileSpy.mock.calls[0][0]?.variables?.input;
+    expect(input.publicVisibility).toMatchObject({ workshop: true, bio: true });
+    // Pure visibility save: no shop / studio / personal fields ride along.
+    expect(input).not.toHaveProperty("bio");
+    expect(input).not.toHaveProperty("workshopName");
+    expect(input).not.toHaveProperty("displayName");
+    expect(updateMyInfoSpy).not.toHaveBeenCalled();
   });
 });

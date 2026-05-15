@@ -58,6 +58,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: me.email,
             avatarUrl: me.avatarUrl,
             city: me.city,
+            region: me.region,
+            countryCode: me.countryCode,
+            locationLat: me.locationLat,
+            locationLng: me.locationLng,
+            addressLine: me.addressLine,
+            postalCode: me.postalCode,
+            formattedAddress: me.formattedAddress,
             isDesigner: me.isDesigner,
             isOnboarded: me.isOnboarded,
             // Carrying designerProfile.slug through to the authStore is what

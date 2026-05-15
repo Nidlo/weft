@@ -69,6 +69,7 @@ export const GET_DESIGNER = gql`
         workshopLat
         workshopLng
         profileCompleteness
+        publicVisibility
       }
     }
   }

@@ -15,6 +15,13 @@ export interface GqlUser {
   email: string | null;
   avatarUrl: string | null;
   city: string | null;
+  region: string | null;
+  countryCode: string | null;
+  locationLat: number | null;
+  locationLng: number | null;
+  addressLine: string | null;
+  postalCode: string | null;
+  formattedAddress: string | null;
   isVerified: boolean;
   isDesigner: boolean;
   isOnboarded: boolean;
@@ -152,6 +159,19 @@ export interface GqlDesignerProfile {
   profileViewsThisWeek: number;
   createdAt: string;
   updatedAt: string;
+  // Effective public-visibility map (designer's choices over the
+  // privacy-first defaults). Present on the public + edit queries.
+  publicVisibility?: DesignerPublicVisibility | null;
+}
+
+export interface DesignerPublicVisibility {
+  bio: boolean;
+  pricing: boolean;
+  portfolio: boolean;
+  experience: boolean;
+  stats: boolean;
+  city: boolean;
+  workshop: boolean;
 }
 
 export interface PortfolioImage {

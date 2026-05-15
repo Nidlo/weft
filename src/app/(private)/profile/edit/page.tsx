@@ -46,6 +46,7 @@ import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import type {
   AddPortfolioImageData,
   DesignerData,
+  DesignerPublicVisibility,
   PortfolioImage,
   RemovePortfolioImageData,
 } from "@/types/graphql";
@@ -61,7 +62,66 @@ interface DesignerFormState {
   isAcceptingOrders: boolean;
   workshopName: string;
   workshopLocation: LocationData | null;
+  visibility: DesignerPublicVisibility;
 }
+
+// Privacy-first defaults, must mirror DesignerProfile::
+// DEFAULT_PUBLIC_VISIBILITY on the backend. Used until the API hands us
+// the designer's saved map.
+const DEFAULT_VISIBILITY: DesignerPublicVisibility = {
+  bio: true,
+  pricing: true,
+  portfolio: true,
+  experience: true,
+  stats: true,
+  city: true,
+  workshop: false,
+};
+
+// The toggle rows, in display order. Copy is client-facing and frames
+// each choice around what a prospective client sees.
+const VISIBILITY_ROWS: {
+  key: keyof DesignerPublicVisibility;
+  label: string;
+  description: string;
+}[] = [
+  {
+    key: "bio",
+    label: "About / bio",
+    description: "Your story and what makes your work yours.",
+  },
+  {
+    key: "pricing",
+    label: "Price range",
+    description: "The typical price band clients can expect.",
+  },
+  {
+    key: "portfolio",
+    label: "Portfolio",
+    description: "Your gallery of recent work.",
+  },
+  {
+    key: "experience",
+    label: "Years of experience",
+    description: "How long you've been doing this.",
+  },
+  {
+    key: "stats",
+    label: "Track record",
+    description: "Orders completed, on-time rate, response time.",
+  },
+  {
+    key: "city",
+    label: "City",
+    description: "Your general city. Never your exact address.",
+  },
+  {
+    key: "workshop",
+    label: "Studio name & address",
+    description:
+      "Your shop's name, street address, and map pin. Off by default. Only turn on if you're happy for anyone to see where your studio is.",
+  },
+];
 
 const emptyDesigner: DesignerFormState = {
   displayName: "",
@@ -72,6 +132,7 @@ const emptyDesigner: DesignerFormState = {
   isAcceptingOrders: true,
   workshopName: "",
   workshopLocation: null,
+  visibility: DEFAULT_VISIBILITY,
 };
 
 /**
@@ -83,6 +144,23 @@ const emptyDesigner: DesignerFormState = {
  */
 const isFreshLocationPick = (loc: LocationData | null): boolean =>
   !!loc && (loc.lat !== 0 || loc.lng !== 0);
+
+// Now that the personal LocationPicker is seeded with the saved pin (not
+// 0/0), "has a pin" no longer means "user just moved it". Dirty = the
+// in-memory pin differs from the saved one. Epsilon because lat/lng
+// round-trip through decimal(10,8)/(11,8) columns.
+const COORD_EPSILON = 1e-6;
+const locationPinMoved = (
+  loc: LocationData | null,
+  savedLat: number | null | undefined,
+  savedLng: number | null | undefined
+): boolean => {
+  if (!loc || (loc.lat === 0 && loc.lng === 0)) return false;
+  return (
+    Math.abs(loc.lat - (savedLat ?? 0)) > COORD_EPSILON ||
+    Math.abs(loc.lng - (savedLng ?? 0)) > COORD_EPSILON
+  );
+};
 
 export default function ProfileEditPage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
@@ -125,6 +203,9 @@ export default function ProfileEditPage() {
   const [studioJustSavedAt, setStudioJustSavedAt] = useState<number | null>(
     null
   );
+  const [visibilityJustSavedAt, setVisibilityJustSavedAt] = useState<
+    number | null
+  >(null);
 
   const designerSlug = user?.designerProfile?.slug ?? null;
   const { data: designerData, loading: designerLoading } =
@@ -208,18 +289,29 @@ export default function ProfileEditPage() {
     setLastName(user.lastName ?? "");
     setOtherNames(user.otherNames ?? "");
     setEmail(user.email ?? "");
+    // Restore the full saved location, not just the city. The backend
+    // persists lat/lng + the structured address; the old code rebuilt
+    // LocationData from `user.city` alone, so the map pin and street
+    // address vanished on every reopen and the user had to re-pick.
+    // Mirrors the workshop-location hydration below: a non-zero pin or
+    // any stored address text counts as a real saved location.
+    const hasStoredLocation =
+      !!user.locationLat ||
+      !!user.locationLng ||
+      !!user.formattedAddress ||
+      !!user.city;
     setLocation(
-      user.city
+      hasStoredLocation
         ? {
-            lat: 0,
-            lng: 0,
-            formattedAddress: user.city,
-            city: user.city,
-            region: null,
+            lat: user.locationLat ?? 0,
+            lng: user.locationLng ?? 0,
+            formattedAddress: user.formattedAddress ?? user.city ?? "",
+            city: user.city ?? null,
+            region: user.region ?? null,
             country: null,
-            countryCode: null,
-            postalCode: null,
-            addressLine: null,
+            countryCode: user.countryCode ?? null,
+            postalCode: user.postalCode ?? null,
+            addressLine: user.addressLine ?? null,
           }
         : null
     );
@@ -261,6 +353,12 @@ export default function ProfileEditPage() {
             addressLine: null,
           }
         : null,
+      // Layer the saved map over the privacy-first defaults so a key the
+      // API doesn't return yet still has a sane value.
+      visibility: {
+        ...DEFAULT_VISIBILITY,
+        ...(profile.publicVisibility ?? {}),
+      },
     };
     setDesigner(seed);
     setDesignerSnapshot(seed);
@@ -278,9 +376,10 @@ export default function ProfileEditPage() {
       (otherNames.trim() || null) !== (user.otherNames ?? null) ||
       (email.trim() || null) !== (user.email ?? null) ||
       (location?.city ?? null) !== (user.city ?? null) ||
-      // Treat a fresh map pick (non-zero lat/lng) as dirty even if city
-      // happens to be the same - region/lat/lng/country may have changed.
-      !!(location && location.lat !== 0 && location.lng !== 0));
+      // A genuinely moved pin counts as dirty even if the city label is
+      // unchanged (a nearby point can share a city but differ in
+      // region/address/coords).
+      locationPinMoved(location, user.locationLat, user.locationLng));
 
   const designerProfileDirty =
     designerHydrated &&
@@ -305,8 +404,15 @@ export default function ProfileEditPage() {
         (designerSnapshot.workshopLocation?.formattedAddress ?? null) ||
       isFreshLocationPick(designer.workshopLocation));
 
+  const visibilityDirty =
+    designerHydrated &&
+    VISIBILITY_ROWS.some(
+      ({ key }) => designer.visibility[key] !== designerSnapshot.visibility[key]
+    );
+
   // Used only by the autosave-draft hook so refreshes don't lose typed work.
-  const anyDirty = personalInfoDirty || designerProfileDirty || studioDirty;
+  const anyDirty =
+    personalInfoDirty || designerProfileDirty || studioDirty || visibilityDirty;
 
   // "Saved · just now" affordances per section. Each section shows its own
   // confirmation for ~5s after a successful save; re-editing flips the
@@ -327,6 +433,10 @@ export default function ProfileEditPage() {
     !studioDirty &&
     studioJustSavedAt !== null &&
     Date.now() - studioJustSavedAt < SAVED_NOTICE_MS;
+  const visibilityRecentlySaved =
+    !visibilityDirty &&
+    visibilityJustSavedAt !== null &&
+    Date.now() - visibilityJustSavedAt < SAVED_NOTICE_MS;
 
   // Force a re-render once each "just saved" window expires so the affordance
   // disappears. Cheap setTimeouts - no polling loop.
@@ -373,6 +483,17 @@ export default function ProfileEditPage() {
     );
     return () => window.clearTimeout(id);
   }, [studioJustSavedAt]);
+
+  useEffect(() => {
+    if (visibilityJustSavedAt === null) return;
+    const elapsed = Date.now() - visibilityJustSavedAt;
+    if (elapsed >= SAVED_NOTICE_MS) return;
+    const id = window.setTimeout(
+      () => setVisibilityJustSavedAt(null),
+      SAVED_NOTICE_MS - elapsed
+    );
+    return () => window.clearTimeout(id);
+  }, [visibilityJustSavedAt]);
 
   // Autosave draft so a refresh / session expiry doesn't lose work
   // (per docs/journeys/05-failure-modes.md §1.1).
@@ -575,7 +696,26 @@ export default function ProfileEditPage() {
         lastName: lastName.trim() || null,
         otherNames: otherNames.trim() || null,
         email: email.trim() || null,
+        // Mirror the full saved location into the store, not just city.
+        // Otherwise a same-session revisit to /profile/edit re-hydrates
+        // from stale region/pin/address - the exact "saved it but the
+        // map is blank again" complaint, just one navigation later.
         city: location?.city ?? user.city,
+        region: location ? location.region : user.region,
+        countryCode: location ? location.countryCode : user.countryCode,
+        postalCode: location ? location.postalCode : user.postalCode,
+        addressLine: location ? location.addressLine : user.addressLine,
+        formattedAddress: location
+          ? location.formattedAddress
+          : user.formattedAddress,
+        locationLat:
+          location && isFreshLocationPick(location)
+            ? location.lat
+            : user.locationLat,
+        locationLng:
+          location && isFreshLocationPick(location)
+            ? location.lng
+            : user.locationLng,
       });
       // Clear only the personal-info portion of the autosave draft by
       // re-running the autosave with current state once dirty has cleared.
@@ -669,6 +809,28 @@ export default function ProfileEditPage() {
         console.error("Save studio location failed:", err);
       }
       toast.error("Couldn't save your studio location. Try again.");
+    }
+  };
+
+  /** Save the public-visibility toggles (publicVisibility map only). */
+  const handleSaveVisibility = async () => {
+    if (!user || !user.isDesigner || !visibilityDirty) return;
+    try {
+      await updateProfile({
+        variables: { input: { publicVisibility: designer.visibility } },
+      });
+      setDesignerSnapshot((prev) => ({
+        ...prev,
+        visibility: designer.visibility,
+      }));
+      clearDraft();
+      setVisibilityJustSavedAt(Date.now());
+      toast.success("Visibility settings saved");
+    } catch (err) {
+      if (typeof console !== "undefined") {
+        console.error("Save visibility failed:", err);
+      }
+      toast.error("Couldn't save your visibility settings. Try again.");
     }
   };
 
@@ -1128,6 +1290,77 @@ export default function ProfileEditPage() {
                     saving={savingProfile && studioDirty}
                     recentlySaved={studioRecentlySaved}
                     onSave={handleSaveStudio}
+                  />
+                </>
+              )}
+            </GlassCard>
+          </section>
+        )}
+
+        {/* What clients can see - per-section public-visibility toggles.
+            Backend enforces these for non-owners; this is the control
+            surface. Privacy-first: studio name/address is off until the
+            designer opts in. */}
+        {user.isDesigner && (
+          <section>
+            <header className="mb-4">
+              <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
+                Privacy
+              </p>
+              <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+                What clients can see
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                You decide what shows on your public profile. Your phone and
+                email are never shown publicly. Turn anything off and visitors
+                simply won&apos;t see that section.
+              </p>
+            </header>
+            <GlassCard variant="solid" className="space-y-1 p-5 sm:p-6">
+              {designerLoading && !designerHydrated ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ) : (
+                <>
+                  {VISIBILITY_ROWS.map(({ key, label, description }) => (
+                    <div
+                      key={key}
+                      className="border-border/60 flex items-start justify-between gap-4 border-b py-3.5 last:border-b-0"
+                    >
+                      <div className="min-w-0">
+                        <Label
+                          htmlFor={`vis-${key}`}
+                          className="text-sm font-medium"
+                        >
+                          {label}
+                        </Label>
+                        <p className="text-muted-foreground mt-0.5 text-xs">
+                          {description}
+                        </p>
+                      </div>
+                      <Switch
+                        id={`vis-${key}`}
+                        checked={designer.visibility[key]}
+                        onCheckedChange={(checked) =>
+                          setDesigner((d) => ({
+                            ...d,
+                            visibility: { ...d.visibility, [key]: checked },
+                          }))
+                        }
+                        aria-label={`Show ${label} on your public profile`}
+                      />
+                    </div>
+                  ))}
+
+                  <SectionSaveBar
+                    label="Save visibility"
+                    dirty={visibilityDirty}
+                    saving={savingProfile && visibilityDirty}
+                    recentlySaved={visibilityRecentlySaved}
+                    onSave={handleSaveVisibility}
                   />
                 </>
               )}
