@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# x-precommit.sh — stitchub critical-rule pre-commit hook
+# x-precommit.sh - stitchub critical-rule pre-commit hook
 #
 # Source of truth: /Users/mac/Projects/mine/stitchub/.claude/scripts/x-precommit.sh
 # Deployed via:    bash .claude/scripts/install-hooks.sh <repo>
@@ -45,7 +45,7 @@ CI_BASE_REF=""
 
 print_help() {
     cat <<EOF
-${BOLD}x-precommit.sh${NC} — stitchub critical-rule pre-commit hook
+${BOLD}x-precommit.sh${NC} - stitchub critical-rule pre-commit hook
 
 ${BOLD}Usage:${NC}
     bash x-precommit.sh                  Run check on staged files (default = precommit mode)
@@ -67,7 +67,7 @@ ${BOLD}As a GitHub Action:${NC}
     Called by .github/workflows/x-check.yml as: bash .github/scripts/x-precommit.sh --ci origin/main
 
 ${BOLD}Bypass (precommit only):${NC}
-    git commit --no-verify  # use sparingly — defeats the purpose
+    git commit --no-verify  # use sparingly - defeats the purpose
 EOF
 }
 
@@ -87,6 +87,8 @@ ${RED}🔴 BLOCKING (commit refused):${NC}
   A-03  JWTs stored in plaintext Hive boxes
   A-04  Math.random() in auth/OTP/password code
   Q-08  Drizzle .where() using JS && instead of and()
+  Q-13  AI hidden characters (em-dash, en-dash, ellipsis, smart quotes, zero-width, BOM)
+  Q-13  Decorative HTML entities (&mdash;, &ndash;, &hellip;)
   X-02  Asset ownership bypass (OR createdBy IS NULL)
   P-01  New escrow code (escrow is OUT of MVP scope)
 
@@ -230,7 +232,7 @@ else
     if git rev-parse --verify HEAD >/dev/null 2>&1; then
         STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null)
     else
-        # First commit — no HEAD yet
+        # First commit - no HEAD yet
         STAGED_FILES=$(git ls-files --cached 2>/dev/null)
     fi
 fi
@@ -255,9 +257,9 @@ else
 fi
 
 # ============================================================
-# Auto-format (precommit mode only — best-effort, language-aware)
+# Auto-format (precommit mode only - best-effort, language-aware)
 # ============================================================
-# Skip silently if the relevant tool isn't installed in this repo —
+# Skip silently if the relevant tool isn't installed in this repo -
 # the rule scan still runs. JS/TS auto-format is handled by husky +
 # lint-staged in repos that use them (weft); this block covers PHP +
 # Python so warp + fitscan get the same "fix-on-commit" UX.
@@ -366,9 +368,9 @@ scan_pattern "CRITICAL" "S-03" "Drizzle SQL logger enabled without env gate" \
 scan_pattern "CRITICAL" "Q-08" "Drizzle where() uses && instead of and()" \
     '\.where\([^)]*&&' \
     '\.(ts|tsx)$' \
-    "Import { and } from 'drizzle-orm' and wrap conditions: and(condA, condB) — JS && breaks the query. See backend audit."
+    "Import { and } from 'drizzle-orm' and wrap conditions: and(condA, condB) - JS && breaks the query. See backend audit."
 
-# P-01: Escrow tokens in NEW code (legal-copy pages are exempt — they say "does not escrow")
+# P-01: Escrow tokens in NEW code (legal-copy pages are exempt - they say "does not escrow")
 LEGAL_PAGE_PATTERN='app/(terms|privacy|cookies|data-deletion)/'
 P01_FILES=$(printf "%s\n" "$CODE_FILES" | grep -E '\.(ts|tsx|dart|sql)$' | grep -vE "$LEGAL_PAGE_PATTERN" 2>/dev/null || true)
 if [ -n "$P01_FILES" ]; then
@@ -404,8 +406,8 @@ scan_pattern "WARNING" "Q-03" "print() in Dart code" \
     "Use a logger package (logger, talker, etc.). print() is for tests/debug only." \
     'test/|_test\.dart|\.g\.dart|\.freezed\.dart'
 
-# Q-07: FormData.fromMap (manual verification needed for Future bug — mobile audit critical)
-scan_pattern "WARNING" "Q-07" "FormData.fromMap — verify no un-awaited Futures" \
+# Q-07: FormData.fromMap (manual verification needed for Future bug - mobile audit critical)
+scan_pattern "WARNING" "Q-07" "FormData.fromMap - verify no un-awaited Futures" \
     'FormData\.fromMap' \
     '\.dart$' \
     "Mobile audit critical: passing Future<MultipartFile> to FormData.fromMap silently breaks uploads. Verify all values are awaited BEFORE the map is built."
@@ -443,6 +445,61 @@ scan_pattern "WARNING" "Q-01" "TypeScript : any" \
     '\.test\.|\.spec\.|\.d\.ts$|tests/|__tests__'
 
 # ============================================================
+# Q-13: AI hidden characters (em-dash, en-dash, ellipsis, smart quotes,
+# zero-width, BOM) and decorative HTML entities (&mdash;/&ndash;/&hellip;)
+# in committed code. Critical-tier; blocks the commit.
+#
+# BSD grep on macOS can't do Unicode classes, so we shell out to Python.
+# Python ships with macOS + every Linux distro we deploy on, so it's safe
+# to depend on. If Python isn't on PATH we silently skip Q-13 (the
+# LLM-driven /x-check still catches it).
+# ============================================================
+
+if command -v python3 >/dev/null 2>&1; then
+    # Exclude carrier files: the precommit script itself + the workflow YAML
+    # both quote the offending characters legitimately (as detection
+    # patterns / examples). Markdown is already filtered above; the rules /
+    # memory files that document Q-13 fall under that exclusion.
+    Q13_FILES=$(printf "%s\n" "$CODE_FILES" | grep -Ev '\.(md|markdown)$|x-precommit\.sh$|x-check\.ya?ml$' 2>/dev/null || true)
+    if [ -n "$Q13_FILES" ]; then
+        while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            # Python reads the file content directly. In precommit mode
+            # we'd ideally read STAGED content via git show, but the
+            # working-tree copy is what the user just wrote and the
+            # hook runs synchronously after their save; the diff vs
+            # working tree is rarely meaningful here.
+            content=$(read_file_content "$file")
+            [ -z "$content" ] && continue
+            hits=$(printf "%s" "$content" | python3 -c '
+import re, sys
+pat = re.compile(r"[–—…‘’“”​‌‍﻿]")
+for i, line in enumerate(sys.stdin, 1):
+    if pat.search(line):
+        ch = pat.search(line).group()
+        print(f"{i}:U+{ord(ch):04X}:{line.rstrip()[:120]}")
+' 2>/dev/null || true)
+            if [ -n "$hits" ]; then
+                while IFS= read -r hit; do
+                    line=$(printf "%s" "$hit" | cut -d: -f1)
+                    cp=$(printf "%s" "$hit" | cut -d: -f2)
+                    snippet=$(printf "%s" "$hit" | cut -d: -f3- | sed 's/^[[:space:]]*//' | cut -c1-100)
+                    emit_violation "CRITICAL" "Q-13" "AI hidden character ($cp)" "$file" "$line" "$snippet" \
+                        "Replace with plain ASCII: em-dash to comma/period/semicolon; smart quote to straight quote; zero-width/BOM to deletion. See .claude/rules.md Q-13."
+                done <<< "$hits"
+            fi
+        done <<< "$Q13_FILES"
+    fi
+fi
+
+# Q-13: HTML entities used as decoration (&mdash;, &ndash;, &hellip;).
+# Legit in markdown / docs; only flag in code files.
+scan_pattern "CRITICAL" "Q-13" "Decorative HTML entity (&mdash;/&ndash;/&hellip;)" \
+    '&(mdash|ndash|hellip);' \
+    '\.(ts|tsx|js|jsx|dart|kt|swift|py|php|graphql|html|svelte|vue|astro)$' \
+    "Replace with plain ASCII. &mdash; -> period/comma/semicolon; &hellip; -> three ASCII dots or restructure. See Q-13."
+
+# ============================================================
 # S-02: Committed .env files (special-case: filename check, not content)
 # ============================================================
 
@@ -464,16 +521,16 @@ fi
 printf "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
 if [ "$VIOLATIONS" -eq 0 ] && [ "$WARNINGS" -eq 0 ]; then
-    printf "${GREEN}${BOLD}✅ x-precommit: PASSED — no critical rule violations${NC}\n"
+    printf "${GREEN}${BOLD}✅ x-precommit: PASSED - no critical rule violations${NC}\n"
     exit 0
 fi
 
 if [ "$WARNINGS" -gt 0 ]; then
-    printf "${YELLOW}${BOLD}⚠  %s warning(s) — review but not blocking${NC}\n" "$WARNINGS"
+    printf "${YELLOW}${BOLD}⚠  %s warning(s) - review but not blocking${NC}\n" "$WARNINGS"
 fi
 
 if [ "$VIOLATIONS" -gt 0 ]; then
-    printf "${RED}${BOLD}❌ x-precommit: BLOCKED — %s critical violation(s)${NC}\n\n" "$VIOLATIONS"
+    printf "${RED}${BOLD}❌ x-precommit: BLOCKED - %s critical violation(s)${NC}\n\n" "$VIOLATIONS"
     printf "${BOLD}Options:${NC}\n"
     printf "  1. Fix the violations above and try the commit again\n"
     printf "  2. In Claude Code, run /x-implement or /x-check for full LLM-based check + fixes\n"
@@ -481,5 +538,5 @@ if [ "$VIOLATIONS" -gt 0 ]; then
     exit 1
 fi
 
-# Warnings only — commit allowed
+# Warnings only - commit allowed
 exit 0
