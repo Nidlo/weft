@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StitchLoader } from "@/components/ui/stitch-loader";
+import { PoseIllustration } from "@/components/measurements/pose-illustration";
 import type { MeasurementUnit } from "@/lib/utils/measurement";
 import {
   cmToInches,
@@ -240,6 +241,7 @@ export function RescanFlow({
 
         <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
           <div className="space-y-2">
+            <PoseIllustration variant="front" size="thumb" />
             <Label htmlFor="rescan-front">Front photo *</Label>
             <Input
               id="rescan-front"
@@ -249,6 +251,7 @@ export function RescanFlow({
             />
           </div>
           <div className="space-y-2">
+            <PoseIllustration variant="side" size="thumb" />
             <Label htmlFor="rescan-side">Side photo (optional)</Label>
             <Input
               id="rescan-side"

@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StitchLoader } from "@/components/ui/stitch-loader";
+import { PoseIllustration } from "@/components/measurements/pose-illustration";
 import type {
   Landmarks,
   MeasurementData,
@@ -376,6 +377,20 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
           </p>
         </header>
 
+        {/* Pose reference - shown before the text tips so users see the
+            expected stance before clicking Continue. Pose accuracy is the
+            biggest accuracy lever after height + lighting. */}
+        <GlassCard variant="ghost" className="space-y-4 p-5 sm:p-6">
+          <div className="text-copper flex items-center gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden />
+            How to stand
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <PoseIllustration variant="front" />
+            <PoseIllustration variant="side" />
+          </div>
+        </GlassCard>
+
         <GlassCard variant="solid" className="space-y-4 p-5 sm:p-6">
           <div className="text-copper flex items-center gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase">
             <Lightbulb className="h-3.5 w-3.5" aria-hidden />
@@ -437,19 +452,25 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         </header>
 
         <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
-          <PhotoField
-            id="front-photo"
-            label="Front photo"
-            required
-            file={frontImage}
-            onChange={setFrontImage}
-          />
-          <PhotoField
-            id="side-photo"
-            label="Side photo"
-            file={sideImage}
-            onChange={setSideImage}
-          />
+          <div className="space-y-2">
+            <PoseIllustration variant="front" size="thumb" />
+            <PhotoField
+              id="front-photo"
+              label="Front photo"
+              required
+              file={frontImage}
+              onChange={setFrontImage}
+            />
+          </div>
+          <div className="space-y-2">
+            <PoseIllustration variant="side" size="thumb" />
+            <PhotoField
+              id="side-photo"
+              label="Side photo"
+              file={sideImage}
+              onChange={setSideImage}
+            />
+          </div>
 
           {/* Sprint 35 - "Estimate from photo" toggle. When on, the height
               input is hidden and Claude estimates the value directly from
