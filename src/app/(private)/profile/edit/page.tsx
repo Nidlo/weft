@@ -698,7 +698,7 @@ export default function ProfileEditPage() {
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to profile
           </Link>
-          <header className="mt-4">
+          <header data-tour-id="profileEdit.header" className="mt-4">
             <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Account
             </p>
@@ -710,6 +710,7 @@ export default function ProfileEditPage() {
 
         {/* Avatar */}
         <GlassCard
+          data-tour-id="profileEdit.avatar"
           variant="solid"
           className="flex flex-col items-center gap-4 p-6"
         >
@@ -768,7 +769,7 @@ export default function ProfileEditPage() {
         </GlassCard>
 
         {/* Account basics */}
-        <section>
+        <section data-tour-id="profileEdit.identity">
           <header className="mb-4">
             <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Identity

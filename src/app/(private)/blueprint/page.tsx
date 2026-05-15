@@ -12,7 +12,6 @@ import type { CreateOrderData, BlueprintData } from "@/types/graphql";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OnboardingShell } from "@/components/shared/onboarding-shell";
-import { TourAutoFire } from "@/lib/tour/auto-fire";
 import { StepGarment } from "./step-garment";
 import { StepDesign } from "./step-design";
 import { StepReferenceImages } from "./step-reference-images";
@@ -197,7 +196,6 @@ function BlueprintWizard() {
 
   return (
     <AppShell>
-      <TourAutoFire tour="newOrder" />
       <OnboardingShell
         eyebrow="Custom order"
         title="Build your blueprint."

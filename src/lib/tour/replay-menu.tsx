@@ -6,23 +6,21 @@ import { Compass, Check, RotateCcw } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 
-import { TOURS } from "./registry";
+import { TOURS, ROUTE_FOR } from "./registry";
 import type { TourId } from "./types";
 import { useTour } from "./use-tour";
 
-const TOUR_ORDER: TourId[] = ["home", "newOrder", "orderDetail"];
-
-// Tours anchor to DOM that only exists on a specific route. If the
-// user replays from settings or the header help icon we may not be on
-// that route - navigate first, then start. orderDetail points at the
-// order list (the user picks a specific order, then we replay on that
-// page); the auto-fire on the detail page handles the rest via the
-// force flag flowing through the store.
-const ROUTE_FOR: Record<TourId, string> = {
-  home: "/",
-  newOrder: "/blueprint",
-  orderDetail: "/orders",
-};
+// Display order in the replay list - roughly the order a new user meets
+// each surface.
+const TOUR_ORDER: TourId[] = [
+  "home",
+  "dashboard",
+  "newOrder",
+  "orderDetail",
+  "measurements",
+  "profileEdit",
+  "messages",
+];
 
 /**
  * Lists every available tour with its current status and a replay

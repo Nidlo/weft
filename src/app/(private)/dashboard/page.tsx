@@ -94,7 +94,10 @@ function ClientDashboard({ firstName }: { firstName: string | null }) {
 
       <section>
         <SectionHeader eyebrow="Get started" title="Quick actions" />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div
+          data-tour-id="dashboard.actions"
+          className="grid gap-3 sm:grid-cols-2"
+        >
           {CLIENT_ACTIONS.map((action) => (
             <QuickActionCard key={action.href} action={action} />
           ))}
@@ -323,7 +326,10 @@ function DesignerDashboard({ user }: { user: AuthUser }) {
       {/* Quick actions */}
       <section>
         <SectionHeader eyebrow="Tools" title="Quick actions" />
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div
+          data-tour-id="dashboard.actions"
+          className="grid gap-3 sm:grid-cols-3"
+        >
           {DESIGNER_ACTIONS.map((action) => (
             <QuickActionCard key={action.href} action={action} />
           ))}
@@ -341,7 +347,7 @@ interface GreetingProps {
 
 function Greeting({ eyebrow, title, subtitle }: GreetingProps) {
   return (
-    <header>
+    <header data-tour-id="dashboard.greeting">
       <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
         {eyebrow}
       </p>

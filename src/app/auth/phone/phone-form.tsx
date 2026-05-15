@@ -16,6 +16,8 @@ import type {
 } from "@/types/graphql";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
+import { useTourStore } from "@/lib/tour/use-tour";
+import { filterTourProgress } from "@/lib/tour/filter-progress";
 import { safeNext } from "@/lib/utils/safe-next";
 import { buildClaimedToast } from "@/lib/utils/claimed-toast";
 import { Button } from "@/components/ui/button";
@@ -152,6 +154,11 @@ function PhoneAuthContent() {
             isDesigner: user.isDesigner,
             isOnboarded: user.isOnboarded,
           });
+          // Sync tour progress on login (see verify/page.tsx for why the
+          // AuthProvider Me probe alone isn't enough on a fresh device).
+          useTourStore
+            .getState()
+            .hydrate(filterTourProgress(user.tourProgress));
 
           toast.success("Signed in successfully!");
           // Social-login users only have a phone when they reused an

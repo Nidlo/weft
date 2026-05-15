@@ -67,7 +67,6 @@ import {
   getStatusConfig,
   PRODUCTION_STAGES,
 } from "@/lib/utils/order";
-import { TourAutoFire } from "@/lib/tour/auto-fire";
 import { cn } from "@/lib/utils";
 
 export default function OrderDetailPage({
@@ -238,7 +237,6 @@ export default function OrderDetailPage({
 
   return (
     <AppShell>
-      <TourAutoFire tour="orderDetail" />
       <div className="space-y-8">
         <Link
           href="/orders"

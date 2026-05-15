@@ -208,7 +208,10 @@ export default function MeasurementsPage() {
         ) : null}
 
         {!inSubFlow && (
-          <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <header
+            data-tour-id="measurements.header"
+            className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+          >
             <div>
               <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
                 Fit
@@ -233,6 +236,7 @@ export default function MeasurementsPage() {
               {measurements.length < 10 && (
                 <>
                   <Button
+                    data-tour-id="measurements.scan"
                     variant="luxe-outline"
                     size="lg"
                     className="gap-1.5"
@@ -242,6 +246,7 @@ export default function MeasurementsPage() {
                     Fitscan AI
                   </Button>
                   <Button
+                    data-tour-id="measurements.add"
                     variant="luxe"
                     size="lg"
                     className="gap-1.5"
