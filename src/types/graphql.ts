@@ -322,6 +322,13 @@ export interface DesignerData {
   designer: GqlUserWithProfile | null;
 }
 
+export interface MyDesignerProfileData {
+  me: {
+    id: string;
+    designerProfile: GqlDesignerProfile | null;
+  };
+}
+
 export interface SpecializationsData {
   specializations: Specialization[];
 }
