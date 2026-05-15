@@ -58,11 +58,21 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en",
     siteName: "Nidlo",
+    // Explicit so per-page metadata exports that spread `openGraph`
+    // without `images` still serve the branded share card. File-convention
+    // fallback covers the rest; designer profiles override per-route.
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Nidlo. Where every stitch begins",
+      },
+    ],
   },
   twitter: {
-    // The root opengraph-image.tsx auto-populates the image; designer
-    // profiles override via their own file-convention OG image.
     card: "summary_large_image",
+    images: ["/opengraph-image"],
   },
   manifest: "/manifest.webmanifest",
   icons: {
