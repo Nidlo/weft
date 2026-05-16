@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useBlueprintStore } from "@/lib/stores/blueprint";
 import { CREATE_ORDER } from "@/lib/graphql/mutations/order";
+import { useCreateBlueprintDraft } from "@/lib/hooks/use-blueprint-drafts";
 import type { CreateOrderData, BlueprintData } from "@/types/graphql";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,12 +49,18 @@ function BlueprintWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const designerSlug = searchParams.get("designer");
+  // When a designer pitches a design TO a client, the wizard is opened
+  // with ?pitchClient=<userId>. That flips the draft's initiator role to
+  // "designer" and the counterparty to that client.
+  const pitchClientId = searchParams.get("pitchClient");
 
   const store = useBlueprintStore();
   const { step, setStep, setField, reset } = store;
 
   const [createOrder, { loading: submitting }] =
     useMutation<CreateOrderData>(CREATE_ORDER);
+  const { createBlueprintDraft, loading: savingDraft } =
+    useCreateBlueprintDraft();
 
   // Set designer from URL param on first load
   useEffect(() => {
@@ -115,35 +122,68 @@ function BlueprintWizard() {
     }
   };
 
+  const buildBlueprint = (): BlueprintData => {
+    const blueprint: BlueprintData = {
+      garment_type: store.garmentType,
+      occasion: store.occasion,
+      design_details: store.designDetails as Record<string, string | string[]>,
+      fabric_type: store.fabricType,
+    };
+
+    if (store.garmentTypeOther)
+      blueprint.garment_type_other = store.garmentTypeOther;
+    if (store.additionalDetails.length > 0)
+      blueprint.additional_details = store.additionalDetails;
+    if (store.freeText) blueprint.free_text = store.freeText;
+    if (store.referenceImages.length > 0) {
+      blueprint.reference_images = store.referenceImages.map((img) => img.url);
+    }
+    if (store.fabricTypeOther)
+      blueprint.fabric_type_other = store.fabricTypeOther;
+    if (store.fabricColour) blueprint.fabric_colour = store.fabricColour;
+    if (store.fabricColourHex)
+      blueprint.fabric_colour_hex = store.fabricColourHex;
+    if (store.clientProvidingFabric) blueprint.client_providing_fabric = true;
+    if (store.fabricNotes) blueprint.fabric_notes = store.fabricNotes;
+
+    return blueprint;
+  };
+
+  const handleSaveAsDraft = async () => {
+    try {
+      const blueprint = buildBlueprint();
+      const budgetMin = store.budgetMin
+        ? Math.round(Number(store.budgetMin) * 100)
+        : undefined;
+      const budgetMax = store.budgetMax
+        ? Math.round(Number(store.budgetMax) * 100)
+        : undefined;
+
+      const draft = await createBlueprintDraft({
+        counterpartyId: pitchClientId ?? store.designerId,
+        initiatorRole: pitchClientId ? "designer" : "client",
+        blueprint,
+        budgetMin,
+        budgetMax,
+        proposedDeadline: store.deadline || undefined,
+        message: store.notes || undefined,
+      });
+
+      if (draft) {
+        reset();
+        toast.success("Saved as a draft. You can collaborate on it now.");
+        router.push(`/drafts/${draft.id}`);
+      }
+    } catch {
+      toast.error(
+        "We couldn't save the draft. Please review your details and try again."
+      );
+    }
+  };
+
   const handleSubmit = async () => {
     try {
-      const blueprint: BlueprintData = {
-        garment_type: store.garmentType,
-        occasion: store.occasion,
-        design_details: store.designDetails as Record<
-          string,
-          string | string[]
-        >,
-        fabric_type: store.fabricType,
-      };
-
-      if (store.garmentTypeOther)
-        blueprint.garment_type_other = store.garmentTypeOther;
-      if (store.additionalDetails.length > 0)
-        blueprint.additional_details = store.additionalDetails;
-      if (store.freeText) blueprint.free_text = store.freeText;
-      if (store.referenceImages.length > 0) {
-        blueprint.reference_images = store.referenceImages.map(
-          (img) => img.url
-        );
-      }
-      if (store.fabricTypeOther)
-        blueprint.fabric_type_other = store.fabricTypeOther;
-      if (store.fabricColour) blueprint.fabric_colour = store.fabricColour;
-      if (store.fabricColourHex)
-        blueprint.fabric_colour_hex = store.fabricColourHex;
-      if (store.clientProvidingFabric) blueprint.client_providing_fabric = true;
-      if (store.fabricNotes) blueprint.fabric_notes = store.fabricNotes;
+      const blueprint = buildBlueprint();
 
       // Convert GHS to pesewas
       const budgetMinPesewas = Math.round(Number(store.budgetMin) * 100);
@@ -221,7 +261,16 @@ function BlueprintWizard() {
         {step === 3 && <StepFabric />}
         {step === 4 && <StepMeasurements />}
         {step === 5 && <StepBudget />}
-        {step === 6 && <StepReview onEditStep={setStep} />}
+        {step === 6 && (
+          <StepReview
+            onEditStep={setStep}
+            onSaveAsDraft={handleSaveAsDraft}
+            savingDraft={savingDraft}
+            draftCtaLabel={
+              pitchClientId ? "Send as a pitch draft" : "Save as draft instead"
+            }
+          />
+        )}
       </OnboardingShell>
     </AppShell>
   );

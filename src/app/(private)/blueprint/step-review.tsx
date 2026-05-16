@@ -13,6 +13,9 @@ import { MeasurementSummary } from "@/components/shared/measurement-summary";
 
 interface StepReviewProps {
   onEditStep: (step: number) => void;
+  onSaveAsDraft?: () => void;
+  savingDraft?: boolean;
+  draftCtaLabel?: string;
 }
 
 function formatLabel(
@@ -22,7 +25,12 @@ function formatLabel(
   return list.find((o) => o.value === value)?.label ?? value.replace(/_/g, " ");
 }
 
-export function StepReview({ onEditStep }: StepReviewProps) {
+export function StepReview({
+  onEditStep,
+  onSaveAsDraft,
+  savingDraft,
+  draftCtaLabel = "Save as draft instead",
+}: StepReviewProps) {
   const store = useBlueprintStore();
   const { options } = useBlueprintOptions();
   const { measurements } = useMeasurements();
@@ -187,6 +195,22 @@ export function StepReview({ onEditStep }: StepReviewProps) {
         </div>
         {store.notes && <KeyValue label="Notes" value={store.notes} />}
       </ReviewSection>
+
+      {onSaveAsDraft && (
+        <div className="border-t pt-5">
+          <p className="text-muted-foreground mb-3 text-sm">
+            Not ready to commit? Save this as a draft to brainstorm it back and
+            forth before it becomes an order.
+          </p>
+          <Button
+            variant="outline"
+            onClick={onSaveAsDraft}
+            disabled={savingDraft}
+          >
+            {savingDraft ? "Saving..." : draftCtaLabel}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
