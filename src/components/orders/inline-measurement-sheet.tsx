@@ -178,9 +178,9 @@ export function InlineMeasurementSheet({
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className="max-h-[92vh] w-full overflow-y-auto px-4 pb-6 sm:px-6"
+        className="max-h-[92vh] w-full overflow-y-auto"
       >
-        <SheetHeader className="px-0">
+        <SheetHeader>
           <SheetTitle>Take a measurement</SheetTitle>
           <SheetDescription>
             {pendingClientPhone

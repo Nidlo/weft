@@ -41,12 +41,12 @@ import {
   ADD_PORTFOLIO_IMAGE,
   REMOVE_PORTFOLIO_IMAGE,
 } from "@/lib/graphql/mutations/profile";
-import { GET_DESIGNER } from "@/lib/graphql/queries/designer";
+import { MY_DESIGNER_PROFILE } from "@/lib/graphql/queries/designer";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import type {
   AddPortfolioImageData,
-  DesignerData,
   DesignerPublicVisibility,
+  MyDesignerProfileData,
   PortfolioImage,
   RemovePortfolioImageData,
 } from "@/types/graphql";
@@ -207,13 +207,26 @@ export default function ProfileEditPage() {
     number | null
   >(null);
 
-  const designerSlug = user?.designerProfile?.slug ?? null;
-  const { data: designerData, loading: designerLoading } =
-    useQuery<DesignerData>(GET_DESIGNER, {
-      variables: { slug: designerSlug ?? "" },
-      skip: !user?.isDesigner || !designerSlug,
-      fetchPolicy: "cache-and-network",
-    });
+  // Hydrate the edit form from the OWNER's own record, never the public
+  // designer(slug:) path. The old slug-keyed query silently blanked the
+  // entire form (designer fields, studio, portfolio) and hid the
+  // view-as-client link whenever the slug was null/stale (fresh
+  // designer, stale persisted authStore, half-deployed backend). The
+  // `me` resolver returns the full unscrubbed profile for the owner, so
+  // this works for any authenticated designer regardless of slug.
+  const {
+    data: designerData,
+    loading: designerLoading,
+    error: designerError,
+    refetch: refetchDesigner,
+  } = useQuery<MyDesignerProfileData>(MY_DESIGNER_PROFILE, {
+    skip: !user?.isDesigner,
+    fetchPolicy: "cache-and-network",
+  });
+  const ownProfile = designerData?.me?.designerProfile ?? null;
+  // Prefer the freshly-fetched slug; fall back to the persisted authStore
+  // so the view-as-client link still resolves on the very first paint.
+  const publicSlug = ownProfile?.slug ?? user?.designerProfile?.slug ?? null;
   const { specializations: allSpecs, loading: specsLoading } =
     useSpecializations();
 
@@ -223,23 +236,9 @@ export default function ProfileEditPage() {
   const [updateProfile, { loading: savingProfile }] = useMutation<{
     updateProfile: { id: string; slug: string | null };
   }>(UPDATE_PROFILE, {
-    // Re-pull the designer record too - without this, the user clicks
-    // Save, the mutation returns the updated DesignerProfile, but the
-    // page's `designerData` (driven by GET_DESIGNER) still shows the old
-    // values until the next cache eviction.
-    refetchQueries: ({ data }) => {
-      const queries: Array<{ query: typeof ME_QUERY; variables?: object }> = [
-        { query: ME_QUERY },
-      ];
-      const slug = data?.updateProfile?.slug ?? designerSlug;
-      if (slug) {
-        queries.push({
-          query: GET_DESIGNER as unknown as typeof ME_QUERY,
-          variables: { slug },
-        });
-      }
-      return queries;
-    },
+    // Re-pull ME (header/authStore) AND the owner profile so the form
+    // reflects the saved values without a manual reload. No slug needed.
+    refetchQueries: [{ query: ME_QUERY }, { query: MY_DESIGNER_PROFILE }],
   });
   const [updateAvatar, { loading: uploadingAvatar }] = useMutation<{
     updateAvatar: { id: string; avatarUrl: string | null };
@@ -247,28 +246,17 @@ export default function ProfileEditPage() {
     refetchQueries: [{ query: ME_QUERY }],
   });
 
-  // Refetch GET_DESIGNER only when we have a slug - firing it with an empty
-  // string makes the backend reject the request ("$slug must not be null")
-  // and the mutation's caller sees a confusing error even though the upload
-  // / remove itself succeeded. A brand-new designer with no displayName yet
-  // doesn't have a slug; the addPortfolioImage / removePortfolioImage
-  // response already returns the updated portfolioImages, so the cache
-  // reflects the change either way.
+  // Portfolio mutations refetch the owner profile (no slug → no empty-slug
+  // rejection, and it can't blank the form). The mutation response also
+  // returns the updated portfolioImages so the cache is consistent either
+  // way.
   const [addPortfolioImage] = useMutation<AddPortfolioImageData>(
     ADD_PORTFOLIO_IMAGE,
-    {
-      refetchQueries: () =>
-        designerSlug
-          ? [{ query: GET_DESIGNER, variables: { slug: designerSlug } }]
-          : [],
-    }
+    { refetchQueries: [{ query: MY_DESIGNER_PROFILE }] }
   );
   const [removePortfolioImage, { loading: removingImage }] =
     useMutation<RemovePortfolioImageData>(REMOVE_PORTFOLIO_IMAGE, {
-      refetchQueries: () =>
-        designerSlug
-          ? [{ query: GET_DESIGNER, variables: { slug: designerSlug } }]
-          : [],
+      refetchQueries: [{ query: MY_DESIGNER_PROFILE }],
     });
 
   // Portfolio upload state - mirrors StepPortfolio pattern
@@ -320,8 +308,8 @@ export default function ProfileEditPage() {
   // Hydrate designer fields the same way as `seededFromUserId` above -
   // setState during render (guarded by a one-shot flag) is the React 19
   // idiom for deriving state from props/queries without an effect.
-  if (!designerHydrated && designerData?.designer?.designerProfile) {
-    const profile = designerData.designer.designerProfile;
+  if (!designerHydrated && ownProfile) {
+    const profile = ownProfile;
     const hasStoredWorkshop =
       !!profile.workshopAddress ||
       profile.workshopLat !== null ||
@@ -557,8 +545,7 @@ export default function ProfileEditPage() {
   const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-  const currentImages: PortfolioImage[] =
-    designerData?.designer?.designerProfile?.portfolioImages ?? [];
+  const currentImages: PortfolioImage[] = ownProfile?.portfolioImages ?? [];
 
   const uploadPortfolioFile = async (
     file: File
@@ -1026,6 +1013,44 @@ export default function ProfileEditPage() {
             />
           </GlassCard>
         </section>
+
+        {/* Owner-profile load failed (network / half-deployed backend).
+            Surface a retry instead of letting every designer section
+            render blank - a blank form reads as catastrophic data loss
+            to the designer when their data is actually safe server-side. */}
+        {user.isDesigner && designerError && !designerHydrated && (
+          <GlassCard
+            variant="solid"
+            className="border-status-error/30 space-y-3 p-5 sm:p-6"
+          >
+            <div className="flex items-start gap-3">
+              <AlertCircle
+                className="text-status-error mt-0.5 h-5 w-5 shrink-0"
+                aria-hidden
+              />
+              <div>
+                <p className="text-display text-base font-semibold tracking-tight">
+                  Couldn&apos;t load your designer profile
+                </p>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Your saved details are safe - this is just a loading hiccup.
+                  Try again.
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="luxe-outline"
+              size="sm"
+              onClick={() => void refetchDesigner()}
+              loading={designerLoading}
+              loadingLabel="Retrying..."
+              className="gap-1.5"
+            >
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+              Retry
+            </Button>
+          </GlassCard>
+        )}
 
         {/* Designer profile */}
         {user.isDesigner && (
@@ -1554,10 +1579,8 @@ export default function ProfileEditPage() {
             </header>
             <GlassCard variant="solid" className="space-y-4 p-5 sm:p-6">
               {(() => {
-                const score =
-                  designerData?.designer?.designerProfile
-                    ?.profileCompleteness ?? 0;
-                const profile = designerData?.designer?.designerProfile;
+                const score = ownProfile?.profileCompleteness ?? 0;
+                const profile = ownProfile;
                 const u = user;
                 return (
                   <>
@@ -1645,9 +1668,9 @@ export default function ProfileEditPage() {
         {/* No global Save button: each section above commits its own
             changes. This is just the exit ramp once the user is done. */}
         <div className="flex flex-col items-center gap-3 pt-2 pb-6">
-          {user?.isDesigner && user?.designerProfile?.slug && (
+          {user?.isDesigner && publicSlug && (
             <Link
-              href={`/designer/${user.designerProfile.slug}`}
+              href={`/designer/${publicSlug}`}
               className="text-copper text-sm font-medium underline-offset-4 hover:underline"
             >
               View my public profile →

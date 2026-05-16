@@ -134,8 +134,13 @@ const DESIGNER_USER = {
   designerProfile: { slug: "kojo" },
 };
 
+// MY_DESIGNER_PROFILE is owner-scoped: `me { designerProfile }`, NOT the
+// public `designer(slug:)`. This is the architectural fix - the edit
+// form hydrates from the owner's own record so a null/stale slug can
+// never blank it.
 const DESIGNER_QUERY_DATA = {
-  designer: {
+  me: {
+    id: "u-2",
     designerProfile: {
       id: "p-1",
       displayName: "Kojo Atelier",
@@ -171,7 +176,12 @@ beforeEach(() => {
   updateMyInfoSpy.mockClear();
   updateProfileSpy.mockClear();
   updateAvatarSpy.mockClear();
-  useQuerySpy.mockReturnValue({ data: DESIGNER_QUERY_DATA, loading: false });
+  useQuerySpy.mockReturnValue({
+    data: DESIGNER_QUERY_DATA,
+    loading: false,
+    error: undefined,
+    refetch: vi.fn(),
+  });
 });
 
 import ProfileEditPage from "./page";
@@ -419,5 +429,57 @@ describe("ProfileEditPage", () => {
     expect(input).not.toHaveProperty("workshopName");
     expect(input).not.toHaveProperty("displayName");
     expect(updateMyInfoSpy).not.toHaveBeenCalled();
+  });
+
+  // Regression: the reported bug. An existing designer whose persisted
+  // authStore lost designerProfile (stale store / pre-fix cache / a
+  // transient ME error) used to get a totally blank edit form because
+  // the old query was slug-gated. The owner-scoped query has no slug
+  // dependency, so the form must still hydrate from its data.
+  it("hydrates the form even when authStore has no designerProfile slug", () => {
+    useAuthGuardSpy.mockReturnValue({
+      user: { ...DESIGNER_USER, designerProfile: null },
+      isReady: true,
+    });
+    render(<ProfileEditPage />);
+
+    // Designer fields populated from MY_DESIGNER_PROFILE, not the slug.
+    expect(screen.getByDisplayValue("Kojo Atelier")).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(/tailoring since 2018/i)
+    ).toBeInTheDocument();
+    // The owner query is fired (not skipped on a missing slug): the only
+    // skip condition left is non-designer.
+    const skipArg = (
+      useQuerySpy.mock.calls.find(
+        (c) => (c[1] as { skip?: boolean })?.skip !== undefined
+      )?.[1] as { skip?: boolean } | undefined
+    )?.skip;
+    expect(skipArg).toBe(false);
+    // View-as-client link resolves from the fetched profile slug.
+    expect(
+      screen.getByRole("link", { name: /view my public profile/i })
+    ).toHaveAttribute("href", "/designer/kojo");
+  });
+
+  it("shows a retry affordance (not a blank form) when the owner query errors", () => {
+    useAuthGuardSpy.mockReturnValue({ user: DESIGNER_USER, isReady: true });
+    const refetchSpy = vi.fn();
+    useQuerySpy.mockReturnValue({
+      data: undefined,
+      loading: false,
+      error: new Error("network down"),
+      refetch: refetchSpy,
+    });
+    render(<ProfileEditPage />);
+
+    expect(
+      screen.getByText(/couldn't load your designer profile/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/your saved details are safe/i)
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /retry/i }));
+    expect(refetchSpy).toHaveBeenCalledTimes(1);
   });
 });

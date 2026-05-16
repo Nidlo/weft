@@ -117,7 +117,9 @@ export function DesignerProfileView({ designer }: Props) {
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-display text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl">
+                {/* App-wide scale (matches the /profile H1) - was one
+                    Tailwind step larger and out-shouted everything. */}
+                <h1 className="text-display text-3xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-4xl">
                   {displayName}
                 </h1>
                 {designer.isVerified && (
@@ -236,7 +238,10 @@ export function DesignerProfileView({ designer }: Props) {
         {profile?.pricingMin != null && profile?.pricingMax != null && (
           <SectionBlock eyebrow="Pricing" title="Typical price range">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:gap-6">
-              <span className="text-display text-4xl font-semibold tabular-nums sm:text-5xl">
+              {/* One step under the section titles, equal to the
+                  Track-record stat figure: a single uniform headline-
+                  number treatment that doesn't dwarf its caption. */}
+              <span className="text-display text-2xl font-semibold tabular-nums sm:text-3xl">
                 {formatPesewasShort(profile.pricingMin)}
                 <span className="text-muted-foreground/50 mx-3">-</span>
                 {formatPesewasShort(profile.pricingMax)}
@@ -419,7 +424,7 @@ function SectionBlock({ eyebrow, title, children }: SectionBlockProps) {
         <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
           {eyebrow}
         </p>
-        <h2 className="text-display mt-1.5 text-2xl font-semibold tracking-tight sm:text-3xl">
+        <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
           {title}
         </h2>
       </header>
@@ -438,7 +443,7 @@ function PerformanceStat({ icon: Icon, value, label }: PerformanceStatProps) {
   return (
     <GlassCard variant="solid" className="p-5 text-center sm:p-6">
       <Icon className="text-copper mx-auto h-5 w-5" aria-hidden />
-      <p className="text-display mt-3 text-3xl font-semibold tabular-nums sm:text-4xl">
+      <p className="text-display mt-3 text-2xl font-semibold tabular-nums sm:text-3xl">
         {value}
       </p>
       <p className="text-muted-foreground mt-1 text-[11px] font-semibold tracking-[0.16em] uppercase">
