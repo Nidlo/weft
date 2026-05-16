@@ -138,4 +138,50 @@ describe("DesignerProfileView", () => {
     });
     expect(cta).toBeDisabled();
   });
+
+  it("renders the studio section when the designer opted workshop public", () => {
+    const withStudio: GqlUserWithProfile = {
+      ...DESIGNER,
+      designerProfile: {
+        ...DESIGNER.designerProfile!,
+        workshopName: "Adwoa Atelier",
+        workshopAddress: "12 Oxford St, Osu, Accra",
+      },
+    } as unknown as GqlUserWithProfile;
+    render(<DesignerProfileView designer={withStudio} />);
+    expect(screen.getByText(/where they work/i)).toBeInTheDocument();
+    expect(screen.getByText("Adwoa Atelier")).toBeInTheDocument();
+    expect(screen.getByText("12 Oxford St, Osu, Accra")).toBeInTheDocument();
+  });
+
+  it("omits the studio section entirely when workshop fields are scrubbed", () => {
+    // Backend nulls workshop_* for non-owners when it's private (default).
+    render(<DesignerProfileView designer={DESIGNER} />);
+    expect(screen.queryByText(/where they work/i)).not.toBeInTheDocument();
+  });
+
+  it("hides the Track record section when stats visibility is off", () => {
+    const noStats: GqlUserWithProfile = {
+      ...DESIGNER,
+      designerProfile: {
+        ...DESIGNER.designerProfile!,
+        publicVisibility: {
+          bio: true,
+          pricing: true,
+          portfolio: true,
+          experience: true,
+          stats: false,
+          city: true,
+          workshop: false,
+        },
+      },
+    } as unknown as GqlUserWithProfile;
+    render(<DesignerProfileView designer={noStats} />);
+    expect(screen.queryByText(/track record/i)).not.toBeInTheDocument();
+  });
+
+  it("shows the Track record section by default (no visibility map)", () => {
+    render(<DesignerProfileView designer={DESIGNER} />);
+    expect(screen.getByText(/track record/i)).toBeInTheDocument();
+  });
 });

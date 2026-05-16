@@ -4,7 +4,14 @@
  * tour means updating BOTH places (typed end-to-end so a typo on
  * either side surfaces immediately).
  */
-export type TourId = "home" | "newOrder" | "orderDetail";
+export type TourId =
+  | "home"
+  | "newOrder"
+  | "orderDetail"
+  | "dashboard"
+  | "measurements"
+  | "profileEdit"
+  | "messages";
 
 export type TourOutcome = "completed" | "skipped";
 

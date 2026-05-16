@@ -22,6 +22,8 @@ import type {
 import { buildClaimedToast } from "@/lib/utils/claimed-toast";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useGuestGuard } from "@/lib/hooks/use-guest-guard";
+import { useTourStore } from "@/lib/tour/use-tour";
+import { filterTourProgress } from "@/lib/tour/filter-progress";
 import { maskPhone } from "@/lib/utils/phone";
 import { safeNext } from "@/lib/utils/safe-next";
 import { Button } from "@/components/ui/button";
@@ -171,6 +173,14 @@ function VerifyOtpContent() {
             isDesigner: user.isDesigner,
             isOnboarded: user.isOnboarded,
           });
+          // Sync tour progress now instead of waiting for the next cold
+          // load's Me probe. Without this a returning user on a fresh
+          // device replays tours they already finished elsewhere, since
+          // AuthProvider only hydrates progress when a session was
+          // already persisted at boot.
+          useTourStore
+            .getState()
+            .hydrate(filterTourProgress(user.tourProgress));
 
           toast.success("Phone verified!");
           // If a designer parked orders/measurements against this phone

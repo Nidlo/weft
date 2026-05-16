@@ -186,7 +186,7 @@ export function Header() {
               >
                 <Menu className="h-5 w-5" />
               </Button>
-              <SheetContent side="bottom" className="px-2 pb-6">
+              <SheetContent side="bottom" className="pb-6">
                 <SheetHeader className="text-left">
                   <SheetTitle className="text-display text-lg font-semibold tracking-tight">
                     {user?.firstName ? `Hi, ${user.firstName}` : "Account"}

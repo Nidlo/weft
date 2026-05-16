@@ -285,24 +285,28 @@ export function ManualForm({
   };
 
   const handleUnitToggle = () => {
-    // Sprint 35 - the previous implementation flipped the unit label
-    // without touching the values. Anyone scanning while their preferred
-    // unit was "inches" saw cm values displayed next to an "in" label -
-    // e.g. AI waist 95cm rendered as "95 in" (which would be 241cm,
-    // monstrous). Convert the data alongside the unit so the displayed
-    // number always matches the displayed label.
-    setUnit((prev) => {
-      const next = prev === "cm" ? "inches" : "cm";
-      setData(
-        (d) =>
-          convertMeasurementData(
-            d as Record<string, Record<string, number | null>>,
-            prev,
-            next
-          ) as MeasurementData
-      );
-      return next;
-    });
+    // Convert the data alongside the unit so the displayed number always
+    // matches the displayed label (a cm value must not render next to an
+    // "in" label).
+    //
+    // CRITICAL: the two setters are called independently with PURE
+    // updaters. The previous version nested `setData` inside the
+    // `setUnit` updater - an impure updater. React 19 double-invokes
+    // state updaters in dev to surface exactly this kind of impurity, so
+    // the nested `setData` was enqueued twice and the conversion
+    // compounded: 39.8 in -> 101.1 cm -> 256.8 cm (x2.54 twice). Reading
+    // `unit` from the render closure and keeping each updater
+    // side-effect-free makes a double-invoke a harmless no-op.
+    const next: MeasurementUnit = unit === "cm" ? "inches" : "cm";
+    setData(
+      (d) =>
+        convertMeasurementData(
+          d as Record<string, Record<string, number | null>>,
+          unit,
+          next
+        ) as MeasurementData
+    );
+    setUnit(next);
   };
 
   const handleSubmit = async () => {

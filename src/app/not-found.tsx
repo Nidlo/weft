@@ -28,7 +28,7 @@ export default function NotFound() {
           The link may be broken or the page has moved. Pick a path below to get
           back on track.
         </p>
-        <div className="mt-8 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button asChild variant="luxe" size="lg" className="flex-1 gap-2">
             <Link href="/">
               <Home className="h-4 w-4" aria-hidden />

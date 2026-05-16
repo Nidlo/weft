@@ -73,4 +73,59 @@ describe("OnboardingShell", () => {
       .find((li): li is HTMLLIElement => li !== null);
     expect(activeChip).toHaveAttribute("aria-current", "step");
   });
+
+  it("hides the per-step word labels on mobile (numbers-only) and shows them at sm: up", () => {
+    renderShell({ step: 1 });
+    // The header caption is the readable source of truth on mobile.
+    expect(screen.getByText(/step 2 of 4/i)).toBeInTheDocument();
+    // Each indicator label span is mobile-hidden, desktop-visible.
+    const label = screen
+      .getAllByText("Style")
+      .map((el) => el.closest("span"))
+      .find(
+        (s): s is HTMLSpanElement => s?.className.includes("uppercase") ?? false
+      );
+    expect(label?.className).toContain("hidden");
+    expect(label?.className).toContain("sm:block");
+  });
+
+  it("makes completed step nodes tappable when onStepSelect is provided (jump back), leaving upcoming inert", () => {
+    const onStepSelect = vi.fn();
+    renderShell({ step: 2, onStepSelect });
+
+    // Step 1 ("Basics") is completed -> a real button that jumps back.
+    const backNode = screen.getByRole("button", {
+      name: /go back to step 1: basics/i,
+    });
+    fireEvent.click(backNode);
+    expect(onStepSelect).toHaveBeenCalledWith(0);
+
+    // The upcoming step ("Finish", index 3) is NOT a button.
+    expect(
+      screen.queryByRole("button", { name: /go back to step 4: finish/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders every node non-interactive when onStepSelect is omitted (onboarding wizards unchanged)", () => {
+    renderShell({ step: 2 });
+    expect(
+      screen.queryByRole("button", { name: /go back to step/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("scales to any step count without crowding the markup (7-step blueprint case)", () => {
+    const SEVEN = [
+      "Garment",
+      "Design",
+      "References",
+      "Fabric",
+      "Fit",
+      "Budget",
+      "Review",
+    ] as const;
+    renderShell({ steps: SEVEN, step: 3 });
+    // 7 list items, header caption reflects the 7-step flow.
+    expect(screen.getAllByRole("listitem")).toHaveLength(7);
+    expect(screen.getByText(/step 4 of 7/i)).toBeInTheDocument();
+  });
 });

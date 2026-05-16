@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
-import { Home, Search, MessageSquare, User, ClipboardList } from "lucide-react";
+import {
+  Home,
+  Search,
+  MessageSquare,
+  User,
+  ClipboardList,
+  PencilRuler,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -13,6 +20,7 @@ const clientNavItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/search", label: "Search", icon: Search },
   { href: "/orders", label: "Orders", icon: ClipboardList },
+  { href: "/drafts", label: "Drafts", icon: PencilRuler },
   { href: "/messages", label: "Messages", icon: MessageSquare },
   { href: "/profile", label: "Profile", icon: User },
 ];
@@ -24,6 +32,7 @@ const clientNavItems = [
 const designerNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/orders", label: "Orders", icon: ClipboardList },
+  { href: "/drafts", label: "Drafts", icon: PencilRuler },
   { href: "/messages", label: "Messages", icon: MessageSquare },
   { href: "/profile", label: "Profile", icon: User },
 ];
