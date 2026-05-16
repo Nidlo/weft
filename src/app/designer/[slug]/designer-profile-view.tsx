@@ -73,20 +73,14 @@ export function DesignerProfileView({ designer }: Props) {
   const hasWorkshop = !!(profile?.workshopName || profile?.workshopAddress);
 
   // Fire-and-forget profile view tracking. Silent-swallow is intentional:
-  // a failed view-count increment must not surface as an error to the
-  // viewer (the page renders fine without it). Logged at debug so a
-  // sudden flood of failures still shows up in the console / Sentry
-  // breadcrumb stream during incident triage. (Q-02)
+  // a failed view-count increment is cosmetic and must not surface to the
+  // viewer (the page renders fine without it). (Q-02)
   const [trackView] = useMutation(TRACK_PROFILE_VIEW);
   const tracked = useRef(false);
   useEffect(() => {
     if (profile?.slug && !tracked.current) {
       tracked.current = true;
-      trackView({ variables: { slug: profile.slug } }).catch((err) => {
-        if (process.env.NODE_ENV !== "production") {
-          console.debug("[trackView] swallowed failure:", err);
-        }
-      });
+      trackView({ variables: { slug: profile.slug } }).catch(() => {});
     }
   }, [profile?.slug, trackView]);
 
