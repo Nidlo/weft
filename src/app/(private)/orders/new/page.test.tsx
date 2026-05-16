@@ -66,6 +66,25 @@ vi.mock("@/components/orders/voice-input", () => ({
   VoiceInput: () => <div data-testid="voice-input" />,
 }));
 
+// CountryPhoneInput runs its own GET_COUNTRIES query (covered by its own
+// test). Stub it here so the page test doesn't need an Apollo provider.
+vi.mock("@/components/shared/country-phone-input", () => ({
+  CountryPhoneInput: ({
+    value,
+    onChange,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+  }) => (
+    <input
+      data-testid="country-phone-input"
+      aria-label="Client phone"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+}));
+
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
