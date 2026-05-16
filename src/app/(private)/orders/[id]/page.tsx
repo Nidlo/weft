@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { ThreadDivider } from "@/components/ui/thread-divider";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -94,6 +95,10 @@ export default function OrderDetailPage({
   const [updateNotes, setUpdateNotes] = useState("");
   const [showUpdate, setShowUpdate] = useState(false);
   const [showReviewPrompt, setShowReviewPrompt] = useState(false);
+  const [reviewLightboxIndex, setReviewLightboxIndex] = useState<number | null>(
+    null
+  );
+  const [refLightboxIndex, setRefLightboxIndex] = useState<number | null>(null);
   // Soft payment gate: the BE returns DEPOSIT_NOT_PAID when the designer
   // tries to advance to fabric_ready without a recorded deposit. We catch
   // it here and surface the dialog (instead of a red error toast); on
@@ -612,26 +617,33 @@ export default function OrderDetailPage({
                 </p>
               )}
               {order.review.photos && order.review.photos.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto">
-                  {order.review.photos.map((photo, i) => (
-                    <a
-                      key={i}
-                      href={photo.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Open review photo ${i + 1} full size`}
-                      className="ring-border relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-1"
-                    >
-                      <Image
-                        src={photo.thumbnail_url}
-                        alt={`Review photo ${i + 1}`}
-                        fill
-                        sizes="64px"
-                        className="object-cover"
-                      />
-                    </a>
-                  ))}
-                </div>
+                <>
+                  <div className="flex gap-2 overflow-x-auto">
+                    {order.review.photos.map((photo, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setReviewLightboxIndex(i)}
+                        aria-label={`View review photo ${i + 1}`}
+                        className="ring-border focus-visible:ring-ring relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-1 focus:outline-none focus-visible:ring-2"
+                      >
+                        <Image
+                          src={photo.thumbnail_url}
+                          alt={`Review photo ${i + 1}`}
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <ImageLightbox
+                    images={order.review.photos.map((p) => ({ url: p.url }))}
+                    index={reviewLightboxIndex}
+                    onIndexChange={setReviewLightboxIndex}
+                    onClose={() => setReviewLightboxIndex(null)}
+                  />
+                </>
               )}
               {order.review.designerResponse && (
                 <div className="border-border/60 bg-card/40 rounded-xl border p-3">
@@ -879,13 +891,12 @@ export default function OrderDetailPage({
                   </p>
                   <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5">
                     {bpReferenceImages.map((url, i) => (
-                      <a
+                      <button
                         key={i}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Open reference image ${i + 1} full size`}
-                        className="group ring-border relative aspect-square overflow-hidden rounded-xl ring-1"
+                        type="button"
+                        onClick={() => setRefLightboxIndex(i)}
+                        aria-label={`View reference image ${i + 1}`}
+                        className="group ring-border focus-visible:ring-ring relative aspect-square overflow-hidden rounded-xl ring-1 focus:outline-none focus-visible:ring-2"
                       >
                         <Image
                           src={url}
@@ -894,9 +905,15 @@ export default function OrderDetailPage({
                           sizes="(max-width: 640px) 33vw, 200px"
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
-                      </a>
+                      </button>
                     ))}
                   </div>
+                  <ImageLightbox
+                    images={bpReferenceImages.map((url) => ({ url }))}
+                    index={refLightboxIndex}
+                    onIndexChange={setRefLightboxIndex}
+                    onClose={() => setRefLightboxIndex(null)}
+                  />
                 </div>
               )}
 

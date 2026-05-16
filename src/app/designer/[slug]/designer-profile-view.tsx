@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
 import {
-  ArrowLeft,
   ArrowRight,
   CheckCircle2,
   Clock,
@@ -22,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { ThreadDivider } from "@/components/ui/thread-divider";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { ReviewsSection } from "@/components/reviews/reviews-section";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { parseStringList } from "@/lib/utils/parse-list";
@@ -343,70 +342,15 @@ export function DesignerProfileView({ designer }: Props) {
         />
       </div>
 
-      {/* Lightbox - preserves keyboard cycle, premium chrome */}
-      <Dialog
-        open={lightboxIndex !== null}
-        onOpenChange={() => setLightboxIndex(null)}
-      >
-        <DialogContent className="max-w-4xl overflow-hidden p-0">
-          {lightboxIndex !== null && images[lightboxIndex] && (
-            <div className="bg-card">
-              <Image
-                src={images[lightboxIndex].url}
-                alt={
-                  images[lightboxIndex].caption ||
-                  `Portfolio image ${lightboxIndex + 1}`
-                }
-                width={1200}
-                height={1200}
-                sizes="(max-width: 768px) 100vw, 768px"
-                className="h-auto w-full"
-              />
-              {images[lightboxIndex].caption && (
-                <p className="border-border/60 text-foreground/80 border-t px-5 pt-4 text-sm">
-                  {images[lightboxIndex].caption}
-                </p>
-              )}
-              <div className="border-border/60 flex items-center justify-between gap-3 border-t p-4">
-                <Button
-                  type="button"
-                  variant="luxe-outline"
-                  size="sm"
-                  onClick={() =>
-                    setLightboxIndex(
-                      lightboxIndex > 0 ? lightboxIndex - 1 : images.length - 1
-                    )
-                  }
-                  aria-label="Previous portfolio image"
-                  className="gap-1"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-                  Previous
-                </Button>
-                <span className="text-muted-foreground text-xs font-medium tabular-nums">
-                  <span className="text-foreground">{lightboxIndex + 1}</span> /{" "}
-                  {images.length}
-                </span>
-                <Button
-                  type="button"
-                  variant="luxe-outline"
-                  size="sm"
-                  onClick={() =>
-                    setLightboxIndex(
-                      lightboxIndex < images.length - 1 ? lightboxIndex + 1 : 0
-                    )
-                  }
-                  aria-label="Next portfolio image"
-                  className="gap-1"
-                >
-                  Next
-                  <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ImageLightbox
+        images={images.map((img) => ({
+          url: img.url,
+          caption: img.caption,
+        }))}
+        index={lightboxIndex}
+        onIndexChange={setLightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+      />
     </AppShell>
   );
 }
