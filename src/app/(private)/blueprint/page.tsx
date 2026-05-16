@@ -204,6 +204,12 @@ function BlueprintWizard() {
         onBack={handleBack}
         onNext={handleNext}
         onComplete={handleSubmit}
+        // Tapping a completed node jumps back to it (review-and-revise
+        // is common when building a blueprint). Guarded to earlier steps
+        // only - forward skipping stays blocked by canProceed/Next.
+        onStepSelect={(i) => {
+          if (i < step) setStep(i);
+        }}
         canProceed={canProceed()}
         saving={submitting}
         completeLabel="Confirm & submit"
