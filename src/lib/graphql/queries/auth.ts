@@ -13,6 +13,13 @@ export const ME_QUERY = gql`
       email
       avatarUrl
       city
+      region
+      countryCode
+      locationLat
+      locationLng
+      addressLine
+      postalCode
+      formattedAddress
       isVerified
       isDesigner
       isOnboarded

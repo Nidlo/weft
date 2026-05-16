@@ -1,0 +1,8 @@
+# Build output
+.next/
+out/
+build/
+
+# Vendored third-party assets served verbatim (MediaPipe emscripten glue
+# + wasm). Never reformat these.
+public/mediapipe/

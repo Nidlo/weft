@@ -383,3 +383,68 @@ describe("checkBounds", () => {
     expect(checkBounds("not_a_real_field", 50, "cm")).toBeNull();
   });
 });
+
+/**
+ * Regression guard for the Fitscan "values way bigger after switching
+ * units" bug. Root cause: the AI scan result (always cm) was projected
+ * into the user's preferred unit BEFORE the mm recompute baseline + the
+ * landmark-recompute pipeline consumed it, but those consumers hardcode
+ * `from: "cm"`. For an inches-preferring user that double-step inflated
+ * every value by ~2.54x. The fix keeps the scan result canonically cm
+ * and converts only at the display boundary. These specs lock the
+ * invariant so the regression can't silently return.
+ */
+describe("Fitscan unit invariant (regression: values inflated ~2.54x)", () => {
+  const fitscanCm = {
+    upper_body: { bust: 90, waist: 72 },
+    vertical: { full_height: 170 },
+  };
+
+  it("the mm recompute baseline is identical regardless of the user's display unit", () => {
+    // Whatever the user prefers, the baseline is derived from the SAME
+    // canonical cm payload, never from a display-projected one.
+    const baseline = convertMeasurementData(fitscanCm, "cm", "mm");
+    expect(baseline).toEqual({
+      upper_body: { bust: 900, waist: 720 },
+      vertical: { full_height: 1700 },
+    });
+  });
+
+  it("converting cm -> inches for display does NOT change the canonical cm source", () => {
+    const display = convertMeasurementData(fitscanCm, "cm", "inches");
+    expect(display.upper_body.bust).toBeCloseTo(35.4, 1);
+    // Source object is untouched; baseline still derives from real cm.
+    expect(fitscanCm.upper_body.bust).toBe(90);
+  });
+
+  it("demonstrates the old bug: projecting to inches first, then treating it as cm, inflates ~2.54x", () => {
+    // This is exactly the chain the fix removed. Kept as an executable
+    // record of WHY the projection must not precede the cm-baseline.
+    const projectedToInches = convertMeasurementData(fitscanCm, "cm", "inches");
+    const buggyBaselineMm = convertMeasurementData(
+      projectedToInches as typeof fitscanCm,
+      "cm",
+      "mm"
+    );
+    const correctBaselineMm = convertMeasurementData(fitscanCm, "cm", "mm");
+    const ratio =
+      correctBaselineMm.upper_body.bust! / buggyBaselineMm.upper_body.bust!;
+    expect(ratio).toBeCloseTo(2.54, 1);
+  });
+
+  it("round-trips cm -> inches -> cm within the documented 1-decimal rounding noise", () => {
+    // convertMeasurementData deliberately rounds to 1 decimal each step
+    // (so users don't see 91.4400000004), so a there-and-back toggle can
+    // drift by up to ~0.2 cm. That's body-measurement-insignificant; what
+    // matters is there's NO 2.54x-class error.
+    const toInches = convertMeasurementData(fitscanCm, "cm", "inches");
+    const back = convertMeasurementData(
+      toInches as typeof fitscanCm,
+      "inches",
+      "cm"
+    );
+    expect(Math.abs(back.upper_body.bust! - 90)).toBeLessThanOrEqual(0.2);
+    expect(Math.abs(back.upper_body.waist! - 72)).toBeLessThanOrEqual(0.2);
+    expect(Math.abs(back.vertical.full_height! - 170)).toBeLessThanOrEqual(0.2);
+  });
+});

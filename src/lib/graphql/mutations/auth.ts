@@ -27,6 +27,7 @@ export const VERIFY_OTP = gql`
         isVerified
         isDesigner
         isOnboarded
+        tourProgress
       }
       pendingRestore {
         deletedAt
@@ -55,6 +56,7 @@ export const SOCIAL_LOGIN = gql`
         isVerified
         isDesigner
         isOnboarded
+        tourProgress
       }
     }
   }

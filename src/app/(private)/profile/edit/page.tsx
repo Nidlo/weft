@@ -41,11 +41,12 @@ import {
   ADD_PORTFOLIO_IMAGE,
   REMOVE_PORTFOLIO_IMAGE,
 } from "@/lib/graphql/mutations/profile";
-import { GET_DESIGNER } from "@/lib/graphql/queries/designer";
+import { MY_DESIGNER_PROFILE } from "@/lib/graphql/queries/designer";
 import { ME_QUERY } from "@/lib/graphql/queries/auth";
 import type {
   AddPortfolioImageData,
-  DesignerData,
+  DesignerPublicVisibility,
+  MyDesignerProfileData,
   PortfolioImage,
   RemovePortfolioImageData,
 } from "@/types/graphql";
@@ -61,7 +62,66 @@ interface DesignerFormState {
   isAcceptingOrders: boolean;
   workshopName: string;
   workshopLocation: LocationData | null;
+  visibility: DesignerPublicVisibility;
 }
+
+// Privacy-first defaults, must mirror DesignerProfile::
+// DEFAULT_PUBLIC_VISIBILITY on the backend. Used until the API hands us
+// the designer's saved map.
+const DEFAULT_VISIBILITY: DesignerPublicVisibility = {
+  bio: true,
+  pricing: true,
+  portfolio: true,
+  experience: true,
+  stats: true,
+  city: true,
+  workshop: false,
+};
+
+// The toggle rows, in display order. Copy is client-facing and frames
+// each choice around what a prospective client sees.
+const VISIBILITY_ROWS: {
+  key: keyof DesignerPublicVisibility;
+  label: string;
+  description: string;
+}[] = [
+  {
+    key: "bio",
+    label: "About / bio",
+    description: "Your story and what makes your work yours.",
+  },
+  {
+    key: "pricing",
+    label: "Price range",
+    description: "The typical price band clients can expect.",
+  },
+  {
+    key: "portfolio",
+    label: "Portfolio",
+    description: "Your gallery of recent work.",
+  },
+  {
+    key: "experience",
+    label: "Years of experience",
+    description: "How long you've been doing this.",
+  },
+  {
+    key: "stats",
+    label: "Track record",
+    description: "Orders completed, on-time rate, response time.",
+  },
+  {
+    key: "city",
+    label: "City",
+    description: "Your general city. Never your exact address.",
+  },
+  {
+    key: "workshop",
+    label: "Studio name & address",
+    description:
+      "Your shop's name, street address, and map pin. Off by default. Only turn on if you're happy for anyone to see where your studio is.",
+  },
+];
 
 const emptyDesigner: DesignerFormState = {
   displayName: "",
@@ -72,6 +132,7 @@ const emptyDesigner: DesignerFormState = {
   isAcceptingOrders: true,
   workshopName: "",
   workshopLocation: null,
+  visibility: DEFAULT_VISIBILITY,
 };
 
 /**
@@ -83,6 +144,23 @@ const emptyDesigner: DesignerFormState = {
  */
 const isFreshLocationPick = (loc: LocationData | null): boolean =>
   !!loc && (loc.lat !== 0 || loc.lng !== 0);
+
+// Now that the personal LocationPicker is seeded with the saved pin (not
+// 0/0), "has a pin" no longer means "user just moved it". Dirty = the
+// in-memory pin differs from the saved one. Epsilon because lat/lng
+// round-trip through decimal(10,8)/(11,8) columns.
+const COORD_EPSILON = 1e-6;
+const locationPinMoved = (
+  loc: LocationData | null,
+  savedLat: number | null | undefined,
+  savedLng: number | null | undefined
+): boolean => {
+  if (!loc || (loc.lat === 0 && loc.lng === 0)) return false;
+  return (
+    Math.abs(loc.lat - (savedLat ?? 0)) > COORD_EPSILON ||
+    Math.abs(loc.lng - (savedLng ?? 0)) > COORD_EPSILON
+  );
+};
 
 export default function ProfileEditPage() {
   const { user, isReady } = useAuthGuard({ requireOnboarded: true });
@@ -125,14 +203,30 @@ export default function ProfileEditPage() {
   const [studioJustSavedAt, setStudioJustSavedAt] = useState<number | null>(
     null
   );
+  const [visibilityJustSavedAt, setVisibilityJustSavedAt] = useState<
+    number | null
+  >(null);
 
-  const designerSlug = user?.designerProfile?.slug ?? null;
-  const { data: designerData, loading: designerLoading } =
-    useQuery<DesignerData>(GET_DESIGNER, {
-      variables: { slug: designerSlug ?? "" },
-      skip: !user?.isDesigner || !designerSlug,
-      fetchPolicy: "cache-and-network",
-    });
+  // Hydrate the edit form from the OWNER's own record, never the public
+  // designer(slug:) path. The old slug-keyed query silently blanked the
+  // entire form (designer fields, studio, portfolio) and hid the
+  // view-as-client link whenever the slug was null/stale (fresh
+  // designer, stale persisted authStore, half-deployed backend). The
+  // `me` resolver returns the full unscrubbed profile for the owner, so
+  // this works for any authenticated designer regardless of slug.
+  const {
+    data: designerData,
+    loading: designerLoading,
+    error: designerError,
+    refetch: refetchDesigner,
+  } = useQuery<MyDesignerProfileData>(MY_DESIGNER_PROFILE, {
+    skip: !user?.isDesigner,
+    fetchPolicy: "cache-and-network",
+  });
+  const ownProfile = designerData?.me?.designerProfile ?? null;
+  // Prefer the freshly-fetched slug; fall back to the persisted authStore
+  // so the view-as-client link still resolves on the very first paint.
+  const publicSlug = ownProfile?.slug ?? user?.designerProfile?.slug ?? null;
   const { specializations: allSpecs, loading: specsLoading } =
     useSpecializations();
 
@@ -142,23 +236,9 @@ export default function ProfileEditPage() {
   const [updateProfile, { loading: savingProfile }] = useMutation<{
     updateProfile: { id: string; slug: string | null };
   }>(UPDATE_PROFILE, {
-    // Re-pull the designer record too - without this, the user clicks
-    // Save, the mutation returns the updated DesignerProfile, but the
-    // page's `designerData` (driven by GET_DESIGNER) still shows the old
-    // values until the next cache eviction.
-    refetchQueries: ({ data }) => {
-      const queries: Array<{ query: typeof ME_QUERY; variables?: object }> = [
-        { query: ME_QUERY },
-      ];
-      const slug = data?.updateProfile?.slug ?? designerSlug;
-      if (slug) {
-        queries.push({
-          query: GET_DESIGNER as unknown as typeof ME_QUERY,
-          variables: { slug },
-        });
-      }
-      return queries;
-    },
+    // Re-pull ME (header/authStore) AND the owner profile so the form
+    // reflects the saved values without a manual reload. No slug needed.
+    refetchQueries: [{ query: ME_QUERY }, { query: MY_DESIGNER_PROFILE }],
   });
   const [updateAvatar, { loading: uploadingAvatar }] = useMutation<{
     updateAvatar: { id: string; avatarUrl: string | null };
@@ -166,28 +246,17 @@ export default function ProfileEditPage() {
     refetchQueries: [{ query: ME_QUERY }],
   });
 
-  // Refetch GET_DESIGNER only when we have a slug - firing it with an empty
-  // string makes the backend reject the request ("$slug must not be null")
-  // and the mutation's caller sees a confusing error even though the upload
-  // / remove itself succeeded. A brand-new designer with no displayName yet
-  // doesn't have a slug; the addPortfolioImage / removePortfolioImage
-  // response already returns the updated portfolioImages, so the cache
-  // reflects the change either way.
+  // Portfolio mutations refetch the owner profile (no slug → no empty-slug
+  // rejection, and it can't blank the form). The mutation response also
+  // returns the updated portfolioImages so the cache is consistent either
+  // way.
   const [addPortfolioImage] = useMutation<AddPortfolioImageData>(
     ADD_PORTFOLIO_IMAGE,
-    {
-      refetchQueries: () =>
-        designerSlug
-          ? [{ query: GET_DESIGNER, variables: { slug: designerSlug } }]
-          : [],
-    }
+    { refetchQueries: [{ query: MY_DESIGNER_PROFILE }] }
   );
   const [removePortfolioImage, { loading: removingImage }] =
     useMutation<RemovePortfolioImageData>(REMOVE_PORTFOLIO_IMAGE, {
-      refetchQueries: () =>
-        designerSlug
-          ? [{ query: GET_DESIGNER, variables: { slug: designerSlug } }]
-          : [],
+      refetchQueries: [{ query: MY_DESIGNER_PROFILE }],
     });
 
   // Portfolio upload state - mirrors StepPortfolio pattern
@@ -208,18 +277,29 @@ export default function ProfileEditPage() {
     setLastName(user.lastName ?? "");
     setOtherNames(user.otherNames ?? "");
     setEmail(user.email ?? "");
+    // Restore the full saved location, not just the city. The backend
+    // persists lat/lng + the structured address; the old code rebuilt
+    // LocationData from `user.city` alone, so the map pin and street
+    // address vanished on every reopen and the user had to re-pick.
+    // Mirrors the workshop-location hydration below: a non-zero pin or
+    // any stored address text counts as a real saved location.
+    const hasStoredLocation =
+      !!user.locationLat ||
+      !!user.locationLng ||
+      !!user.formattedAddress ||
+      !!user.city;
     setLocation(
-      user.city
+      hasStoredLocation
         ? {
-            lat: 0,
-            lng: 0,
-            formattedAddress: user.city,
-            city: user.city,
-            region: null,
+            lat: user.locationLat ?? 0,
+            lng: user.locationLng ?? 0,
+            formattedAddress: user.formattedAddress ?? user.city ?? "",
+            city: user.city ?? null,
+            region: user.region ?? null,
             country: null,
-            countryCode: null,
-            postalCode: null,
-            addressLine: null,
+            countryCode: user.countryCode ?? null,
+            postalCode: user.postalCode ?? null,
+            addressLine: user.addressLine ?? null,
           }
         : null
     );
@@ -228,8 +308,8 @@ export default function ProfileEditPage() {
   // Hydrate designer fields the same way as `seededFromUserId` above -
   // setState during render (guarded by a one-shot flag) is the React 19
   // idiom for deriving state from props/queries without an effect.
-  if (!designerHydrated && designerData?.designer?.designerProfile) {
-    const profile = designerData.designer.designerProfile;
+  if (!designerHydrated && ownProfile) {
+    const profile = ownProfile;
     const hasStoredWorkshop =
       !!profile.workshopAddress ||
       profile.workshopLat !== null ||
@@ -261,6 +341,12 @@ export default function ProfileEditPage() {
             addressLine: null,
           }
         : null,
+      // Layer the saved map over the privacy-first defaults so a key the
+      // API doesn't return yet still has a sane value.
+      visibility: {
+        ...DEFAULT_VISIBILITY,
+        ...(profile.publicVisibility ?? {}),
+      },
     };
     setDesigner(seed);
     setDesignerSnapshot(seed);
@@ -278,9 +364,10 @@ export default function ProfileEditPage() {
       (otherNames.trim() || null) !== (user.otherNames ?? null) ||
       (email.trim() || null) !== (user.email ?? null) ||
       (location?.city ?? null) !== (user.city ?? null) ||
-      // Treat a fresh map pick (non-zero lat/lng) as dirty even if city
-      // happens to be the same - region/lat/lng/country may have changed.
-      !!(location && location.lat !== 0 && location.lng !== 0));
+      // A genuinely moved pin counts as dirty even if the city label is
+      // unchanged (a nearby point can share a city but differ in
+      // region/address/coords).
+      locationPinMoved(location, user.locationLat, user.locationLng));
 
   const designerProfileDirty =
     designerHydrated &&
@@ -305,8 +392,15 @@ export default function ProfileEditPage() {
         (designerSnapshot.workshopLocation?.formattedAddress ?? null) ||
       isFreshLocationPick(designer.workshopLocation));
 
+  const visibilityDirty =
+    designerHydrated &&
+    VISIBILITY_ROWS.some(
+      ({ key }) => designer.visibility[key] !== designerSnapshot.visibility[key]
+    );
+
   // Used only by the autosave-draft hook so refreshes don't lose typed work.
-  const anyDirty = personalInfoDirty || designerProfileDirty || studioDirty;
+  const anyDirty =
+    personalInfoDirty || designerProfileDirty || studioDirty || visibilityDirty;
 
   // "Saved · just now" affordances per section. Each section shows its own
   // confirmation for ~5s after a successful save; re-editing flips the
@@ -327,6 +421,10 @@ export default function ProfileEditPage() {
     !studioDirty &&
     studioJustSavedAt !== null &&
     Date.now() - studioJustSavedAt < SAVED_NOTICE_MS;
+  const visibilityRecentlySaved =
+    !visibilityDirty &&
+    visibilityJustSavedAt !== null &&
+    Date.now() - visibilityJustSavedAt < SAVED_NOTICE_MS;
 
   // Force a re-render once each "just saved" window expires so the affordance
   // disappears. Cheap setTimeouts - no polling loop.
@@ -373,6 +471,17 @@ export default function ProfileEditPage() {
     );
     return () => window.clearTimeout(id);
   }, [studioJustSavedAt]);
+
+  useEffect(() => {
+    if (visibilityJustSavedAt === null) return;
+    const elapsed = Date.now() - visibilityJustSavedAt;
+    if (elapsed >= SAVED_NOTICE_MS) return;
+    const id = window.setTimeout(
+      () => setVisibilityJustSavedAt(null),
+      SAVED_NOTICE_MS - elapsed
+    );
+    return () => window.clearTimeout(id);
+  }, [visibilityJustSavedAt]);
 
   // Autosave draft so a refresh / session expiry doesn't lose work
   // (per docs/journeys/05-failure-modes.md §1.1).
@@ -436,8 +545,7 @@ export default function ProfileEditPage() {
   const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-  const currentImages: PortfolioImage[] =
-    designerData?.designer?.designerProfile?.portfolioImages ?? [];
+  const currentImages: PortfolioImage[] = ownProfile?.portfolioImages ?? [];
 
   const uploadPortfolioFile = async (
     file: File
@@ -575,7 +683,26 @@ export default function ProfileEditPage() {
         lastName: lastName.trim() || null,
         otherNames: otherNames.trim() || null,
         email: email.trim() || null,
+        // Mirror the full saved location into the store, not just city.
+        // Otherwise a same-session revisit to /profile/edit re-hydrates
+        // from stale region/pin/address - the exact "saved it but the
+        // map is blank again" complaint, just one navigation later.
         city: location?.city ?? user.city,
+        region: location ? location.region : user.region,
+        countryCode: location ? location.countryCode : user.countryCode,
+        postalCode: location ? location.postalCode : user.postalCode,
+        addressLine: location ? location.addressLine : user.addressLine,
+        formattedAddress: location
+          ? location.formattedAddress
+          : user.formattedAddress,
+        locationLat:
+          location && isFreshLocationPick(location)
+            ? location.lat
+            : user.locationLat,
+        locationLng:
+          location && isFreshLocationPick(location)
+            ? location.lng
+            : user.locationLng,
       });
       // Clear only the personal-info portion of the autosave draft by
       // re-running the autosave with current state once dirty has cleared.
@@ -672,6 +799,28 @@ export default function ProfileEditPage() {
     }
   };
 
+  /** Save the public-visibility toggles (publicVisibility map only). */
+  const handleSaveVisibility = async () => {
+    if (!user || !user.isDesigner || !visibilityDirty) return;
+    try {
+      await updateProfile({
+        variables: { input: { publicVisibility: designer.visibility } },
+      });
+      setDesignerSnapshot((prev) => ({
+        ...prev,
+        visibility: designer.visibility,
+      }));
+      clearDraft();
+      setVisibilityJustSavedAt(Date.now());
+      toast.success("Visibility settings saved");
+    } catch (err) {
+      if (typeof console !== "undefined") {
+        console.error("Save visibility failed:", err);
+      }
+      toast.error("Couldn't save your visibility settings. Try again.");
+    }
+  };
+
   if (!isReady || !user) {
     return (
       <AppShell>
@@ -698,7 +847,7 @@ export default function ProfileEditPage() {
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to profile
           </Link>
-          <header className="mt-4">
+          <header data-tour-id="profileEdit.header" className="mt-4">
             <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Account
             </p>
@@ -710,6 +859,7 @@ export default function ProfileEditPage() {
 
         {/* Avatar */}
         <GlassCard
+          data-tour-id="profileEdit.avatar"
           variant="solid"
           className="flex flex-col items-center gap-4 p-6"
         >
@@ -768,7 +918,7 @@ export default function ProfileEditPage() {
         </GlassCard>
 
         {/* Account basics */}
-        <section>
+        <section data-tour-id="profileEdit.identity">
           <header className="mb-4">
             <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
               Identity
@@ -863,6 +1013,44 @@ export default function ProfileEditPage() {
             />
           </GlassCard>
         </section>
+
+        {/* Owner-profile load failed (network / half-deployed backend).
+            Surface a retry instead of letting every designer section
+            render blank - a blank form reads as catastrophic data loss
+            to the designer when their data is actually safe server-side. */}
+        {user.isDesigner && designerError && !designerHydrated && (
+          <GlassCard
+            variant="solid"
+            className="border-status-error/30 space-y-3 p-5 sm:p-6"
+          >
+            <div className="flex items-start gap-3">
+              <AlertCircle
+                className="text-status-error mt-0.5 h-5 w-5 shrink-0"
+                aria-hidden
+              />
+              <div>
+                <p className="text-display text-base font-semibold tracking-tight">
+                  Couldn&apos;t load your designer profile
+                </p>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Your saved details are safe - this is just a loading hiccup.
+                  Try again.
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="luxe-outline"
+              size="sm"
+              onClick={() => void refetchDesigner()}
+              loading={designerLoading}
+              loadingLabel="Retrying..."
+              className="gap-1.5"
+            >
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+              Retry
+            </Button>
+          </GlassCard>
+        )}
 
         {/* Designer profile */}
         {user.isDesigner && (
@@ -1134,6 +1322,77 @@ export default function ProfileEditPage() {
           </section>
         )}
 
+        {/* What clients can see - per-section public-visibility toggles.
+            Backend enforces these for non-owners; this is the control
+            surface. Privacy-first: studio name/address is off until the
+            designer opts in. */}
+        {user.isDesigner && (
+          <section>
+            <header className="mb-4">
+              <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
+                Privacy
+              </p>
+              <h2 className="text-display mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
+                What clients can see
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                You decide what shows on your public profile. Your phone and
+                email are never shown publicly. Turn anything off and visitors
+                simply won&apos;t see that section.
+              </p>
+            </header>
+            <GlassCard variant="solid" className="space-y-1 p-5 sm:p-6">
+              {designerLoading && !designerHydrated ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ) : (
+                <>
+                  {VISIBILITY_ROWS.map(({ key, label, description }) => (
+                    <div
+                      key={key}
+                      className="border-border/60 flex items-start justify-between gap-4 border-b py-3.5 last:border-b-0"
+                    >
+                      <div className="min-w-0">
+                        <Label
+                          htmlFor={`vis-${key}`}
+                          className="text-sm font-medium"
+                        >
+                          {label}
+                        </Label>
+                        <p className="text-muted-foreground mt-0.5 text-xs">
+                          {description}
+                        </p>
+                      </div>
+                      <Switch
+                        id={`vis-${key}`}
+                        checked={designer.visibility[key]}
+                        onCheckedChange={(checked) =>
+                          setDesigner((d) => ({
+                            ...d,
+                            visibility: { ...d.visibility, [key]: checked },
+                          }))
+                        }
+                        aria-label={`Show ${label} on your public profile`}
+                      />
+                    </div>
+                  ))}
+
+                  <SectionSaveBar
+                    label="Save visibility"
+                    dirty={visibilityDirty}
+                    saving={savingProfile && visibilityDirty}
+                    recentlySaved={visibilityRecentlySaved}
+                    onSave={handleSaveVisibility}
+                  />
+                </>
+              )}
+            </GlassCard>
+          </section>
+        )}
+
         {/* Portfolio */}
         {user.isDesigner && (
           <section>
@@ -1320,10 +1579,8 @@ export default function ProfileEditPage() {
             </header>
             <GlassCard variant="solid" className="space-y-4 p-5 sm:p-6">
               {(() => {
-                const score =
-                  designerData?.designer?.designerProfile
-                    ?.profileCompleteness ?? 0;
-                const profile = designerData?.designer?.designerProfile;
+                const score = ownProfile?.profileCompleteness ?? 0;
+                const profile = ownProfile;
                 const u = user;
                 return (
                   <>
@@ -1411,9 +1668,9 @@ export default function ProfileEditPage() {
         {/* No global Save button: each section above commits its own
             changes. This is just the exit ramp once the user is done. */}
         <div className="flex flex-col items-center gap-3 pt-2 pb-6">
-          {user?.isDesigner && user?.designerProfile?.slug && (
+          {user?.isDesigner && publicSlug && (
             <Link
-              href={`/designer/${user.designerProfile.slug}`}
+              href={`/designer/${publicSlug}`}
               className="text-copper text-sm font-medium underline-offset-4 hover:underline"
             >
               View my public profile →

@@ -67,7 +67,6 @@ import {
   getStatusConfig,
   PRODUCTION_STAGES,
 } from "@/lib/utils/order";
-import { TourAutoFire } from "@/lib/tour/auto-fire";
 import { cn } from "@/lib/utils";
 
 export default function OrderDetailPage({
@@ -125,7 +124,10 @@ export default function OrderDetailPage({
           variant="solid"
           className="mx-auto max-w-md py-12 text-center"
         >
-          <h2 className="text-display text-2xl font-semibold tracking-tight">
+          {/* Match the app's responsive heading pair - every other
+              heading on this page already conforms to the canonical
+              scale, this lone fallback was a flat non-responsive size. */}
+          <h2 className="text-display text-xl font-semibold tracking-tight sm:text-2xl">
             Order not found.
           </h2>
           <p className="text-muted-foreground mt-2 text-sm">
@@ -238,7 +240,6 @@ export default function OrderDetailPage({
 
   return (
     <AppShell>
-      <TourAutoFire tour="orderDetail" />
       <div className="space-y-8">
         <Link
           href="/orders"
@@ -470,7 +471,7 @@ export default function OrderDetailPage({
                         <div className="mt-3 flex gap-2">
                           <Button
                             variant="luxe"
-                            size="sm"
+                            size="lg"
                             onClick={handleUpdateStatus}
                             loading={updating}
                             loadingLabel="Updating..."
@@ -479,7 +480,7 @@ export default function OrderDetailPage({
                           </Button>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="lg"
                             onClick={() => setShowUpdate(false)}
                           >
                             Cancel
@@ -574,7 +575,7 @@ export default function OrderDetailPage({
                     <div className="mt-3 flex gap-2">
                       <Button
                         variant="destructive"
-                        size="sm"
+                        size="lg"
                         onClick={handleCancel}
                         disabled={
                           cancelReasonCategory === "other" &&
@@ -587,7 +588,7 @@ export default function OrderDetailPage({
                       </Button>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="lg"
                         onClick={() => setShowCancel(false)}
                       >
                         Never mind

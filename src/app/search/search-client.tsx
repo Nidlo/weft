@@ -60,8 +60,13 @@ export function SearchClient() {
     minRating: minRating ? Number(minRating) : undefined,
     acceptingOnly: acceptingOnly || undefined,
     sortBy,
-    lat: sortBy === "nearest" && lat ? lat : undefined,
-    lng: sortBy === "nearest" && lng ? lng : undefined,
+    // Send coordinates whenever we have them, not only in "nearest"
+    // sort. This is what makes the km label show on every card and lets
+    // the "recommended" sort factor in proximity. Designers far away are
+    // still returned (no radius cutoff) - distance only ranks, never
+    // filters.
+    lat: lat ?? undefined,
+    lng: lng ?? undefined,
   };
 
   const { designers, loading, error, hasMore, loadMore } =

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { TourRouter } from "@/lib/tour/tour-router";
+
 /**
  * Layout for every authenticated, account-scoped surface. Sets
  * `robots: noindex, nofollow` so that even if a crawler ignores
@@ -26,5 +28,10 @@ export default function PrivateLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <TourRouter />
+      {children}
+    </>
+  );
 }

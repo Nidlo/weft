@@ -10,6 +10,13 @@ export const UPDATE_MY_INFO = gql`
       fullName
       email
       city
+      region
+      countryCode
+      locationLat
+      locationLng
+      addressLine
+      postalCode
+      formattedAddress
       avatarUrl
     }
   }
@@ -32,6 +39,7 @@ export const UPDATE_PROFILE = gql`
       workshopLat
       workshopLng
       profileCompleteness
+      publicVisibility
     }
   }
 `;

@@ -28,16 +28,23 @@ interface OnboardingShellProps {
   completeLabel?: string;
   /**
    * Optional prefix for tour anchor data attributes on the header,
-   * stepper, and continue button (e.g. "newOrder" → "newOrder.header").
+   * stepper, and continue button (e.g. "newOrder" -> "newOrder.header").
    * Wizards that aren't tour targets just omit this.
    */
   tourPrefix?: string;
+  /**
+   * Optional: lets the user tap an already-COMPLETED step node to jump
+   * back to it. Upcoming steps stay inert (linear flow - no skipping
+   * ahead). Omit entirely (onboarding wizards do) and every node is
+   * non-interactive, preserving the original behaviour.
+   */
+  onStepSelect?: (index: number) => void;
 }
 
 /**
  * Shared chrome for both onboarding wizards (designer + client).
  *
- *  - Editorial header (eyebrow → display title → live step caption)
+ *  - Editorial header (eyebrow -> display title -> live step caption)
  *  - Animated step indicator: numbered chips with a copper thread that
  *    "stitches" forward as the user advances. Done steps show a check.
  *  - AnimatePresence-wrapped content slot so steps slide in/out cleanly.
@@ -60,6 +67,7 @@ export function OnboardingShell({
   saving = false,
   completeLabel = "Complete setup",
   tourPrefix,
+  onStepSelect,
 }: OnboardingShellProps) {
   const reduced = useReducedMotion();
   const isLastStep = step === steps.length - 1;
@@ -84,7 +92,7 @@ export function OnboardingShell({
       </header>
 
       <div data-tour-id={tourPrefix ? `${tourPrefix}.stepper` : undefined}>
-        <StepIndicator steps={steps} step={step} />
+        <StepIndicator steps={steps} step={step} onStepSelect={onStepSelect} />
       </div>
 
       <GlassCard variant="solid" className="mt-8 p-6 sm:p-8">
@@ -165,14 +173,22 @@ export function OnboardingShell({
 interface StepIndicatorProps {
   steps: readonly string[];
   step: number;
+  onStepSelect?: (index: number) => void;
 }
 
 /**
- * Numbered chip row + animated thread connector. The connector's
- * `width` snaps to the appropriate fraction whenever `step` changes,
- * giving the user a clear sense of progress.
+ * Progress stepper. The per-step word labels truncated and collided on
+ * narrow phones (7 short labels do not fit a ~375px row),
+ * so on mobile we show ONLY the numbered nodes - the header already
+ * spells out "Step N of M · {current label}", which is the readable
+ * source of truth there. At `sm:` and up the full word labels return.
+ *
+ * When `onStepSelect` is supplied, a COMPLETED node is a real button
+ * that jumps back to that step; the active + upcoming nodes are inert
+ * (linear flow, no skipping ahead). Without the prop every node is
+ * presentational (unchanged behaviour for the onboarding wizards).
  */
-function StepIndicator({ steps, step }: StepIndicatorProps) {
+function StepIndicator({ steps, step, onStepSelect }: StepIndicatorProps) {
   const reduced = useReducedMotion();
   const fillPct = steps.length > 1 ? (step / (steps.length - 1)) * 100 : 0;
 
@@ -202,38 +218,58 @@ function StepIndicator({ steps, step }: StepIndicatorProps) {
       <ol className="relative flex items-start justify-between">
         {steps.map((label, i) => {
           const state = i < step ? "done" : i === step ? "active" : "upcoming";
+          const canJumpBack = state === "done" && !!onStepSelect;
+
+          const node = (
+            <motion.span
+              className={cn(
+                "ring-background flex size-8 items-center justify-center rounded-full text-xs font-semibold tabular-nums ring-2",
+                state === "done" && "bg-copper text-background",
+                state === "active" &&
+                  "bg-foreground text-background shadow-(--shadow-glow)",
+                state === "upcoming" &&
+                  "bg-card text-muted-foreground border-border border"
+              )}
+              initial={false}
+              animate={
+                reduced || state !== "active"
+                  ? { scale: 1 }
+                  : { scale: [1, 1.08, 1] }
+              }
+              transition={{ duration: 0.45 }}
+            >
+              {state === "done" ? (
+                <Check className="h-3.5 w-3.5" aria-hidden />
+              ) : (
+                i + 1
+              )}
+            </motion.span>
+          );
+
           return (
             <li
               key={label}
               className="flex flex-col items-center gap-2"
               aria-current={state === "active" ? "step" : undefined}
             >
-              <motion.span
-                className={cn(
-                  "ring-background flex size-8 items-center justify-center rounded-full text-xs font-semibold tabular-nums ring-2",
-                  state === "done" && "bg-copper text-background",
-                  state === "active" &&
-                    "bg-foreground text-background shadow-(--shadow-glow)",
-                  state === "upcoming" &&
-                    "bg-card text-muted-foreground border-border border"
-                )}
-                initial={false}
-                animate={
-                  reduced || state !== "active"
-                    ? { scale: 1 }
-                    : { scale: [1, 1.08, 1] }
-                }
-                transition={{ duration: 0.45 }}
-              >
-                {state === "done" ? (
-                  <Check className="h-3.5 w-3.5" aria-hidden />
-                ) : (
-                  i + 1
-                )}
-              </motion.span>
+              {canJumpBack ? (
+                <button
+                  type="button"
+                  onClick={() => onStepSelect(i)}
+                  aria-label={`Go back to step ${i + 1}: ${label}`}
+                  className="focus-visible:ring-copper rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  {node}
+                </button>
+              ) : (
+                node
+              )}
+              {/* Labels collide on phones with 7 steps - show them only
+                  from sm: up; the header carries the current label on
+                  mobile. */}
               <span
                 className={cn(
-                  "max-w-20 truncate text-center text-[11px] font-medium tracking-[0.12em] uppercase",
+                  "hidden max-w-20 truncate text-center text-[11px] font-medium tracking-[0.12em] uppercase sm:block",
                   state === "active"
                     ? "text-foreground"
                     : "text-muted-foreground"

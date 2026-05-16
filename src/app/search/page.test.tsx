@@ -21,8 +21,10 @@ vi.mock("@/lib/hooks/use-cities", () => ({
   useCities: () => ({ cities: [] }),
 }));
 
+const useGeolocationSpy = vi.fn();
+
 vi.mock("@/lib/hooks/use-geolocation", () => ({
-  useGeolocation: () => ({ lat: null, lng: null }),
+  useGeolocation: (...args: unknown[]) => useGeolocationSpy(...args),
 }));
 
 vi.mock("@/components/layout/app-shell", () => ({
@@ -40,6 +42,13 @@ vi.mock("@/components/shared/designer-card", () => ({
 import SearchPage from "./page";
 
 beforeEach(() => {
+  useGeolocationSpy.mockReset();
+  useGeolocationSpy.mockReturnValue({
+    lat: null,
+    lng: null,
+    error: null,
+    loading: false,
+  });
   useDesignerSearchSpy.mockReset();
   useDesignerSearchSpy.mockReturnValue({
     designers: [],
@@ -124,6 +133,38 @@ describe("SearchPage", () => {
     render(<SearchPage />);
     expect(screen.getAllByTestId("designer-card")).toHaveLength(2);
     expect(screen.getByText(/all/i)).toBeInTheDocument();
+  });
+
+  it("passes lat/lng to the search under the default sort, not only when sorting by nearest", () => {
+    useGeolocationSpy.mockReturnValue({
+      lat: 5.6037,
+      lng: -0.187,
+      error: null,
+      loading: false,
+    });
+    render(<SearchPage />);
+
+    // Default sort is "recommended" - the fix is that coords still flow
+    // so distance comes back on every card and recommended can weight by
+    // proximity. Pre-fix this only happened under sortBy === "nearest".
+    const lastInput = useDesignerSearchSpy.mock.calls.at(-1)?.[0] as {
+      sortBy: string;
+      lat?: number;
+      lng?: number;
+    };
+    expect(lastInput.sortBy).toBe("recommended");
+    expect(lastInput.lat).toBe(5.6037);
+    expect(lastInput.lng).toBe(-0.187);
+  });
+
+  it("omits lat/lng when geolocation is unavailable", () => {
+    render(<SearchPage />);
+    const lastInput = useDesignerSearchSpy.mock.calls.at(-1)?.[0] as {
+      lat?: number;
+      lng?: number;
+    };
+    expect(lastInput.lat).toBeUndefined();
+    expect(lastInput.lng).toBeUndefined();
   });
 
   it("toggles the active state when a quick-filter chip is clicked", () => {

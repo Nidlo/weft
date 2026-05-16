@@ -15,6 +15,13 @@ export interface GqlUser {
   email: string | null;
   avatarUrl: string | null;
   city: string | null;
+  region: string | null;
+  countryCode: string | null;
+  locationLat: number | null;
+  locationLng: number | null;
+  addressLine: string | null;
+  postalCode: string | null;
+  formattedAddress: string | null;
   isVerified: boolean;
   isDesigner: boolean;
   isOnboarded: boolean;
@@ -152,6 +159,19 @@ export interface GqlDesignerProfile {
   profileViewsThisWeek: number;
   createdAt: string;
   updatedAt: string;
+  // Effective public-visibility map (designer's choices over the
+  // privacy-first defaults). Present on the public + edit queries.
+  publicVisibility?: DesignerPublicVisibility | null;
+}
+
+export interface DesignerPublicVisibility {
+  bio: boolean;
+  pricing: boolean;
+  portfolio: boolean;
+  experience: boolean;
+  stats: boolean;
+  city: boolean;
+  workshop: boolean;
 }
 
 export interface PortfolioImage {
@@ -300,6 +320,13 @@ export interface DesignersData {
 
 export interface DesignerData {
   designer: GqlUserWithProfile | null;
+}
+
+export interface MyDesignerProfileData {
+  me: {
+    id: string;
+    designerProfile: GqlDesignerProfile | null;
+  };
 }
 
 export interface SpecializationsData {
@@ -1413,4 +1440,104 @@ export interface MyStyleProfileData {
 
 export interface GenerateStyleProfileData {
   generateStyleProfile: GqlStyleProfile;
+}
+
+// ── Blueprint Draft (pre-order collaboration) ────────────────────────
+
+export type DraftParty = "client" | "designer";
+
+export type BlueprintDraftStatus =
+  | "draft"
+  | "shared"
+  | "revised"
+  | "accepted"
+  | "converted"
+  | "withdrawn"
+  | "declined";
+
+export interface GqlBlueprintDraftRevision {
+  id: string;
+  authorId: string;
+  authorRole: DraftParty;
+  blueprint: BlueprintData;
+  budgetMin: number | null;
+  budgetMax: number | null;
+  proposedDeadline: string | null;
+  message: string | null;
+  createdAt: string;
+  author?: GqlUser | null;
+}
+
+export interface GqlBlueprintDraft {
+  id: string;
+  initiatorId: string;
+  initiatorRole: DraftParty;
+  clientId: string;
+  designerId: string;
+  blueprint: BlueprintData;
+  budgetMin: number | null;
+  budgetMax: number | null;
+  proposedDeadline: string | null;
+  status: BlueprintDraftStatus;
+  currentTurn: DraftParty;
+  convertedOrderId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  client?: GqlUser | null;
+  designer?: GqlUser | null;
+  initiator?: GqlUser | null;
+  convertedOrder?: { id: string; status: string } | null;
+  revisions?: GqlBlueprintDraftRevision[];
+}
+
+export interface MyBlueprintDraftsData {
+  myBlueprintDrafts: GqlBlueprintDraft[];
+}
+
+export interface BlueprintDraftDetailData {
+  blueprintDraft: GqlBlueprintDraft | null;
+}
+
+export interface CreateBlueprintDraftInput {
+  counterpartyId: string;
+  initiatorRole: DraftParty;
+  blueprint: BlueprintData;
+  budgetMin?: number;
+  budgetMax?: number;
+  proposedDeadline?: string;
+  message?: string;
+}
+
+export interface CreateBlueprintDraftData {
+  createBlueprintDraft: GqlBlueprintDraft;
+}
+
+export interface ReviseBlueprintDraftInput {
+  draftId: string;
+  blueprint: BlueprintData;
+  budgetMin?: number;
+  budgetMax?: number;
+  proposedDeadline?: string;
+  message?: string;
+}
+
+export interface ReviseBlueprintDraftData {
+  reviseBlueprintDraft: GqlBlueprintDraft;
+}
+
+export interface AcceptBlueprintDraftData {
+  acceptBlueprintDraft: GqlBlueprintDraft;
+}
+
+export interface ConvertBlueprintDraftToOrderData {
+  convertBlueprintDraftToOrder: {
+    id: string;
+    status: string;
+    clientId: string;
+    designerId: string;
+  };
+}
+
+export interface CloseBlueprintDraftData {
+  closeBlueprintDraft: { id: string; status: BlueprintDraftStatus };
 }

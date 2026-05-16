@@ -147,7 +147,7 @@ export function OrderEditSheet({
         side="bottom"
         className="max-h-[90vh] w-full overflow-y-auto"
       >
-        <SheetHeader className="px-4 sm:px-6">
+        <SheetHeader>
           <SheetTitle>Edit Order</SheetTitle>
         </SheetHeader>
 
