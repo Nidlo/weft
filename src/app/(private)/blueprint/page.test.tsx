@@ -16,6 +16,21 @@ vi.mock("@apollo/client/react", () => ({
   useMutation: () => [vi.fn(), { loading: false }],
 }));
 
+// The wizard now also consumes the blueprint-draft hooks (save-as-draft
+// + revise mode). Stub the hook module so the test doesn't need Apollo's
+// useQuery; the create-order path under test is unaffected by them.
+vi.mock("@/lib/hooks/use-blueprint-drafts", () => ({
+  useCreateBlueprintDraft: () => ({
+    createBlueprintDraft: vi.fn(),
+    loading: false,
+  }),
+  useReviseBlueprintDraft: () => ({
+    reviseBlueprintDraft: vi.fn(),
+    loading: false,
+  }),
+  useBlueprintDraft: () => ({ draft: null, loading: false }),
+}));
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
   useSearchParams: () => ({ get: () => null }),

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
 import { toast } from "sonner";
@@ -8,7 +8,12 @@ import { toast } from "sonner";
 import { useAuthGuard } from "@/lib/hooks/use-auth-guard";
 import { useBlueprintStore } from "@/lib/stores/blueprint";
 import { CREATE_ORDER } from "@/lib/graphql/mutations/order";
-import { useCreateBlueprintDraft } from "@/lib/hooks/use-blueprint-drafts";
+import {
+  useCreateBlueprintDraft,
+  useBlueprintDraft,
+  useReviseBlueprintDraft,
+} from "@/lib/hooks/use-blueprint-drafts";
+import { draftToStoreFields } from "@/lib/utils/draft-to-store";
 import type { CreateOrderData, BlueprintData } from "@/types/graphql";
 import { AppShell } from "@/components/layout/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,6 +58,10 @@ function BlueprintWizard() {
   // with ?pitchClient=<userId>. That flips the draft's initiator role to
   // "designer" and the counterparty to that client.
   const pitchClientId = searchParams.get("pitchClient");
+  // Revise mode: ?reviseDraft=<id> reopens the wizard pre-filled from an
+  // existing draft so the reviser edits the spec itself, then submits the
+  // edit as a new revision instead of creating an order.
+  const reviseDraftId = searchParams.get("reviseDraft");
 
   const store = useBlueprintStore();
   const { step, setStep, setField, reset } = store;
@@ -61,6 +70,26 @@ function BlueprintWizard() {
     useMutation<CreateOrderData>(CREATE_ORDER);
   const { createBlueprintDraft, loading: savingDraft } =
     useCreateBlueprintDraft();
+  const { reviseBlueprintDraft, loading: revising } = useReviseBlueprintDraft();
+  const { draft: reviseDraft } = useBlueprintDraft(reviseDraftId ?? "");
+
+  // One-shot hydration from the draft. The ref guard stops a re-render
+  // (or the user editing fields) from being clobbered by a second
+  // hydration pass once the draft query resolves / refetches.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (!reviseDraftId || !reviseDraft || hydratedRef.current) return;
+    hydratedRef.current = true;
+    const fields = draftToStoreFields(reviseDraft);
+    (Object.keys(fields) as (keyof typeof fields)[]).forEach((k) => {
+      const v = fields[k];
+      if (v !== undefined) {
+        // setField is typed per-key; the loop erases the narrowing.
+        setField(k, v as never);
+      }
+    });
+    setStep(0);
+  }, [reviseDraftId, reviseDraft, setField, setStep]);
 
   // Set designer from URL param on first load
   useEffect(() => {
@@ -147,6 +176,43 @@ function BlueprintWizard() {
     if (store.fabricNotes) blueprint.fabric_notes = store.fabricNotes;
 
     return blueprint;
+  };
+
+  const handleReviseDraft = async () => {
+    if (!reviseDraftId) return;
+    try {
+      const blueprint = buildBlueprint();
+      const budgetMin = store.budgetMin
+        ? Math.round(Number(store.budgetMin) * 100)
+        : undefined;
+      const budgetMax = store.budgetMax
+        ? Math.round(Number(store.budgetMax) * 100)
+        : undefined;
+
+      const updated = await reviseBlueprintDraft({
+        draftId: reviseDraftId,
+        blueprint,
+        budgetMin,
+        budgetMax,
+        proposedDeadline: store.deadline || undefined,
+        message: store.notes || undefined,
+      });
+
+      if (updated) {
+        reset();
+        toast.success("Revision sent back to the other party.");
+        router.push(`/drafts/${reviseDraftId}`);
+      }
+    } catch (err) {
+      const raw = err instanceof Error ? err.message.toLowerCase() : "";
+      toast.error(
+        raw.includes("turn")
+          ? "It is the other party's turn right now, so you can't revise yet."
+          : raw.includes("network") || raw.includes("fetch")
+            ? "We couldn't reach the server. Check your connection and try again."
+            : "We couldn't send your revision. Please review your details and try again."
+      );
+    }
   };
 
   const handleSaveAsDraft = async () => {
@@ -237,13 +303,15 @@ function BlueprintWizard() {
   return (
     <AppShell>
       <OnboardingShell
-        eyebrow="Custom order"
-        title="Build your blueprint."
+        eyebrow={reviseDraftId ? "Revise draft" : "Custom order"}
+        title={
+          reviseDraftId ? "Revise this blueprint." : "Build your blueprint."
+        }
         steps={STEPS}
         step={step}
         onBack={handleBack}
         onNext={handleNext}
-        onComplete={handleSubmit}
+        onComplete={reviseDraftId ? handleReviseDraft : handleSubmit}
         // Tapping a completed node jumps back to it (review-and-revise
         // is common when building a blueprint). Guarded to earlier steps
         // only - forward skipping stays blocked by canProceed/Next.
@@ -251,8 +319,8 @@ function BlueprintWizard() {
           if (i < step) setStep(i);
         }}
         canProceed={canProceed()}
-        saving={submitting}
-        completeLabel="Confirm & submit"
+        saving={reviseDraftId ? revising : submitting}
+        completeLabel={reviseDraftId ? "Send revision" : "Confirm & submit"}
         tourPrefix="newOrder"
       >
         {step === 0 && <StepGarment />}
@@ -264,7 +332,9 @@ function BlueprintWizard() {
         {step === 6 && (
           <StepReview
             onEditStep={setStep}
-            onSaveAsDraft={handleSaveAsDraft}
+            // No "Save as draft" secondary action in revise mode - the
+            // primary CTA already submits the edit as a revision.
+            onSaveAsDraft={reviseDraftId ? undefined : handleSaveAsDraft}
             savingDraft={savingDraft}
             draftCtaLabel={
               pitchClientId ? "Send as a pitch draft" : "Save as draft instead"
