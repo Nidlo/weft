@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored third-party assets served as-is (MediaPipe emscripten
+    // glue + wasm). Never lint or auto-fix these.
+    "public/**",
   ]),
 ]);
 

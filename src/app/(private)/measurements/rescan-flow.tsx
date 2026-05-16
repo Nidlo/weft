@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StitchLoader } from "@/components/ui/stitch-loader";
+import { PoseIllustration } from "@/components/measurements/pose-illustration";
+import { PoseCheckedPhotoField } from "@/components/measurements/pose-checked-photo-field";
 import type { MeasurementUnit } from "@/lib/utils/measurement";
 import {
   cmToInches,
@@ -240,21 +242,24 @@ export function RescanFlow({
 
         <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
           <div className="space-y-2">
-            <Label htmlFor="rescan-front">Front photo *</Label>
-            <Input
+            <PoseIllustration variant="front" size="thumb" />
+            <PoseCheckedPhotoField
               id="rescan-front"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => setFrontImage(e.target.files?.[0] ?? null)}
+              label="Front photo"
+              variant="front"
+              required
+              file={frontImage}
+              onChange={setFrontImage}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="rescan-side">Side photo (optional)</Label>
-            <Input
+            <PoseIllustration variant="side" size="thumb" />
+            <PoseCheckedPhotoField
               id="rescan-side"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => setSideImage(e.target.files?.[0] ?? null)}
+              label="Side photo"
+              variant="side"
+              file={sideImage}
+              onChange={setSideImage}
             />
           </div>
           <div className="space-y-2">

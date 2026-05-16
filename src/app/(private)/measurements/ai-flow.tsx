@@ -5,11 +5,9 @@ import { useMutation } from "@apollo/client/react";
 import {
   ArrowLeft,
   ArrowRight,
-  Camera,
   CheckCircle2,
   Lightbulb,
   Sparkles,
-  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,6 +21,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StitchLoader } from "@/components/ui/stitch-loader";
+import { PoseIllustration } from "@/components/measurements/pose-illustration";
+import { PoseCheckedPhotoField } from "@/components/measurements/pose-checked-photo-field";
 import type {
   Landmarks,
   MeasurementData,
@@ -167,9 +167,10 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   // re-seed `initialData`. We don't want to remount on every drag (kills
   // focus + in-progress edits), only on explicit "Apply".
   const [formKey, setFormKey] = useState(0);
-  // Baseline mm payload derived from the AI extraction's cm payload.
-  // The recompute helper anchors scale via `vertical.full_height` in mm,
-  // so we convert once here and feed it to the banner.
+  // Baseline mm payload derived from the AI extraction. Safe to treat
+  // `extractedData` as cm because that's its enforced invariant (see the
+  // onCompleted handler). The recompute helper anchors scale via
+  // `vertical.full_height` in mm, so we convert once here.
   const baselineMmFromExtracted = useMemo(() => {
     if (!extractedData) return null;
     return convertMeasurementData(
@@ -237,20 +238,15 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   const { elapsedSeconds: elapsed } = useScanJob(scanJobId, {
     onCompleted: (job) => {
       if (cancelledRef.current || !job.result) return;
-      // Fitscan always emits cm. Convert to the user's preferred unit
-      // here so ManualForm's `data` state and its `unit` label stay in
-      // sync - previously the form rendered cm values next to an "in"
-      // label, making the user see 95cm-waist as "95 in".
-      const rawCm = job.result.data ?? null;
-      const projected =
-        rawCm !== null && preferredUnit !== "cm"
-          ? (convertMeasurementData(
-              rawCm as Record<string, Record<string, number | null>>,
-              "cm",
-              preferredUnit
-            ) as MeasurementData)
-          : rawCm;
-      setExtractedData(projected);
+      // INVARIANT: `extractedData` is ALWAYS centimetres (Fitscan's native
+      // unit). Every downstream consumer - the mm baseline, the landmark
+      // recompute pipeline, mergeRecomputedIntoForm - depends on this.
+      // Display-unit conversion happens at exactly one boundary: the
+      // ManualForm handoff below. (A previous version projected this into
+      // the user's preferred unit here, which silently broke the baseline
+      // + recompute math by ~2.54x for inches users - the "values way
+      // bigger" bug.)
+      setExtractedData(job.result.data ?? null);
       setExtractedLandmarks(job.result.landmarks ?? null);
       setPhotoUrl(job.result.photoUrl ?? null);
       setPhotoPublicId(job.result.photoPublicId ?? null);
@@ -376,6 +372,20 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
           </p>
         </header>
 
+        {/* Pose reference - shown before the text tips so users see the
+            expected stance before clicking Continue. Pose accuracy is the
+            biggest accuracy lever after height + lighting. */}
+        <GlassCard variant="ghost" className="space-y-4 p-5 sm:p-6">
+          <div className="text-copper flex items-center gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden />
+            How to stand
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <PoseIllustration variant="front" />
+            <PoseIllustration variant="side" />
+          </div>
+        </GlassCard>
+
         <GlassCard variant="solid" className="space-y-4 p-5 sm:p-6">
           <div className="text-copper flex items-center gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase">
             <Lightbulb className="h-3.5 w-3.5" aria-hidden />
@@ -437,19 +447,27 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         </header>
 
         <GlassCard variant="solid" className="space-y-5 p-5 sm:p-6">
-          <PhotoField
-            id="front-photo"
-            label="Front photo"
-            required
-            file={frontImage}
-            onChange={setFrontImage}
-          />
-          <PhotoField
-            id="side-photo"
-            label="Side photo"
-            file={sideImage}
-            onChange={setSideImage}
-          />
+          <div className="space-y-2">
+            <PoseIllustration variant="front" size="thumb" />
+            <PoseCheckedPhotoField
+              id="front-photo"
+              label="Front photo"
+              variant="front"
+              required
+              file={frontImage}
+              onChange={setFrontImage}
+            />
+          </div>
+          <div className="space-y-2">
+            <PoseIllustration variant="side" size="thumb" />
+            <PoseCheckedPhotoField
+              id="side-photo"
+              label="Side photo"
+              variant="side"
+              file={sideImage}
+              onChange={setSideImage}
+            />
+          </div>
 
           {/* Sprint 35 - "Estimate from photo" toggle. When on, the height
               input is hidden and Claude estimates the value directly from
@@ -711,7 +729,18 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         key={formKey}
         initialLabel="Fitscan AI"
         initialUnit={preferredUnit}
-        initialData={extractedData ?? undefined}
+        // The single display-unit boundary: `extractedData` is canonical
+        // cm; convert to the user's preferred unit so ManualForm's values
+        // and its unit label stay in sync.
+        initialData={
+          extractedData
+            ? (convertMeasurementData(
+                extractedData as Record<string, Record<string, number | null>>,
+                "cm",
+                preferredUnit
+              ) as MeasurementData)
+            : undefined
+        }
         lowConfidenceFields={lowConfidenceFields}
         onSave={(label, unit, data) =>
           onComplete(
@@ -861,73 +890,6 @@ function RecomputeBanner({
       >
         Apply {appliedCount > 0 ? "again" : "to form"}
       </button>
-    </div>
-  );
-}
-
-interface PhotoFieldProps {
-  id: string;
-  label: string;
-  required?: boolean;
-  file: File | null;
-  onChange: (file: File | null) => void;
-}
-
-function PhotoField({ id, label, required, file, onChange }: PhotoFieldProps) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id} className="flex items-center gap-1 text-sm">
-        {label}
-        {required && (
-          <span className="text-copper" aria-label="required">
-            *
-          </span>
-        )}
-      </Label>
-      <label
-        htmlFor={id}
-        className={cn(
-          "border-border bg-card/40 flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed p-4",
-          "hover:border-copper/50 hover:bg-card transition-colors",
-          file && "border-foreground/30 bg-card"
-        )}
-      >
-        <span
-          className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-xl ring-1",
-            file
-              ? "bg-foreground text-background ring-transparent"
-              : "bg-secondary text-foreground ring-border"
-          )}
-        >
-          {file ? (
-            <CheckCircle2 className="h-4 w-4" aria-hidden />
-          ) : (
-            <Camera className="h-4 w-4" aria-hidden />
-          )}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">
-            {file ? file.name : "Tap to choose a photo"}
-          </p>
-          <p className="text-muted-foreground text-xs">
-            {file
-              ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
-              : "JPEG, PNG, or WebP"}
-          </p>
-        </div>
-        <Upload
-          className="text-muted-foreground h-4 w-4 shrink-0"
-          aria-hidden
-        />
-      </label>
-      <Input
-        id={id}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        className="sr-only"
-        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
-      />
     </div>
   );
 }

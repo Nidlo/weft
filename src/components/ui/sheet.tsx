@@ -71,7 +71,12 @@ function SheetContent({
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-(--shadow-2) transition ease-[cubic-bezier(0.22,1,0.36,1)] data-[state=closed]:duration-250 data-[state=open]:duration-400",
+          // Horizontal gutter is owned HERE so every sheet is padded by
+          // default - call sites used to each remember their own px and
+          // half of them forgot, leaving content flush to the screen
+          // edge on mobile. SheetHeader/Footer therefore only pad
+          // vertically (no double inset).
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 px-5 py-5 shadow-(--shadow-2) transition ease-[cubic-bezier(0.22,1,0.36,1)] data-[state=closed]:duration-250 data-[state=open]:duration-400 sm:px-6",
           side === "right" &&
             "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
           side === "left" &&
@@ -111,7 +116,7 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-header"
-      className={cn("flex flex-col gap-1.5 p-4", className)}
+      className={cn("flex flex-col gap-1.5 pt-1 pb-3", className)}
       {...props}
     />
   );
@@ -121,7 +126,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+      className={cn("mt-auto flex flex-col gap-2 pt-3", className)}
       {...props}
     />
   );

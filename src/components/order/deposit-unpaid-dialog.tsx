@@ -62,6 +62,7 @@ export function DepositUnpaidDialog({
           <Button
             type="button"
             variant="ghost"
+            size="lg"
             onClick={onCancel}
             disabled={loading}
           >
@@ -70,6 +71,7 @@ export function DepositUnpaidDialog({
           <Button
             type="button"
             variant="luxe"
+            size="lg"
             onClick={onConfirm}
             loading={loading}
             loadingLabel="Continuing..."

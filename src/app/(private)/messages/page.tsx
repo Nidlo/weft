@@ -63,7 +63,7 @@ export default function MessagesPage() {
   return (
     <AppShell>
       <div className="space-y-7">
-        <header>
+        <header data-tour-id="messages.header">
           <p className="text-copper text-[11px] font-semibold tracking-[0.18em] uppercase">
             Conversations
           </p>
@@ -76,55 +76,60 @@ export default function MessagesPage() {
           </p>
         </header>
 
-        {loading && conversations.length === 0 ? (
-          <GlassCard variant="solid" className="divide-border/60 divide-y p-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 p-3">
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-48" />
+        <div data-tour-id="messages.list">
+          {loading && conversations.length === 0 ? (
+            <GlassCard
+              variant="solid"
+              className="divide-border/60 divide-y p-2"
+            >
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 p-3">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </GlassCard>
-        ) : conversations.length === 0 ? (
-          <GlassCard
-            variant="solid"
-            className="flex flex-col items-center justify-center py-16 text-center"
-          >
-            <span className="bg-secondary text-foreground flex size-16 items-center justify-center rounded-2xl">
-              <MessageSquare className="h-7 w-7" aria-hidden />
-            </span>
-            <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
-              No conversations yet.
-            </h2>
-            <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm text-pretty">
-              {user.isDesigner ? (
-                "Conversations will appear here when clients message you about orders."
-              ) : (
-                <>
-                  Start one from any{" "}
-                  <Sparkles
-                    className="text-copper inline h-3.5 w-3.5"
-                    aria-hidden
-                  />{" "}
-                  designer&apos;s order page - they&apos;ll reach out the moment
-                  they have an update.
-                </>
-              )}
-            </p>
-          </GlassCard>
-        ) : (
-          <GlassCard
-            variant="solid"
-            className="divide-border/60 divide-y overflow-hidden p-0"
-          >
-            {conversations.map((conv) => (
-              <ConversationListItem key={conv.id} conversation={conv} />
-            ))}
-          </GlassCard>
-        )}
+              ))}
+            </GlassCard>
+          ) : conversations.length === 0 ? (
+            <GlassCard
+              variant="solid"
+              className="flex flex-col items-center justify-center py-16 text-center"
+            >
+              <span className="bg-secondary text-foreground flex size-16 items-center justify-center rounded-2xl">
+                <MessageSquare className="h-7 w-7" aria-hidden />
+              </span>
+              <h2 className="text-display mt-5 text-2xl font-semibold tracking-tight">
+                No conversations yet.
+              </h2>
+              <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm text-pretty">
+                {user.isDesigner ? (
+                  "Conversations will appear here when clients message you about orders."
+                ) : (
+                  <>
+                    Start one from any{" "}
+                    <Sparkles
+                      className="text-copper inline h-3.5 w-3.5"
+                      aria-hidden
+                    />{" "}
+                    designer&apos;s order page - they&apos;ll reach out the
+                    moment they have an update.
+                  </>
+                )}
+              </p>
+            </GlassCard>
+          ) : (
+            <GlassCard
+              variant="solid"
+              className="divide-border/60 divide-y overflow-hidden p-0"
+            >
+              {conversations.map((conv) => (
+                <ConversationListItem key={conv.id} conversation={conv} />
+              ))}
+            </GlassCard>
+          )}
+        </div>
       </div>
     </AppShell>
   );

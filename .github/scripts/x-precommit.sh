@@ -238,7 +238,7 @@ else
 fi
 
 # Filter to scannable code files (exclude lockfiles, generated, binary, configs)
-CODE_FILES=$(printf "%s\n" "$STAGED_FILES" | grep -Ev '\.(lock|lockb|png|jpg|jpeg|svg|ico|gif|webp|woff|woff2|ttf|otf|eot|pdf|zip|tar|gz|g\.dart|freezed\.dart)$|^(node_modules|\.next|build|\.dart_tool|\.gradle|dist|coverage|\.git)/' 2>/dev/null || true)
+CODE_FILES=$(printf "%s\n" "$STAGED_FILES" | grep -Ev '\.(lock|lockb|png|jpg|jpeg|svg|ico|gif|webp|woff|woff2|ttf|otf|eot|pdf|zip|tar|gz|g\.dart|freezed\.dart)$|^(node_modules|\.next|build|\.dart_tool|\.gradle|dist|coverage|\.git)/|^(frontend/)?public/mediapipe/' 2>/dev/null || true)
 
 if [ -z "$CODE_FILES" ]; then
     if [ "$MODE" = "ci" ]; then

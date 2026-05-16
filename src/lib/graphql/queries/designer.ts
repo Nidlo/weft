@@ -35,6 +35,38 @@ export const SEARCH_DESIGNERS = gql`
   }
 `;
 
+// Owner-scoped designer profile for the edit screen. NOT slug-keyed:
+// /profile/edit must hydrate from the authenticated owner's own record,
+// never the public designer(slug:) path - a null/stale slug would
+// otherwise silently blank the whole form (designer fields, studio,
+// portfolio) and hide the view-as-client link. The `me` resolver
+// returns the full unscrubbed profile for the owner (self).
+export const MY_DESIGNER_PROFILE = gql`
+  query MyDesignerProfile {
+    me {
+      id
+      designerProfile {
+        id
+        displayName
+        slug
+        bio
+        specializations
+        pricingMin
+        pricingMax
+        portfolioImages
+        equipment
+        isAcceptingOrders
+        workshopName
+        workshopAddress
+        workshopLat
+        workshopLng
+        profileCompleteness
+        publicVisibility
+      }
+    }
+  }
+`;
+
 export const GET_DESIGNER = gql`
   query GetDesigner($slug: String!) {
     designer(slug: $slug) {
@@ -69,6 +101,7 @@ export const GET_DESIGNER = gql`
         workshopLat
         workshopLng
         profileCompleteness
+        publicVisibility
       }
     }
   }
