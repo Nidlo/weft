@@ -167,9 +167,10 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   // re-seed `initialData`. We don't want to remount on every drag (kills
   // focus + in-progress edits), only on explicit "Apply".
   const [formKey, setFormKey] = useState(0);
-  // Baseline mm payload derived from the AI extraction's cm payload.
-  // The recompute helper anchors scale via `vertical.full_height` in mm,
-  // so we convert once here and feed it to the banner.
+  // Baseline mm payload derived from the AI extraction. Safe to treat
+  // `extractedData` as cm because that's its enforced invariant (see the
+  // onCompleted handler). The recompute helper anchors scale via
+  // `vertical.full_height` in mm, so we convert once here.
   const baselineMmFromExtracted = useMemo(() => {
     if (!extractedData) return null;
     return convertMeasurementData(
@@ -237,20 +238,15 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
   const { elapsedSeconds: elapsed } = useScanJob(scanJobId, {
     onCompleted: (job) => {
       if (cancelledRef.current || !job.result) return;
-      // Fitscan always emits cm. Convert to the user's preferred unit
-      // here so ManualForm's `data` state and its `unit` label stay in
-      // sync - previously the form rendered cm values next to an "in"
-      // label, making the user see 95cm-waist as "95 in".
-      const rawCm = job.result.data ?? null;
-      const projected =
-        rawCm !== null && preferredUnit !== "cm"
-          ? (convertMeasurementData(
-              rawCm as Record<string, Record<string, number | null>>,
-              "cm",
-              preferredUnit
-            ) as MeasurementData)
-          : rawCm;
-      setExtractedData(projected);
+      // INVARIANT: `extractedData` is ALWAYS centimetres (Fitscan's native
+      // unit). Every downstream consumer - the mm baseline, the landmark
+      // recompute pipeline, mergeRecomputedIntoForm - depends on this.
+      // Display-unit conversion happens at exactly one boundary: the
+      // ManualForm handoff below. (A previous version projected this into
+      // the user's preferred unit here, which silently broke the baseline
+      // + recompute math by ~2.54x for inches users - the "values way
+      // bigger" bug.)
+      setExtractedData(job.result.data ?? null);
       setExtractedLandmarks(job.result.landmarks ?? null);
       setPhotoUrl(job.result.photoUrl ?? null);
       setPhotoPublicId(job.result.photoPublicId ?? null);
@@ -733,7 +729,18 @@ export function AiFlow({ onComplete, saving = false, onCancel }: AiFlowProps) {
         key={formKey}
         initialLabel="Fitscan AI"
         initialUnit={preferredUnit}
-        initialData={extractedData ?? undefined}
+        // The single display-unit boundary: `extractedData` is canonical
+        // cm; convert to the user's preferred unit so ManualForm's values
+        // and its unit label stay in sync.
+        initialData={
+          extractedData
+            ? (convertMeasurementData(
+                extractedData as Record<string, Record<string, number | null>>,
+                "cm",
+                preferredUnit
+              ) as MeasurementData)
+            : undefined
+        }
         lowConfidenceFields={lowConfidenceFields}
         onSave={(label, unit, data) =>
           onComplete(
