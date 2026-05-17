@@ -260,6 +260,7 @@ export const SEARCH_CLIENTS = gql`
       id
       fullName
       phone
+      email
       avatarUrl
       city
     }

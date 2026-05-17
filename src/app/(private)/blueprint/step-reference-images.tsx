@@ -10,6 +10,7 @@ import { useBlueprintStore, type ReferenceImage } from "@/lib/stores/blueprint";
 import { UPLOAD_REFERENCE_IMAGE } from "@/lib/graphql/mutations/order";
 import type { UploadReferenceImageData } from "@/types/graphql";
 import { Button } from "@/components/ui/button";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,7 @@ export function StepReferenceImages() {
   const { referenceImages, setField } = useBlueprintStore();
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadReferenceImage] = useMutation<UploadReferenceImageData>(
     UPLOAD_REFERENCE_IMAGE
@@ -176,19 +178,26 @@ export function StepReferenceImages() {
               key={i}
               className="group ring-border relative aspect-square overflow-hidden rounded-xl ring-1"
             >
-              <Image
-                src={img.url}
-                alt={img.name}
-                fill
-                sizes="(max-width: 640px) 33vw, 20vw"
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-              />
+              <button
+                type="button"
+                onClick={() => setLightboxIndex(i)}
+                aria-label={`View ${img.name}`}
+                className="focus-visible:ring-ring absolute inset-0 z-0 focus:outline-none focus-visible:ring-2"
+              >
+                <Image
+                  src={img.url}
+                  alt={img.name}
+                  fill
+                  sizes="(max-width: 640px) 33vw, 20vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </button>
               <Button
                 type="button"
                 variant="secondary"
                 size="icon-sm"
                 aria-label={`Remove ${img.name}`}
-                className="bg-background/80 absolute top-1.5 right-1.5 size-7 rounded-full opacity-0 shadow-(--shadow-2) backdrop-blur transition-opacity group-hover:opacity-100"
+                className="bg-background/80 absolute top-1.5 right-1.5 z-10 size-7 rounded-full opacity-0 shadow-(--shadow-2) backdrop-blur transition-opacity group-hover:opacity-100"
                 onClick={() => handleRemove(i)}
               >
                 <X className="h-3.5 w-3.5" />
@@ -197,6 +206,16 @@ export function StepReferenceImages() {
           ))}
         </div>
       )}
+
+      <ImageLightbox
+        images={referenceImages.map((img) => ({
+          url: img.url,
+          caption: img.name,
+        }))}
+        index={lightboxIndex}
+        onIndexChange={setLightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+      />
 
       <p className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.16em] uppercase">
         <ImageIcon className="text-copper h-3 w-3" aria-hidden />
