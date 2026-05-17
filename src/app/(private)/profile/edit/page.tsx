@@ -33,6 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { GlassCard } from "@/components/ui/glass-card";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { LocationPicker } from "@/components/shared/location-picker";
 import {
   UPDATE_MY_INFO,
@@ -264,6 +265,9 @@ export default function ProfileEditPage() {
   const [portfolioUploading, setPortfolioUploading] = useState(false);
   const [portfolioDragOver, setPortfolioDragOver] = useState(false);
   const [removingIndex, setRemovingIndex] = useState<number | null>(null);
+  const [portfolioLightboxIndex, setPortfolioLightboxIndex] = useState<
+    number | null
+  >(null);
   interface FailedUpload {
     id: string;
     file: File;
@@ -1436,18 +1440,25 @@ export default function ProfileEditPage() {
                       key={img.public_id ?? i}
                       className="ring-border relative aspect-square overflow-hidden rounded-xl ring-1"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={img.thumbnail_url ?? img.url}
-                        alt={img.caption ?? `Portfolio ${i + 1}`}
-                        className="h-full w-full object-cover"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setPortfolioLightboxIndex(i)}
+                        aria-label={`View portfolio image ${i + 1}`}
+                        className="focus-visible:ring-ring absolute inset-0 z-0 focus:outline-none focus-visible:ring-2"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={img.thumbnail_url ?? img.url}
+                          alt={img.caption ?? `Portfolio ${i + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleRemovePortfolioImage(i)}
                         disabled={removingIndex === i || removingImage}
                         aria-label={`Remove portfolio image ${i + 1}`}
-                        className="absolute top-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity hover:bg-black/80 disabled:cursor-wait"
+                        className="absolute top-1.5 right-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity hover:bg-black/80 disabled:cursor-wait"
                       >
                         {removingIndex === i ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -1459,6 +1470,16 @@ export default function ProfileEditPage() {
                   ))}
                 </div>
               )}
+
+              <ImageLightbox
+                images={currentImages.map((img) => ({
+                  url: img.url,
+                  caption: img.caption,
+                }))}
+                index={portfolioLightboxIndex}
+                onIndexChange={setPortfolioLightboxIndex}
+                onClose={() => setPortfolioLightboxIndex(null)}
+              />
 
               {/* Upload zone */}
               {currentImages.length < MAX_PORTFOLIO && (

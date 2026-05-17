@@ -56,6 +56,7 @@ import { ReferenceImageUpload } from "@/components/orders/reference-image-upload
 import { MeasurementSelector } from "@/components/orders/measurement-selector";
 import { BudgetInput } from "@/components/orders/budget-input";
 import { VoiceInput } from "@/components/orders/voice-input";
+import { CountryPhoneInput } from "@/components/shared/country-phone-input";
 
 type ClientMode = "none" | "search" | "external";
 
@@ -496,7 +497,7 @@ export default function NewOrderPage() {
                             className="text-copper mr-2 h-4 w-4"
                             aria-hidden
                           />
-                          Search by name or phone...
+                          Search your existing clients...
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent
@@ -505,7 +506,7 @@ export default function NewOrderPage() {
                       >
                         <Command shouldFilter={false}>
                           <CommandInput
-                            placeholder="Type name or phone..."
+                            placeholder="Name, phone, or email..."
                             value={clientSearchQuery}
                             onValueChange={handleClientSearch}
                           />
@@ -518,7 +519,16 @@ export default function NewOrderPage() {
                             {!searchingClients &&
                               clientSearchQuery.length >= 2 &&
                               clientResults.length === 0 && (
-                                <CommandEmpty>No clients found.</CommandEmpty>
+                                <CommandEmpty>
+                                  <span className="block text-sm font-medium">
+                                    No match among your clients
+                                  </span>
+                                  <span className="text-muted-foreground mt-1 block text-xs">
+                                    This only searches clients you&apos;ve
+                                    worked with before. For a new client, use
+                                    the External tab above.
+                                  </span>
+                                </CommandEmpty>
                               )}
                             {clientResults.length > 0 && (
                               <CommandGroup>
@@ -537,7 +547,11 @@ export default function NewOrderPage() {
                                           {client.fullName ?? "Unknown"}
                                         </p>
                                         <p className="text-muted-foreground text-xs">
-                                          {[client.phone, client.city]
+                                          {[
+                                            client.phone,
+                                            client.email,
+                                            client.city,
+                                          ]
                                             .filter(Boolean)
                                             .join(" · ")}
                                         </p>
@@ -569,17 +583,12 @@ export default function NewOrderPage() {
                   </Field>
                   <Field
                     label="Client phone"
-                    hint="If provided, the client receives SMS updates. They can claim the order when they sign up."
+                    hint="Pick the country, then the local number. They receive SMS updates and auto-claim this order when they sign up with the same number."
                   >
-                    <Input
+                    <CountryPhoneInput
                       id="clientPhone"
-                      type="tel"
-                      placeholder="024 123 4567"
                       value={clientPhone}
-                      onChange={(e) => setClientPhone(e.target.value)}
-                      autoComplete="tel"
-                      inputMode="numeric"
-                      className="h-11 tabular-nums"
+                      onChange={setClientPhone}
                     />
                   </Field>
                 </div>
